@@ -55,6 +55,9 @@ export const routes = {
   portal: (token: string) => `/portal/${token}`,
   brief: (token: string) => `/brief/${token}`,
   briefInvite: (token: string) => `/brief-invite/${token}`,
+
+  // V3 Preview (chantier en cours — à valider avant bascule officielle)
+  projectV3Preview: (id: string) => `/projets-v3-preview/${id}`,
 } as const
 
 /**
@@ -107,6 +110,7 @@ export const routePermissions: Array<{ path: string; permission: string }> = [
   { path: routes.settings, permission: 'can_view_settings' },
   { path: routes.procedures, permission: 'can_view_procedures' },
   { path: routes.personalTasks, permission: 'can_view_dashboard' },
+  { path: '/projets-v3-preview', permission: 'can_view_projects' },
 ]
 
 export function getPermissionForPath(pathname: string): string | null {

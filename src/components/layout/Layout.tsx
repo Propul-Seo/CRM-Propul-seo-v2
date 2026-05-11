@@ -35,6 +35,7 @@ const ERPManager = lazy(() => import('../../modules/ERPManager').then(m => ({ de
 const CommunicationManager = lazy(() => import('../../modules/CommunicationManager').then(m => ({ default: m.CommunicationManager })))
 const ProceduresManager = lazy(() => import('../../modules/ProceduresManager').then(m => ({ default: m.ProceduresManager })))
 const ClientDetailsRoute = lazy(() => import('../routing/ClientDetailsRoute').then(m => ({ default: m.ClientDetailsRoute })))
+const ProjectDetailsV3Preview = lazy(() => import('../../modules/ProjectDetailsV3Preview').then(m => ({ default: m.ProjectDetailsV3Preview })))
 
 const ModuleLoader = () => (
   <div className="flex items-center justify-center h-64">
@@ -211,6 +212,9 @@ export function Layout() {
 
               {/* Détail client / lead (depuis CRM) */}
               <Route path="/clients/:id" element={wrap(ClientDetailsRoute)} />
+
+              {/* V3 Preview — chantier de refonte en cours, accessible pour validation */}
+              <Route path="/projets-v3-preview/:id" element={wrap(ProjectDetailsV3Preview)} />
 
               {/* CRM v1 */}
               <Route path={routes.dashboardLegacy} element={<Dashboard />} />

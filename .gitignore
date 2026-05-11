@@ -62,3 +62,6 @@ coverage/
 # Update
 .superpowers/
 .vercel
+
+# Demo admin script (mot de passe en clair — NE JAMAIS COMMIT)
+scripts/create-demo-admin.mjs
