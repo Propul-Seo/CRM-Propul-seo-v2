@@ -16,14 +16,24 @@ import {
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useProjectsV2 } from '@/modules/ProjectsManagerV2/hooks/useProjectsV2'
 import { supabase } from '@/lib/supabase'
-import { ProjectsV3Header } from './components/ProjectsV3Header'
+import { ProjectsV3Header, type V3ViewMode } from './components/ProjectsV3Header'
 import { ProjectColumnV3 } from './components/ProjectColumnV3'
 import { ProjectCardV3 } from './components/ProjectCardV3'
+import { ProjectCardV3Compact } from './components/ProjectCardV3Compact'
 import { SortableProjectCardV3 } from './components/SortableProjectCardV3'
+import { SortableProjectCardV3Compact } from './components/SortableProjectCardV3Compact'
 import { statusToColumn, V3_COLUMN_ORDER, type V3Column } from './utils/statusMapping'
 import { getActivePoles, type V3Pole } from './utils/poleMapping'
 import { useProjectDragDropV3 } from './hooks/useProjectDragDropV3'
 import type { ProjectV2 } from '@/types/project-v2'
+
+const VIEW_MODE_STORAGE_KEY = 'propulseo:projects-v3:view-mode'
+
+function loadViewMode(): V3ViewMode {
+  if (typeof window === 'undefined') return 'normal'
+  const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY)
+  return stored === 'compact' ? 'compact' : 'normal'
+}
 
 function useDebounced<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value)
@@ -43,6 +53,14 @@ export function ProjectsV3Page() {
   const [searchQuery, setSearchQuery] = useState('')
   const debouncedSearch = useDebounced(searchQuery, 300)
   const [users, setUsers] = useState<{ id: string; name: string }[]>([])
+  const [viewMode, setViewMode] = useState<V3ViewMode>(loadViewMode)
+
+  const handleViewModeChange = (mode: V3ViewMode) => {
+    setViewMode(mode)
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode)
+    }
+  }
 
   useEffect(() => {
     supabase.from('users').select('id, name').order('name').then(({ data }) => {
@@ -136,6 +154,8 @@ export function ProjectsV3Page() {
           // TODO étape ultérieure : modal création (réutiliser celle de V2 ?)
           console.log('[ProjectsV3] new project — à brancher')
         }}
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
       />
 
       <DndContext
@@ -158,6 +178,7 @@ export function ProjectsV3Page() {
                 count={items.length}
                 itemIds={itemIds}
                 isEmpty={items.length === 0}
+                compact={viewMode === 'compact'}
                 isDragTarget={
                   activeProject !== null &&
                   overColumn === column &&
@@ -165,12 +186,21 @@ export function ProjectsV3Page() {
                 }
               >
                 {items.map((project, index) => (
-                  <SortableProjectCardV3
-                    key={project.id}
-                    project={project}
-                    index={index}
-                    onClick={() => navigate(`/projets-v3-preview/${project.id}`)}
-                  />
+                  viewMode === 'compact' ? (
+                    <SortableProjectCardV3Compact
+                      key={project.id}
+                      project={project}
+                      index={index}
+                      onClick={() => navigate(`/projets-v3-preview/${project.id}`)}
+                    />
+                  ) : (
+                    <SortableProjectCardV3
+                      key={project.id}
+                      project={project}
+                      index={index}
+                      onClick={() => navigate(`/projets-v3-preview/${project.id}`)}
+                    />
+                  )
                 ))}
               </ProjectColumnV3>
             )
@@ -180,7 +210,11 @@ export function ProjectsV3Page() {
         <DragOverlay dropAnimation={{ duration: 200, easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)' }}>
           {activeProject ? (
             <div className="rotate-1 scale-[1.03] shadow-[0_12px_32px_rgba(0,0,0,0.5)]">
-              <ProjectCardV3 project={activeProject} index={0} />
+              {viewMode === 'compact' ? (
+                <ProjectCardV3Compact project={activeProject} index={0} />
+              ) : (
+                <ProjectCardV3 project={activeProject} index={0} />
+              )}
             </div>
           ) : null}
         </DragOverlay>

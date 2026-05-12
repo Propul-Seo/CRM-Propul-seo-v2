@@ -1,10 +1,12 @@
-import { Plus, Search } from 'lucide-react'
+import { Plus, Search, LayoutGrid, Rows3 } from 'lucide-react'
 import { V3_POLE_ORDER, V3_POLE_LABELS, V3_POLE_COLORS, type V3Pole } from '../utils/poleMapping'
 
 interface UserOption {
   id: string
   name: string
 }
+
+export type V3ViewMode = 'normal' | 'compact'
 
 interface Props {
   projectCount: number
@@ -16,6 +18,8 @@ interface Props {
   searchQuery: string
   onSearchChange: (q: string) => void
   onNewProject: () => void
+  viewMode: V3ViewMode
+  onViewModeChange: (mode: V3ViewMode) => void
 }
 
 export function ProjectsV3Header({
@@ -28,6 +32,8 @@ export function ProjectsV3Header({
   searchQuery,
   onSearchChange,
   onNewProject,
+  viewMode,
+  onViewModeChange,
 }: Props) {
   return (
     <header className="mb-6">
@@ -111,8 +117,38 @@ export function ProjectsV3Header({
           })}
         </div>
 
-        {/* Recherche poussée à droite */}
-        <div className="relative ml-auto min-w-[240px]">
+        {/* Toggle vue normale / compacte */}
+        <div className="ml-auto flex items-center gap-px bg-[#070512] border border-[rgba(139,92,246,0.18)] rounded-md p-px">
+          <button
+            type="button"
+            onClick={() => onViewModeChange('normal')}
+            title="Vue normale (cartes détaillées)"
+            aria-pressed={viewMode === 'normal'}
+            className="h-[28px] w-[30px] flex items-center justify-center rounded transition-colors duration-150"
+            style={{
+              background: viewMode === 'normal' ? 'rgba(139, 92, 246, 0.18)' : 'transparent',
+              color: viewMode === 'normal' ? '#A78BFA' : '#6b7280',
+            }}
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onViewModeChange('compact')}
+            title="Vue compacte (tout d'un coup)"
+            aria-pressed={viewMode === 'compact'}
+            className="h-[28px] w-[30px] flex items-center justify-center rounded transition-colors duration-150"
+            style={{
+              background: viewMode === 'compact' ? 'rgba(139, 92, 246, 0.18)' : 'transparent',
+              color: viewMode === 'compact' ? '#A78BFA' : '#6b7280',
+            }}
+          >
+            <Rows3 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+
+        {/* Recherche */}
+        <div className="relative min-w-[240px]">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#6b7280] pointer-events-none" />
           <input
             type="text"

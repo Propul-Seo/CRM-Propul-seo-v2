@@ -13,6 +13,8 @@ interface Props {
   isEmpty: boolean
   /** True quand cette colonne est la cible logique du drag en cours, même si le pointeur survole une carte enfant. */
   isDragTarget?: boolean
+  /** Mode compact = espacement vertical réduit entre les cartes. */
+  compact?: boolean
 }
 
 const COLUMN_ICONS: Record<V3Column, LucideIcon> = {
@@ -27,7 +29,7 @@ const COLUMN_ICON_COLORS: Record<V3Column, string> = {
   en_pause: '#f59e0b',
 }
 
-export function ProjectColumnV3({ column, count, itemIds, children, isEmpty, isDragTarget = false }: Props) {
+export function ProjectColumnV3({ column, count, itemIds, children, isEmpty, isDragTarget = false, compact = false }: Props) {
   const Icon = COLUMN_ICONS[column]
   const iconColor = COLUMN_ICON_COLORS[column]
 
@@ -75,7 +77,7 @@ export function ProjectColumnV3({ column, count, itemIds, children, isEmpty, isD
             <p className="text-[12px]">{highlighted ? 'Déposez ici' : 'Aucun projet'}</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-2.5">
+          <div className={compact ? 'flex flex-col gap-1' : 'flex flex-col gap-2.5'}>
             {children}
           </div>
         )}
