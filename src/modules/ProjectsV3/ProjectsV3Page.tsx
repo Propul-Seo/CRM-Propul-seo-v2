@@ -4,12 +4,14 @@ import { useNavigate } from 'react-router-dom'
 import {
   DndContext,
   DragOverlay,
-  closestCorners,
+  pointerWithin,
+  rectIntersection,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
   MeasuringStrategy,
+  type CollisionDetection,
 } from '@dnd-kit/core'
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useProjectsV2 } from '@/modules/ProjectsManagerV2/hooks/useProjectsV2'
@@ -90,13 +92,26 @@ export function ProjectsV3Page() {
     return acc
   }, [filteredProjects])
 
-  const { activeProject, handleDragStart, handleDragEnd, handleDragCancel } =
+  const { activeProject, activeColumn, overColumn, handleDragStart, handleDragOver, handleDragEnd, handleDragCancel } =
     useProjectDragDropV3({ projects: filteredProjects, onStatusChange: updateProjectStatus })
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
+
+  /**
+   * Stratégie de collision robuste pour kanban multi-containers :
+   * 1. pointerWithin : retourne les droppables qui contiennent le pointeur
+   *    → idéal quand on est nettement dans une colonne
+   * 2. Fallback rectIntersection : si le pointeur n'est dans aucune zone
+   *    (espace entre colonnes), prend l'intersection rectangulaire la plus proche
+   */
+  const collisionDetectionStrategy: CollisionDetection = (args) => {
+    const pointerCollisions = pointerWithin(args)
+    if (pointerCollisions.length > 0) return pointerCollisions
+    return rectIntersection(args)
+  }
 
   if (loading) {
     return (
@@ -125,9 +140,10 @@ export function ProjectsV3Page() {
 
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCorners}
+        collisionDetection={collisionDetectionStrategy}
         measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
         onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
@@ -142,6 +158,11 @@ export function ProjectsV3Page() {
                 count={items.length}
                 itemIds={itemIds}
                 isEmpty={items.length === 0}
+                isDragTarget={
+                  activeProject !== null &&
+                  overColumn === column &&
+                  activeColumn !== column
+                }
               >
                 {items.map((project, index) => (
                   <SortableProjectCardV3

@@ -11,6 +11,8 @@ interface Props {
   itemIds: string[]
   children: ReactNode
   isEmpty: boolean
+  /** True quand cette colonne est la cible logique du drag en cours, même si le pointeur survole une carte enfant. */
+  isDragTarget?: boolean
 }
 
 const COLUMN_ICONS: Record<V3Column, LucideIcon> = {
@@ -25,20 +27,25 @@ const COLUMN_ICON_COLORS: Record<V3Column, string> = {
   en_pause: '#f59e0b',
 }
 
-export function ProjectColumnV3({ column, count, itemIds, children, isEmpty }: Props) {
+export function ProjectColumnV3({ column, count, itemIds, children, isEmpty, isDragTarget = false }: Props) {
   const Icon = COLUMN_ICONS[column]
   const iconColor = COLUMN_ICON_COLORS[column]
 
   const { setNodeRef, isOver } = useDroppable({ id: column })
+
+  // Allumage : soit le pointeur est directement dans la colonne (isOver),
+  // soit le DndContext nous indique que la cible logique = cette colonne
+  // (cas où le pointeur est sur une carte enfant — isOver=false alors qu'on droppera bien ici)
+  const highlighted = isOver || isDragTarget
 
   return (
     <section
       ref={setNodeRef}
       className="rounded-xl p-[14px] min-h-[500px] flex flex-col transition-all duration-200 border"
       style={{
-        background: isOver ? `${iconColor}0D` : '#0f0b1e',
-        borderColor: isOver ? iconColor : 'rgba(139, 92, 246, 0.18)',
-        boxShadow: isOver ? `inset 0 0 0 1px ${iconColor}33` : 'none',
+        background: highlighted ? `${iconColor}0D` : '#0f0b1e',
+        borderColor: highlighted ? iconColor : 'rgba(139, 92, 246, 0.18)',
+        boxShadow: highlighted ? `inset 0 0 0 1px ${iconColor}33` : 'none',
       }}
     >
       {/* Column header */}
@@ -60,12 +67,12 @@ export function ProjectColumnV3({ column, count, itemIds, children, isEmpty }: P
           <div
             className="flex-1 flex flex-col items-center justify-center text-center px-4 py-8 border border-dashed rounded-lg transition-colors duration-200"
             style={{
-              borderColor: isOver ? iconColor : 'rgba(139, 92, 246, 0.18)',
-              color: isOver ? iconColor : '#6b7280',
+              borderColor: highlighted ? iconColor : 'rgba(139, 92, 246, 0.18)',
+              color: highlighted ? iconColor : '#6b7280',
             }}
           >
             <Inbox className="h-7 w-7 mb-2 opacity-40" />
-            <p className="text-[12px]">{isOver ? 'Déposez ici' : 'Aucun projet'}</p>
+            <p className="text-[12px]">{highlighted ? 'Déposez ici' : 'Aucun projet'}</p>
           </div>
         ) : (
           <div className="flex flex-col gap-2.5">
