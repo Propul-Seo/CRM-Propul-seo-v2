@@ -1,16 +1,18 @@
 import { useState } from 'react'
-import { User, Plus, Building2, Pencil, Mail, Phone } from 'lucide-react'
+import { User, Plus, Pencil } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { ProjectV2, ProjectStatusV2 } from '@/types/project-v2'
+import type { ProjectV2, ProjectStatusV2, ProjectContactRole } from '@/types/project-v2'
 import {
   PROJECT_STATUS_ORDER,
   PROJECT_STATUS_LABELS,
   getStatusStyle,
 } from '../statusConfig'
 import { ContactEditModalV3 } from './ContactEditModalV3'
+import { AddProjectContactModalV3 } from './AddProjectContactModalV3'
+import { ContactCardV3 } from './ContactCardV3'
 import { PipelineSelect } from './pipeline-previews/PipelineSelect'
-import { useProjectContactV3 } from '../hooks/useProjectContactV3'
+import { useProjectContactsV3 } from '../hooks/useProjectContactsV3'
 
 interface TeamUser { id: string; name: string; email: string }
 
@@ -44,63 +46,58 @@ function RightSection({
 
 export function ProjectV3RightSidebar({ project, users, onContactSaved, onAssign, onStatusChange }: Props) {
   const assignee = users.find((u) => u.id === project.assigned_to)
-  const [contactModalOpen, setContactModalOpen] = useState(false)
+  const [addContactOpen, setAddContactOpen] = useState(false)
+  const [editContactId, setEditContactId] = useState<string | null>(null)
   const [showAssignSelect, setShowAssignSelect] = useState(false)
-  const { contact, refetch: refetchContact } = useProjectContactV3(project.client_id)
+  const {
+    contacts,
+    refetch: refetchContacts,
+    createAndLink,
+    unlinkContact,
+    setRole,
+  } = useProjectContactsV3(project.id)
 
-  const hasLinkedContact = !!project.client_id
-  const actionLabel = hasLinkedContact ? 'Modifier' : 'Ajouter'
-  const ActionIcon = hasLinkedContact ? Pencil : Plus
+  const takenRoles = contacts.map((c) => c.role)
+
+  const handleContactSaved = async () => {
+    await refetchContacts()
+    if (onContactSaved) await onContactSaved()
+  }
 
   return (
     <div className="flex flex-col">
-      {/* Contact client */}
+      {/* Contact client (multi-contacts) */}
       <RightSection
-        title="Contact client"
+        title={`Contact client${contacts.length > 1 ? ` · ${contacts.length}` : ''}`}
         action={
           <button
-            onClick={() => setContactModalOpen(true)}
+            onClick={() => setAddContactOpen(true)}
             className="text-[10px] text-[#8B5CF6] hover:text-[#A78BFA] flex items-center gap-0.5 transition-colors"
           >
-            <ActionIcon className="h-3 w-3" /> {actionLabel}
+            <Plus className="h-3 w-3" /> Ajouter
           </button>
         }
       >
-        {hasLinkedContact && contact ? (
+        {contacts.length > 0 ? (
           <div className="space-y-2">
-            <div className="flex items-start gap-2">
-              <div className="h-8 w-8 rounded-full bg-[rgba(139,92,246,0.15)] border border-[rgba(139,92,246,0.2)] flex items-center justify-center shrink-0">
-                <Building2 className="h-3.5 w-3.5 text-[#8B5CF6]" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-[#ede9fe] truncate">{contact.name}</p>
-                {contact.company && (
-                  <p className="text-[10px] text-[#9ca3af] truncate">{contact.company}</p>
-                )}
-              </div>
-            </div>
-            {contact.email && (
-              <ContactCoord icon={Mail} value={contact.email} href={`mailto:${contact.email}`} />
-            )}
-            {contact.phone && (
-              <ContactCoord icon={Phone} value={contact.phone} href={`tel:${contact.phone}`} />
-            )}
-            {!contact.email && !contact.phone && (
-              <p className="text-[10px] text-[#9ca3af] italic">Aucune coordonnée renseignée</p>
-            )}
+            {contacts.map((link) => (
+              <ContactCardV3
+                key={link.id}
+                link={link}
+                onEdit={() => setEditContactId(link.contact_id)}
+                onChangeRole={(role) => setRole(link.id, role)}
+                onUnlink={() => unlinkContact(link.id)}
+              />
+            ))}
           </div>
         ) : project.client_name ? (
-          <div className="flex items-start gap-2">
-            <div className="h-8 w-8 rounded-full bg-[rgba(139,92,246,0.15)] border border-[rgba(139,92,246,0.2)] flex items-center justify-center shrink-0">
-              <Building2 className="h-3.5 w-3.5 text-[#8B5CF6]" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-[#ede9fe]">{project.client_name}</p>
-              <p className="text-[10px] text-[#9ca3af] italic">Cliquer sur « Ajouter » pour créer un contact</p>
-            </div>
-          </div>
+          <p className="text-xs text-[#9ca3af] italic">
+            Client : <span className="text-[#ede9fe] font-medium not-italic">{project.client_name}</span>
+            <br />
+            <span className="text-[10px]">Cliquer sur « Ajouter » pour créer un contact</span>
+          </p>
         ) : (
-          <p className="text-xs text-[#9ca3af] italic">Aucun client renseigné</p>
+          <p className="text-xs text-[#9ca3af] italic">Aucun contact lié au projet</p>
         )}
       </RightSection>
 
@@ -189,38 +186,27 @@ export function ProjectV3RightSidebar({ project, users, onContactSaved, onAssign
         )}
       </RightSection>
 
-      {contactModalOpen && (
-        <ContactEditModalV3
-          contactId={project.client_id ?? null}
-          projectId={project.id}
-          defaultClientName={project.client_name}
-          onClose={() => setContactModalOpen(false)}
-          onSaved={async () => {
-            await refetchContact()
-            if (onContactSaved) await onContactSaved()
+      {addContactOpen && (
+        <AddProjectContactModalV3
+          takenRoles={takenRoles}
+          onClose={() => setAddContactOpen(false)}
+          onSubmit={async (data, role) => {
+            const ok = await createAndLink(data, role)
+            if (ok && onContactSaved) await onContactSaved()
+            return ok
           }}
         />
       )}
-    </div>
-  )
-}
 
-function ContactCoord({
-  icon: Icon,
-  value,
-  href,
-}: {
-  icon: React.ElementType
-  value: string
-  href: string
-}) {
-  return (
-    <a
-      href={href}
-      className="flex items-center gap-2 text-[10px] text-[#9ca3af] hover:text-[#ede9fe] transition-colors group"
-    >
-      <Icon className="h-3 w-3 shrink-0 group-hover:text-[#A78BFA]" />
-      <span className="truncate">{value}</span>
-    </a>
+      {editContactId && (
+        <ContactEditModalV3
+          contactId={editContactId}
+          projectId={project.id}
+          defaultClientName={null}
+          onClose={() => setEditContactId(null)}
+          onSaved={handleContactSaved}
+        />
+      )}
+    </div>
   )
 }
