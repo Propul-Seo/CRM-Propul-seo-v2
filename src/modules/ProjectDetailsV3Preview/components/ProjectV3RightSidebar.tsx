@@ -201,8 +201,6 @@ export function ProjectV3RightSidebar({ project, users, onContactSaved, onAssign
       {editContactId && (
         <ContactEditModalV3
           contactId={editContactId}
-          projectId={project.id}
-          defaultClientName={null}
           onClose={() => setEditContactId(null)}
           onSaved={handleContactSaved}
         />

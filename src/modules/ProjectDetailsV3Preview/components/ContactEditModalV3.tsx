@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { X } from 'lucide-react'
-import { supabase, v2 } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { useContactsCRUD } from '@/hooks/supabase/useContactsCRUD'
 
 interface ContactData {
@@ -12,33 +12,36 @@ interface ContactData {
 }
 
 interface Props {
-  /** ID du contact existant à éditer. Si null, on est en mode création + liaison. */
-  contactId: string | null
-  /** ID du projet pour lier le contact créé (mode création uniquement). */
-  projectId: string
-  /** Nom client suggéré comme valeur par défaut (mode création). */
-  defaultClientName?: string | null
+  /** ID du contact existant à éditer (obligatoire — mode édition uniquement). */
+  contactId: string
   onClose: () => void
   /** Appelée après save réussi. Le parent doit refetch. */
   onSaved: () => void | Promise<void>
 }
 
-export function ContactEditModalV3({ contactId, projectId, defaultClientName, onClose, onSaved }: Props) {
-  const { createContact, updateContact } = useContactsCRUD()
+/**
+ * Modal d'édition des coordonnées d'un contact existant.
+ *
+ * Note : la création d'un nouveau contact lié à un projet passe désormais
+ * par AddProjectContactModalV3 (qui utilise useProjectContactsV3.createAndLink
+ * pour insérer dans la table project_contacts). Ce modal-ci est strictement
+ * en mode édition.
+ */
+export function ContactEditModalV3({ contactId, onClose, onSaved }: Props) {
+  const { updateContact } = useContactsCRUD()
   const [form, setForm] = useState<ContactData>({
-    name: defaultClientName ?? '',
+    name: '',
     email: '',
     phone: '',
     company: '',
   })
-  const [loading, setLoading] = useState(contactId !== null)
+  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
-  // Charger le contact existant en mode édition.
+  // Charger le contact existant.
   // onClose volontairement absent des deps : il est inline dans le parent et changerait
   // à chaque render, ce qui re-déclencherait le fetch en boucle pendant la sauvegarde.
   useEffect(() => {
-    if (!contactId) return
     let cancelled = false
     ;(async () => {
       const { data, error } = await supabase
@@ -77,37 +80,13 @@ export function ContactEditModalV3({ contactId, projectId, defaultClientName, on
     }
     setSaving(true)
     try {
-      if (contactId) {
-        // Mode édition
-        const res = await updateContact(contactId, {
-          name: form.name.trim(),
-          email: form.email.trim(),
-          phone: form.phone.trim() || null,
-          company: form.company.trim() || null,
-        })
-        if (!res.success) return
-      } else {
-        // Mode création + liaison au projet
-        const res = await createContact({
-          name: form.name.trim(),
-          email: form.email.trim(),
-          phone: form.phone.trim() || null,
-          company: form.company.trim() || null,
-        })
-        if (!res.success || !res.data) return
-        const { error: linkErr } = await v2
-          .from('projects')
-          .update({ client_id: res.data.id, client_name: res.data.name })
-          .eq('id', projectId)
-        if (linkErr) {
-          // Rollback : on supprime le contact orphelin pour préserver l'intégrité.
-          await supabase.from('contacts').delete().eq('id', res.data.id)
-          toast.error('Impossible de lier le contact au projet — aucune donnée créée')
-          console.error('[link-contact]', linkErr)
-          return
-        }
-        // createContact toaste déjà "Contact créé avec succès" — pas de double toast.
-      }
+      const res = await updateContact(contactId, {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim() || null,
+        company: form.company.trim() || null,
+      })
+      if (!res.success) return
       await onSaved()
       onClose()
     } finally {
@@ -128,7 +107,7 @@ export function ContactEditModalV3({ contactId, projectId, defaultClientName, on
       >
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-lg font-semibold text-[#ede9fe]">
-            {contactId ? 'Modifier le contact' : 'Ajouter un contact'}
+            Modifier le contact
           </h3>
           <button
             type="button"

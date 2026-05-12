@@ -94,7 +94,7 @@ export function ProjectEditModalV3({ project, users, onSave, onClose }: Props) {
       })
       onClose()
     } catch (err) {
-      // L'erreur est déjà toastée par useProjectsCRUD.updateProject — on garde le modal ouvert.
+      // L'erreur est déjà toastée par useProjectUpdateV3.updateProject — on garde le modal ouvert.
       console.error('[project-save]', err)
     } finally {
       setSaving(false)
