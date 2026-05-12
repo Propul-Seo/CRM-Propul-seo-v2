@@ -1,11 +1,14 @@
 import { Clock, Play, Pause, Inbox, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { useDroppable } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import type { V3Column } from '../utils/statusMapping'
 import { V3_COLUMN_LABELS } from '../utils/statusMapping'
 
 interface Props {
   column: V3Column
   count: number
+  itemIds: string[]
   children: ReactNode
   isEmpty: boolean
 }
@@ -22,12 +25,22 @@ const COLUMN_ICON_COLORS: Record<V3Column, string> = {
   en_pause: '#f59e0b',
 }
 
-export function ProjectColumnV3({ column, count, children, isEmpty }: Props) {
+export function ProjectColumnV3({ column, count, itemIds, children, isEmpty }: Props) {
   const Icon = COLUMN_ICONS[column]
   const iconColor = COLUMN_ICON_COLORS[column]
 
+  const { setNodeRef, isOver } = useDroppable({ id: column })
+
   return (
-    <section className="bg-[#0f0b1e] border border-[rgba(139,92,246,0.18)] rounded-xl p-[14px] min-h-[500px] flex flex-col">
+    <section
+      ref={setNodeRef}
+      className="rounded-xl p-[14px] min-h-[500px] flex flex-col transition-all duration-200 border"
+      style={{
+        background: isOver ? `${iconColor}0D` : '#0f0b1e',
+        borderColor: isOver ? iconColor : 'rgba(139, 92, 246, 0.18)',
+        boxShadow: isOver ? `inset 0 0 0 1px ${iconColor}33` : 'none',
+      }}
+    >
       {/* Column header */}
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-[rgba(139,92,246,0.18)]">
         <div className="flex items-center gap-2">
@@ -41,17 +54,25 @@ export function ProjectColumnV3({ column, count, children, isEmpty }: Props) {
         </span>
       </div>
 
-      {/* Cards */}
-      {isEmpty ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-center px-4 py-8 border border-dashed border-[rgba(139,92,246,0.18)] rounded-lg text-[#6b7280]">
-          <Inbox className="h-7 w-7 mb-2 opacity-40" />
-          <p className="text-[12px]">Aucun projet</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-2.5">
-          {children}
-        </div>
-      )}
+      {/* Cards (sortable context for in-column reordering + droppable target) */}
+      <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+        {isEmpty ? (
+          <div
+            className="flex-1 flex flex-col items-center justify-center text-center px-4 py-8 border border-dashed rounded-lg transition-colors duration-200"
+            style={{
+              borderColor: isOver ? iconColor : 'rgba(139, 92, 246, 0.18)',
+              color: isOver ? iconColor : '#6b7280',
+            }}
+          >
+            <Inbox className="h-7 w-7 mb-2 opacity-40" />
+            <p className="text-[12px]">{isOver ? 'Déposez ici' : 'Aucun projet'}</p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2.5">
+            {children}
+          </div>
+        )}
+      </SortableContext>
     </section>
   )
 }
