@@ -5,6 +5,8 @@ import { SyntheseTabV3 } from '../tabs/SyntheseTabV3'
 import { ProductionTabV3 } from '../tabs/ProductionTabV3'
 import { BriefTabV3 } from '../tabs/BriefTabV3'
 import { DocumentsTabV3 } from '../tabs/DocumentsTabV3'
+import { useProjectTabCounts } from '../hooks/useProjectTabCounts'
+import { useV3Keyboard } from '../hooks/useV3Keyboard'
 import type { ProjectV2 } from '@/types/project-v2'
 
 type TabId = 'synthese' | 'production' | 'brief' | 'documents'
@@ -23,6 +25,7 @@ interface Props {
 export function ProjectV3Tabs({ project }: Props) {
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTab = (searchParams.get('tab') as TabId) || 'synthese'
+  const counts = useProjectTabCounts(project.id)
 
   const handleTabChange = (id: TabId) => {
     const next = new URLSearchParams(searchParams)
@@ -31,12 +34,29 @@ export function ProjectV3Tabs({ project }: Props) {
     setSearchParams(next, { replace: true })
   }
 
+  useV3Keyboard({
+    onSwitchTab: (direction) => {
+      const currentIdx = TABS.findIndex((t) => t.id === activeTab)
+      const nextIdx = (currentIdx + direction + TABS.length) % TABS.length
+      handleTabChange(TABS[nextIdx].id)
+    },
+  })
+
+  const badgeFor = (id: TabId): React.ReactNode => {
+    if (id === 'synthese' && counts.activities > 0) return counts.activities
+    if (id === 'production' && counts.tasks > 0) return counts.tasks
+    if (id === 'documents' && counts.documents > 0) return counts.documents
+    if (id === 'brief' && counts.briefFilled) return '●'
+    return null
+  }
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Tab nav */}
       <div className="flex items-center gap-1 px-4 py-2 border-b border-[rgba(139,92,246,0.18)] bg-[#070512] shrink-0">
         {TABS.map(({ id, label, icon: Icon }) => {
           const isActive = activeTab === id
+          const badge = badgeFor(id)
           return (
             <button
               key={id}
@@ -50,6 +70,18 @@ export function ProjectV3Tabs({ project }: Props) {
             >
               <Icon className="h-3.5 w-3.5" />
               {label}
+              {badge !== null && (
+                <span
+                  className={cn(
+                    'ml-0.5 inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[10px] font-semibold',
+                    isActive
+                      ? 'bg-white/20 text-white'
+                      : 'bg-[rgba(139,92,246,0.18)] text-[#A78BFA]',
+                  )}
+                >
+                  {badge}
+                </span>
+              )}
             </button>
           )
         })}
