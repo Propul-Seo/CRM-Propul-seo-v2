@@ -21,6 +21,7 @@ import {
   Globe,
   Settings2,
   BookOpen,
+  Vault,
   ListTodo,
   type LucideIcon
 } from 'lucide-react';
@@ -87,7 +88,8 @@ export function Sidebar() {
     section: 'perso',
     title: 'Personnel',
     items: [
-      { to: routes.personalTasks, label: 'Mes Tâches', icon: ListTodo, permission: 'can_view_dashboard' }
+      { to: routes.personalTasks, label: 'Mes Tâches',  icon: ListTodo, permission: 'can_view_dashboard' },
+      { to: routes.agencyVault,   label: 'Coffre-fort', icon: Vault,    permission: 'can_view_dashboard' },
     ]
   }] : [];
 

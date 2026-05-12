@@ -36,6 +36,7 @@ const CommunicationManager = lazy(() => import('../../modules/CommunicationManag
 const ProceduresManager = lazy(() => import('../../modules/ProceduresManager').then(m => ({ default: m.ProceduresManager })))
 const ClientDetailsRoute = lazy(() => import('../routing/ClientDetailsRoute').then(m => ({ default: m.ClientDetailsRoute })))
 const ProjectDetailsV3Preview = lazy(() => import('../../modules/ProjectDetailsV3Preview').then(m => ({ default: m.ProjectDetailsV3Preview })))
+const AgencyVaultPage = lazy(() => import('../../modules/AgencyVault').then(m => ({ default: m.AgencyVaultPage })))
 
 const ModuleLoader = () => (
   <div className="flex items-center justify-center h-64">
@@ -215,6 +216,9 @@ export function Layout() {
 
               {/* V3 Preview — chantier de refonte en cours, accessible pour validation */}
               <Route path="/projets-v3-preview/:id" element={wrap(ProjectDetailsV3Preview)} />
+
+              {/* Coffre-fort agence (admin only — garde côté RPC) */}
+              <Route path={routes.agencyVault} element={wrap(AgencyVaultPage)} />
 
               {/* CRM v1 */}
               <Route path={routes.dashboardLegacy} element={<Dashboard />} />
