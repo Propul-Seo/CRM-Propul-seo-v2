@@ -8,7 +8,9 @@
     "build": "tsc -b --noEmit || true && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "audit:lines": "node scripts/audit-lines.mjs"
+    "audit:lines": "node scripts/audit-lines.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -62,7 +64,6 @@
     "cmdk": "^1.0.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
-    "dotenv": "^17.2.1",
     "embla-carousel-react": "^8.3.0",
     "framer-motion": "^11.5.4",
     "input-otp": "^1.2.4",
@@ -86,12 +87,14 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",
+    "@playwright/test": "^1.60.0",
     "@types/node": "^22.7.3",
     "@types/react": "^18.3.9",
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
+    "dotenv": "^17.4.2",
     "eslint": "^9.11.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.12",
