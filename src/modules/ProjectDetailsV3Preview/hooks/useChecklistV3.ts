@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { MOCK_SITEWEB_CHECKLISTS } from '@/modules/SiteWebManager/mocks/mockSiteWebChecklists'
 import { MOCK_ERP_CHECKLISTS } from '@/modules/ERPManager/mocks/mockERPChecklists'
-import type { ChecklistItemV2, ChecklistPhase, ChecklistStatus } from '@/types/project-v2'
+import { buildTemplateForProject } from './checklistTemplates'
+import type { ChecklistItemV2, ChecklistPhase, ChecklistStatus, PrestaType } from '@/types/project-v2'
 
 const MOCK_REGISTRY: Record<string, ChecklistItemV2[]> = {
   ...MOCK_SITEWEB_CHECKLISTS,
@@ -18,6 +19,8 @@ function isMockProject(projectId: string) {
 interface UseReturn {
   items: ChecklistItemV2[]
   loading: boolean
+  /** IDs des items dont une mutation (status/update/delete) est en cours côté BDD. */
+  pendingIds: Set<string>
   progress: number
   progressByPhase: Record<ChecklistPhase, { total: number; done: number; percent: number }>
   addItem: (item: Omit<ChecklistItemV2, 'id' | 'created_at' | 'updated_at'>) => Promise<void>
@@ -29,9 +32,32 @@ interface UseReturn {
 
 const PHASES: ChecklistPhase[] = ['onboarding', 'conception', 'developpement', 'recette', 'post_livraison', 'general']
 
+// Garde anti-double-matérialisation : StrictMode (mount/unmount/remount en dev)
+// et navigations rapides peuvent déclencher 2 mounts concurrents avant que le
+// premier INSERT ne soit visible. On verrouille par projectId au niveau module.
+const materializingProjects = new Set<string>()
+
 export function useChecklistV3(projectId: string): UseReturn {
   const [items, setItems] = useState<ChecklistItemV2[]>([])
   const [loading, setLoading] = useState(true)
+  const [pendingIds, setPendingIds] = useState<Set<string>>(() => new Set())
+
+  const markPending = useCallback((id: string) => {
+    setPendingIds((prev) => {
+      const next = new Set(prev)
+      next.add(id)
+      return next
+    })
+  }, [])
+
+  const unmarkPending = useCallback((id: string) => {
+    setPendingIds((prev) => {
+      if (!prev.has(id)) return prev
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
+  }, [])
 
   useEffect(() => {
     if (!projectId) return
@@ -40,16 +66,89 @@ export function useChecklistV3(projectId: string): UseReturn {
       setLoading(false)
       return
     }
+    let cancelled = false
+    setItems([])
     setLoading(true)
-    supabase
-      .from('checklist_items_v2')
-      .select('*')
-      .eq('project_id', projectId)
-      .order('sort_order', { ascending: true })
-      .then(({ data, error }) => {
-        if (!error && data) setItems(data as ChecklistItemV2[])
+    ;(async () => {
+      const { data: existing, error } = await supabase
+        .from('checklist_items_v2')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('sort_order', { ascending: true })
+      if (cancelled) return
+      if (error) {
+        console.error('[useChecklistV3] load failed', error)
         setLoading(false)
-      })
+        return
+      }
+      if (existing && existing.length > 0) {
+        setItems(existing as ChecklistItemV2[])
+        setLoading(false)
+        return
+      }
+      // Aucun item en BDD : on tente une matérialisation depuis le template
+      // selon les presta_type du projet. Si le projet n'a pas de presta_type
+      // reconnu, on reste sur une liste vide (comportement actuel).
+      // Verrou anti-double-INSERT en cas de mounts concurrents (StrictMode).
+      if (materializingProjects.has(projectId)) {
+        setLoading(false)
+        return
+      }
+      materializingProjects.add(projectId)
+      try {
+        const { data: project, error: projErr } = await supabase
+          .from('projects_v2')
+          .select('presta_type, assigned_to')
+          .eq('id', projectId)
+          .single()
+        if (cancelled) return
+        if (projErr || !project) {
+          console.error('[useChecklistV3] project lookup failed', projErr)
+          setItems([])
+          setLoading(false)
+          return
+        }
+        const template = buildTemplateForProject(
+          (project as { presta_type: PrestaType[] | null }).presta_type,
+          (project as { assigned_to: string | null }).assigned_to,
+        )
+        if (template.length === 0) {
+          setItems([])
+          setLoading(false)
+          return
+        }
+        const rows = template.map((t) => ({
+          project_id: projectId,
+          parent_task_id: t.parent_task_id ?? null,
+          title: t.title,
+          phase: t.phase,
+          status: t.status,
+          priority: t.priority,
+          assigned_to: t.assigned_to,
+          assigned_name: t.assigned_name ?? null,
+          due_date: t.due_date ?? null,
+          sort_order: t.position,
+        }))
+        const { data: inserted, error: insErr } = await supabase
+          .from('checklist_items_v2')
+          .insert(rows)
+          .select()
+        if (cancelled) return
+        if (insErr) {
+          console.error('[useChecklistV3] materialize failed', insErr)
+          setItems([])
+          setLoading(false)
+          return
+        }
+        setItems((inserted ?? []) as ChecklistItemV2[])
+        setLoading(false)
+      } finally {
+        materializingProjects.delete(projectId)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
   }, [projectId])
 
   const progress = useMemo(() => {
@@ -200,22 +299,27 @@ export function useChecklistV3(projectId: string): UseReturn {
         return prev.map((i) => (i.id === id ? { ...i, status, updated_at: new Date().toISOString() } : i))
       })
       if (!previous) return
-      const { data, error } = await supabase
-        .from('checklist_items_v2')
-        .update({ status })
-        .eq('id', id)
-        .select()
-        .single()
-      if (error) {
-        console.error('[useChecklistV3] setItemStatus failed', { id, status, error })
-        const rollback = previous
-        setItems((prev) => prev.map((i) => (i.id === id ? rollback : i)))
-        throw new Error(`Impossible de changer le statut : ${error.message}`)
+      markPending(id)
+      try {
+        const { data, error } = await supabase
+          .from('checklist_items_v2')
+          .update({ status })
+          .eq('id', id)
+          .select()
+          .single()
+        if (error) {
+          console.error('[useChecklistV3] setItemStatus failed', { id, status, error })
+          const rollback = previous
+          setItems((prev) => prev.map((i) => (i.id === id ? rollback : i)))
+          throw new Error(`Impossible de changer le statut : ${error.message}`)
+        }
+        if (data) setItems((prev) => prev.map((i) => (i.id === id ? (data as ChecklistItemV2) : i)))
+      } finally {
+        unmarkPending(id)
       }
-      if (data) setItems((prev) => prev.map((i) => (i.id === id ? (data as ChecklistItemV2) : i)))
     },
-    [projectId],
+    [projectId, markPending, unmarkPending],
   )
 
-  return { items, loading, progress, progressByPhase, addItem, addItems, updateItem, deleteItem, setItemStatus }
+  return { items, loading, pendingIds, progress, progressByPhase, addItem, addItems, updateItem, deleteItem, setItemStatus }
 }

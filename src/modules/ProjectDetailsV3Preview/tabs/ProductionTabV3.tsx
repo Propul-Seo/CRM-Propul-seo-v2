@@ -3,8 +3,10 @@ import { Plus, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useChecklistV3 } from '../hooks/useChecklistV3'
 import { useIsProjectV3Admin } from '../hooks/useIsProjectV3Admin'
+import { useUsers } from '@/hooks/useUsers'
 import { ProductionPhase } from './production/ProductionPhase'
-import { PHASE_LABELS, PHASE_ORDER, MOCK_USERS, PRESTA_LABELS } from './production/constants'
+import { PHASE_LABELS, PHASE_ORDER, PRESTA_LABELS } from './production/constants'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TEMPLATES } from './production/templates'
 import type { ProjectV2, ChecklistPhase, ChecklistStatus, PrestaType } from '@/types/project-v2'
 
@@ -13,14 +15,15 @@ interface Props {
 }
 
 export function ProductionTabV3({ project }: Props) {
-  const { items, loading, progress, progressByPhase, setItemStatus, addItem, addItems, deleteItem } =
+  const { items, loading, pendingIds, progress, progressByPhase, setItemStatus, addItem, addItems, deleteItem } =
     useChecklistV3(project.id)
   const { isAdmin } = useIsProjectV3Admin()
+  const { users } = useUsers()
 
   const [isApplyingTemplate, setIsApplyingTemplate] = useState(false)
   const [collapsed, setCollapsed] = useState<Partial<Record<ChecklistPhase, boolean>>>({})
   const [newTitle, setNewTitle] = useState('')
-  const [newPhase, setNewPhase] = useState<ChecklistPhase>('general')
+  const [newPhase, setNewPhase] = useState<ChecklistPhase>('onboarding')
   const [newAssignedTo, setNewAssignedTo] = useState('')
   const [showAdd, setShowAdd] = useState(false)
 
@@ -41,7 +44,7 @@ export function ProductionTabV3({ project }: Props) {
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newTitle.trim()) return
-    const user = MOCK_USERS.find((u) => u.id === newAssignedTo)
+    const user = users.find((u) => u.id === newAssignedTo)
     try {
       await addItem({
         project_id: project.id,
@@ -191,22 +194,31 @@ export function ProductionTabV3({ project }: Props) {
             className="w-full bg-surface-3 border border-border rounded-md px-3 py-1.5 text-sm text-foreground placeholder-muted-foreground"
             autoFocus
           />
-          <div className="flex flex-wrap gap-2">
-            <select
-              value={newPhase}
-              onChange={(e) => setNewPhase(e.target.value as ChecklistPhase)}
-              className="bg-surface-3 border border-border rounded-md px-2 py-1 text-sm text-foreground"
+          <div className="flex flex-wrap gap-2 items-center">
+            <Select value={newPhase} onValueChange={(v) => setNewPhase(v as ChecklistPhase)}>
+              <SelectTrigger className="w-[160px] h-8 bg-surface-3 border-border text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent side="top" align="start" avoidCollisions={false}>
+                {PHASE_ORDER.map((p) => (
+                  <SelectItem key={p} value={p}>{PHASE_LABELS[p]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={newAssignedTo === '' ? '__none__' : newAssignedTo}
+              onValueChange={(v) => setNewAssignedTo(v === '__none__' ? '' : v)}
             >
-              {PHASE_ORDER.map((p) => <option key={p} value={p}>{PHASE_LABELS[p]}</option>)}
-            </select>
-            <select
-              value={newAssignedTo}
-              onChange={(e) => setNewAssignedTo(e.target.value)}
-              className="bg-surface-3 border border-border rounded-md px-2 py-1 text-sm text-foreground"
-            >
-              <option value="">Non assigné</option>
-              {MOCK_USERS.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
-            </select>
+              <SelectTrigger className="w-[180px] h-8 bg-surface-3 border-border text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent side="top" align="start" avoidCollisions={false}>
+                <SelectItem value="__none__">Non assigné</SelectItem>
+                {users.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <button type="submit" className="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 transition-colors">
               Ajouter
             </button>
@@ -237,6 +249,7 @@ export function ProductionTabV3({ project }: Props) {
             allItems={items}
             progress={progressByPhase[phase]}
             collapsed={!!collapsed[phase]}
+            pendingIds={pendingIds}
             onToggle={() => togglePhase(phase)}
             onCycleStatus={cycleStatus}
             onAddSubTask={handleAddSubTask}

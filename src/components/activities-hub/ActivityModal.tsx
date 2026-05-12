@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -28,6 +28,7 @@ export function ActivityModal<T extends string>({
   const [type, setType] = useState<T>(defaultType)
   const [content, setContent] = useState(initialContent)
   const [saving, setSaving] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   useEffect(() => {
     if (open) {
@@ -35,6 +36,21 @@ export function ActivityModal<T extends string>({
       setContent(initialContent)
     }
   }, [open, defaultType, initialContent])
+
+  // À l'ouverture (ou quand le contenu initial change), focus le textarea
+  // et place le curseur à la fin du texte prérempli pour permettre de
+  // compléter directement (ex : "Première décision projet — pack pro").
+  useEffect(() => {
+    if (!open) return
+    const id = requestAnimationFrame(() => {
+      const el = textareaRef.current
+      if (!el) return
+      el.focus()
+      const end = el.value.length
+      el.setSelectionRange(end, end)
+    })
+    return () => cancelAnimationFrame(id)
+  }, [open, initialContent])
 
   const handleSubmit = async () => {
     if (!content.trim()) return
@@ -68,6 +84,7 @@ export function ActivityModal<T extends string>({
           <div>
             <Label>Contenu</Label>
             <Textarea
+              ref={textareaRef}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Détails de l'activité..."

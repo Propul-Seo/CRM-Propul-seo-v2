@@ -45,8 +45,3 @@ export const PRESTA_LABELS: Record<PrestaType, string> = {
   communication: 'Communication',
 }
 
-export const MOCK_USERS = [
-  { id: 'user-alice', name: 'Alice Martin' },
-  { id: 'user-bob',   name: 'Bob Lefèvre' },
-  { id: 'user-carol', name: 'Carol Petit' },
-]

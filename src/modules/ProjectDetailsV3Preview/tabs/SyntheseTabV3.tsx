@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { Sparkles } from 'lucide-react'
-import { QuickActionBar, ActivityTimeline, type ActivityRecord } from '@/components/activities-hub'
+import { QuickActionBar, ActivityTimeline, ActivityModal, type ActivityRecord } from '@/components/activities-hub'
 import { MetricCard } from '../components/MetricCard'
 import { useProjectActivitiesV3 } from '../hooks/useProjectActivitiesV3'
 import { useIsProjectV3Admin } from '../hooks/useIsProjectV3Admin'
@@ -34,6 +35,11 @@ const PRIMER_PROMPTS: Array<{ type: ActivityType; label: string }> = [
 export function SyntheseTabV3({ project }: Props) {
   const { activities, loading, addActivity, updateActivity, deleteActivity } = useProjectActivitiesV3(project.id)
   const { isAdmin } = useIsProjectV3Admin()
+
+  // Modale ouverte par un bouton de l'état vide ("Première décision projet"…) :
+  // on préremplit le contenu avec le libellé du bouton pour que l'utilisateur
+  // puisse compléter sans tout retaper.
+  const [primerModal, setPrimerModal] = useState<{ type: ActivityType; content: string } | null>(null)
 
   const records: ActivityRecord<ActivityType>[] = activities.map((a) => ({
     id: a.id,
@@ -115,13 +121,7 @@ export function SyntheseTabV3({ project }: Props) {
                     {PRIMER_PROMPTS.map((p) => (
                       <button
                         key={p.type}
-                        onClick={async () => {
-                          try {
-                            await addActivity(p.type, p.label)
-                          } catch (err) {
-                            toast.error(err instanceof Error ? err.message : "Impossible d'ajouter l'activité")
-                          }
-                        }}
+                        onClick={() => setPrimerModal({ type: p.type, content: p.label })}
                         className="px-3 py-1.5 text-xs font-medium rounded-md bg-[rgba(139,92,246,0.15)] text-[#A78BFA] border border-[rgba(139,92,246,0.3)] hover:bg-[rgba(139,92,246,0.25)] transition-colors"
                       >
                         {p.label}
@@ -134,6 +134,21 @@ export function SyntheseTabV3({ project }: Props) {
           )}
         </div>
       </div>
+
+      <ActivityModal
+        open={primerModal !== null}
+        onClose={() => setPrimerModal(null)}
+        onSubmit={async (type, content) => {
+          try {
+            await addActivity(type, content)
+          } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Impossible d'ajouter l'activité")
+          }
+        }}
+        actions={PROJECT_V3_ACTIONS}
+        defaultType={primerModal?.type ?? PROJECT_V3_ACTIONS[0].type}
+        initialContent={primerModal?.content ?? ''}
+      />
     </div>
   )
 }
