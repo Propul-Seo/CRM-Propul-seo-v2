@@ -1,19 +1,21 @@
 import { useSearchParams } from 'react-router-dom'
-import { BarChart3, Hammer, ClipboardList, Folder } from 'lucide-react'
+import { BarChart3, Hammer, ClipboardList, Folder, KeyRound } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SyntheseTabV3 } from '../tabs/SyntheseTabV3'
 import { ProductionTabV3 } from '../tabs/ProductionTabV3'
+import { AccessTabV3 } from '../tabs/AccessTabV3'
 import { BriefTabV3 } from '../tabs/BriefTabV3'
 import { DocumentsTabV3 } from '../tabs/DocumentsTabV3'
 import { useProjectTabCounts } from '../hooks/useProjectTabCounts'
 import { useV3Keyboard } from '../hooks/useV3Keyboard'
 import type { ProjectV2 } from '@/types/project-v2'
 
-type TabId = 'synthese' | 'production' | 'brief' | 'documents'
+type TabId = 'synthese' | 'production' | 'access' | 'brief' | 'documents'
 
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: 'synthese',   label: 'Synthèse',   icon: BarChart3 },
   { id: 'production', label: 'Production', icon: Hammer },
+  { id: 'access',     label: 'Accès',      icon: KeyRound },
   { id: 'brief',      label: 'Brief',      icon: ClipboardList },
   { id: 'documents',  label: 'Documents',  icon: Folder },
 ]
@@ -88,9 +90,10 @@ export function ProjectV3Tabs({ project }: Props) {
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
         {activeTab === 'synthese' && <SyntheseTabV3 project={project} />}
         {activeTab === 'production' && <ProductionTabV3 project={project} />}
+        {activeTab === 'access' && <AccessTabV3 project={project} />}
         {activeTab === 'brief' && <BriefTabV3 project={project} />}
         {activeTab === 'documents' && <DocumentsTabV3 project={project} />}
       </div>
