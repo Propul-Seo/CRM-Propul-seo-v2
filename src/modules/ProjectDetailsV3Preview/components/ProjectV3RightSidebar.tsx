@@ -85,7 +85,7 @@ export function ProjectV3RightSidebar({ project, users, onContactSaved, onAssign
                 key={link.id}
                 link={link}
                 onEdit={() => setEditContactId(link.contact_id)}
-                onChangeRole={(role) => setRole(link.id, role)}
+                onChangeRole={(role, customLabel) => setRole(link.id, role, customLabel)}
                 onUnlink={() => unlinkContact(link.id)}
               />
             ))}
@@ -190,8 +190,8 @@ export function ProjectV3RightSidebar({ project, users, onContactSaved, onAssign
         <AddProjectContactModalV3
           takenRoles={takenRoles}
           onClose={() => setAddContactOpen(false)}
-          onSubmit={async (data, role) => {
-            const ok = await createAndLink(data, role)
+          onSubmit={async (data, role, customLabel) => {
+            const ok = await createAndLink(data, role, customLabel)
             if (ok && onContactSaved) await onContactSaved()
             return ok
           }}

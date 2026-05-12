@@ -7,11 +7,13 @@ import {
   type ProjectContactWithDetails,
 } from '@/types/project-v2'
 import { MenuItemV3 } from './MenuItemV3'
+import { RoleEditorV3 } from './RoleEditorV3'
 
 interface Props {
   link: ProjectContactWithDetails
   onEdit: () => void
-  onChangeRole: (role: ProjectContactRole) => void
+  /** Change le rôle. `customLabel` n'est pertinent que pour role='other'. */
+  onChangeRole: (role: ProjectContactRole, customLabel: string | null) => void
   onUnlink: () => void
 }
 
@@ -23,11 +25,11 @@ const ROLE_STYLES: Record<ProjectContactRole, { badge: string; icon: React.Eleme
   other:          { badge: 'bg-slate-500/15 text-slate-300 border-slate-500/30',   icon: UserIcon },
 }
 
-const ROLE_OPTIONS: ProjectContactRole[] = ['primary', 'decision_maker', 'technical', 'billing', 'other']
-
 export function ContactCardV3({ link, onEdit, onChangeRole, onUnlink }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [roleSubmenuOpen, setRoleSubmenuOpen] = useState(false)
+  const [editingRole, setEditingRole] = useState(false)
+  const [draftRole, setDraftRole] = useState<ProjectContactRole>(link.role)
+  const [draftLabel, setDraftLabel] = useState<string>(link.notes ?? '')
   const menuRef = useRef<HTMLDivElement>(null)
 
   // Fermer le menu au clic en dehors
@@ -36,21 +38,44 @@ export function ContactCardV3({ link, onEdit, onChangeRole, onUnlink }: Props) {
     const handler = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setMenuOpen(false)
-        setRoleSubmenuOpen(false)
       }
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [menuOpen])
 
-  const { contact, role } = link
+  const { contact, role, notes } = link
   const roleStyle = ROLE_STYLES[role]
   const RoleIcon = roleStyle.icon
   const isPrimary = role === 'primary'
+  // Si role='other' et notes définies, on affiche le label custom au lieu de "Autre"
+  const displayedRoleLabel =
+    role === 'other' && notes?.trim() ? notes.trim() : PROJECT_CONTACT_ROLE_LABELS[role]
+
+  const openRoleEditor = () => {
+    setMenuOpen(false)
+    setDraftRole(role)
+    setDraftLabel(notes ?? '')
+    setEditingRole(true)
+  }
+
+  const cancelRoleEdit = () => {
+    setEditingRole(false)
+    setDraftRole(role)
+    setDraftLabel(notes ?? '')
+  }
+
+  const confirmRoleEdit = () => {
+    setEditingRole(false)
+    const customLabel = draftRole === 'other' ? (draftLabel.trim() || null) : null
+    if (draftRole !== role || (draftRole === 'other' && customLabel !== (notes ?? null))) {
+      onChangeRole(draftRole, customLabel)
+    }
+  }
 
   return (
     <div className="relative bg-[#0f0b1e] border border-[rgba(139,92,246,0.15)] rounded-lg p-3 space-y-2">
-      {/* Header : avatar + nom + rôle + menu */}
+      {/* Header : avatar + nom + menu */}
       <div className="flex items-start gap-2">
         <div
           className={cn(
@@ -85,43 +110,17 @@ export function ContactCardV3({ link, onEdit, onChangeRole, onUnlink }: Props) {
             <div className="absolute right-0 top-7 z-10 w-44 bg-[#070512] border border-[rgba(139,92,246,0.25)] rounded-md shadow-lg overflow-hidden">
               <MenuItemV3
                 icon={Pencil}
-                label="Modifier"
+                label="Modifier coordonnées"
                 onClick={() => {
                   setMenuOpen(false)
                   onEdit()
                 }}
               />
-              <div className="relative">
-                <MenuItemV3
-                  icon={RoleIcon}
-                  label="Changer rôle"
-                  trailing={<ChevronRight className="h-3 w-3" />}
-                  onClick={() => setRoleSubmenuOpen((o) => !o)}
-                />
-                {roleSubmenuOpen && (
-                  <div className="absolute right-full top-0 mr-1 w-40 bg-[#070512] border border-[rgba(139,92,246,0.25)] rounded-md shadow-lg overflow-hidden">
-                    {ROLE_OPTIONS.map((r) => (
-                      <button
-                        key={r}
-                        type="button"
-                        onClick={() => {
-                          setMenuOpen(false)
-                          setRoleSubmenuOpen(false)
-                          if (r !== role) onChangeRole(r)
-                        }}
-                        className={cn(
-                          'w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 transition-colors',
-                          r === role
-                            ? 'bg-[rgba(139,92,246,0.15)] text-[#A78BFA]'
-                            : 'text-[#ede9fe] hover:bg-[rgba(139,92,246,0.1)]',
-                        )}
-                      >
-                        {PROJECT_CONTACT_ROLE_LABELS[r]}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <MenuItemV3
+                icon={RoleIcon}
+                label="Modifier rôle"
+                onClick={openRoleEditor}
+              />
               <div className="border-t border-[rgba(139,92,246,0.15)]" />
               <MenuItemV3
                 icon={Trash2}
@@ -137,18 +136,31 @@ export function ContactCardV3({ link, onEdit, onChangeRole, onUnlink }: Props) {
         </div>
       </div>
 
-      {/* Badge rôle */}
-      <div className="flex">
-        <span
-          className={cn(
-            'inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border',
-            roleStyle.badge,
-          )}
-        >
-          <RoleIcon className="h-2.5 w-2.5" />
-          {PROJECT_CONTACT_ROLE_LABELS[role]}
-        </span>
-      </div>
+      {/* Section rôle : badge en lecture, sélecteur inline en édition */}
+      {!editingRole ? (
+        <div className="flex">
+          <button
+            type="button"
+            onClick={openRoleEditor}
+            className={cn(
+              'inline-flex items-center gap-1 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border hover:opacity-80 transition-opacity',
+              roleStyle.badge,
+            )}
+          >
+            <RoleIcon className="h-2.5 w-2.5" />
+            {displayedRoleLabel}
+          </button>
+        </div>
+      ) : (
+        <RoleEditorV3
+          draftRole={draftRole}
+          draftLabel={draftLabel}
+          onRoleChange={setDraftRole}
+          onLabelChange={setDraftLabel}
+          onConfirm={confirmRoleEdit}
+          onCancel={cancelRoleEdit}
+        />
+      )}
 
       {/* Coordonnées : email + téléphone */}
       {(contact.email || contact.phone) && (

@@ -12,15 +12,26 @@ interface UseReturn {
   refetch: () => Promise<void>
   /** Lier un contact existant au projet avec un rôle. */
   linkContact: (contactId: string, role?: ProjectContactRole) => Promise<boolean>
-  /** Créer un nouveau contact et le lier au projet. */
+  /**
+   * Créer un nouveau contact et le lier au projet.
+   * `customLabel` est stocké dans `notes` (utile pour role='other' avec libellé libre).
+   */
   createAndLink: (
     data: { name: string; email: string; phone?: string | null; company?: string | null },
     role?: ProjectContactRole,
+    customLabel?: string | null,
   ) => Promise<boolean>
   /** Délier un contact du projet (ne supprime pas le contact). */
   unlinkContact: (projectContactId: string) => Promise<boolean>
-  /** Changer le rôle d'un contact lié au projet. */
-  setRole: (projectContactId: string, role: ProjectContactRole) => Promise<boolean>
+  /**
+   * Changer le rôle d'un contact lié au projet.
+   * `customLabel` (optionnel) est stocké dans `notes` ; passer `null` pour effacer.
+   */
+  setRole: (
+    projectContactId: string,
+    role: ProjectContactRole,
+    customLabel?: string | null,
+  ) => Promise<boolean>
 }
 
 /**
@@ -132,6 +143,7 @@ export function useProjectContactsV3(projectId: string): UseReturn {
     async (
       data: { name: string; email: string; phone?: string | null; company?: string | null },
       role: ProjectContactRole = 'primary',
+      customLabel: string | null = null,
     ) => {
       // 1. Créer le contact
       const { data: created, error: createErr } = await supabase
@@ -151,10 +163,11 @@ export function useProjectContactsV3(projectId: string): UseReturn {
         return false
       }
 
-      // 2. Lier au projet
+      // 2. Lier au projet (notes = customLabel, utile pour role='other' avec libellé libre)
+      const notesValue = role === 'other' && customLabel?.trim() ? customLabel.trim() : null
       const { error: linkErr } = await supabase
         .from('project_contacts')
-        .insert({ project_id: projectId, contact_id: created.id, role })
+        .insert({ project_id: projectId, contact_id: created.id, role, notes: notesValue })
 
       if (linkErr) {
         // Rollback : supprimer le contact orphelin
@@ -195,12 +208,21 @@ export function useProjectContactsV3(projectId: string): UseReturn {
   )
 
   const setRole = useCallback(
-    async (projectContactId: string, role: ProjectContactRole) => {
+    async (
+      projectContactId: string,
+      role: ProjectContactRole,
+      customLabel: string | null = null,
+    ) => {
       // Snapshot du rôle avant changement (pour savoir si on touche au primary)
       const previousRole = contacts.find((c) => c.id === projectContactId)?.role
+      // Si on quitte 'other', on efface le label custom ; sinon on prend la valeur passée.
+      const notesUpdate =
+        role === 'other'
+          ? customLabel?.trim() || null
+          : null
       const { error } = await supabase
         .from('project_contacts')
-        .update({ role })
+        .update({ role, notes: notesUpdate })
         .eq('id', projectContactId)
       if (error) {
         if (error.code === '23505' && role === 'primary') {

@@ -10,10 +10,14 @@ import {
 interface Props {
   /** Rôles déjà occupés sur ce projet (pour griser l'option 'primary' si déjà pris). */
   takenRoles: ProjectContactRole[]
-  /** Callback de création + liaison. Reçoit les données + le rôle choisi. */
+  /**
+   * Callback de création + liaison.
+   * `customLabel` est non-null uniquement pour role='other' avec libellé saisi.
+   */
   onSubmit: (
     data: { name: string; email: string; phone: string | null; company: string | null },
     role: ProjectContactRole,
+    customLabel: string | null,
   ) => Promise<boolean>
   onClose: () => void
 }
@@ -31,6 +35,7 @@ export function AddProjectContactModalV3({ takenRoles, onSubmit, onClose }: Prop
   const [role, setRole] = useState<ProjectContactRole>(
     takenRoles.includes('primary') ? 'other' : 'primary',
   )
+  const [customLabel, setCustomLabel] = useState('')
   const [saving, setSaving] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,6 +54,7 @@ export function AddProjectContactModalV3({ takenRoles, onSubmit, onClose }: Prop
           company: form.company.trim() || null,
         },
         role,
+        role === 'other' ? (customLabel.trim() || null) : null,
       )
       if (ok) onClose()
     } finally {
@@ -139,6 +145,16 @@ export function AddProjectContactModalV3({ takenRoles, onSubmit, onClose }: Prop
                 )
               })}
             </div>
+            {role === 'other' && (
+              <input
+                type="text"
+                value={customLabel}
+                onChange={(e) => setCustomLabel(e.target.value)}
+                placeholder="Préciser (optionnel) : CEO, Stagiaire, Comptable externe…"
+                maxLength={50}
+                className={cn(inputCls, 'mt-2')}
+              />
+            )}
           </Field>
 
           <div className="flex gap-3 pt-2">
