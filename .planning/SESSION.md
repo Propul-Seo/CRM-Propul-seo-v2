@@ -1,40 +1,39 @@
-# Session State — 2026-05-11 22:30
+# Session State — 2026-05-12 14:45
 
 ## Branch
-main
+**preview/v3-ux-overhaul** (exception assumée — chantier V3 isolé, validé en début de session)
 
 ## Completed This Session
-- **Sprint 1** (V3 isolation foundations) : composants génériques `src/components/activities-hub/` (QuickActionBar, ActivityModal, ActivityTimeline, types). Réutilisables pour V3 sans toucher V1/V2.
-- **Sprint 2** (sidebars V3) : `ProjectV3LeftSidebar` + `ProjectV3RightSidebar` (copies adaptées du CRM ERP lead). Statuts génériques + spécifiques (sw/erp/comm) gérés via `getStatusStyle`/`getStatusLabel` avec fallback safe.
-- **Sprint 3** (onglets centraux) : 4 onglets V3 — Synthèse (KPI cards + timeline d'activités), Production (checklist par phase + templates par presta_type), Brief (édition 6 champs), Documents (GED par catégorie avec upload Supabase Storage).
-- **Sprint 4** (assemblage + route) : `ProjectDetailsV3Preview/index.tsx` (orchestration 3 colonnes + chip "V3 Preview"). Route `/projets-v3-preview/:id` accessible.
-- **Mode démo admin** : script local `scripts/create-demo-admin.mjs` (ignoré par git, mot de passe en clair). Compte créé : `lyestriki@yahoo.fr` / `DemoPropul2026!`, rôle admin toutes permissions.
-- **Bug fix** : `addActivity` du hook V3 alignée sur la vraie table BDD (`content` direct, pas `title`/`description` — la table prod utilise toujours l'ancien schéma).
-- **Sécurité (code review)** : route `/projets-v3-preview` ajoutée dans `routePermissions` avec permission `can_view_projects`.
+- **Sprint 0** : retrait variantes Synthèse + simplification QuickActionBar (4 actions, plus de "Tâche"/"Plus")
+- **Sprint 1** (1.1-1.5) : édition projet/contact/pipeline/échéance câblés. Hotfix : tous les updates passent via `useProjectUpdateV3` (v2 schema), pas `useProjectsCRUD` (V1)
+- **Sprint 1.6** : pipeline en Select (validé via 3 previews) + contact enrichi (email/tél cliquables) + refonte sidebars (gauche=identité, droite=actions)
+- **Sprint 1.7** : multi-contacts par projet avec rôles (Principal/Décideur/Technique/Comptabilité/Autre+custom). Table `project_contacts` créée en prod + migration versionnée. Hook `useProjectContactsV3` + UI cards + RoleEditorV3 inline + AddProjectContactModalV3
+- **Code review pre-flight** : 3 fixes (mode création ContactEditModalV3 dead path supprimé, migration .sql ajoutée au repo, commentaire useProjectsCRUD nettoyé)
 
 ## Next Task
-**Démarrer Sprint 3A — UX Overhaul sur la branche `preview/v3-ux-overhaul`.**
+**Sprint 2 — Templates mocks → BDD (fix bugs Production)**
 
-Plan complet dans [`.planning/V3_UX_OVERHAUL_PLAN.md`](./V3_UX_OVERHAUL_PLAN.md).
+Fichier critique : `src/modules/ProjectDetailsV3Preview/hooks/useChecklistV3.ts`
 
-Sprints prévus :
-- **3A — Bugs bloquants** (~1h) : fix ajout tâche (bug `position` vs `sort_order` confirmé par code review #4), sidebar app collapse auto sur page V3, pipeline adapté au type de projet (sw/erp/comm), breadcrumb cliquable.
-- **3B — Cohérence info** (~1h) : supprimer redondances statuts (3 endroits → 1), repenser/supprimer section "Statistiques" droite, empty states actionnables, compteurs sur onglets.
-- **3C — Polish typo/empty/buttons** (~2h) : hiérarchie typographique, sidebar collapsable, QuickActionBar plus engageante, badges priorité par défaut invisibles, loading skeleton coordonné.
-- **3D — Power user + robustesse** (~2h) : toast d'erreur systématique (fixe code review #1, #2), optimistic UI, raccourcis clavier (Cmd+K palette), mode focus, permissions par rôle, `uploader_name` correct (#2), `fetchDocs` stable (#3).
+Bugs racine identifiés :
+1. `mockSiteWebChecklists.ts` (et ERP/Comm) contient `assigned_to: 'user-alice'` (string non-UUID) → INSERT en BDD crashe
+2. Items mock (préfixés `sw-`/`erp-`/`comm-`) restent en mémoire, jamais matérialisés en BDD → toggle ne persiste pas
 
-**Première commande de la prochaine session** :
-```
-git checkout preview/v3-ux-overhaul
-```
+Fix : implémenter `materializeTemplate(projectId, prestaType, projectAssignedTo)` dans useChecklistV3 qui :
+- INSERT batch des items du template au premier mount si pas déjà fait
+- `assigned_to = projectAssignedTo ?? null` (hérite de l'assigné projet, ignore les 'user-alice' du mock)
+- Une fois en BDD, toggle devient un vrai UPDATE persistant
+
+Plan complet dans `.claude/plans/sur-la-partie-document-glowing-bonbon.md` (Sprint 2).
 
 ## Blockers
-Aucun.
+Aucun. MCP Supabase configuré sur le bon projet (`tbuqctfgjjxnevmsvucl` = ERP), migrations applicables directement.
 
 ## Key Context
-- **Règle V3 isolation stricte** : ne JAMAIS modifier les fichiers V1/V2. Tout en V3 est dans `src/components/activities-hub/` et `src/modules/ProjectDetailsV3Preview/`. Mémoire `feedback_v3_isolation.md` à respecter. Cf MEMORY.md.
-- **Mode démo admin** : `lyestriki@yahoo.fr` / `DemoPropul2026!` sur le projet Supabase `tbuqctfgjjxnevmsvucl`. Script `scripts/create-demo-admin.mjs` non commit. Pour relancer : `node scripts/create-demo-admin.mjs`.
-- **Bug V2 connu (non corrigé) — règle isolation** : `useActivitiesV2` (V2) insère `content` au lieu de `title`/`description` SI la table v2.project_activities (schéma v2) est utilisée. En réalité le client `v2.from('project_activities')` redirige vers `public.project_activities_v2` qui utilise `content` → V2 fonctionne par hasard. À investiguer un jour si schéma BDD migré.
-- **2 fichiers V1/V2 modifiés** (additif autorisé) : `src/lib/routes.ts` (helper + permission) et `src/components/layout/Layout.tsx` (lazy import + Route).
-- **Migration SQL non commitée** : `supabase/migrations/20260507_project_end_checklist.sql` — chantier antérieur, à vérifier avant prochain commit BDD.
-- **Issues de code review différées au Sprint 3D** : #1 (handleDelete erreurs), #2 (uploader_name hardcodé), #3 (fetchDocs stable). Issue #6 (sécurité permission) **corrigée** cette session. Issue #4 (position vs sort_order) à fixer en Sprint 3A.
+- **Page projet V3 entièrement fonctionnelle** : Modifier projet, édition contact multi avec rôles, pipeline en Select cliquable, responsable, échéance. Plus aucun toast "disponible dans une prochaine version".
+- **Convention typage** : V1=`database.ts` (sacrée, Étienne), V2/V3=`project-v2.ts`. Pas de fichier dédié V3.
+- **Double source vérité** `projects_v2.client_id` ↔ `project_contacts` : sync via `syncPrimaryToClientId` à chaque mutation primary. À terme remplacer par trigger SQL.
+- **Retours fin de chantier en file d'attente** : (1) QuickActionBar ajouter champ date + PJ, (2) Coffre-fort Propul'seo (identifiants OVH/Supabase chiffrés).
+- **Dette technique acceptée** : ProjectEditModalV3 à 301 lignes (à split en form-helpers), rollback createAndLink non-atomique, RLS project_contacts permissif, inputCls/Field dupliqués 3x.
+- **Premier login** : `lyestriki@yahoo.fr` / `DemoPropul2026!`. Projet de test V3 = Lolett (`d570010a-553f-4171-88a2-ecb637a4663e`).
+- **Dev server** : http://localhost:5174/projets-v3-preview/:id
