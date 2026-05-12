@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { User, Plus, Building2, Pencil } from 'lucide-react'
+import { User, Plus, Building2, Pencil, Mail, Phone } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ProjectV2 } from '@/types/project-v2'
 import {
@@ -8,6 +8,7 @@ import {
   getStatusStyle,
 } from '../statusConfig'
 import { ContactEditModalV3 } from './ContactEditModalV3'
+import { useProjectContactV3 } from '../hooks/useProjectContactV3'
 
 interface TeamUser { id: string; name: string; email: string }
 
@@ -40,6 +41,7 @@ function RightSection({
 export function ProjectV3RightSidebar({ project, users, onContactSaved }: Props) {
   const assignee = users.find((u) => u.id === project.assigned_to)
   const [contactModalOpen, setContactModalOpen] = useState(false)
+  const { contact, refetch: refetchContact } = useProjectContactV3(project.client_id)
 
   const hasLinkedContact = !!project.client_id
   const actionLabel = hasLinkedContact ? 'Modifier' : 'Ajouter'
@@ -59,18 +61,37 @@ export function ProjectV3RightSidebar({ project, users, onContactSaved }: Props)
           </button>
         }
       >
-        {project.client_name ? (
+        {hasLinkedContact && contact ? (
+          <div className="space-y-2">
+            <div className="flex items-start gap-2">
+              <div className="h-8 w-8 rounded-full bg-[rgba(139,92,246,0.15)] border border-[rgba(139,92,246,0.2)] flex items-center justify-center shrink-0">
+                <Building2 className="h-3.5 w-3.5 text-[#8B5CF6]" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-[#ede9fe] truncate">{contact.name}</p>
+                {contact.company && (
+                  <p className="text-[10px] text-[#9ca3af] truncate">{contact.company}</p>
+                )}
+              </div>
+            </div>
+            {contact.email && (
+              <ContactCoord icon={Mail} value={contact.email} href={`mailto:${contact.email}`} />
+            )}
+            {contact.phone && (
+              <ContactCoord icon={Phone} value={contact.phone} href={`tel:${contact.phone}`} />
+            )}
+            {!contact.email && !contact.phone && (
+              <p className="text-[10px] text-[#9ca3af] italic">Aucune coordonnée renseignée</p>
+            )}
+          </div>
+        ) : project.client_name ? (
           <div className="flex items-start gap-2">
             <div className="h-8 w-8 rounded-full bg-[rgba(139,92,246,0.15)] border border-[rgba(139,92,246,0.2)] flex items-center justify-center shrink-0">
               <Building2 className="h-3.5 w-3.5 text-[#8B5CF6]" />
             </div>
             <div className="min-w-0">
               <p className="text-xs font-semibold text-[#ede9fe]">{project.client_name}</p>
-              {hasLinkedContact ? (
-                <p className="text-[10px] text-[#9ca3af]">Contact lié au projet</p>
-              ) : (
-                <p className="text-[10px] text-[#9ca3af] italic">Coordonnées non renseignées</p>
-              )}
+              <p className="text-[10px] text-[#9ca3af] italic">Cliquer sur « Ajouter » pour créer un contact</p>
             </div>
           </div>
         ) : (
@@ -130,10 +151,31 @@ export function ProjectV3RightSidebar({ project, users, onContactSaved }: Props)
           defaultClientName={project.client_name}
           onClose={() => setContactModalOpen(false)}
           onSaved={async () => {
+            await refetchContact()
             if (onContactSaved) await onContactSaved()
           }}
         />
       )}
     </div>
+  )
+}
+
+function ContactCoord({
+  icon: Icon,
+  value,
+  href,
+}: {
+  icon: React.ElementType
+  value: string
+  href: string
+}) {
+  return (
+    <a
+      href={href}
+      className="flex items-center gap-2 text-[10px] text-[#9ca3af] hover:text-[#ede9fe] transition-colors group"
+    >
+      <Icon className="h-3 w-3 shrink-0 group-hover:text-[#A78BFA]" />
+      <span className="truncate">{value}</span>
+    </a>
   )
 }

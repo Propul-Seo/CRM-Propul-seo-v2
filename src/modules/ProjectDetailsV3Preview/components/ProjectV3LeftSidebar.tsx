@@ -6,12 +6,8 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { ProjectV2, ProjectStatusV2 } from '@/types/project-v2'
-import {
-  PROJECT_STATUS_ORDER,
-  PROJECT_STATUS_LABELS,
-  getStatusLabel,
-  formatPresta,
-} from '../statusConfig'
+import { formatPresta } from '../statusConfig'
+import { PipelineSelect } from './pipeline-previews/PipelineSelect'
 
 interface TeamUser { id: string; name: string; email: string }
 
@@ -136,9 +132,6 @@ const formatBudget = (amount: number | null | undefined): string | null => {
 }
 
 export function ProjectV3LeftSidebar({ project, users, onEdit, onAssign, onStatusChange }: Props) {
-  const statusLabel = getStatusLabel(project.status)
-  const currentStep = PROJECT_STATUS_ORDER.indexOf(project.status)
-  const totalSteps = PROJECT_STATUS_ORDER.length
 
   return (
     <div className="flex flex-col">
@@ -171,35 +164,9 @@ export function ProjectV3LeftSidebar({ project, users, onEdit, onAssign, onStatu
         )}
       </div>
 
-      {/* Pipeline steps */}
-      <div className="px-4 py-3 border-b border-[rgba(139,92,246,0.15)]">
-        <p className="text-[10px] font-semibold text-[#9ca3af] uppercase tracking-widest mb-2">Étape du pipeline</p>
-        <div className="flex gap-1">
-          {PROJECT_STATUS_ORDER.map((s, i) => {
-            const isActiveOrPassed = i <= currentStep
-            const isCurrent = i === currentStep
-            const clickable = !!onStatusChange
-            return (
-              <button
-                key={s}
-                type="button"
-                disabled={!clickable}
-                onClick={() => clickable && onStatusChange?.(s)}
-                title={`${PROJECT_STATUS_LABELS[s]}${clickable ? ' — cliquer pour avancer ici' : ''}`}
-                className={cn(
-                  'h-1.5 flex-1 rounded-full transition-all',
-                  isActiveOrPassed ? 'bg-[#8B5CF6]' : 'bg-[rgba(139,92,246,0.15)]',
-                  isCurrent && 'ring-2 ring-[#A78BFA]/40',
-                  clickable && 'cursor-pointer hover:opacity-80',
-                  !clickable && 'cursor-default',
-                )}
-              />
-            )
-          })}
-        </div>
-        <p className="text-[10px] text-[#9ca3af] mt-1.5">
-          {currentStep + 1}/{totalSteps} — {statusLabel}
-        </p>
+      {/* Pipeline (format Select validé) */}
+      <div className="border-b border-[rgba(139,92,246,0.15)] py-3 px-4">
+        <PipelineSelect status={project.status} onChange={onStatusChange} />
       </div>
 
       {/* À propos */}
