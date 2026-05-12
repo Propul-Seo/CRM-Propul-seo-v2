@@ -1,39 +1,55 @@
-# Session State — 2026-05-12 14:45
+# Session State — 2026-05-12 16:30
 
 ## Branch
-**preview/v3-ux-overhaul** (exception assumée — chantier V3 isolé, validé en début de session)
+**preview/v3-ux-overhaul** (exception assumée — chantier V3 isolé, on continue dessus)
 
 ## Completed This Session
-- **Sprint 0** : retrait variantes Synthèse + simplification QuickActionBar (4 actions, plus de "Tâche"/"Plus")
-- **Sprint 1** (1.1-1.5) : édition projet/contact/pipeline/échéance câblés. Hotfix : tous les updates passent via `useProjectUpdateV3` (v2 schema), pas `useProjectsCRUD` (V1)
-- **Sprint 1.6** : pipeline en Select (validé via 3 previews) + contact enrichi (email/tél cliquables) + refonte sidebars (gauche=identité, droite=actions)
-- **Sprint 1.7** : multi-contacts par projet avec rôles (Principal/Décideur/Technique/Comptabilité/Autre+custom). Table `project_contacts` créée en prod + migration versionnée. Hook `useProjectContactsV3` + UI cards + RoleEditorV3 inline + AddProjectContactModalV3
-- **Code review pre-flight** : 3 fixes (mode création ContactEditModalV3 dead path supprimé, migration .sql ajoutée au repo, commentaire useProjectsCRUD nettoyé)
+- **Sprint 2 — Matérialisation templates BDD** (commit `2bd64c7`) :
+  - `checklistTemplates.ts` : mapping `presta_type[]` → templates (site_web/erp/communication)
+  - `useChecklistV3` : SELECT existing → si vide, INSERT batch template avec `assigned_to` projet
+  - Verrou anti-double-INSERT (Set module-level, StrictMode safe) + reset `setItems([])` au switch projet
+- **UX bonus** :
+  - `pendingIds` + spinner `Loader2` sur cases checklist pendant sync BDD (fix bug "F5 trop rapide")
+  - `ActivityModal` : autofocus + curseur en fin de `initialContent`
+  - Boutons primer timeline ouvrent modale préremplie (au lieu de `addActivity` direct)
+  - Dropdown users alimenté par `useUsers()` (vrais users BDD, plus de MOCK_USERS)
+  - Phase défaut → `'onboarding'`
+  - Selects shadcn `side="top" avoidCollisions={false}` pour ouverture forcée vers le haut
 
-## Next Task
-**Sprint 2 — Templates mocks → BDD (fix bugs Production)**
+## Next Task — À faire à la reprise (TODO ordonnée)
 
-Fichier critique : `src/modules/ProjectDetailsV3Preview/hooks/useChecklistV3.ts`
+**1. Tests de validation Sprint 2 (5 min)** sur le projet Castel + projet ERP vide (ex: Snapdesk) :
+- Page V3 → onglet Production → toggle case → F5 → case reste cochée
+- "+ Ajouter une tâche" → dropdown users montre vraie équipe, phase défaut "Onboarding", dropdown s'ouvre vers le haut
+- Onglet Synthèse projet vide → clic "Première décision projet" → modale préremplie avec curseur en fin
 
-Bugs racine identifiés :
-1. `mockSiteWebChecklists.ts` (et ERP/Comm) contient `assigned_to: 'user-alice'` (string non-UUID) → INSERT en BDD crashe
-2. Items mock (préfixés `sw-`/`erp-`/`comm-`) restent en mémoire, jamais matérialisés en BDD → toggle ne persiste pas
+**2. Sprint 3 — Coffre-fort Propul'seo** (chantier principal) :
+- Brainstorming : quelle approche de chiffrement ? (libsodium côté client, Supabase Vault, ou champs chiffrés AES-GCM en BDD avec clé maître ?)
+- UI : composant `AccessVaultV3` réutilisable, masquage par défaut, copy-to-clipboard
+- Catégories cibles : `hosting` (OVH), `cms`, `analytics`, `social`, `tools`, `design` — type `ProjectAccess` déjà défini dans `project-v2.ts:145`
+- Table `project_accesses_v2` existe déjà (10 rows). Vérifier le schéma et RLS avant de coder.
 
-Fix : implémenter `materializeTemplate(projectId, prestaType, projectAssignedTo)` dans useChecklistV3 qui :
-- INSERT batch des items du template au premier mount si pas déjà fait
-- `assigned_to = projectAssignedTo ?? null` (hérite de l'assigné projet, ignore les 'user-alice' du mock)
-- Une fois en BDD, toggle devient un vrai UPDATE persistant
+**3. Sprint 4 — QuickActionBar enrichi** (optionnel) :
+- Ajouter champ date à `ActivityModal` (pour décisions/réunions plannifiées)
+- Ajouter pièce jointe (upload Supabase Storage)
 
-Plan complet dans `.claude/plans/sur-la-partie-document-glowing-bonbon.md` (Sprint 2).
+**4. Dette technique à traiter quand fenêtre dispo** (pas urgent) :
+- Split `useChecklistV3.ts` (325 lignes → < 200) : extraire la matérialisation dans un hook `useMaterializeChecklist`
+- Trigger SQL `project_contacts ↔ projects_v2.client_id` (remplace `syncPrimaryToClientId` JS)
+- Schéma : ajouter `'skipped'` au CHECK status de `checklist_items_v2` (ou retirer du type TS)
+- Cast type `projects_v2.select('presta_type, assigned_to')` → utiliser type généré `database.ts`
+- RLS plus stricte sur `project_contacts`
 
 ## Blockers
-Aucun. MCP Supabase configuré sur le bon projet (`tbuqctfgjjxnevmsvucl` = ERP), migrations applicables directement.
+Aucun. Tests UI manuels à faire mais la matérialisation a été validée via INSERT SQL test.
 
 ## Key Context
-- **Page projet V3 entièrement fonctionnelle** : Modifier projet, édition contact multi avec rôles, pipeline en Select cliquable, responsable, échéance. Plus aucun toast "disponible dans une prochaine version".
-- **Convention typage** : V1=`database.ts` (sacrée, Étienne), V2/V3=`project-v2.ts`. Pas de fichier dédié V3.
-- **Double source vérité** `projects_v2.client_id` ↔ `project_contacts` : sync via `syncPrimaryToClientId` à chaque mutation primary. À terme remplacer par trigger SQL.
-- **Retours fin de chantier en file d'attente** : (1) QuickActionBar ajouter champ date + PJ, (2) Coffre-fort Propul'seo (identifiants OVH/Supabase chiffrés).
-- **Dette technique acceptée** : ProjectEditModalV3 à 301 lignes (à split en form-helpers), rollback createAndLink non-atomique, RLS project_contacts permissif, inputCls/Field dupliqués 3x.
-- **Premier login** : `lyestriki@yahoo.fr` / `DemoPropul2026!`. Projet de test V3 = Lolett (`d570010a-553f-4171-88a2-ecb637a4663e`).
-- **Dev server** : http://localhost:5174/projets-v3-preview/:id
+- **Dev server** : http://localhost:5174/projets-v3-preview/:id (port 5174, PID 30664)
+- **Projets test** :
+  - Lolett `d570010a-553f-4171-88a2-ecb637a4663e` (13 items déjà en BDD)
+  - Castel `8c93d560-28e4-4f41-bbed-01195d3b0e70` (site_web, matérialisé ce sprint)
+  - Snapdesk `66020367-a52e-4035-81ee-e0030de26768` (erp, vide — bon cobaye Sprint 3)
+- **Login** : `lyestriki@yahoo.fr` / `DemoPropul2026!`
+- **Convention typage** : V1=`database.ts` (sacrée), V2/V3=`project-v2.ts`. Pas de fichier V3 dédié.
+- **Remote git déménagé** : origin `lyestriki-29/CRM-Propul-seo-v2.git` → nouvelle URL `Propul-Seo/CRM-Propul-seo-v2.git`. Push fonctionne via ancienne URL pour l'instant, à mettre à jour quand confort.
+- **Communication = Instagram par défaut** dans la matérialisation. Si besoin Branding/Photos, ajouter logique selon `BriefComm.type_contrat`.
