@@ -60,6 +60,10 @@ export const routes = {
 
   // V3 Preview (chantier en cours — à valider avant bascule officielle)
   projectV3Preview: (id: string) => `/projets-v3-preview/${id}`,
+  projectsV3Completed: '/projets-v3-termines',
+  leadsV3: '/leads-v3',
+  communicationV3Production: '/communication-v3/production',
+  communicationV3Kpi: '/communication-v3/kpi',
 } as const
 
 /**
@@ -114,6 +118,10 @@ export const routePermissions: Array<{ path: string; permission: string }> = [
   { path: routes.procedures, permission: 'can_view_procedures' },
   { path: routes.personalTasks, permission: 'can_view_dashboard' },
   { path: '/projets-v3-preview', permission: 'can_view_projects' },
+  { path: routes.projectsV3Completed, permission: 'can_view_projects' },
+  { path: routes.leadsV3, permission: 'can_view_leads' },
+  { path: routes.communicationV3Production, permission: 'can_view_communication' },
+  { path: routes.communicationV3Kpi, permission: 'can_view_communication' },
 ]
 
 /**

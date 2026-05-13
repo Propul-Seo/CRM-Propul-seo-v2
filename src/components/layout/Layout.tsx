@@ -38,6 +38,7 @@ const ClientDetailsRoute = lazy(() => import('../routing/ClientDetailsRoute').th
 const ProjectDetailsV3Preview = lazy(() => import('../../modules/ProjectDetailsV3Preview').then(m => ({ default: m.ProjectDetailsV3Preview })))
 const AgencyVaultPage = lazy(() => import('../../modules/AgencyVault').then(m => ({ default: m.AgencyVaultPage })))
 const ProjectsV3Page = lazy(() => import('../../modules/ProjectsV3').then(m => ({ default: m.ProjectsV3Page })))
+const LeadsV3PlaceholderRoute = lazy(() => import('../../modules/LeadsV3').then(m => ({ default: m.LeadsV3Page })))
 
 const ModuleLoader = () => (
   <div className="flex items-center justify-center h-64">
@@ -233,6 +234,16 @@ export function Layout() {
 
               {/* Projets en cours V3 — refonte kanban 3 colonnes */}
               <Route path={routes.projectsV3} element={wrap(ProjectsV3Page)} />
+
+              {/* Communication V3 — wiring vers modules V2 existants */}
+              <Route path={routes.communicationV3Production} element={wrap(Communication)} />
+              <Route path={routes.communicationV3Kpi} element={wrap(CommunicationKPI)} />
+
+              {/* Projets V3 Terminés — réutilise CompletedProjectsManager (V2) en attendant module dédié */}
+              <Route path={routes.projectsV3Completed} element={wrap(CompletedProjectsManager)} />
+
+              {/* Leads V3 — module en cours de construction (Phase 4) */}
+              <Route path={routes.leadsV3} element={wrap(LeadsV3PlaceholderRoute)} />
 
               {/* CRM v1 */}
               <Route path={routes.dashboardLegacy} element={<Dashboard />} />
