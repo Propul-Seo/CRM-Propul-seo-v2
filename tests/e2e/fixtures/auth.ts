@@ -19,6 +19,7 @@ export const test = base.extend<{ adminPage: Page }>({
     // Premier login peut être lent (Supabase + bootstrap modules lazy).
     await expect(page.getByText(/V3 Preview|Personnel/i).first()).toBeVisible({ timeout: 30_000 })
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright fixture, pas un hook React.
     await use(page)
   },
 })
