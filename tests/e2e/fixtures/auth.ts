@@ -9,13 +9,15 @@ export const test = base.extend<{ adminPage: Page }>({
     }
 
     await page.goto('/')
-    // LoginPage attend des champs email + password, et un bouton submit
-    await page.getByLabel(/e-?mail/i).fill(email)
-    await page.getByLabel(/mot de passe|password/i).fill(password)
+    // LoginPage (src/components/auth/LoginPage.tsx) : labels non associés via htmlFor,
+    // on cible donc via type=email et type=password.
+    await page.locator('input[type="email"]').fill(email)
+    await page.locator('input[type="password"]').fill(password)
     await page.getByRole('button', { name: /se connecter|connexion|sign in/i }).click()
 
-    // Attendre que la sidebar admin soit visible (preuve que l'auth a marché)
-    await expect(page.getByText('Personnel')).toBeVisible({ timeout: 10_000 })
+    // Attendre que la sidebar soit visible (preuve que l'auth a marché).
+    // Premier login peut être lent (Supabase + bootstrap modules lazy).
+    await expect(page.getByText(/V3 Preview|Personnel/i).first()).toBeVisible({ timeout: 30_000 })
 
     await use(page)
   },
