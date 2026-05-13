@@ -205,7 +205,7 @@ async function generatePDF(quoteData: QuoteData): Promise<{ success: boolean; pd
 
     // Wait for the document to be generated (polling)
     let documentStatus = "pending";
-    let maxAttempts = 10;
+    const maxAttempts = 10;
     let attempts = 0;
     
     while (documentStatus === "pending" && attempts < maxAttempts) {

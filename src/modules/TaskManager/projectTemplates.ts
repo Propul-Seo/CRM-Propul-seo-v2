@@ -233,7 +233,7 @@ export function createTasksFromTemplate(
   
   return template.tasks.map((templateTask, index) => {
     // Calculer la date d'échéance en fonction des dépendances et de la priorité
-    let dueDate = new Date(baseDate);
+    const dueDate = new Date(baseDate);
     dueDate.setDate(dueDate.getDate() + index * 2); // Espacer les tâches de 2 jours
     
     // Ajuster la priorité selon la catégorie

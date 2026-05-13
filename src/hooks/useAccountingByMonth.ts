@@ -166,7 +166,7 @@ export function useAccountingByMonth(initialMonth: Date) {
     const result: string[] = [];
     const today = new Date();
     const currentYear = today.getFullYear();
-    let d = new Date(currentYear, 0, 1); // Janvier de l'année en cours
+    const d = new Date(currentYear, 0, 1); // Janvier de l'année en cours
     while (getMonthKey(d) <= getMonthKey(today)) {
       result.push(getMonthKey(d));
       d.setMonth(d.getMonth() + 1);

@@ -120,7 +120,7 @@ export function LeadsV3Page() {
   const handleConvertLead = async (card: LeadCardData) => {
     setConvertingId(card.id)
     try {
-      let payloadName = card.company || card.contact || 'Nouveau projet'
+      const payloadName = card.company || card.contact || 'Nouveau projet'
       let payloadBudget: number | null = card.amount
       let assignedTo: string | null = null
       let assignedName: string | null = card.assignee
