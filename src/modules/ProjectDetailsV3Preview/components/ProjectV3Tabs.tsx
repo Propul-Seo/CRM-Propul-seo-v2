@@ -8,6 +8,7 @@ import { BriefTabV3 } from '../tabs/BriefTabV3'
 import { DocumentsTabV3 } from '../tabs/DocumentsTabV3'
 import { useProjectTabCounts } from '../hooks/useProjectTabCounts'
 import { useV3Keyboard } from '../hooks/useV3Keyboard'
+import type { useChecklistV3 } from '../hooks/useChecklistV3'
 import type { ProjectV2 } from '@/types/project-v2'
 
 type TabId = 'synthese' | 'production' | 'access' | 'brief' | 'documents'
@@ -22,9 +23,12 @@ const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
 
 interface Props {
   project: ProjectV2
+  checklist: ReturnType<typeof useChecklistV3>
+  onEdit: () => void
+  onRefresh: () => Promise<void> | void
 }
 
-export function ProjectV3Tabs({ project }: Props) {
+export function ProjectV3Tabs({ project, checklist, onEdit, onRefresh }: Props) {
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTab = (searchParams.get('tab') as TabId) || 'synthese'
   const counts = useProjectTabCounts(project.id)
@@ -91,8 +95,12 @@ export function ProjectV3Tabs({ project }: Props) {
 
       {/* Tab content */}
       <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-        {activeTab === 'synthese' && <SyntheseTabV3 project={project} />}
-        {activeTab === 'production' && <ProductionTabV3 project={project} />}
+        {activeTab === 'synthese' && (
+          <SyntheseTabV3 project={project} checklistProgress={checklist.progress} onEdit={onEdit} />
+        )}
+        {activeTab === 'production' && (
+          <ProductionTabV3 project={project} checklist={checklist} />
+        )}
         {activeTab === 'access' && <AccessTabV3 project={project} />}
         {activeTab === 'brief' && <BriefTabV3 project={project} />}
         {activeTab === 'documents' && <DocumentsTabV3 project={project} />}

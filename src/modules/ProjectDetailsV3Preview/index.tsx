@@ -7,6 +7,7 @@ import { useStore } from '@/store'
 import { routes } from '@/lib/routes'
 import type { PrestaType, ProjectV2, ProjectStatusV2 } from '@/types/project-v2'
 import { useProjectV3 } from './hooks/useProjectV3'
+import { useChecklistV3 } from './hooks/useChecklistV3'
 import { ProjectV3LeftSidebar } from './components/ProjectV3LeftSidebar'
 import { ProjectV3RightSidebar } from './components/ProjectV3RightSidebar'
 import { ProjectV3Tabs } from './components/ProjectV3Tabs'
@@ -26,6 +27,9 @@ export function ProjectDetailsV3Preview() {
   const { project, loading: loadingProject, error, refetch } = useProjectV3(id ?? '')
   const { users, loading: loadingUsers } = useUsers()
   const { updateProject } = useProjectUpdateV3()
+  // Source de vérité unique pour la progression : hissé ici pour que sidebar et tabs
+  // partagent la même instance (un seul SELECT, un seul state, pas de drift possible).
+  const checklist = useChecklistV3(id ?? '')
   const setSidebarCollapsed = useStore((s) => s.setSidebarCollapsed)
   const [focusMode, setFocusMode] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
@@ -151,6 +155,7 @@ export function ProjectDetailsV3Preview() {
           <div className="w-[300px] shrink-0 border-r border-[rgba(139,92,246,0.18)] overflow-y-auto bg-[#070512]">
             <ProjectV3LeftSidebar
               project={project}
+              checklistProgress={checklist.progress}
               onEdit={() => setEditOpen(true)}
             />
           </div>
@@ -158,7 +163,12 @@ export function ProjectDetailsV3Preview() {
 
         {/* Contenu central — onglets */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <ProjectV3Tabs project={project} />
+          <ProjectV3Tabs
+            project={project}
+            checklist={checklist}
+            onEdit={() => setEditOpen(true)}
+            onRefresh={refetch}
+          />
         </div>
 
         {/* Sidebar droite */}

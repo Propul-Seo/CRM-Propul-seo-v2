@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Folder, Calendar, Tag, Wallet, Target, ChevronDown } from 'lucide-react'
+import { Folder, Calendar, Tag, Wallet, Target, ChevronDown, Building2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
@@ -9,6 +9,8 @@ import { formatPresta } from '../statusConfig'
 
 interface Props {
   project: ProjectV2
+  /** Progression calculée depuis la checklist (source de vérité). */
+  checklistProgress: number
   onEdit: () => void
 }
 
@@ -124,7 +126,37 @@ const formatBudget = (amount: number | null | undefined): string | null => {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(amount)
 }
 
-export function ProjectV3LeftSidebar({ project, onEdit }: Props) {
+const formatSiret = (siret: string | null | undefined): string | null => {
+  if (!siret) return null
+  const clean = siret.replace(/\s/g, '')
+  if (clean.length !== 14) return clean
+  return `${clean.slice(0, 3)} ${clean.slice(3, 6)} ${clean.slice(6, 9)} ${clean.slice(9)}`
+}
+
+type PappersData = {
+  nom_entreprise?: string
+  denomination?: string
+  forme_juridique?: string
+  tranche_effectif_salarie?: string
+}
+
+function getCompanyInfo(data: ProjectV2['company_data']): {
+  name: string | null
+  legalForm: string | null
+  workforce: string | null
+} {
+  const d = (data ?? {}) as PappersData
+  return {
+    name: d.nom_entreprise ?? d.denomination ?? null,
+    legalForm: d.forme_juridique ?? null,
+    workforce: d.tranche_effectif_salarie ?? null,
+  }
+}
+
+export function ProjectV3LeftSidebar({ project, checklistProgress, onEdit }: Props) {
+  const company = getCompanyInfo(project.company_data)
+  const isEnriched = !!project.company_enriched_at
+
   return (
     <div className="flex flex-col">
       {/* En-tête identité */}
@@ -158,7 +190,13 @@ export function ProjectV3LeftSidebar({ project, onEdit }: Props) {
 
       {/* À propos */}
       <SidebarSection title="À propos" collapsible storageKey="about">
-        <InfoRow icon={Calendar} label="Début" value={formatDate(project.start_date)} />
+        <InfoRow
+          icon={Calendar}
+          label="Début"
+          value={formatDate(project.start_date)}
+          emptyAction="Définir une date de début"
+          onEmptyClick={onEdit}
+        />
         <InfoRow
           icon={Calendar}
           label="Fin prévue"
@@ -173,7 +211,29 @@ export function ProjectV3LeftSidebar({ project, onEdit }: Props) {
           emptyAction="Ajouter un budget"
           onEmptyClick={onEdit}
         />
-        <InfoRow icon={Target} label="Progression" value={`${project.progress ?? 0}%`} />
+        <InfoRow icon={Target} label="Progression" value={`${checklistProgress}%`} />
+        <InfoRow
+          icon={Building2}
+          label="SIRET"
+          value={formatSiret(project.siret)}
+          emptyAction="Ajouter un SIRET"
+          onEmptyClick={onEdit}
+        />
+        {isEnriched && company.name && (
+          <InfoRow icon={Building2} label="Raison sociale" value={company.name} />
+        )}
+        {isEnriched && company.legalForm && (
+          <InfoRow icon={Building2} label="Forme juridique" value={company.legalForm} />
+        )}
+        {isEnriched && company.workforce && (
+          <InfoRow icon={Building2} label="Effectif" value={company.workforce} />
+        )}
+        {isEnriched && (
+          <div className="flex items-center gap-1.5 mt-2 ml-6">
+            <span className="text-[10px] text-emerald-400">✓</span>
+            <span className="text-[10px] text-emerald-400/80">Enrichi via Pappers</span>
+          </div>
+        )}
         {project.last_activity_at && (
           <InfoRow
             icon={Tag}

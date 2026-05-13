@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Plus, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { useChecklistV3 } from '../hooks/useChecklistV3'
+import type { useChecklistV3 } from '../hooks/useChecklistV3'
 import { useIsProjectV3Admin } from '../hooks/useIsProjectV3Admin'
 import { useUsers } from '@/hooks/useUsers'
 import { ProductionPhase } from './production/ProductionPhase'
@@ -21,11 +21,12 @@ const PRIORITY_LABELS: Record<ChecklistPriority, string> = {
 
 interface Props {
   project: ProjectV2
+  checklist: ReturnType<typeof useChecklistV3>
 }
 
-export function ProductionTabV3({ project }: Props) {
+export function ProductionTabV3({ project, checklist }: Props) {
   const { items, loading, pendingIds, progress, progressByPhase, setItemStatus, addItem, addItems, deleteItem } =
-    useChecklistV3(project.id)
+    checklist
   const { isAdmin } = useIsProjectV3Admin()
   const { users } = useUsers()
 
@@ -41,11 +42,15 @@ export function ProductionTabV3({ project }: Props) {
     setCollapsed((prev) => ({ ...prev, [phase]: !prev[phase] }))
 
   const cycleStatus = async (id: string, current: ChecklistStatus) => {
-    const next: Record<ChecklistStatus, ChecklistStatus> = {
-      todo: 'in_progress', in_progress: 'done', done: 'todo', skipped: 'todo',
-    }
+    // Cycle 2 états : 1 clic valide, re-clic décoche.
+    // Les anciens items en `in_progress` ou `skipped` (legacy) sont traités comme "à faire" :
+    // un clic dessus les passe directement à `done`.
+    // La progression affichée en sidebar/Synthèse est dérivée du même hook checklist
+    // partagé (hissé dans index.tsx), donc elle se met à jour automatiquement
+    // sans refetch — pas besoin d'appeler onProgressUpdated ici.
+    const next: ChecklistStatus = current === 'done' ? 'todo' : 'done'
     try {
-      await setItemStatus(id, next[current])
+      await setItemStatus(id, next)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Impossible de changer le statut')
     }

@@ -23,6 +23,7 @@ export function ProjectEditModalV3({ project, users, onSave, onClose }: Props) {
     presta_type: project.presta_type ?? [],
     assigned_to: project.assigned_to ?? '',
     budget:      project.budget != null ? String(project.budget) : '',
+    start_date:  project.start_date ?? '',
     end_date:    project.end_date ?? '',
     client_name: project.client_name ?? '',
     siret:       project.siret ?? '',
@@ -87,6 +88,7 @@ export function ProjectEditModalV3({ project, users, onSave, onClose }: Props) {
         assigned_to:   form.assigned_to || null,
         assigned_name: assignedUser?.name ?? null,
         budget:        form.budget ? parseFloat(form.budget) : null,
+        start_date:    form.start_date || null,
         end_date:      form.end_date || null,
         client_name:   form.client_name.trim() || null,
         category:      form.presta_type[0] ?? project.category,
@@ -229,14 +231,24 @@ export function ProjectEditModalV3({ project, users, onSave, onClose }: Props) {
             </Field>
           </div>
 
-          <Field label="Échéance">
-            <input
-              type="date"
-              value={form.end_date}
-              onChange={(e) => setForm({ ...form, end_date: e.target.value })}
-              className={inputCls}
-            />
-          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Date de début">
+              <input
+                type="date"
+                value={form.start_date}
+                onChange={(e) => setForm({ ...form, start_date: e.target.value })}
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Échéance">
+              <input
+                type="date"
+                value={form.end_date}
+                onChange={(e) => setForm({ ...form, end_date: e.target.value })}
+                className={inputCls}
+              />
+            </Field>
+          </div>
 
           <Field label="SIRET">
             <div className="flex gap-2">

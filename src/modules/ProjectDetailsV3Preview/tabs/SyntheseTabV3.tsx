@@ -10,10 +10,9 @@ import type { ProjectV2, ActivityType } from '@/types/project-v2'
 
 interface Props {
   project: ProjectV2
-}
-
-const notifyEditPlaceholder = () => {
-  toast.info("Édition du projet — disponible dans une prochaine version.")
+  /** Progression calculée depuis la checklist (source de vérité). */
+  checklistProgress: number
+  onEdit: () => void
 }
 
 const formatBudget = (amount: number | null | undefined): string => {
@@ -32,7 +31,7 @@ const PRIMER_PROMPTS: Array<{ type: ActivityType; label: string }> = [
   { type: 'meeting',  label: 'Réunion de lancement' },
 ]
 
-export function SyntheseTabV3({ project }: Props) {
+export function SyntheseTabV3({ project, checklistProgress, onEdit }: Props) {
   const { activities, loading, addActivity, updateActivity, deleteActivity } = useProjectActivitiesV3(project.id)
   const { isAdmin } = useIsProjectV3Admin()
 
@@ -61,24 +60,30 @@ export function SyntheseTabV3({ project }: Props) {
 
       {/* Contenu scrollable */}
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-        {/* KPI cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* KPI cards — toutes cliquables (ouvrent la modale d'édition projet) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <MetricCard
             label="Budget"
             value={formatBudget(project.budget)}
             isEmpty={project.budget === null || project.budget === undefined}
             emptyAction="Ajouter un budget"
-            onEmptyClick={notifyEditPlaceholder}
+            onEmptyClick={onEdit}
+            onValueClick={onEdit}
           />
-          <MetricCard label="Progression" value={`${project.progress ?? 0}%`} valueColor="text-[#a78bfa]" />
-          <MetricCard label="Score" value={`${project.completion_score ?? 0}%`} valueColor="text-[#22c55e]" />
+          <MetricCard
+            label="Progression"
+            value={`${checklistProgress}%`}
+            valueColor="text-[#a78bfa]"
+            hint="Calculée depuis la production"
+          />
           <MetricCard
             label="Échéance"
             value={formatDate(project.end_date)}
             valueColor="text-[#f59e0b]"
             isEmpty={!project.end_date}
             emptyAction="Définir une échéance"
-            onEmptyClick={notifyEditPlaceholder}
+            onEmptyClick={onEdit}
+            onValueClick={onEdit}
           />
         </div>
 
