@@ -4,6 +4,8 @@ import { toast } from 'sonner'
 import { v2, supabase } from '@/lib/supabase'
 import { DocumentFolder } from './documents/DocumentFolder'
 import { useIsProjectV3Admin } from '../hooks/useIsProjectV3Admin'
+import { DocumentPreviewModal } from '../components/DocumentPreviewModal'
+import { useDocumentPreviewV3 } from '../hooks/useDocumentPreviewV3'
 import {
   CATEGORIES, CATEGORY_ORDER, inferCategory, BUCKET, type Doc,
 } from './documents/constants'
@@ -25,6 +27,7 @@ export function DocumentsTabV3({ project }: Props) {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { isAdmin } = useIsProjectV3Admin()
+  const { previewDoc, previewUrl, openPreview, closePreview } = useDocumentPreviewV3()
 
   const fetchDocs = async () => {
     const { data, error } = await v2
@@ -219,6 +222,7 @@ export function DocumentsTabV3({ project }: Props) {
                 onCancelDelete={() => setConfirmDeleteId(null)}
                 onDelete={handleDelete}
                 onDownload={handleDownload}
+                onPreview={openPreview}
                 canDelete={isAdmin}
               />
             )
@@ -231,6 +235,13 @@ export function DocumentsTabV3({ project }: Props) {
           )}
         </div>
       )}
+
+      <DocumentPreviewModal
+        open={previewDoc !== null}
+        onClose={closePreview}
+        document={previewDoc}
+        signedUrl={previewUrl}
+      />
     </div>
   )
 }

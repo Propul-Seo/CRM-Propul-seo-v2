@@ -9,7 +9,7 @@
 - [x] **Phase 1** — Sidebar rename V2 BETA → V3 PREVIEW + routes (commit 4ab1ac6)
 - [x] **Phase 2** — Projets V3 Terminés, module dédié vue liste (commit 7ff1181)
 - [x] **Phase 3** — Communication V3 wiring (livré en Phase 1, routes pointent vers V2)
-- [ ] **Phase 4** — Leads V3 (CRM Principal + CRM ERP fusionnés, 3 variantes UX) [GROS MORCEAU]
+- [x] **Phase 4** — Leads V3 + 3 variantes UX + optimistic DnD (commit c3ed12a)
 - [ ] **Phase 5** — Documents projet preview (PDF/images/vidéo/Office) [GROS MORCEAU]
 - [ ] **Phase 6** — Audit onglets restants détail projet (Accès, Brief, Sidebar contact)
 - [ ] **Phase 7** — Token-saver fin + SESSION.md final

@@ -16,12 +16,13 @@ interface Props {
   onCancelDelete: () => void
   onDelete: (doc: Doc) => void
   onDownload: (doc: Doc) => void
+  onPreview?: (doc: Doc) => void
   canDelete?: boolean
 }
 
 export function DocumentFolder({
   category, docs, isOpen, confirmDeleteId,
-  onToggle, onAskDelete, onCancelDelete, onDelete, onDownload,
+  onToggle, onAskDelete, onCancelDelete, onDelete, onDownload, onPreview,
   canDelete = true,
 }: Props) {
   const conf = CATEGORIES[category]
@@ -50,7 +51,15 @@ export function DocumentFolder({
         <div className="border-t border-white/10 divide-y divide-white/5">
           {docs.map((doc) => (
             <div key={doc.id}>
-              <div className="flex items-center gap-3 px-3 py-2.5 bg-surface-1/50 hover:bg-surface-2/50 transition-colors">
+              <div
+                onClick={() => {
+                  if (onPreview && doc.file_path) onPreview(doc)
+                }}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-2.5 bg-surface-1/50 hover:bg-surface-2/50 transition-colors',
+                  onPreview && doc.file_path && 'cursor-pointer',
+                )}
+              >
                 <FileText className="h-6 w-6 text-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-foreground truncate">{doc.name}</p>
@@ -69,7 +78,7 @@ export function DocumentFolder({
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                   {doc.file_path ? (
                     <button
                       onClick={() => onDownload(doc)}
