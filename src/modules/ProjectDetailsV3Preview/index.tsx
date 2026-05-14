@@ -5,21 +5,13 @@ import { useUsers } from '@/hooks/useUsers'
 import { useProjectUpdateV3 } from './hooks/useProjectUpdateV3'
 import { useStore } from '@/store'
 import { routes } from '@/lib/routes'
-import type { PrestaType, ProjectV2, ProjectStatusV2 } from '@/types/project-v2'
+import type { ProjectV2, ProjectStatusV2 } from '@/types/project-v2'
 import { useProjectV3 } from './hooks/useProjectV3'
 import { useChecklistV3 } from './hooks/useChecklistV3'
 import { ProjectV3LeftSidebar } from './components/ProjectV3LeftSidebar'
 import { ProjectV3RightSidebar } from './components/ProjectV3RightSidebar'
 import { ProjectV3Tabs } from './components/ProjectV3Tabs'
 import { ProjectEditModalV3 } from './components/ProjectEditModalV3'
-
-function getProjectListContext(presta: PrestaType[] | null | undefined): { label: string; path: string } {
-  const types = presta ?? []
-  if (types.includes('site_web') || types.includes('web')) return { label: 'Site Web', path: routes.siteWeb }
-  if (types.includes('erp') || types.includes('erp_v2') || types.includes('saas')) return { label: 'ERP', path: routes.erp }
-  if (types.includes('communication')) return { label: 'Communication', path: routes.communication }
-  return { label: 'Projets', path: routes.projects }
-}
 
 export function ProjectDetailsV3Preview() {
   const { id } = useParams<{ id: string }>()
@@ -90,7 +82,6 @@ export function ProjectDetailsV3Preview() {
   }, [])
 
   const teamUsers = users.map((u) => ({ id: u.id, name: u.name, email: u.email }))
-  const listContext = getProjectListContext(project?.presta_type)
 
   if (loading) {
     return (
@@ -109,7 +100,7 @@ export function ProjectDetailsV3Preview() {
         <div className="text-center max-w-md">
           <p className="text-sm text-[#ede9fe] mb-2">{error ?? 'Projet introuvable'}</p>
           <button
-            onClick={() => navigate('/projets')}
+            onClick={() => navigate(routes.projectsV3)}
             className="text-xs text-[#8B5CF6] hover:text-[#A78BFA] transition-colors"
           >
             ← Retour à la liste des projets
@@ -125,10 +116,10 @@ export function ProjectDetailsV3Preview() {
       <div className="flex items-center justify-between px-5 py-3 bg-[#070512] border-b border-[rgba(139,92,246,0.18)] shrink-0">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate(listContext.path)}
+            onClick={() => navigate(routes.projectsV3)}
             className="flex items-center gap-1.5 text-xs text-[#9ca3af] hover:text-[#ede9fe] transition-colors"
           >
-            ← {listContext.label}
+            ← Projets
           </button>
           <span className="text-[rgba(139,92,246,0.3)]">/</span>
           <span className="text-xs font-medium text-[#ede9fe] truncate">{project.name}</span>
