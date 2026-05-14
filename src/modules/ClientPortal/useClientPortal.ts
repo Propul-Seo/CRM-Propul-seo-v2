@@ -56,10 +56,11 @@ export function useClientPortal() {
     setError(null)
     setData(null)
 
-    const { data: payload, error: rpcError } = await supabaseAnon.rpc('get_portal_data', {
+    const { data: rawPayload, error: rpcError } = await supabaseAnon.rpc('get_portal_data', {
       p_short_code: token,
     })
 
+    const payload = Array.isArray(rawPayload) ? rawPayload[0] : rawPayload
     if (rpcError || !payload || typeof payload !== 'object') {
       setError('Lien invalide ou expiré.')
       setLoading(false)

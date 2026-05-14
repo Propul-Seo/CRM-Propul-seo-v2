@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase, supabaseAnon, v2 } from '@/lib/supabase'
 import { generateShortCode } from '@/lib/shortCode'
-import type { ProjectBrief } from '../../../types/project-v2'
+import type { ProjectBrief } from '@/types/project-v2'
 
 // Fix 1: BriefFields exported at module scope
 export type BriefFields = Pick<
@@ -130,14 +130,16 @@ export function useBriefByToken(token: string) {
 
   useEffect(() => {
     if (!token) return
-    // Fix 3: reset error/data at start of effect
+    let cancelled = false
     setError(null)
     setData(null)
     setLoading(true)
 
     // Lecture publique via RPC SECURITY DEFINER : validation token cote serveur.
     supabaseAnon.rpc('get_brief_by_short_code', { p_short_code: token })
-      .then(({ data: payload, error: rpcError }) => {
+      .then(({ data: rawPayload, error: rpcError }) => {
+        if (cancelled) return
+        const payload = Array.isArray(rawPayload) ? rawPayload[0] : rawPayload
         if (rpcError || !payload || typeof payload !== 'object') {
           setError('Lien invalide ou désactivé.')
           setLoading(false)
@@ -152,6 +154,8 @@ export function useBriefByToken(token: string) {
         setData({ projectId: p.projectId, projectName: p.projectName, brief: p.brief ?? null })
         setLoading(false)
       })
+
+    return () => { cancelled = true }
   }, [token])
 
   // Ecriture publique via RPC SECURITY DEFINER : validation token + whitelisting champs cote serveur.
@@ -170,8 +174,9 @@ export function useBriefByToken(token: string) {
       },
     })
 
-    if (rpcError || !result || typeof result !== 'object') return false
-    const r = result as { ok?: boolean; error?: string }
+    const normalizedResult = Array.isArray(result) ? result[0] : result
+    if (rpcError || !normalizedResult || typeof normalizedResult !== 'object') return false
+    const r = normalizedResult as { ok?: boolean; error?: string }
     if (!r.ok) return false
 
     // Fire-and-forget — appel Edge Function pour notif email (non bloquant)
@@ -198,7 +203,7 @@ export function useBriefByToken(token: string) {
     ).catch(() => {/* silencieux — email est best-effort */})
 
     return true
-  }, [data])
+  }, [data, token])
 
   return { data, loading, error, submitBrief }
 }
