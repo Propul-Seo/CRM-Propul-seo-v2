@@ -1,85 +1,82 @@
-# Session State — 2026-05-13 fin (chantier V3 complet)
+# Session State — 2026-05-14 fin (sécurité Supabase + Coolify live)
 
 ## Branch
-**preview/v3-ux-overhaul** (exception V3 assumée — chantier isolé, pas de push)
+**main** (chantier V3 mergé, prod live sur Coolify)
 
-## Tag de retour rapide
-`git reset --hard v3-pre-autonomous-session` revient avant la session autonome.
+## Completed This Session
 
-## Completed This Session (12 commits depuis le tag de safety)
+### V3 finalisation & merge main
+- Templates production V3 refondus (site_web 18 / erp_v2 17) basés sur ses vrais projets (Lutins, Lorett, Précieuse, ServicImmo, Remplacare, Tracker)
+- Onglet Documents V3 — Variante A (dropzone XL + filtres pills + liste plate) + 5 sous-composants
+- Sidebar V3 PREVIEW réorganisée : Dashboard / Projets en cours / Leads / Comm Production / Comm KPI / Procédures / Projets Terminés. "Gestion des projets" déplacée vers Pôles V2.
+- Migration BDD : 37 anciens projets re-matérialisés avec nouveaux templates (Lolett préservé, 14 tâches done)
+- Merge `preview/v3-ux-overhaul` → `main` (48 commits, no-ff)
+- Push main → GitHub `Propul-Seo/CRM-Propul-seo-v2`
 
-### Refonte V3 livrée
-- **Phase 1** — Sidebar : V2 BETA → V3 PREVIEW, +4 routes (Leads, Projets terminés V3, Comm. Production, Comm. KPI)
-- **Phase 2** — Module ProjectsV3Completed (vue liste, filtres responsable/pôles/recherche)
-- **Phase 3** — Communication V3 wiring (routes V3 → modules V2 réutilisés)
-- **Phase 4** — Module Leads V3 (CRM Principal + CRM ERP fusionnés, variante Kanban A retenue)
-- **Phase 5** — Preview documents projet (PDF / images / vidéo / Office via Google Docs viewer)
-- **Phase 6** — Audit onglets restants (Accès, Brief, Sidebar droite) → AUDIT_PHASE6.md
-- **Bonus** — Conversion lead → projet 1 clic (bouton sur cards "signé")
+### Sécurité Supabase (chantier majeur)
+**Avant : 191 findings advisors (4 ERROR + 187 WARN). Après : 181 findings (0 ERROR).**
 
-### Améliorations finales (après ton retour)
-- Choix utilisateur : **variante Kanban A** retenue, suppression de B (Compact) + C (Inbox) et de LeadCardV3Compact (-558 lignes)
-- Bouton "Nouveau projet" V3 branché sur modale dédiée
-- Modale Nouveau projet refondue : types **Communication / ERP / Site Web** (cohérence sidebar), tous les champs de Modifier (Client, Priorité, Date de début, SIRET)
-- Splittée en NewProjectModalV3 (77 L) + NewProjectFormV3 (220 L) pour respecter la règle 200 lignes
-- Fix BDD bonus : fallback `client_name = name` si vide (contrainte NOT NULL en BDD sinon INSERT échoue)
+- DROP 3 tables backup avec données sensibles (incluait colonne `password` exposée)
+- Activation RLS sur `automation_logs`
+- DROP 33 policies "public always-true" sur 16 tables CRM critiques
+- CREATE policies `authenticated_all_*` propres
+- DROP 14 policies anon trop larges sur portail/brief
+- CREATE 3 RPC SECURITY DEFINER (`get_portal_data`, `get_brief_by_short_code`, `upsert_brief_by_short_code`) avec search_path figé + GRANT explicite anon
+- Migration frontend `useClientPortal` + `useBriefV2` vers RPC
+- Tests live confirmés : 27 tables critiques renvoient `[]` en anon, RPC fonctionnent avec token valide
 
-### Infrastructure tests (process pérenne)
-- Vitest installé + config + setup
-- 5 fichiers unit (105 tests, 1.4s) sur documentMimeType / leadStatusMapping / leadAdapters / poleMapping / statusMapping
-- 6 specs E2E Playwright (12 tests, 22s) sur navigation, création projet, terminés, leads, détail Lolett, comm wiring
-- Process futur acté : chaque nouvelle feature livre 1 test unit + 1 test E2E happy path
+### Déploiement Coolify
+- Dockerfile multi-stage (Node 22 alpine builder → nginx alpine serve)
+- nginx.conf avec SPA fallback + gzip + cache + CSP + headers sécurité dans chaque bloc location
+- .dockerignore complet
+- Switch Build Pack Coolify : Nixpacks → Dockerfile (Nixpacks détectait à tort comme "deno")
+- Variables d'env VITE_SUPABASE_* configurées avec "Available at Buildtime"
+- Container running healthy sur https://crm.propulseo-site.com
+- Fix CSP img-src trop restrictif (Google Photos bloqué) → relax `https:` global pour images
 
-### Lint cleanup
-- temp_files/ + next-public/ ignorés (code legacy hors scope)
-- Auto-fix triviales (let→const)
-- 420 → 329 erreurs (-91), reste dette technique préexistante dans src/
+### Code review fin de session
+- 2 Critical fixés sur Sidebar.tsx : `any` → `User | null`, imports relatifs → path aliases `@/`
+- 124/124 tests unit verts, tsc clean
 
-## État final
-- TypeScript : clean
-- Tests : 105/105 unit + 12/12 E2E
-- Build prod : OK (Vite 7.4s)
-- V1/V2 : intacts, aucun fichier modifié hors scope V3
-- Push : aucun (commits locaux uniquement)
+## Next Tasks (ordre de priorité)
 
-## Next Task — Production templates
+### P0 — Strict minimum prod stable
+- Aucun. **Tout est live et fonctionne.**
 
-L'utilisateur veut ouvrir une **nouvelle session dédiée aux templates production**.
+### P1 — Cette semaine (hardening Supabase, 1h)
+1. Activer **leaked password protection** dans Supabase Auth Settings (1 clic)
+2. Réduire **OTP expiry** à 600s max
+3. Restreindre les 2 buckets Storage publics (`client-post-assets`, `post-assets`)
+4. Retirer 3 materialized views de l'API REST (`kpi_monthly_overview`, `kpi_daily_metrics`, `kpi_top_posts`)
+5. Upgrade Postgres (version vulnérable détectée, ~5 min downtime)
+6. Fix récursion infinie policy `channel_members` (bug RLS préexistant)
 
-### État actuel (à lire en début de session suivante)
-- Fichier : `src/modules/ProjectDetailsV3Preview/tabs/production/templates.ts`
-- **7 templates** : web (16 tâches), site_web (21), seo (13), erp (13), erp_v2 (9), saas (12), communication (7)
-- Total : 91 tâches templates
-- Problème : avec la nouvelle modale création qui n'expose que Communication/ERP/Site Web, les anciens templates `web`, `seo`, `saas`, `erp_v2` deviennent non utilisés pour les nouveaux projets mais restent pour la compat des projets V1/V2 existants en BDD
+### P2 — Polish code (différé)
+- `Sidebar.tsx` > 200L (314L) : extraire NavSection config dans `sidebarConfig.ts`
+- `DocumentsTabV3.tsx` : `uploader_name` hardcodé `'Admin'` → utiliser `currentUser?.name`
+- `nginx.conf` : ajouter `Content-Security-Policy` au bloc `location` SVG/images
+- 5 fichiers V3 > 200L (ProjectEditModalV3 312L, ProductionTabV3 289L, etc.)
+- Rotation anon key + cleanup 4 fichiers du repo avec clé hardcodée
+- 55 fonctions avec `search_path` mutable → ajouter `SET search_path`
+- 38 fonctions SECURITY DEFINER anon → audit revoke
+- Race condition possible dans `useBriefV2` legacy (avant `useBriefByToken`)
 
-### Options présentées
-- A. Garder tels quels (rétrocompat)
-- B. Supprimer les 4 legacy (-49 tâches)
-- C. Fusionner web + site_web et erp + erp_v2
-
-### Pistes connexes pour la session templates
-- Permettre la création de templates custom côté UI (BDD ?)
-- Templater aussi le brief, les accès attendus, les documents requis
-- Éditer un template existant sans toucher au code
+### P3 — Features WIP
+- DashboardV3Preview : 4 variantes (Cockpit/Hero/Bento/Editorial) commitées en WIP, à valider avant intégration sidebar V3
+- Supprimer backups checklist_items_v2_backup_20260513 quand prod stable depuis quelques jours
+- Nettoyer templates legacy `web`, `seo`, `saas` quand confirmation plus jamais utilisés
 
 ## Blockers
 Aucun.
 
 ## Key Context
-- Dev server : http://localhost:5174
+- Branche : **main** (synchronisée avec origin/main)
+- Prod : https://crm.propulseo-site.com (Coolify, container healthy)
+- Repo GitHub : Propul-Seo/CRM-Propul-seo-v2 (déplacé de lyestriki-29/)
+- Tag de safety pré-V3 : `v3-pre-autonomous-session`
+- Tests : 124/124 unit + 12/12 E2E
+- Architecture portail client : RPC SECURITY DEFINER (pas de policy anon directe) — gold standard Supabase
 - Login admin : lyestriki@yahoo.fr
-- Branche : preview/v3-ux-overhaul, ahead of origin by 12 commits, **AUCUN PUSH**
-- Tag retour catastrophe : v3-pre-autonomous-session
-- Routes V3 actives : /leads-v3, /projets-en-cours, /projets-v3-termines, /projets-v3-preview/:id, /communication-v3/production, /communication-v3/kpi, /coffre-fort
-- Variante Leads V3 retenue : A (Kanban). B et C supprimées.
-- Tests : `npm run test` (unit), `npm run test:e2e` (E2E)
-- Issues différées (non bloquantes) :
-  - Realtime Supabase pas branché dans Leads V3 (mono-user OK)
-  - DocumentsTabV3 préexistant à 247 lignes (>200)
-  - 329 erreurs ESLint préexistantes dans src/ (no-any, exhaustive-deps)
-  - MetricCard Score retirée du détail projet (pas d'algo défini)
-
-## Push manuel (à faire quand tu valides)
-```bash
-git push origin preview/v3-ux-overhaul
-```
+- Coolify dashboard : http://146.59.228.186:8000 (projet `crm-propulseo`)
+- Variables env Coolify : VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY avec "Available at Buildtime"
+- Backup BDD : `checklist_items_v2_backup_20260513` (148 lignes) — peut être droppé une fois prod validée
