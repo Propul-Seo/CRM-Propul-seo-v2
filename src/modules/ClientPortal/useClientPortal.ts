@@ -1,6 +1,6 @@
 // src/modules/ClientPortal/useClientPortal.ts
 import { useState, useCallback } from 'react'
-import { supabaseAnon, v2, v2Anon } from '@/lib/supabase'
+import { supabaseAnon, v2 } from '@/lib/supabase'
 import { generateShortCode } from '@/lib/shortCode'
 import type { ProjectV2, ChecklistItemV2 } from '@/types/project-v2'
 
@@ -49,71 +49,35 @@ export function useClientPortal() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Lecture publique via token (client anon)
+  // Lecture publique via RPC SECURITY DEFINER : validation token cote serveur.
+  // Renvoie projet + checklist + invoices + contact en un appel atomique.
   const fetchPortalData = useCallback(async (token: string) => {
     setLoading(true)
     setError(null)
     setData(null)
 
-    // 1. Projet par token (refuse lien expiré)
-    const now = new Date().toISOString()
-    const { data: project, error: projectError } = await v2Anon
-      .from('projects')
-      .select('id, name, client_name, client_id, status, progress, completion_score, next_action_label, next_action_due, presta_type, start_date, end_date, budget, ai_summary, portal_expires_at')
-      .eq('portal_short_code', token)
-      .eq('portal_enabled', true)
-      .or(`portal_expires_at.is.null,portal_expires_at.gt.${now}`)
-      .single()
+    const { data: payload, error: rpcError } = await supabaseAnon.rpc('get_portal_data', {
+      p_short_code: token,
+    })
 
-    if (projectError || !project) {
+    if (rpcError || !payload || typeof payload !== 'object') {
       setError('Lien invalide ou expiré.')
       setLoading(false)
       return
     }
 
-    // 2. Checklist (tâches principales seulement)
-    const { data: checklist } = await v2Anon
-      .from('checklist_items')
-      .select('id, title, phase, status')
-      .eq('project_id', project.id)
-      .is('parent_task_id', null)
-      .order('position', { ascending: true })
-
-    // 3. Factures (envoyées, payées, en retard)
-    const { data: invoices } = await v2Anon
-      .from('invoices')
-      .select('id, label, amount, status, date, due_date')
-      .eq('project_id', project.id)
-      .in('status', ['sent', 'paid', 'overdue'])
-      .order('date', { ascending: false })
-
-    // 4. Contact client (si client_id présent)
-    let contact: PortalClientContact | null = null
-    if (project.client_id) {
-      const { data: clientData, error: contactError } = await supabaseAnon
-        .from('clients')
-        .select('name, email, phone, address, sector')
-        .eq('id', project.client_id)
-        .single()
-      if (contactError) {
-        console.error('[ClientPortal] contact fetch failed:', contactError.message)
-      }
-      if (clientData) {
-        contact = {
-          name: clientData.name ?? null,
-          email: clientData.email ?? null,
-          phone: clientData.phone ?? null,
-          address: clientData.address ?? null,
-          sector: clientData.sector ?? null,
-        }
-      }
+    const p = payload as { error?: string; project?: PortalData['project']; checklist?: PortalData['checklist']; invoices?: PortalInvoice[]; contact?: PortalClientContact | null }
+    if (p.error || !p.project) {
+      setError('Lien invalide ou expiré.')
+      setLoading(false)
+      return
     }
 
     setData({
-      project: project as PortalData['project'],
-      checklist: (checklist ?? []) as PortalData['checklist'],
-      invoices: (invoices ?? []) as PortalInvoice[],
-      contact,
+      project: p.project,
+      checklist: p.checklist ?? [],
+      invoices: p.invoices ?? [],
+      contact: p.contact ?? null,
     })
     setLoading(false)
   }, [])

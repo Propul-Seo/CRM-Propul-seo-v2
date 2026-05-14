@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { supabase, supabaseAnon, v2, v2Anon } from '@/lib/supabase'
+import { supabase, supabaseAnon, v2 } from '@/lib/supabase'
 import { generateShortCode } from '@/lib/shortCode'
 import type { ProjectBrief } from '../../../types/project-v2'
 
@@ -135,57 +135,44 @@ export function useBriefByToken(token: string) {
     setData(null)
     setLoading(true)
 
-    v2Anon
-      .from('projects')
-      .select('id, name')
-      .eq('brief_short_code', token)
-      .eq('brief_token_enabled', true)
-      .single()
-      .then(async ({ data: project, error: projectError }) => {
-        if (projectError || !project) {
+    // Lecture publique via RPC SECURITY DEFINER : validation token cote serveur.
+    supabaseAnon.rpc('get_brief_by_short_code', { p_short_code: token })
+      .then(({ data: payload, error: rpcError }) => {
+        if (rpcError || !payload || typeof payload !== 'object') {
           setError('Lien invalide ou désactivé.')
           setLoading(false)
           return
         }
-
-        const { data: brief } = await v2Anon
-          .from('project_briefs')
-          .select('*')
-          .eq('project_id', project.id)
-          .maybeSingle()
-
-        // Fix 2: cache project.id in data
-        setData({ projectId: project.id, projectName: project.name, brief: brief as ProjectBrief | null })
+        const p = payload as { error?: string; projectId?: string; projectName?: string; brief?: ProjectBrief | null }
+        if (p.error || !p.projectId || !p.projectName) {
+          setError('Lien invalide ou désactivé.')
+          setLoading(false)
+          return
+        }
+        setData({ projectId: p.projectId, projectName: p.projectName, brief: p.brief ?? null })
         setLoading(false)
       })
   }, [token])
 
-  // Fix 2: use data.projectId directly — no redundant re-fetch
+  // Ecriture publique via RPC SECURITY DEFINER : validation token + whitelisting champs cote serveur.
   const submitBrief = useCallback(async (fields: BriefFields): Promise<boolean> => {
     if (!data) return false
 
-    const payload = {
-      ...fields,
-      project_id: data.projectId,
-      status: 'submitted' as const,
-      submitted_at: new Date().toISOString(),
-    }
+    const { data: result, error: rpcError } = await supabaseAnon.rpc('upsert_brief_by_short_code', {
+      p_short_code: token,
+      p_fields: {
+        objective: fields.objective ?? '',
+        target_audience: fields.target_audience ?? '',
+        pages: fields.pages ?? '',
+        techno: fields.techno ?? '',
+        design_references: fields.design_references ?? '',
+        notes: fields.notes ?? '',
+      },
+    })
 
-    let dbError: unknown
-    if (data.brief) {
-      const result = await v2Anon
-        .from('project_briefs')
-        .update(payload)
-        .eq('id', data.brief.id)
-      dbError = result.error
-    } else {
-      const result = await v2Anon
-        .from('project_briefs')
-        .insert(payload)
-      dbError = result.error
-    }
-
-    if (dbError) return false
+    if (rpcError || !result || typeof result !== 'object') return false
+    const r = result as { ok?: boolean; error?: string }
+    if (!r.ok) return false
 
     // Fire-and-forget — appel Edge Function pour notif email (non bloquant)
     fetch(
