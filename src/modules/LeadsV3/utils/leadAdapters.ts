@@ -46,6 +46,37 @@ export function erpToCard(lead: CRMERPLead): LeadCardData {
   }
 }
 
+/**
+ * Tri des leads Site Web — reprend la logique du CRM V1 (KanbanDragContext.sortContacts) :
+ * 1) leads avec `next_activity_date` en premier, du plus urgent au moins urgent (date asc)
+ * 2) leads sans next_activity, triés par `created_at` croissant
+ */
+export function sortSiteWebLeads(leads: SiteWebLead[]): SiteWebLead[] {
+  return [...leads].sort((a, b) => {
+    if (a.next_activity_date && b.next_activity_date) {
+      return new Date(a.next_activity_date).getTime() - new Date(b.next_activity_date).getTime()
+    }
+    if (a.next_activity_date && !b.next_activity_date) return -1
+    if (!a.next_activity_date && b.next_activity_date) return 1
+    return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+  })
+}
+
+/**
+ * Tri des leads ERP par dernière activité descendante (la plus récente d'abord).
+ * Les leads sans `last_activity_at` retombent en fin de liste, triés par `created_at` desc.
+ */
+export function sortErpLeads(leads: CRMERPLead[]): CRMERPLead[] {
+  return [...leads].sort((a, b) => {
+    if (a.last_activity_at && b.last_activity_at) {
+      return new Date(b.last_activity_at).getTime() - new Date(a.last_activity_at).getTime()
+    }
+    if (a.last_activity_at && !b.last_activity_at) return -1
+    if (!a.last_activity_at && b.last_activity_at) return 1
+    return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+  })
+}
+
 /** Recherche texte commune (case-insensitive). */
 export function matchesQuery(data: LeadCardData, q: string): boolean {
   if (!q) return true

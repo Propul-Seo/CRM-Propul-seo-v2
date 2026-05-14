@@ -9,7 +9,7 @@ import { VariantA_Kanban } from './variants/VariantA_Kanban'
 import { useLeadsV3SiteWeb } from './hooks/useLeadsV3SiteWeb'
 import { useLeadsV3Erp } from './hooks/useLeadsV3Erp'
 import { useConvertLeadToProject } from './hooks/useConvertLeadToProject'
-import { siteWebToCard, erpToCard, matchesQuery } from './utils/leadAdapters'
+import { siteWebToCard, erpToCard, matchesQuery, sortSiteWebLeads, sortErpLeads } from './utils/leadAdapters'
 import type { LeadCardData } from './components/LeadCardV3'
 import {
   SITE_WEB_STATUS_ORDER,
@@ -70,7 +70,7 @@ export function LeadsV3Page() {
   // Construction des cards + statusMap selon l'onglet
   const { cards, leadStatus, columns, onStatusChange } = useMemo(() => {
     if (tab === 'site_web') {
-      const filtered = sw.leads.filter(l => !filterUserId || l.assigned_to === filterUserId)
+      const filtered = sortSiteWebLeads(sw.leads.filter(l => !filterUserId || l.assigned_to === filterUserId))
       const allCards = filtered.map(siteWebToCard).filter(c => matchesQuery(c, debouncedSearch))
       const statusMap: Record<string, string> = {}
       for (const l of filtered) statusMap[l.id] = l.normalized_status
@@ -83,7 +83,7 @@ export function LeadsV3Page() {
       }
       return { cards: allCards, leadStatus: statusMap, columns: cols, onStatusChange: updater }
     }
-    const filtered = erp.leads.filter(l => !filterUserId || l.assignee_id === filterUserId)
+    const filtered = sortErpLeads(erp.leads.filter(l => !filterUserId || l.assignee_id === filterUserId))
     const allCards = filtered.map(erpToCard).filter(c => matchesQuery(c, debouncedSearch))
     const statusMap: Record<string, string> = {}
     for (const l of filtered) statusMap[l.id] = normalizeErpStatus(l.status)
