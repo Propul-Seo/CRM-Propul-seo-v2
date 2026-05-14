@@ -1,17 +1,18 @@
-import { useState, useRef, useEffect, useMemo } from 'react'
-import { FileText, Upload, Search } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import { v2, supabase } from '@/lib/supabase'
-import { DocumentFolder } from './documents/DocumentFolder'
 import { useIsProjectV3Admin } from '../hooks/useIsProjectV3Admin'
 import { DocumentPreviewModal } from '../components/DocumentPreviewModal'
 import { useDocumentPreviewV3 } from '../hooks/useDocumentPreviewV3'
+import { DocumentDropzone } from './documents/DocumentDropzone'
+import { DocumentFilters, type FilterValue } from './documents/DocumentFilters'
+import { DocumentList } from './documents/DocumentList'
+import { DocumentToolbar, type SortKey } from './documents/DocumentToolbar'
 import {
   CATEGORIES, CATEGORY_ORDER, inferCategory, BUCKET, type Doc,
 } from './documents/constants'
 import type { ProjectV2, DocumentCategory } from '@/types/project-v2'
-
-type SortKey = 'date' | 'name' | 'size'
 
 interface Props {
   project: ProjectV2
@@ -23,9 +24,8 @@ export function DocumentsTabV3({ project }: Props) {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('date')
-  const [openFolders, setOpenFolders] = useState<Set<DocumentCategory>>(new Set(CATEGORY_ORDER))
+  const [filter, setFilter] = useState<FilterValue>('all')
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const { isAdmin } = useIsProjectV3Admin()
   const { previewDoc, previewUrl, openPreview, closePreview } = useDocumentPreviewV3()
 
@@ -45,40 +45,30 @@ export function DocumentsTabV3({ project }: Props) {
 
   useEffect(() => { fetchDocs() /* eslint-disable-line react-hooks/exhaustive-deps */ }, [projectId])
 
-  const filtered = useMemo(() => {
+  // Compteurs par catégorie pour les pills (basés sur tous les docs, indépendants du filtre)
+  const counts = useMemo<Record<FilterValue, number>>(() => {
+    const c: Record<FilterValue, number> = { all: docs.length } as Record<FilterValue, number>
+    for (const cat of CATEGORY_ORDER) c[cat] = 0
+    for (const d of docs) {
+      const cat = d.category in CATEGORIES ? d.category : 'other'
+      c[cat as DocumentCategory] = (c[cat as DocumentCategory] ?? 0) + 1
+    }
+    return c
+  }, [docs])
+
+  const visible = useMemo(() => {
     const q = search.toLowerCase().trim()
     return docs
+      .filter((d) => filter === 'all' || d.category === filter)
       .filter((d) => !q || d.name.toLowerCase().includes(q) || (d.uploader_name ?? '').toLowerCase().includes(q))
       .sort((a, b) => {
         if (sortKey === 'name') return a.name.localeCompare(b.name)
         if (sortKey === 'size') return (b.file_size ?? 0) - (a.file_size ?? 0)
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       })
-  }, [docs, search, sortKey])
+  }, [docs, search, sortKey, filter])
 
-  const grouped = useMemo(() => {
-    const map = new Map<DocumentCategory, Doc[]>()
-    for (const cat of CATEGORY_ORDER) map.set(cat, [])
-    for (const doc of filtered) {
-      const cat = doc.category in CATEGORIES ? doc.category : 'other'
-      map.get(cat as DocumentCategory)!.push(doc)
-    }
-    return map
-  }, [filtered])
-
-  const toggleFolder = (cat: DocumentCategory) => {
-    setOpenFolders((prev) => {
-      const next = new Set(prev)
-      if (next.has(cat)) next.delete(cat)
-      else next.add(cat)
-      return next
-    })
-  }
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
+  const handleFile = async (file: File) => {
     const existingVersions = docs
       .filter((d) => d.name.toLowerCase() === file.name.toLowerCase())
       .map((d) => parseInt(d.version ?? '1'))
@@ -93,7 +83,6 @@ export function DocumentsTabV3({ project }: Props) {
 
     if (uploadError) {
       toast.error(`Erreur upload : ${uploadError.message}`)
-      e.target.value = ''
       return
     }
 
@@ -115,7 +104,6 @@ export function DocumentsTabV3({ project }: Props) {
       toast.success(`"${file.name}" ajouté`)
       fetchDocs()
     }
-    e.target.value = ''
   }
 
   const handleDelete = async (doc: Doc) => {
@@ -151,89 +139,42 @@ export function DocumentsTabV3({ project }: Props) {
   }
 
   if (loading) {
-    return <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">Chargement…</div>
+    return <div className="flex-1 flex items-center justify-center text-sm text-[#9ca3af]">Chargement…</div>
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-      <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} />
+    <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+      <DocumentToolbar
+        count={docs.length}
+        search={search}
+        sortKey={sortKey}
+        onSearchChange={setSearch}
+        onSortChange={setSortKey}
+      />
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-foreground">Documents</h3>
-          <span className="text-xs text-muted-foreground">
-            {docs.length} fichier{docs.length !== 1 ? 's' : ''}
-          </span>
-        </div>
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
-        >
-          <Upload className="h-4 w-4" />
-          Uploader
-        </button>
-      </div>
+      <DocumentFilters active={filter} counts={counts} onChange={setFilter} />
 
-      {/* Barre recherche + tri */}
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher un document…"
-            className="w-full pl-8 pr-3 py-1.5 bg-surface-2 border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/50"
-          />
-        </div>
-        <select
-          value={sortKey}
-          onChange={(e) => setSortKey(e.target.value as SortKey)}
-          className="bg-surface-2 border border-border rounded-md px-2 py-1.5 text-xs text-foreground focus:outline-none"
-        >
-          <option value="date">Plus récent</option>
-          <option value="name">Nom</option>
-          <option value="size">Taille</option>
-        </select>
-      </div>
+      <DocumentDropzone onFile={handleFile} />
 
-      {/* Dossiers GED */}
       {docs.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground gap-3">
+        <div className="flex flex-col items-center justify-center py-10 text-[#9ca3af] gap-3">
           <FileText className="h-10 w-10 opacity-30" />
           <p className="text-sm">Aucun document pour ce projet.</p>
-          <p className="text-xs opacity-60">Les PJ des emails apparaissent ici après une sync Gmail.</p>
+          <p className="text-xs opacity-60">Les PJ des emails apparaîtront ici après une sync Gmail.</p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {CATEGORY_ORDER.map((cat) => {
-            const catDocs = grouped.get(cat) ?? []
-            if (catDocs.length === 0) return null
-            return (
-              <DocumentFolder
-                key={cat}
-                category={cat}
-                docs={catDocs}
-                isOpen={openFolders.has(cat)}
-                confirmDeleteId={confirmDeleteId}
-                onToggle={() => toggleFolder(cat)}
-                onAskDelete={setConfirmDeleteId}
-                onCancelDelete={() => setConfirmDeleteId(null)}
-                onDelete={handleDelete}
-                onDownload={handleDownload}
-                onPreview={openPreview}
-                canDelete={isAdmin}
-              />
-            )
-          })}
-
-          {filtered.length === 0 && search && (
-            <div className="text-center py-8 text-sm text-muted-foreground">
-              Aucun document pour "{search}"
-            </div>
-          )}
-        </div>
+        <DocumentList
+          filter={filter}
+          visible={visible}
+          search={search}
+          canDelete={isAdmin}
+          confirmDeleteId={confirmDeleteId}
+          onPreview={openPreview}
+          onDownload={handleDownload}
+          onAskDelete={setConfirmDeleteId}
+          onCancelDelete={() => setConfirmDeleteId(null)}
+          onDelete={handleDelete}
+        />
       )}
 
       <DocumentPreviewModal

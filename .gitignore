@@ -70,3 +70,4 @@ scripts/create-demo-admin.mjs
 .env.test
 playwright-report/
 test-results/
+.mockups/
