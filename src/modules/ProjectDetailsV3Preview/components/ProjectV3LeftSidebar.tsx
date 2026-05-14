@@ -1,32 +1,82 @@
-import { Folder, Calendar, Tag, UserCheck, Wallet, Target } from 'lucide-react'
+import { useState } from 'react'
+import { Folder, Calendar, Tag, Wallet, Target, ChevronDown, Building2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { ProjectV2 } from '@/types/project-v2'
-import {
-  PROJECT_STATUS_ORDER,
-  PROJECT_STATUS_LABELS,
-  getStatusStyle,
-  getStatusLabel,
-  formatPresta,
-} from '../statusConfig'
-
-interface TeamUser { id: string; name: string; email: string }
+import { formatPresta } from '../statusConfig'
 
 interface Props {
   project: ProjectV2
-  users: TeamUser[]
+  /** Progression calculée depuis la checklist (source de vérité). */
+  checklistProgress: number
   onEdit: () => void
-  onAssign: (userId: string | null) => void
 }
 
-function SidebarSection({ title, children }: { title: string; children: React.ReactNode }) {
+function SidebarSection({
+  title,
+  children,
+  collapsible,
+  storageKey,
+  defaultCollapsed = false,
+}: {
+  title: string
+  children: React.ReactNode
+  collapsible?: boolean
+  storageKey?: string
+  defaultCollapsed?: boolean
+}) {
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    if (!collapsible || !storageKey) return defaultCollapsed
+    try {
+      const stored = localStorage.getItem(`v3-sidebar-section:${storageKey}`)
+      if (stored === 'true') return true
+      if (stored === 'false') return false
+    } catch {
+      // ignore
+    }
+    return defaultCollapsed
+  })
+
+  const toggle = () => {
+    const next = !collapsed
+    setCollapsed(next)
+    if (collapsible && storageKey) {
+      try {
+        localStorage.setItem(`v3-sidebar-section:${storageKey}`, String(next))
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  if (!collapsible) {
+    return (
+      <div className="border-b border-[rgba(139,92,246,0.15)] py-4 px-4">
+        <p className="text-[10px] font-semibold text-[#9ca3af] uppercase tracking-widest mb-3">{title}</p>
+        {children}
+      </div>
+    )
+  }
+
   return (
     <div className="border-b border-[rgba(139,92,246,0.15)] py-4 px-4">
-      <p className="text-[10px] font-semibold text-[#9ca3af] uppercase tracking-widest mb-3">{title}</p>
-      {children}
+      <button
+        onClick={toggle}
+        className="flex items-center justify-between w-full mb-3 text-left group"
+      >
+        <p className="text-[10px] font-semibold text-[#9ca3af] uppercase tracking-widest group-hover:text-[#ede9fe] transition-colors">
+          {title}
+        </p>
+        <ChevronDown
+          className={cn(
+            'h-3.5 w-3.5 text-[#9ca3af] transition-transform group-hover:text-[#ede9fe]',
+            collapsed && '-rotate-90',
+          )}
+        />
+      </button>
+      {!collapsed && children}
     </div>
   )
 }
@@ -35,19 +85,32 @@ function InfoRow({
   icon: Icon,
   label,
   value,
+  emptyAction,
+  onEmptyClick,
 }: {
   icon: React.ElementType
   label: string
   value: string | null | undefined
+  emptyAction?: string
+  onEmptyClick?: () => void
 }) {
   return (
     <div className="flex items-start gap-2.5 mb-3">
       <Icon className="h-3.5 w-3.5 text-[#9ca3af] shrink-0 mt-0.5" />
       <div className="min-w-0">
         <p className="text-[10px] text-[#9ca3af]">{label}</p>
-        <p className={cn('text-xs font-medium mt-0.5', value ? 'text-[#ede9fe]' : 'text-[#9ca3af] italic')}>
-          {value || '—'}
-        </p>
+        {value ? (
+          <p className="text-xs font-medium mt-0.5 text-[#ede9fe]">{value}</p>
+        ) : emptyAction && onEmptyClick ? (
+          <button
+            onClick={onEmptyClick}
+            className="text-xs font-medium mt-0.5 text-[#8B5CF6] hover:text-[#A78BFA] transition-colors"
+          >
+            + {emptyAction}
+          </button>
+        ) : (
+          <p className="text-xs font-medium mt-0.5 text-[#9ca3af] italic">—</p>
+        )}
       </div>
     </div>
   )
@@ -63,11 +126,36 @@ const formatBudget = (amount: number | null | undefined): string | null => {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(amount)
 }
 
-export function ProjectV3LeftSidebar({ project, users, onEdit, onAssign }: Props) {
-  const statusConf = getStatusStyle(project.status)
-  const statusLabel = getStatusLabel(project.status)
-  const currentStep = PROJECT_STATUS_ORDER.indexOf(project.status)
-  const totalSteps = PROJECT_STATUS_ORDER.length
+const formatSiret = (siret: string | null | undefined): string | null => {
+  if (!siret) return null
+  const clean = siret.replace(/\s/g, '')
+  if (clean.length !== 14) return clean
+  return `${clean.slice(0, 3)} ${clean.slice(3, 6)} ${clean.slice(6, 9)} ${clean.slice(9)}`
+}
+
+type PappersData = {
+  nom_entreprise?: string
+  denomination?: string
+  forme_juridique?: string
+  tranche_effectif_salarie?: string
+}
+
+function getCompanyInfo(data: ProjectV2['company_data']): {
+  name: string | null
+  legalForm: string | null
+  workforce: string | null
+} {
+  const d = (data ?? {}) as PappersData
+  return {
+    name: d.nom_entreprise ?? d.denomination ?? null,
+    legalForm: d.forme_juridique ?? null,
+    workforce: d.tranche_effectif_salarie ?? null,
+  }
+}
+
+export function ProjectV3LeftSidebar({ project, checklistProgress, onEdit }: Props) {
+  const company = getCompanyInfo(project.company_data)
+  const isEnriched = !!project.company_enriched_at
 
   return (
     <div className="flex flex-col">
@@ -82,52 +170,70 @@ export function ProjectV3LeftSidebar({ project, users, onEdit, onAssign }: Props
             size="sm"
             onClick={onEdit}
             className="text-xs h-7 text-[#9ca3af] hover:text-[#ede9fe]"
+            title="Modifier les informations du projet"
           >
-            Modifier
+            Modifier le projet
           </Button>
         </div>
-        <h2 className="text-sm font-bold text-[#ede9fe] leading-tight">{project.name}</h2>
+        <h2 className="text-xl font-bold text-[#ede9fe] leading-tight tracking-tight">{project.name}</h2>
         {project.client_name && (
-          <p className="text-xs text-[#9ca3af] mt-0.5">{project.client_name}</p>
+          <p className="text-xs text-[#9ca3af] mt-1">{project.client_name}</p>
         )}
-        <div className="flex flex-wrap items-center gap-1.5 mt-2">
-          <span className={cn('inline-flex text-[10px] font-semibold px-2 py-0.5 rounded-full', statusConf.badge)}>
-            {statusLabel}
-          </span>
-          {project.presta_type && project.presta_type.length > 0 && (
+        {project.presta_type && project.presta_type.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 mt-2">
             <span className="inline-flex text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[rgba(139,92,246,0.15)] text-[#A78BFA]">
               {formatPresta(project.presta_type)}
             </span>
-          )}
-        </div>
-      </div>
-
-      {/* Pipeline steps */}
-      <div className="px-4 py-3 border-b border-[rgba(139,92,246,0.15)]">
-        <p className="text-[10px] font-semibold text-[#9ca3af] uppercase tracking-widest mb-2">Étape du pipeline</p>
-        <div className="flex gap-1">
-          {PROJECT_STATUS_ORDER.map((s, i) => (
-            <div
-              key={s}
-              title={PROJECT_STATUS_LABELS[s]}
-              className={cn(
-                'h-1.5 flex-1 rounded-full transition-all',
-                i <= currentStep ? 'bg-[#8B5CF6]' : 'bg-[rgba(139,92,246,0.15)]',
-              )}
-            />
-          ))}
-        </div>
-        <p className="text-[10px] text-[#9ca3af] mt-1.5">
-          {currentStep + 1}/{totalSteps} — {statusLabel}
-        </p>
+          </div>
+        )}
       </div>
 
       {/* À propos */}
-      <SidebarSection title="À propos">
-        <InfoRow icon={Calendar} label="Début" value={formatDate(project.start_date)} />
-        <InfoRow icon={Calendar} label="Fin prévue" value={formatDate(project.end_date)} />
-        <InfoRow icon={Wallet} label="Budget" value={formatBudget(project.budget)} />
-        <InfoRow icon={Target} label="Progression" value={`${project.progress ?? 0}%`} />
+      <SidebarSection title="À propos" collapsible storageKey="about">
+        <InfoRow
+          icon={Calendar}
+          label="Début"
+          value={formatDate(project.start_date)}
+          emptyAction="Définir une date de début"
+          onEmptyClick={onEdit}
+        />
+        <InfoRow
+          icon={Calendar}
+          label="Fin prévue"
+          value={formatDate(project.end_date)}
+          emptyAction="Définir une échéance"
+          onEmptyClick={onEdit}
+        />
+        <InfoRow
+          icon={Wallet}
+          label="Budget"
+          value={formatBudget(project.budget)}
+          emptyAction="Ajouter un budget"
+          onEmptyClick={onEdit}
+        />
+        <InfoRow icon={Target} label="Progression" value={`${checklistProgress}%`} />
+        <InfoRow
+          icon={Building2}
+          label="SIRET"
+          value={formatSiret(project.siret)}
+          emptyAction="Ajouter un SIRET"
+          onEmptyClick={onEdit}
+        />
+        {isEnriched && company.name && (
+          <InfoRow icon={Building2} label="Raison sociale" value={company.name} />
+        )}
+        {isEnriched && company.legalForm && (
+          <InfoRow icon={Building2} label="Forme juridique" value={company.legalForm} />
+        )}
+        {isEnriched && company.workforce && (
+          <InfoRow icon={Building2} label="Effectif" value={company.workforce} />
+        )}
+        {isEnriched && (
+          <div className="flex items-center gap-1.5 mt-2 ml-6">
+            <span className="text-[10px] text-emerald-400">✓</span>
+            <span className="text-[10px] text-emerald-400/80">Enrichi via Pappers</span>
+          </div>
+        )}
         {project.last_activity_at && (
           <InfoRow
             icon={Tag}
@@ -139,34 +245,10 @@ export function ProjectV3LeftSidebar({ project, users, onEdit, onAssign }: Props
 
       {/* Description / Notes */}
       {project.description && (
-        <SidebarSection title="Notes">
+        <SidebarSection title="Notes" collapsible storageKey="notes">
           <p className="text-xs text-[#ede9fe] leading-relaxed whitespace-pre-wrap">{project.description}</p>
         </SidebarSection>
       )}
-
-      {/* Responsable */}
-      <SidebarSection title="Responsable">
-        <div className="flex items-center gap-2 mb-2">
-          <UserCheck className="h-3.5 w-3.5 text-[#9ca3af] shrink-0" />
-          <p className="text-xs text-[#ede9fe] font-medium">
-            {project.assigned_name ?? <span className="italic text-[#9ca3af]">Non assigné</span>}
-          </p>
-        </div>
-        <Select
-          value={project.assigned_to ?? '__none__'}
-          onValueChange={(v) => onAssign(v === '__none__' ? null : v)}
-        >
-          <SelectTrigger className="h-7 text-xs bg-[#0f0b1e] border-[rgba(139,92,246,0.25)]">
-            <SelectValue placeholder="Choisir un responsable" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__none__">— Non assigné</SelectItem>
-            {users.map((u) => (
-              <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </SidebarSection>
     </div>
   )
 }

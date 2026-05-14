@@ -11,7 +11,7 @@ import { Dashboard } from '../../modules/Dashboard';
 import { Lock, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { ProjectsV2Provider } from '../../modules/ProjectsManagerV2/context/ProjectsV2Context';
-import { routes, getPermissionForPath } from '../../lib/routes';
+import { routes, getPermissionForPath, isAdminOnlyPath } from '../../lib/routes';
 
 // Lazy load heavy modules
 const CRM = lazy(() => import('../../modules/CRM').then(m => ({ default: m.CRM })));
@@ -36,6 +36,10 @@ const CommunicationManager = lazy(() => import('../../modules/CommunicationManag
 const ProceduresManager = lazy(() => import('../../modules/ProceduresManager').then(m => ({ default: m.ProceduresManager })))
 const ClientDetailsRoute = lazy(() => import('../routing/ClientDetailsRoute').then(m => ({ default: m.ClientDetailsRoute })))
 const ProjectDetailsV3Preview = lazy(() => import('../../modules/ProjectDetailsV3Preview').then(m => ({ default: m.ProjectDetailsV3Preview })))
+const AgencyVaultPage = lazy(() => import('../../modules/AgencyVault').then(m => ({ default: m.AgencyVaultPage })))
+const ProjectsV3Page = lazy(() => import('../../modules/ProjectsV3').then(m => ({ default: m.ProjectsV3Page })))
+const LeadsV3PlaceholderRoute = lazy(() => import('../../modules/LeadsV3').then(m => ({ default: m.LeadsV3Page })))
+const ProjectsV3CompletedPage = lazy(() => import('../../modules/ProjectsV3Completed').then(m => ({ default: m.ProjectsV3CompletedPage })))
 
 const ModuleLoader = () => (
   <div className="flex items-center justify-center h-64">
@@ -119,6 +123,13 @@ export function Layout() {
     if (!currentUserData || loading) return;
     if (currentUserData.role === 'admin') return;
 
+    // Routes admin-only : redirect immédiat pour tout non-admin
+    if (isAdminOnlyPath(location.pathname)) {
+      console.log(`🔒 Route admin-only ${location.pathname} → redirect dashboard`);
+      navigate(routes.dashboard, { replace: true });
+      return;
+    }
+
     const requiredPerm = getPermissionForPath(location.pathname);
     if (!requiredPerm) return;
     if (currentUserData[requiredPerm] === true) return;
@@ -157,7 +168,10 @@ export function Layout() {
   };
 
   const requiredPerm = getPermissionForPath(location.pathname);
-  const allowed = canAccess(requiredPerm);
+  const isAdminRoute = isAdminOnlyPath(location.pathname);
+  const allowed = isAdminRoute
+    ? (currentUserData?.role === 'admin')
+    : canAccess(requiredPerm);
 
   if (loading) {
     return (
@@ -215,6 +229,22 @@ export function Layout() {
 
               {/* V3 Preview — chantier de refonte en cours, accessible pour validation */}
               <Route path="/projets-v3-preview/:id" element={wrap(ProjectDetailsV3Preview)} />
+
+              {/* Coffre-fort agence (admin only — garde côté RPC) */}
+              <Route path={routes.agencyVault} element={wrap(AgencyVaultPage)} />
+
+              {/* Projets en cours V3 — refonte kanban 3 colonnes */}
+              <Route path={routes.projectsV3} element={wrap(ProjectsV3Page)} />
+
+              {/* Communication V3 — wiring vers modules V2 existants */}
+              <Route path={routes.communicationV3Production} element={wrap(Communication)} />
+              <Route path={routes.communicationV3Kpi} element={wrap(CommunicationKPI)} />
+
+              {/* Projets V3 Terminés — module V3 dédié, vue liste compacte */}
+              <Route path={routes.projectsV3Completed} element={wrap(ProjectsV3CompletedPage)} />
+
+              {/* Leads V3 — module en cours de construction (Phase 4) */}
+              <Route path={routes.leadsV3} element={wrap(LeadsV3PlaceholderRoute)} />
 
               {/* CRM v1 */}
               <Route path={routes.dashboardLegacy} element={<Dashboard />} />

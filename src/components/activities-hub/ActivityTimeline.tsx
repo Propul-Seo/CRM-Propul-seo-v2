@@ -117,6 +117,8 @@ interface Props<T extends string> {
   onUpdate?: (id: string, updates: { type: T; content: string }) => Promise<void>
   onDelete?: (id: string) => Promise<void>
   emptyHint?: string
+  /** Si fourni, remplace le rendu d'empty state par défaut. */
+  emptyState?: React.ReactNode
 }
 
 export function ActivityTimeline<T extends string>({
@@ -126,8 +128,10 @@ export function ActivityTimeline<T extends string>({
   onUpdate,
   onDelete,
   emptyHint = 'Aucune activité — utilisez les boutons ci-dessus pour en créer une.',
+  emptyState,
 }: Props<T>) {
   if (activities.length === 0) {
+    if (emptyState) return <>{emptyState}</>
     return <div className="text-center py-12 text-[#9ca3af] text-sm">{emptyHint}</div>
   }
 

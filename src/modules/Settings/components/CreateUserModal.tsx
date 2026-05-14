@@ -29,7 +29,7 @@ function generatePassword(length = 14): string {
   const all = upper + lower + digits + special;
 
   // Ensure at least one of each type
-  let password = [
+  const password = [
     upper[Math.floor(Math.random() * upper.length)],
     lower[Math.floor(Math.random() * lower.length)],
     digits[Math.floor(Math.random() * digits.length)],

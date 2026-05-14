@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Trash2, X } from 'lucide-react'
+import { Loader2, Plus, Trash2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { STATUS_CONFIG, PRIORITY_CLASS, PRIORITY_LABEL } from './constants'
@@ -8,18 +8,21 @@ import type { ChecklistItemV2, ChecklistStatus } from '@/types/project-v2'
 interface Props {
   item: ChecklistItemV2
   subItems: ChecklistItemV2[]
+  pendingIds?: Set<string>
   onCycleStatus: (id: string, current: ChecklistStatus) => void
   onAddSubTask: (parentId: string, title: string) => void
   onDelete: (id: string) => void
+  canDelete?: boolean
 }
 
-export function ProductionItem({ item, subItems, onCycleStatus, onAddSubTask, onDelete }: Props) {
+export function ProductionItem({ item, subItems, pendingIds, onCycleStatus, onAddSubTask, onDelete, canDelete = true }: Props) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [subOpen, setSubOpen] = useState(false)
   const [subTitle, setSubTitle] = useState('')
 
   const statusConf = STATUS_CONFIG[item.status]
   const StatusIcon = statusConf.icon
+  const isPending = pendingIds?.has(item.id) ?? false
 
   const submitSub = () => {
     if (!subTitle.trim()) return
@@ -33,10 +36,18 @@ export function ProductionItem({ item, subItems, onCycleStatus, onAddSubTask, on
       <div className="flex items-start gap-3 px-4 py-2.5 hover:bg-surface-3/30 transition-colors group">
         <button
           onClick={() => onCycleStatus(item.id, item.status)}
-          className={cn('mt-0.5 shrink-0 transition-colors hover:scale-110', statusConf.color)}
-          title={`Statut : ${statusConf.label}`}
+          disabled={isPending}
+          className={cn(
+            'mt-0.5 shrink-0 transition-colors',
+            isPending ? 'opacity-70 cursor-wait' : 'hover:scale-110',
+            statusConf.color,
+          )}
+          title={isPending ? 'Enregistrement…' : `Statut : ${statusConf.label}`}
+          aria-busy={isPending}
         >
-          <StatusIcon className="h-4 w-4" />
+          {isPending
+            ? <Loader2 className="h-4 w-4 animate-spin" />
+            : <StatusIcon className="h-4 w-4" />}
         </button>
 
         <div className="flex-1 min-w-0">
@@ -72,18 +83,22 @@ export function ProductionItem({ item, subItems, onCycleStatus, onAddSubTask, on
           >
             <Plus className="h-3.5 w-3.5" />
           </button>
-          <button
-            onClick={() => setConfirmDelete(true)}
-            className="text-muted-foreground hover:text-red-400 transition-colors p-0.5"
-            title="Supprimer"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
+          {canDelete && (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="text-muted-foreground hover:text-red-400 transition-colors p-0.5"
+              title="Supprimer"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
 
-        <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 border shrink-0', PRIORITY_CLASS[item.priority])}>
-          {PRIORITY_LABEL[item.priority] ?? item.priority}
-        </Badge>
+        {item.priority !== 'medium' && (
+          <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 border shrink-0', PRIORITY_CLASS[item.priority])}>
+            {PRIORITY_LABEL[item.priority] ?? item.priority}
+          </Badge>
+        )}
       </div>
 
       {confirmDelete && (
@@ -109,14 +124,23 @@ export function ProductionItem({ item, subItems, onCycleStatus, onAddSubTask, on
       {subItems.map((sub) => {
         const conf = STATUS_CONFIG[sub.status]
         const Icon = conf.icon
+        const subPending = pendingIds?.has(sub.id) ?? false
         return (
           <div key={sub.id} className="flex items-start gap-3 pl-8 pr-4 py-2 bg-surface-3/20 border-t border-border/30 hover:bg-surface-3/40 transition-colors group">
             <button
               onClick={() => onCycleStatus(sub.id, sub.status)}
-              className={cn('mt-0.5 shrink-0 transition-colors hover:scale-110', conf.color)}
-              title={`Statut : ${conf.label}`}
+              disabled={subPending}
+              className={cn(
+                'mt-0.5 shrink-0 transition-colors',
+                subPending ? 'opacity-70 cursor-wait' : 'hover:scale-110',
+                conf.color,
+              )}
+              title={subPending ? 'Enregistrement…' : `Statut : ${conf.label}`}
+              aria-busy={subPending}
             >
-              <Icon className="h-3.5 w-3.5" />
+              {subPending
+                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                : <Icon className="h-3.5 w-3.5" />}
             </button>
             <div className="flex-1 min-w-0">
               <p className={cn(

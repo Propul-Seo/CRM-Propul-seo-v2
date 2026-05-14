@@ -6,6 +6,10 @@ export interface ActionDef<T extends string = string> {
   icon: ElementType
   /** Tailwind classes appliquées au hover du bouton */
   colorClass: string
+  /** Tailwind classes appliquées à l'icône au repos (couleur d'icône) */
+  iconColorClass?: string
+  /** Texte affiché en tooltip au survol */
+  description?: string
 }
 
 export interface ActivityRecord<T extends string = string> {

@@ -12,6 +12,7 @@ export const routes = {
   projects: '/projets',
   projectDetail: (id: string) => `/projets/${id}`,
   projectsCompleted: '/projets/termines',
+  projectsV3: '/projets-en-cours',
 
   // Procédures (wiki interne)
   procedures: '/procedures',
@@ -45,6 +46,7 @@ export const routes = {
 
   // Personnel
   personalTasks: '/mes-taches',
+  agencyVault: '/coffre-fort',
 
   // Système
   contacts: '/contacts',
@@ -58,6 +60,10 @@ export const routes = {
 
   // V3 Preview (chantier en cours — à valider avant bascule officielle)
   projectV3Preview: (id: string) => `/projets-v3-preview/${id}`,
+  projectsV3Completed: '/projets-v3-termines',
+  leadsV3: '/leads-v3',
+  communicationV3Production: '/communication-v3/production',
+  communicationV3Kpi: '/communication-v3/kpi',
 } as const
 
 /**
@@ -100,6 +106,7 @@ export const routePermissions: Array<{ path: string; permission: string }> = [
   { path: routes.botOne, permission: 'can_view_crm_bot_one' },
   { path: routes.crmErp, permission: 'can_view_crm_erp' },
   { path: routes.projects, permission: 'can_view_projects' },
+  { path: routes.projectsV3, permission: 'can_view_projects' },
   { path: routes.projectsLegacy, permission: 'can_view_projects' },
   { path: routes.communication, permission: 'can_view_projects' },
   { path: routes.erp, permission: 'can_view_projects' },
@@ -111,7 +118,24 @@ export const routePermissions: Array<{ path: string; permission: string }> = [
   { path: routes.procedures, permission: 'can_view_procedures' },
   { path: routes.personalTasks, permission: 'can_view_dashboard' },
   { path: '/projets-v3-preview', permission: 'can_view_projects' },
+  { path: routes.projectsV3Completed, permission: 'can_view_projects' },
+  { path: routes.leadsV3, permission: 'can_view_leads' },
+  { path: routes.communicationV3Production, permission: 'can_view_communication' },
+  { path: routes.communicationV3Kpi, permission: 'can_view_communication' },
 ]
+
+/**
+ * Routes accessibles uniquement aux utilisateurs avec role='admin'.
+ * Vérification appliquée AVANT le check de permissions booléennes :
+ * un non-admin qui force l'URL est redirigé même s'il a can_view_dashboard.
+ */
+export const ADMIN_ONLY_PATHS: string[] = [
+  routes.agencyVault,
+]
+
+export function isAdminOnlyPath(pathname: string): boolean {
+  return ADMIN_ONLY_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
+}
 
 export function getPermissionForPath(pathname: string): string | null {
   const match = routePermissions

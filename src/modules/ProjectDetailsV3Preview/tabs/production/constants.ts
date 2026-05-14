@@ -1,4 +1,4 @@
-import { Circle, Clock, CheckCircle2 } from 'lucide-react'
+import { Circle, CheckCircle2 } from 'lucide-react'
 import type { ChecklistPhase, ChecklistStatus, PrestaType } from '@/types/project-v2'
 
 export const PHASE_LABELS: Record<ChecklistPhase, string> = {
@@ -14,11 +14,13 @@ export const PHASE_ORDER: ChecklistPhase[] = [
   'onboarding', 'conception', 'developpement', 'recette', 'post_livraison', 'general',
 ]
 
+// Cycle 2 états côté UX (todo / done). `in_progress` et `skipped` restent gérés en BDD
+// pour la rétrocompat mais s'affichent comme "à faire" — un clic les fait passer à `done`.
 export const STATUS_CONFIG: Record<ChecklistStatus, { label: string; icon: typeof Circle; color: string }> = {
-  todo:        { label: 'À faire',  icon: Circle,       color: 'text-muted-foreground' },
-  in_progress: { label: 'En cours', icon: Clock,        color: 'text-blue-400' },
-  done:        { label: 'Terminé',  icon: CheckCircle2, color: 'text-green-400' },
-  skipped:     { label: 'Ignoré',   icon: Circle,       color: 'text-muted-foreground' },
+  todo:        { label: 'À faire', icon: Circle,       color: 'text-muted-foreground' },
+  in_progress: { label: 'À faire', icon: Circle,       color: 'text-muted-foreground' },
+  done:        { label: 'Terminé', icon: CheckCircle2, color: 'text-green-400' },
+  skipped:     { label: 'À faire', icon: Circle,       color: 'text-muted-foreground' },
 }
 
 export const PRIORITY_CLASS: Record<string, string> = {
@@ -45,8 +47,3 @@ export const PRESTA_LABELS: Record<PrestaType, string> = {
   communication: 'Communication',
 }
 
-export const MOCK_USERS = [
-  { id: 'user-alice', name: 'Alice Martin' },
-  { id: 'user-bob',   name: 'Bob Lefèvre' },
-  { id: 'user-carol', name: 'Carol Petit' },
-]

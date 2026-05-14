@@ -10,10 +10,12 @@ interface Props {
   allItems: ChecklistItemV2[]
   progress: { total: number; done: number; percent: number }
   collapsed: boolean
+  pendingIds?: Set<string>
   onToggle: () => void
   onCycleStatus: (id: string, current: ChecklistStatus) => void
   onAddSubTask: (parentId: string, title: string) => void
   onDelete: (id: string) => void
+  canDelete?: boolean
 }
 
 export function ProductionPhase({
@@ -22,10 +24,12 @@ export function ProductionPhase({
   allItems,
   progress,
   collapsed,
+  pendingIds,
   onToggle,
   onCycleStatus,
   onAddSubTask,
   onDelete,
+  canDelete = true,
 }: Props) {
   return (
     <div className="bg-surface-2 border border-border rounded-lg overflow-hidden">
@@ -62,9 +66,11 @@ export function ProductionPhase({
               key={item.id}
               item={item}
               subItems={allItems.filter((i) => i.parent_task_id === item.id)}
+              pendingIds={pendingIds}
               onCycleStatus={onCycleStatus}
               onAddSubTask={onAddSubTask}
               onDelete={onDelete}
+              canDelete={canDelete}
             />
           ))}
         </div>

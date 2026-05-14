@@ -127,7 +127,7 @@ export function useUserBalanceData() {
       });
 
       // Filter out users with zero data, preserving those with expenses
-      let filteredBalances = balances.filter(b => b.totalRevenues > 0 || b.totalExpenses > 0);
+      const filteredBalances = balances.filter(b => b.totalRevenues > 0 || b.totalExpenses > 0);
 
       const totalChargesAllUsers = balances.reduce((sum, b) => sum + b.totalExpenses, 0);
       const totalChargesFiltered = filteredBalances.reduce((sum, b) => sum + b.totalExpenses, 0);

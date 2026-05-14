@@ -34,23 +34,31 @@ export function useProjectsV2(): UseProjectsV2Return {
   }, [fetchProjects])
 
   const updateProjectStatus = useCallback(async (id: string, newStatus: ProjectStatusV2) => {
-    const fromStatus = projects.find(p => p.id === id)?.status
     const { data, error } = await v2
       .from('projects')
       .update({ status: newStatus })
       .eq('id', id)
       .select()
       .single()
-    if (!error && data) {
-      setProjects(prev => prev.map(p => p.id === id ? data as ProjectV2 : p))
-      // Déclencher les automatisations en arrière-plan (ne bloque pas l'UI)
-      if (fromStatus && fromStatus !== newStatus) {
-        triggerStatusAutomations(id, fromStatus, newStatus).catch(err =>
-          console.error('[automation] triggerStatusAutomations failed:', err)
-        )
-      }
+    if (error) {
+      console.error('[updateProjectStatus] Supabase error:', error)
+      throw new Error(error.message)
     }
-  }, [projects])
+    if (!data) {
+      throw new Error('Aucun projet retourné après update')
+    }
+    let fromStatus: ProjectStatusV2 | undefined
+    setProjects(prev => {
+      fromStatus = prev.find(p => p.id === id)?.status
+      return prev.map(p => p.id === id ? data as ProjectV2 : p)
+    })
+    // Déclencher les automatisations en arrière-plan (ne bloque pas l'UI)
+    if (fromStatus && fromStatus !== newStatus) {
+      triggerStatusAutomations(id, fromStatus, newStatus).catch(err =>
+        console.error('[automation] triggerStatusAutomations failed:', err)
+      )
+    }
+  }, [])
 
   const updateProject = useCallback(async (id: string, updates: Partial<ProjectV2>) => {
     const { data, error } = await v2

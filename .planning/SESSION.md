@@ -1,40 +1,85 @@
-# Session State — 2026-05-11 22:30
+# Session State — 2026-05-13 fin (chantier V3 complet)
 
 ## Branch
-main
+**preview/v3-ux-overhaul** (exception V3 assumée — chantier isolé, pas de push)
 
-## Completed This Session
-- **Sprint 1** (V3 isolation foundations) : composants génériques `src/components/activities-hub/` (QuickActionBar, ActivityModal, ActivityTimeline, types). Réutilisables pour V3 sans toucher V1/V2.
-- **Sprint 2** (sidebars V3) : `ProjectV3LeftSidebar` + `ProjectV3RightSidebar` (copies adaptées du CRM ERP lead). Statuts génériques + spécifiques (sw/erp/comm) gérés via `getStatusStyle`/`getStatusLabel` avec fallback safe.
-- **Sprint 3** (onglets centraux) : 4 onglets V3 — Synthèse (KPI cards + timeline d'activités), Production (checklist par phase + templates par presta_type), Brief (édition 6 champs), Documents (GED par catégorie avec upload Supabase Storage).
-- **Sprint 4** (assemblage + route) : `ProjectDetailsV3Preview/index.tsx` (orchestration 3 colonnes + chip "V3 Preview"). Route `/projets-v3-preview/:id` accessible.
-- **Mode démo admin** : script local `scripts/create-demo-admin.mjs` (ignoré par git, mot de passe en clair). Compte créé : `lyestriki@yahoo.fr` / `DemoPropul2026!`, rôle admin toutes permissions.
-- **Bug fix** : `addActivity` du hook V3 alignée sur la vraie table BDD (`content` direct, pas `title`/`description` — la table prod utilise toujours l'ancien schéma).
-- **Sécurité (code review)** : route `/projets-v3-preview` ajoutée dans `routePermissions` avec permission `can_view_projects`.
+## Tag de retour rapide
+`git reset --hard v3-pre-autonomous-session` revient avant la session autonome.
 
-## Next Task
-**Démarrer Sprint 3A — UX Overhaul sur la branche `preview/v3-ux-overhaul`.**
+## Completed This Session (12 commits depuis le tag de safety)
 
-Plan complet dans [`.planning/V3_UX_OVERHAUL_PLAN.md`](./V3_UX_OVERHAUL_PLAN.md).
+### Refonte V3 livrée
+- **Phase 1** — Sidebar : V2 BETA → V3 PREVIEW, +4 routes (Leads, Projets terminés V3, Comm. Production, Comm. KPI)
+- **Phase 2** — Module ProjectsV3Completed (vue liste, filtres responsable/pôles/recherche)
+- **Phase 3** — Communication V3 wiring (routes V3 → modules V2 réutilisés)
+- **Phase 4** — Module Leads V3 (CRM Principal + CRM ERP fusionnés, variante Kanban A retenue)
+- **Phase 5** — Preview documents projet (PDF / images / vidéo / Office via Google Docs viewer)
+- **Phase 6** — Audit onglets restants (Accès, Brief, Sidebar droite) → AUDIT_PHASE6.md
+- **Bonus** — Conversion lead → projet 1 clic (bouton sur cards "signé")
 
-Sprints prévus :
-- **3A — Bugs bloquants** (~1h) : fix ajout tâche (bug `position` vs `sort_order` confirmé par code review #4), sidebar app collapse auto sur page V3, pipeline adapté au type de projet (sw/erp/comm), breadcrumb cliquable.
-- **3B — Cohérence info** (~1h) : supprimer redondances statuts (3 endroits → 1), repenser/supprimer section "Statistiques" droite, empty states actionnables, compteurs sur onglets.
-- **3C — Polish typo/empty/buttons** (~2h) : hiérarchie typographique, sidebar collapsable, QuickActionBar plus engageante, badges priorité par défaut invisibles, loading skeleton coordonné.
-- **3D — Power user + robustesse** (~2h) : toast d'erreur systématique (fixe code review #1, #2), optimistic UI, raccourcis clavier (Cmd+K palette), mode focus, permissions par rôle, `uploader_name` correct (#2), `fetchDocs` stable (#3).
+### Améliorations finales (après ton retour)
+- Choix utilisateur : **variante Kanban A** retenue, suppression de B (Compact) + C (Inbox) et de LeadCardV3Compact (-558 lignes)
+- Bouton "Nouveau projet" V3 branché sur modale dédiée
+- Modale Nouveau projet refondue : types **Communication / ERP / Site Web** (cohérence sidebar), tous les champs de Modifier (Client, Priorité, Date de début, SIRET)
+- Splittée en NewProjectModalV3 (77 L) + NewProjectFormV3 (220 L) pour respecter la règle 200 lignes
+- Fix BDD bonus : fallback `client_name = name` si vide (contrainte NOT NULL en BDD sinon INSERT échoue)
 
-**Première commande de la prochaine session** :
-```
-git checkout preview/v3-ux-overhaul
-```
+### Infrastructure tests (process pérenne)
+- Vitest installé + config + setup
+- 5 fichiers unit (105 tests, 1.4s) sur documentMimeType / leadStatusMapping / leadAdapters / poleMapping / statusMapping
+- 6 specs E2E Playwright (12 tests, 22s) sur navigation, création projet, terminés, leads, détail Lolett, comm wiring
+- Process futur acté : chaque nouvelle feature livre 1 test unit + 1 test E2E happy path
+
+### Lint cleanup
+- temp_files/ + next-public/ ignorés (code legacy hors scope)
+- Auto-fix triviales (let→const)
+- 420 → 329 erreurs (-91), reste dette technique préexistante dans src/
+
+## État final
+- TypeScript : clean
+- Tests : 105/105 unit + 12/12 E2E
+- Build prod : OK (Vite 7.4s)
+- V1/V2 : intacts, aucun fichier modifié hors scope V3
+- Push : aucun (commits locaux uniquement)
+
+## Next Task — Production templates
+
+L'utilisateur veut ouvrir une **nouvelle session dédiée aux templates production**.
+
+### État actuel (à lire en début de session suivante)
+- Fichier : `src/modules/ProjectDetailsV3Preview/tabs/production/templates.ts`
+- **7 templates** : web (16 tâches), site_web (21), seo (13), erp (13), erp_v2 (9), saas (12), communication (7)
+- Total : 91 tâches templates
+- Problème : avec la nouvelle modale création qui n'expose que Communication/ERP/Site Web, les anciens templates `web`, `seo`, `saas`, `erp_v2` deviennent non utilisés pour les nouveaux projets mais restent pour la compat des projets V1/V2 existants en BDD
+
+### Options présentées
+- A. Garder tels quels (rétrocompat)
+- B. Supprimer les 4 legacy (-49 tâches)
+- C. Fusionner web + site_web et erp + erp_v2
+
+### Pistes connexes pour la session templates
+- Permettre la création de templates custom côté UI (BDD ?)
+- Templater aussi le brief, les accès attendus, les documents requis
+- Éditer un template existant sans toucher au code
 
 ## Blockers
 Aucun.
 
 ## Key Context
-- **Règle V3 isolation stricte** : ne JAMAIS modifier les fichiers V1/V2. Tout en V3 est dans `src/components/activities-hub/` et `src/modules/ProjectDetailsV3Preview/`. Mémoire `feedback_v3_isolation.md` à respecter. Cf MEMORY.md.
-- **Mode démo admin** : `lyestriki@yahoo.fr` / `DemoPropul2026!` sur le projet Supabase `tbuqctfgjjxnevmsvucl`. Script `scripts/create-demo-admin.mjs` non commit. Pour relancer : `node scripts/create-demo-admin.mjs`.
-- **Bug V2 connu (non corrigé) — règle isolation** : `useActivitiesV2` (V2) insère `content` au lieu de `title`/`description` SI la table v2.project_activities (schéma v2) est utilisée. En réalité le client `v2.from('project_activities')` redirige vers `public.project_activities_v2` qui utilise `content` → V2 fonctionne par hasard. À investiguer un jour si schéma BDD migré.
-- **2 fichiers V1/V2 modifiés** (additif autorisé) : `src/lib/routes.ts` (helper + permission) et `src/components/layout/Layout.tsx` (lazy import + Route).
-- **Migration SQL non commitée** : `supabase/migrations/20260507_project_end_checklist.sql` — chantier antérieur, à vérifier avant prochain commit BDD.
-- **Issues de code review différées au Sprint 3D** : #1 (handleDelete erreurs), #2 (uploader_name hardcodé), #3 (fetchDocs stable). Issue #6 (sécurité permission) **corrigée** cette session. Issue #4 (position vs sort_order) à fixer en Sprint 3A.
+- Dev server : http://localhost:5174
+- Login admin : lyestriki@yahoo.fr
+- Branche : preview/v3-ux-overhaul, ahead of origin by 12 commits, **AUCUN PUSH**
+- Tag retour catastrophe : v3-pre-autonomous-session
+- Routes V3 actives : /leads-v3, /projets-en-cours, /projets-v3-termines, /projets-v3-preview/:id, /communication-v3/production, /communication-v3/kpi, /coffre-fort
+- Variante Leads V3 retenue : A (Kanban). B et C supprimées.
+- Tests : `npm run test` (unit), `npm run test:e2e` (E2E)
+- Issues différées (non bloquantes) :
+  - Realtime Supabase pas branché dans Leads V3 (mono-user OK)
+  - DocumentsTabV3 préexistant à 247 lignes (>200)
+  - 329 erreurs ESLint préexistantes dans src/ (no-any, exhaustive-deps)
+  - MetricCard Score retirée du détail projet (pas d'algo défini)
+
+## Push manuel (à faire quand tu valides)
+```bash
+git push origin preview/v3-ux-overhaul
+```

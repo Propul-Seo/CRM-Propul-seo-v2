@@ -22,23 +22,27 @@ export function QuickActionBar<T extends string>({ actions, onAdd, showMore = tr
 
   return (
     <>
-      <div className="flex items-center gap-1 px-5 py-2.5 border-b border-[rgba(139,92,246,0.18)] bg-[#070512] shrink-0">
-        {actions.map(({ type, label, icon: Icon, colorClass }) => (
+      <div className="flex items-center gap-1.5 px-5 py-3 border-b border-[rgba(139,92,246,0.18)] bg-[#070512] shrink-0">
+        {actions.map(({ type, label, icon: Icon, colorClass, iconColorClass, description }) => (
           <button
             key={type}
             onClick={() => handleClick(type)}
+            title={description ?? label}
             className={cn(
-              'flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg text-[#9ca3af]',
-              'transition-all text-[10px] font-medium',
+              'flex flex-col items-center justify-center gap-1 px-3.5 h-12 rounded-lg text-[#ede9fe]',
+              'transition-all text-[11px] font-medium',
               colorClass,
             )}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className={cn('h-4 w-4', iconColorClass ?? 'text-[#A78BFA]')} />
             {label}
           </button>
         ))}
         {showMore && (
-          <button className="flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg text-[#9ca3af] hover:text-[#ede9fe] hover:bg-[#0f0b1e] transition-all text-[10px] font-medium ml-1">
+          <button
+            title="Plus d'actions"
+            className="flex flex-col items-center justify-center gap-1 px-3.5 h-12 rounded-lg text-[#9ca3af] hover:text-[#ede9fe] hover:bg-[#0f0b1e] transition-all text-[11px] font-medium ml-1"
+          >
             <MoreHorizontal className="h-4 w-4" />
             Plus
           </button>

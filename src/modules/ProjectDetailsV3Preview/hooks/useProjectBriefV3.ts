@@ -24,6 +24,7 @@ export function useProjectBriefV3(projectId: string): UseReturn {
       .eq('project_id', projectId)
       .maybeSingle()
       .then(({ data, error }) => {
+        if (error) console.error('[useProjectBriefV3] fetch failed', error)
         if (!error) setBrief((data as ProjectBrief | null) ?? null)
         setLoading(false)
       })
@@ -38,7 +39,10 @@ export function useProjectBriefV3(projectId: string): UseReturn {
           .eq('id', brief.id)
           .select()
           .single()
-        if (error) throw new Error(error.message)
+        if (error) {
+          console.error('[useProjectBriefV3] update failed', { briefId: brief.id, error })
+          throw new Error(`Impossible d'enregistrer le brief : ${error.message}`)
+        }
         if (updated) setBrief(updated as ProjectBrief)
       } else {
         const { data: created, error } = await v2
@@ -46,7 +50,10 @@ export function useProjectBriefV3(projectId: string): UseReturn {
           .insert({ ...data, project_id: projectId })
           .select()
           .single()
-        if (error) throw new Error(error.message)
+        if (error) {
+          console.error('[useProjectBriefV3] insert failed', { projectId, error })
+          throw new Error(`Impossible de créer le brief : ${error.message}`)
+        }
         if (created) setBrief(created as ProjectBrief)
       }
     },

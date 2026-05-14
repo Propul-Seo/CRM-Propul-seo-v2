@@ -606,3 +606,59 @@ export interface KpiMonthly {
   delivered_projects: number
   refreshed_at: string
 }
+
+// ===== PROJECT CONTACTS (multi-contacts par projet) =====
+
+/**
+ * Rôle d'un contact dans un projet.
+ * - primary : interlocuteur principal (un seul par projet, contrainte BDD)
+ * - decision_maker : décideur côté client
+ * - technical : référent technique/IT
+ * - billing : référent comptabilité/facturation
+ * - other : autre
+ */
+export type ProjectContactRole = 'primary' | 'decision_maker' | 'technical' | 'billing' | 'other'
+
+export const PROJECT_CONTACT_ROLE_LABELS: Record<ProjectContactRole, string> = {
+  primary:        'Principal',
+  decision_maker: 'Décideur',
+  technical:      'Technique',
+  billing:        'Comptabilité',
+  other:          'Autre',
+}
+
+/** Liaison projet ↔ contact dans la table de liaison `project_contacts`. */
+export interface ProjectContact {
+  id: string
+  project_id: string
+  contact_id: string
+  role: ProjectContactRole
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+/** Payload pour créer une liaison (INSERT). */
+export interface ProjectContactInsert {
+  project_id: string
+  contact_id: string
+  role?: ProjectContactRole
+  notes?: string | null
+}
+
+/** Payload pour mettre à jour une liaison (UPDATE). */
+export interface ProjectContactUpdate {
+  role?: ProjectContactRole
+  notes?: string | null
+}
+
+/** Vue enrichie : liaison + coordonnées du contact (via JOIN). */
+export interface ProjectContactWithDetails extends ProjectContact {
+  contact: {
+    id: string
+    name: string
+    email: string | null
+    phone: string | null
+    company: string | null
+  }
+}

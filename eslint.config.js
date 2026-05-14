@@ -5,7 +5,9 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  // temp_files/ : code legacy / debug / POC, hors scope production (~150 erreurs).
+  // next-public/ : sous-projet séparé avec sa propre config eslint.
+  { ignores: ['dist', 'temp_files/**', 'next-public/**'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

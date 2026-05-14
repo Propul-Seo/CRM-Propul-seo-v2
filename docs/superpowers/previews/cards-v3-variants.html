@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>V3 — Cartes Projet (3 variantes)</title>
+<style>
+  /* ===== Palette V3 Propul'SEO ===== */
+  :root {
+    --bg-0: #0a0814;
+    --bg-1: #0f0b1e;
+    --bg-2: #1a1430;
+    --bg-3: #070512;
+    --border: rgba(139, 92, 246, 0.18);
+    --border-strong: rgba(139, 92, 246, 0.35);
+    --violet: #8B5CF6;
+    --violet-light: #A78BFA;
+    --violet-soft: rgba(139, 92, 246, 0.08);
+    --text-primary: #ede9fe;
+    --text-muted: #9ca3af;
+    --text-dim: #6b7280;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --red: #ef4444;
+
+    /* Couleurs pôles distinctes */
+    --pole-comm: #06b6d4;   /* cyan */
+    --pole-erp: #f59e0b;    /* ambre */
+    --pole-web: #10b981;    /* émeraude */
+
+    /* Couleurs colonnes statut */
+    --col-planif: #8B5CF6;
+    --col-cours: #10b981;
+    --col-pause: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg-0);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 48px 32px;
+  }
+
+  h1 {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 48px;
+  }
+
+  /* ===== Grille comparative ===== */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .variant {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .variant-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--violet-light);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .variant-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .variant-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .variant-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ============================================================ */
+  /* VARIANTE A — Compacte verticale                                */
+  /* ============================================================ */
+  .card-a {
+    position: relative;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 14px 14px 16px;
+    cursor: grab;
+    transition: all 0.2s ease;
+    overflow: hidden;
+  }
+  .card-a::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--col-cours);
+  }
+  .card-a.planif::before { background: var(--col-planif); }
+  .card-a.pause::before  { background: var(--col-pause); }
+
+  .card-a:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+  }
+  .card-a .a-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+  .card-a .a-client {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  .card-a .a-client .sep { color: var(--text-dim); margin: 0 6px; }
+  .card-a .a-progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .card-a .a-progress-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .card-a .a-progress-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .card-a .a-progress-bar {
+    height: 4px;
+    background: var(--bg-2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .card-a .a-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--violet), var(--violet-light));
+    border-radius: 2px;
+  }
+  .card-a .a-poles {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* ============================================================ */
+  /* VARIANTE B — Éclatée horizontale                               */
+  /* ============================================================ */
+  .card-b {
+    position: relative;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    cursor: grab;
+    transition: all 0.2s ease;
+  }
+  .card-b:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+  }
+
+  .card-b .b-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .card-b .b-titles { flex: 1; min-width: 0; }
+  .card-b .b-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .card-b .b-client {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .card-b .b-progress-display {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .card-b .b-percent {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .card-b .b-percent-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+
+  .card-b .b-bar {
+    height: 3px;
+    background: var(--bg-2);
+    border-radius: 1.5px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .card-b .b-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--violet), var(--violet-light));
+    border-radius: 1.5px;
+  }
+
+  .card-b .b-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .card-b .b-poles {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .card-b .b-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--violet-soft);
+    color: var(--violet-light);
+    font-size: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ============================================================ */
+  /* VARIANTE C — Cartouche instrument                              */
+  /* ============================================================ */
+  .card-c {
+    position: relative;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: grab;
+    transition: all 0.2s ease;
+  }
+  .card-c:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+  }
+
+  .card-c .c-header {
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
+    border-bottom: 1px solid var(--border);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-c .c-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+  }
+  .card-c .c-id {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--violet-light);
+    font-variant-numeric: tabular-nums;
+    background: rgba(139, 92, 246, 0.15);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .card-c .c-body { padding: 14px; }
+  .card-c .c-client {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+  .card-c .c-progress-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .card-c .c-progress-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .card-c .c-progress-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .card-c .c-bar {
+    height: 4px;
+    background: var(--bg-2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .card-c .c-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--violet), var(--violet-light));
+    border-radius: 2px;
+  }
+  .card-c .c-poles {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .card-c .c-pole-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+  .card-c .c-pole-dot::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .card-c .c-pole-dot.comm::before { background: var(--pole-comm); box-shadow: 0 0 6px var(--pole-comm); }
+  .card-c .c-pole-dot.erp::before  { background: var(--pole-erp);  box-shadow: 0 0 6px var(--pole-erp); }
+  .card-c .c-pole-dot.web::before  { background: var(--pole-web);  box-shadow: 0 0 6px var(--pole-web); }
+
+  /* ===== Badges pôles partagés (variantes A et B) ===== */
+  .pole-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 18px;
+    padding: 0 7px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .pole-badge.comm {
+    background: rgba(6, 182, 212, 0.12);
+    color: var(--pole-comm);
+    border: 1px solid rgba(6, 182, 212, 0.25);
+  }
+  .pole-badge.erp {
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--pole-erp);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+  }
+  .pole-badge.web {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--pole-web);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+  }
+
+  /* ===== Footer info ===== */
+  .footnote {
+    margin-top: 56px;
+    padding: 20px;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .footnote strong { color: var(--text-primary); }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>V3 — Cartes Projet · 3 variantes</h1>
+    <p class="subtitle">Dark theme V3 réel · même palette que coffre projet · 3 hiérarchies visuelles à comparer.</p>
+
+    <div class="grid">
+      <!-- ============================ -->
+      <!-- VARIANTE A — Compacte         -->
+      <!-- ============================ -->
+      <section class="variant">
+        <div class="variant-title">Variante A</div>
+        <h2 class="variant-name">Compacte verticale</h2>
+        <p class="variant-desc">Dense, filet vertical coloré par statut. Beaucoup de cartes visibles dans une colonne.</p>
+
+        <div class="variant-stack">
+          <article class="card-a">
+            <div class="a-name">Emeline</div>
+            <div class="a-client">précieuse <span class="sep">·</span> Lyes</div>
+            <div class="a-progress-row">
+              <span class="a-progress-label">Avancement</span>
+              <span class="a-progress-value">45%</span>
+            </div>
+            <div class="a-progress-bar"><div class="a-progress-fill" style="width: 45%"></div></div>
+            <div class="a-poles">
+              <span class="pole-badge comm">Comm</span>
+              <span class="pole-badge erp">ERP</span>
+            </div>
+          </article>
+
+          <article class="card-a planif">
+            <div class="a-name">Docagora</div>
+            <div class="a-client">Health finder <span class="sep">·</span> Sarah</div>
+            <div class="a-progress-row">
+              <span class="a-progress-label">Avancement</span>
+              <span class="a-progress-value">12%</span>
+            </div>
+            <div class="a-progress-bar"><div class="a-progress-fill" style="width: 12%"></div></div>
+            <div class="a-poles">
+              <span class="pole-badge web">SiteWeb</span>
+            </div>
+          </article>
+
+          <article class="card-a pause">
+            <div class="a-name">ERP PROPUL'SEO</div>
+            <div class="a-client">ERP team <span class="sep">·</span> Marien</div>
+            <div class="a-progress-row">
+              <span class="a-progress-label">Avancement</span>
+              <span class="a-progress-value">78%</span>
+            </div>
+            <div class="a-progress-bar"><div class="a-progress-fill" style="width: 78%"></div></div>
+            <div class="a-poles">
+              <span class="pole-badge erp">ERP</span>
+              <span class="pole-badge web">SiteWeb</span>
+              <span class="pole-badge comm">Comm</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ============================ -->
+      <!-- VARIANTE B — Éclatée          -->
+      <!-- ============================ -->
+      <section class="variant">
+        <div class="variant-title">Variante B</div>
+        <h2 class="variant-name">Éclatée horizontale</h2>
+        <p class="variant-desc">% XL en lecture immédiate. Plus aérée, identification éclair de l'avancement.</p>
+
+        <div class="variant-stack">
+          <article class="card-b">
+            <div class="b-header">
+              <div class="b-titles">
+                <div class="b-name">Emeline</div>
+                <div class="b-client">précieuse</div>
+              </div>
+              <div class="b-progress-display">
+                <div class="b-percent">45<span style="font-size: 16px; color: var(--text-muted);">%</span></div>
+                <div class="b-percent-label">Avancement</div>
+              </div>
+            </div>
+            <div class="b-bar"><div class="b-bar-fill" style="width: 45%"></div></div>
+            <div class="b-footer">
+              <div class="b-poles">
+                <span class="pole-badge comm">Comm</span>
+                <span class="pole-badge erp">ERP</span>
+              </div>
+              <div class="b-avatar" title="Lyes">L</div>
+            </div>
+          </article>
+
+          <article class="card-b">
+            <div class="b-header">
+              <div class="b-titles">
+                <div class="b-name">Docagora</div>
+                <div class="b-client">Health finder</div>
+              </div>
+              <div class="b-progress-display">
+                <div class="b-percent">12<span style="font-size: 16px; color: var(--text-muted);">%</span></div>
+                <div class="b-percent-label">Avancement</div>
+              </div>
+            </div>
+            <div class="b-bar"><div class="b-bar-fill" style="width: 12%"></div></div>
+            <div class="b-footer">
+              <div class="b-poles">
+                <span class="pole-badge web">SiteWeb</span>
+              </div>
+              <div class="b-avatar" title="Sarah">S</div>
+            </div>
+          </article>
+
+          <article class="card-b">
+            <div class="b-header">
+              <div class="b-titles">
+                <div class="b-name">ERP PROPUL'SEO</div>
+                <div class="b-client">ERP team</div>
+              </div>
+              <div class="b-progress-display">
+                <div class="b-percent">78<span style="font-size: 16px; color: var(--text-muted);">%</span></div>
+                <div class="b-percent-label">Avancement</div>
+              </div>
+            </div>
+            <div class="b-bar"><div class="b-bar-fill" style="width: 78%"></div></div>
+            <div class="b-footer">
+              <div class="b-poles">
+                <span class="pole-badge erp">ERP</span>
+                <span class="pole-badge web">SiteWeb</span>
+                <span class="pole-badge comm">Comm</span>
+              </div>
+              <div class="b-avatar" title="Marien">M</div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ============================ -->
+      <!-- VARIANTE C — Cartouche        -->
+      <!-- ============================ -->
+      <section class="variant">
+        <div class="variant-title">Variante C</div>
+        <h2 class="variant-name">Cartouche instrument</h2>
+        <p class="variant-desc">En-tête marqué + numéro projet + pôles en points lumineux. Style "fiche technique".</p>
+
+        <div class="variant-stack">
+          <article class="card-c">
+            <div class="c-header">
+              <div class="c-name">Emeline</div>
+              <div class="c-id">#07</div>
+            </div>
+            <div class="c-body">
+              <div class="c-client">précieuse · Lyes</div>
+              <div class="c-progress-row">
+                <span class="c-progress-label">Avancement</span>
+                <span class="c-progress-value">45%</span>
+              </div>
+              <div class="c-bar"><div class="c-bar-fill" style="width: 45%"></div></div>
+              <div class="c-poles">
+                <span class="c-pole-dot comm">Comm</span>
+                <span class="c-pole-dot erp">ERP</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card-c">
+            <div class="c-header">
+              <div class="c-name">Docagora</div>
+              <div class="c-id">#12</div>
+            </div>
+            <div class="c-body">
+              <div class="c-client">Health finder · Sarah</div>
+              <div class="c-progress-row">
+                <span class="c-progress-label">Avancement</span>
+                <span class="c-progress-value">12%</span>
+              </div>
+              <div class="c-bar"><div class="c-bar-fill" style="width: 12%"></div></div>
+              <div class="c-poles">
+                <span class="c-pole-dot web">SiteWeb</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card-c">
+            <div class="c-header">
+              <div class="c-name">ERP PROPUL'SEO</div>
+              <div class="c-id">#03</div>
+            </div>
+            <div class="c-body">
+              <div class="c-client">ERP team · Marien</div>
+              <div class="c-progress-row">
+                <span class="c-progress-label">Avancement</span>
+                <span class="c-progress-value">78%</span>
+              </div>
+              <div class="c-bar"><div class="c-bar-fill" style="width: 78%"></div></div>
+              <div class="c-poles">
+                <span class="c-pole-dot erp">ERP</span>
+                <span class="c-pole-dot web">SiteWeb</span>
+                <span class="c-pole-dot comm">Comm</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <div class="footnote">
+      <strong>Comment lire :</strong> les 3 cartes du haut représentent le même projet dans chaque variante.
+      Les statuts de colonne (Planification / En cours / En pause) sont matérialisés différemment selon la variante :
+      <ul style="margin-top: 8px; padding-left: 20px;">
+        <li><strong>A</strong> — filet vertical à gauche, couleur par statut (violet/vert/ambre)</li>
+        <li><strong>B</strong> — pas d'indicateur sur la carte, le contexte vient de la colonne</li>
+        <li><strong>C</strong> — en-tête violet uniforme, le contexte vient de la colonne</li>
+      </ul>
+      <p style="margin-top: 12px;">
+        <strong>Pôles</strong> : Comm (cyan) · ERP (ambre) · SiteWeb (émeraude). Couleurs distinctes par pôle pour scan visuel rapide.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

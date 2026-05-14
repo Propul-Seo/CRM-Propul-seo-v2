@@ -65,3 +65,9 @@ coverage/
 
 # Demo admin script (mot de passe en clair — NE JAMAIS COMMIT)
 scripts/create-demo-admin.mjs
+
+# E2E
+.env.test
+playwright-report/
+test-results/
+.mockups/
