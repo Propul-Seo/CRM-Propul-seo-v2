@@ -25,11 +25,11 @@ import {
   ListTodo,
   type LucideIcon
 } from 'lucide-react';
-import { useStore } from '../../store';
-import { cn } from '../../lib/utils';
-import { useAuth } from '../../hooks/useAuth';
-import { useUsers } from '../../hooks/useUsers';
-import { routes } from '../../lib/routes';
+import { useStore } from '@/store';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
+import { useUsers, type User } from '@/hooks/useUsers';
+import { routes } from '@/lib/routes';
 
 interface NavItem {
   to: string;
@@ -49,7 +49,7 @@ export function Sidebar() {
 
   const { user } = useAuth();
   const { getUserByAuthId } = useUsers();
-  const [currentUserData, setCurrentUserData] = useState<any>(null);
+  const [currentUserData, setCurrentUserData] = useState<User | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(['admin', 'perso', 'v3'])
   );
