@@ -81,6 +81,7 @@ export interface ContactRow {
     id: string;
     name: string;
     email: string;
+    is_active?: boolean;
   } | null;
   assigned_user_name?: string | null;
   next_activity_date: string | null;

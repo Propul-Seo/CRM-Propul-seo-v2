@@ -34,7 +34,7 @@ export interface CRMERPLead {
   assignee_id: string | null;
   notes: string | null;
   last_activity_at: string | null;
-  assignee?: { id: string; name: string; email: string } | null;
+  assignee?: { id: string; name: string; email: string; is_active?: boolean } | null;
 }
 
 export type ActivityType = 'call' | 'email' | 'meeting' | 'note' | 'task';

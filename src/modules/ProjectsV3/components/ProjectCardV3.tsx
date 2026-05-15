@@ -1,4 +1,5 @@
 import type { ProjectV2 } from '@/types/project-v2'
+import { useActiveUserIds } from '@/hooks/useActiveUserIds'
 import { getActivePoles, V3_POLE_LABELS, V3_POLE_COLORS, type V3Pole } from '../utils/poleMapping'
 
 interface Props {
@@ -8,10 +9,16 @@ interface Props {
 }
 
 export function ProjectCardV3({ project, index, onClick }: Props) {
+  const activeIds = useActiveUserIds()
   const poles = getActivePoles(project.presta_type)
   const progress = Math.max(0, Math.min(100, Math.round(project.progress ?? 0)))
   const projectNumber = String(index + 1).padStart(2, '0')
-  const clientLine = [project.client_name, project.assigned_name].filter(Boolean).join(' · ')
+  // Si le responsable est désactivé (ou supprimé), on masque son nom.
+  // activeIds peut être vide au premier render → on n'applique le masque qu'une fois chargé.
+  const assignedActive =
+    !project.assigned_to || activeIds.size === 0 || activeIds.has(project.assigned_to)
+  const assignedLabel = assignedActive ? project.assigned_name : null
+  const clientLine = [project.client_name, assignedLabel].filter(Boolean).join(' · ')
 
   return (
     <article

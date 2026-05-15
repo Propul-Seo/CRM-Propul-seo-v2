@@ -17,7 +17,7 @@ export function useLeadsV3Erp() {
       setLoading(true)
       const { data, error: err } = await supabase
         .from('crmerp_leads')
-        .select('*, assignee:users!assignee_id(id, name, email)')
+        .select('*, assignee:users!assignee_id(id, name, email, is_active)')
         .order('created_at', { ascending: false })
       if (err) throw err
       setLeads((data ?? []) as CRMERPLead[])
