@@ -1,71 +1,68 @@
-# Session State — 2026-05-15 fin
+# Session State — 2026-05-15 fin (cleanup V1/V2 massif)
 
 ## Branch
-**main** — synchronisée avec origin/main (dernier commit pushé : `51efffc`)
+**main** — synchronisée avec origin/main (commit `c319dab`)
 
 ## Sommaire éclair
-Session post-prod : polish UX V3 et Dashboard final. Pas de chantier sécurité aujourd'hui.
+Session de gros nettoyage : suppression complète V1/V2, app 100% V3. Coolify deploy déclenché en fin de session.
 
 ## Completed cette session
 
-### Routes V3 (cohérence navigation)
-- Breadcrumb fiche projet V3 (`← Site Web/ERP/Communication`) → toujours `← Projets` vers `/projets-en-cours`
-- Fallback erreur fiche projet → `routes.projectsV3` au lieu de `/projets` (V2)
-- Audit complet effectué : un seul autre lead-V3 → V1/V2 noté comme dette technique (clic lead ouvre détail V1 car pas de fiche lead V3 dispo)
+### Nettoyage V1/V2 massif (commit `5be7091` — 42 700 lignes supprimées sur 328 fichiers)
+- **17 modules supprimés** : Dashboard, MonthlyDashboard, ClientDetails, CRM, CRMBotOne, ContactDetailsBotOne, CRMERP, ProjectsManager, ProjectDetails, CompletedProjectsManager, Contacts, CommunicationClients, CommunicationManager, ERPManager, SiteWebManager, ProjectDetailsV2, TaskManager
+- **ProjectsManagerV2** réduit à `hooks/` uniquement (utilisé par ClientBrief)
+- **Composants orphelins** supprimés : `components/crm/`, `dialogs/`, `calendar/`, `activities/`, `prospect-activities/`, `realtime/`, plusieurs notifications/mobile/common isolés
+- **Découplages V3 préalables** : LeadsV3 utilise CRMERPLeadDetails/types, ProjectDetailsV3Preview a ses propres mocks/, ProjectsV3 utilise useProjectsV3 (copie de useProjectsV2), DashboardV3 navigate routes V3 only
+- **Sidebar** : 2 sections (Admin + CRM Propulseo + Système), sections "Pôles V2" et "CRM V1" supprimées
+- **Layout + routes.ts + mobile nav** : références legacy supprimées
+- **Code review fixed** (4 findings) : suppression 2 hooks dead code (useMockChecklist, useMockProjects), DashboardV3/useDashboardData typage strict + path aliases, suppression moduleToRoute
 
-### Tri Leads V3 par dernière activité
-- Site Web : reprend la logique exacte de `sortContacts` V1 (next_activity_date asc, puis created_at asc)
-- ERP : tri par `last_activity_at` desc, fallback `created_at` desc
-- Implémenté via 2 nouvelles fonctions `sortSiteWebLeads` / `sortErpLeads` dans `leadAdapters.ts`
+### Dashboard V3 simplifié (commit `c319dab`)
+- Suppression `TasksCard`, `UrgentTasksAlert`, `AiSummariesSection` (240 lignes)
+- Garde : Revenue, Contacts, Projets, QuickStats, RDV à venir, RevenueChart, Objectifs
 
-### Dashboard V3 (chemin sinueux mais clean au final)
-- **D'abord** : créé 4 previews navigables (Cockpit, Hero, Bento, Éditorial) sur routes `/dashboard-preview-{1..4}` avec PreviewSwitcher
-- **Décision utilisateur** : préférait le V1 existant → cloner V1 (intact) vers `src/modules/DashboardV3/` puis appliquer DA V3 (background violet)
-- **Cleanup** : 4 previews supprimées + module `DashboardV2` supprimé entièrement (mort code)
-- `/dashboard` pointe désormais directement sur `DashboardV3` (le V1 cloné)
-- Le V1 d'origine `src/modules/Dashboard/` reste intact (cohérent avec règle d'isolation stricte)
+### Audits 3 agents en parallèle
+- Agent deps modules : SAFE
+- Agent routes/UI : AUCUN orphelin
+- Agent DB/Supabase : ~30 composants orphelins supplémentaires identifiés et supprimés
+- **Erreur d'audit rattrapée** : `activities-hub/` supprimé puis restauré (utilisé par SyntheseTabV3.tsx)
 
-### Sidebar nettoyage
-- "Personnel" renommée → **Admin** (admin-only conservé)
-- "V3 Preview" renommée → **CRM Propulseo**
-- Comptabilité montée dans Admin (section Finance supprimée car vide)
-- État initial : V3 ouvert par défaut, V2 fermé
-- Labels V3 simplifiés : "Projets actifs", "Communication", "KPI", "Projets terminés"
+### Déploiement
+- Coolify deploy `j118yeqht7l7npyth9q3w4gl` queued
+- Gitleaks pre-commit ✅ no leaks
 
 ## Next Tasks (par priorité)
 
-### En attente de feedback utilisateur
-- DA Dashboard V3 : tester en prod et ajuster si le rendu visuel n'est pas exactement V3 (les variables CSS `--surface-*` correspondent déjà à la DA V3, donc 90% du chemin est fait, à voir si touches finales nécessaires)
-
-### 🟠 P1 — Hardening Supabase (différé d'hier)
-1. Supabase Auth Settings → activer leaked password protection
+### 🟠 P1 — Hardening Supabase (toujours différé)
+1. Activer leaked password protection (Auth Settings)
 2. Réduire OTP expiry à 600s
 3. Restreindre 2 buckets Storage publics
-4. Retirer 3 materialized views de l'API REST (kpi_*)
+4. Retirer 3 materialized views `kpi_*` de l'API REST
 5. Upgrade Postgres
 6. Fix récursion infinie policy `channel_members`
 
-### 🟡 P2 — Dette technique notée ce sprint
-- **Fiche détail Lead V3 absente** : clic sur lead V3 ouvre fiche V1 (`/clients/:id`) ou ERP V1 (`/crm-erp/leads/:leadId`). À créer un jour pour cohérence totale.
-- `Sidebar.tsx` > 200L (toujours à refactor)
-- 5 fichiers V3 > 200L
+### 🟡 P2 — Dette technique restante
+- **Fiche détail Lead V3 absente** : clic lead V3 ouvre toujours fiche V1 (ContactDetails, CRMERPLeadDetails). Conservées comme "fonctions mère" pour l'instant.
+- **Hooks/services/types orphelins** (option B reportée du gros cleanup) : ~16 hooks, 3 services, 6 types morts à virer dans `src/hooks/`, `src/services/`, `src/types/`. Aucun impact visuel, juste hygiène.
+- Sidebar.tsx, 5 fichiers V3 > 200L
 
-### 🟢 P3 — Refacto Dashboard
-- Le module `DashboardV3` est un clone complet de `Dashboard` V1. Si V1 est supprimé un jour, mutualiser les composants partagés (RevenueChart, etc.)
+### 🟢 P3 — Refacto
+- `DashboardV3` = clone de Dashboard V1 supprimé. Refacto déjà fait via héritage de structure ; rien d'urgent.
 
 ## Blockers
 Aucun.
 
 ## Key Context
-- Branch : **main** (clean, commit `51efffc`)
-- Prod : https://crm.propulseo-site.com (HEALTHY)
-- Dev local : `npm run dev` → http://localhost:5173 (ou 5174 si 5173 occupé)
-- Coolify : token API dans `.env` (`CoolifyToken=...`), UUID app `el094rjbgs6iefsvaws6qs0w`
+- Branch : **main** (clean, commit `c319dab`)
+- Prod : https://crm.propulseo-site.com (deploy en cours `j118yeqht7l7npyth9q3w4gl`)
+- Dev local : `npm run dev` → port libre (5173 → 5174 → 5175 si occupés)
+- Coolify : token API dans `.env`, UUID app `el094rjbgs6iefsvaws6qs0w`
 - Login admin : lyestriki@yahoo.fr
-- Format clés Supabase : `sb_publishable_*` + `sb_secret_*` + JWT asymétrique
-- Hook gitleaks : actif sur `.githooks/pre-commit`
+- Hook gitleaks : actif sur `.githooks/pre-commit` (vérifié ce jour, ✅ no leaks)
+- **Modules V1 "fonctions mère" conservés** : Communication, CommunicationKPI (utilisés par V3), ContactDetails, CRMERPLeadDetails (fiches détail leads V3), ClientBrief, ClientPortal (routes publiques /brief, /portal)
+- **Métriques cleanup** : `src/modules/` 33 → 17 dossiers, ~42 940 lignes nettes supprimées sur 2 commits
 
-## Comment redeployer
+## Comment redéployer
 ```bash
 TOKEN=$(grep "^CoolifyToken=" .env | cut -d'=' -f2-)
 curl -X GET "https://coolify.propulseo-site.com/api/v1/deploy?uuid=el094rjbgs6iefsvaws6qs0w&force=false" \
