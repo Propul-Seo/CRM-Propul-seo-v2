@@ -11,12 +11,9 @@ import { DashboardHeader } from './components/DashboardHeader';
 import { RevenueCard } from './components/RevenueCard';
 import { ContactsCard } from './components/ContactsCard';
 import { ProjectsCard } from './components/ProjectsCard';
-import { TasksCard } from './components/TasksCard';
 import { QuickStatsCard } from './components/QuickStatsCard';
-import { UrgentTasksAlert } from './components/UrgentTasksAlert';
 import { RevenueChartSection } from './components/RevenueChartSection';
 import { ObjectivesSection } from './components/ObjectivesSection'
-import { AiSummariesSection } from './components/AiSummariesSection'
 import { UpcomingMeetingsCard } from './components/UpcomingMeetingsCard';
 
 export function DashboardV3() {
@@ -97,21 +94,7 @@ export function DashboardV3() {
             isMobile={isMobile}
             onClick={data.handleNavigateToProjects}
           />
-          <TasksCard
-            urgentTasks={data.urgentTasks}
-            pendingTasks={data.pendingTasks}
-            isPrivacyMode={isPrivacyMode}
-            isMobile={isMobile}
-            onClick={data.handleNavigateToTasks}
-          />
           <QuickStatsCard isPrivacyMode={isPrivacyMode} isMobile={isMobile} />
-          {!isPrivacyMode && (
-            <UrgentTasksAlert
-              urgentTasks={data.urgentTasks}
-              isMobile={isMobile}
-              onNavigateToTasks={data.handleNavigateToTasks}
-            />
-          )}
           <UpcomingMeetingsCard isMobile={isMobile} />
           <RevenueChartSection
             isPrivacyMode={isPrivacyMode}
@@ -126,13 +109,6 @@ export function DashboardV3() {
             isMobile={isMobile}
             onOpenModal={() => setShowObjectivesModal(true)}
           />
-          {!isPrivacyMode && (
-            <AiSummariesSection
-              projects={(data.projects ?? []) as any}
-              isMobile={isMobile}
-              onNavigateToProject={data.handleNavigateToProject}
-            />
-          )}
         </motion.div>
       </div>
 
