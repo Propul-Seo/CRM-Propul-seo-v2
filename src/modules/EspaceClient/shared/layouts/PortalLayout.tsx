@@ -1,9 +1,10 @@
 import { useEffect, type ReactNode } from 'react';
-import { LogOut, Sparkles } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { PortalTabBar } from './PortalTabBar';
 import { PortalContactFab } from './PortalContactFab';
+import { BrandPill } from '@/modules/EspaceClient/shared/components';
 import { AGENCY_NAME, type PortalTab } from '@/modules/EspaceClient/shared/constants';
 import './portal-theme.css';
 
@@ -54,12 +55,7 @@ export function PortalLayout({
       <header className="ps-frosted sticky top-0 z-20 border-b border-[var(--ps-border-soft)]">
         <div className="mx-auto flex h-[60px] max-w-6xl items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3">
-            <div
-              className="ps-brand-gradient flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[12px] font-bold tracking-tight text-white shadow-[0_2px_8px_-2px_rgba(124,58,237,0.45),inset_0_1px_0_rgba(255,255,255,0.18)]"
-            >
-              <Sparkles className="h-3.5 w-3.5" strokeWidth={2.4} />
-              {AGENCY_NAME}
-            </div>
+            <BrandPill />
             <span className="hidden h-5 w-px bg-[var(--ps-border)] sm:block" />
             <span className="hidden text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--ps-text-muted)] sm:inline">
               Espace client
