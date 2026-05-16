@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8"><title>Vue 18 — Signature confirmée</title>
+<link rel="stylesheet" href="../tokens/colors_and_type.css">
+<link rel="stylesheet" href="../tokens/portal.css">
+<link rel="stylesheet" href="../tokens/admin.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+  body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+  .container { max-width: 1340px; margin: 0 auto; }
+  .section-h { margin: 36px auto 16px; max-width: 1340px; }
+  .section-h h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; margin: 0; color: #2a2418; }
+  .section-h p { font-size: 13px; color: #6b6357; margin: 4px 0 0; }
+</style>
+</head>
+<body>
+<div id="head"></div>
+
+    <div class="section-h"><h2>Signature reçue</h2></div>
+    <div class="container"><div id="s-ok"></div></div>
+
+<script type="text/babel" src="_lib/primitives.jsx"></script>
+<script type="text/babel" src="_lib/shell.jsx"></script>
+<script type="text/babel" src="_lib/desktop-shell.jsx"></script>
+<script type="text/babel" src="_lib/admin-shell.jsx"></script>
+<script type="text/babel" src="_lib/v2-shared.jsx"></script>
+
+<script type="text/babel">
+function Head() {
+  return <PageHead num="18" title="Retour de DocuSeal — Document signé" subtitle="Confirmation avec audit info (timestamp + IP)." />;
+}
+
+function Custom() {
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 6,
+      padding: "4px 12px", borderRadius: 9999, marginBottom: 16,
+      background: "var(--ps-primary-subtle)", color: "var(--ps-primary-deep)",
+      fontSize: 11.5, fontWeight: 600,
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: 9999, background: "var(--ps-primary)" }} />
+      Confirmé par DocuSeal
+    </span>
+  );
+}
+function S() {
+  return (
+    <StatusPage
+      shellUrl="espace.propulseo-site.com/signatures/sign/success?token=abc"
+      iconName="check"
+      iconTone="violet"
+      customBadge={<Custom />}
+      title="Document signé"
+      subtitle="Votre signature électronique a bien été enregistrée. Le PDF signé est disponible dans votre espace et vous a été envoyé par email."
+      details={
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>Document</span>
+            <span style={{ color: "var(--ps-fg)", fontWeight: 500 }}>Avenant SEO mensuel</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>Signé le</span>
+            <span className="ps-num" style={{ color: "var(--ps-fg)", fontWeight: 500 }}>15 mai 2026 · 14:22</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>IP signataire</span>
+            <span style={{ fontFamily: "var(--ps-font-mono)", color: "var(--ps-fg-muted)" }}>82.66.xx.xx</span>
+          </div>
+        </div>
+      }
+      primaryCta="Télécharger le PDF signé"
+      secondaryCta="Retour à mon espace"
+      secondaryHref="/espace-client"
+    />
+  );
+}
+ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+ReactDOM.createRoot(document.getElementById("s-ok")).render(<S />);
+</script>
+</body></html>

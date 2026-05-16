@@ -1,0 +1,185 @@
+/**
+ * Propul'Space portal theme — scoped under `.propulspace-portal`.
+ *
+ * Source of truth: Propulspace/design_handoff_propulspace/tokens/*.css
+ * (Phase 2 design handoff v1). When the handoff changes, mirror here.
+ *
+ * Naming: short form (--ps-bg, --ps-fg) follows the handoff. Long-form
+ * aliases (--ps-background, --ps-text-primary) kept for backward
+ * compatibility with components written before the handoff merge — will
+ * be migrated when each component is touched again.
+ */
+
+.propulspace-portal {
+  /* ─── SURFACES ─────────────────────────────────────────── */
+  --ps-bg: #FAFAFA;
+  --ps-bg-elevated: #FFFFFF;
+  --ps-bg-subtle: #F4F4F5;
+  --ps-bg-frosted: rgba(255, 255, 255, 0.82);
+
+  /* legacy aliases */
+  --ps-background: var(--ps-bg);
+  --ps-background-elevated: var(--ps-bg-elevated);
+  --ps-background-subtle: var(--ps-bg-subtle);
+
+  /* ─── TEXT ─────────────────────────────────────────────── */
+  --ps-fg: #18181B;
+  --ps-fg-secondary: #52525B;
+  --ps-fg-muted: #A1A1AA;
+
+  --ps-text-primary: var(--ps-fg);
+  --ps-text-secondary: var(--ps-fg-secondary);
+  --ps-text-muted: var(--ps-fg-muted);
+
+  /* ─── BRAND ────────────────────────────────────────────── */
+  --ps-primary: #7C3AED;
+  --ps-primary-hover: #6D28D9;
+  --ps-primary-deep: #5B21B6;
+  --ps-primary-text: #5B21B6;
+  --ps-primary-subtle: #EDE9FE;
+
+  /* ─── SEMANTIC ─────────────────────────────────────────── */
+  --ps-success: #16A34A;  --ps-success-subtle: #DCFCE7;
+  --ps-warning: #EA580C;  --ps-warning-subtle: #FFEDD5;
+  --ps-danger:  #DC2626;  --ps-danger-subtle:  #FEE2E2;
+  --ps-info:    #2563EB;  --ps-info-subtle:    #DBEAFE;
+
+  /* ─── BORDERS / SHADOWS ────────────────────────────────── */
+  --ps-border: #E4E4E7;
+  --ps-border-soft: #F0F0F2;
+  --ps-border-strong: #D4D4D8;
+  --ps-shadow-card:     0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.05);
+  --ps-shadow-raised:   0 4px 12px -2px rgba(91,33,182,.10), 0 2px 4px -1px rgba(16,24,40,.06);
+  --ps-shadow-floating: 0 10px 25px rgba(124,58,237,.08);
+  --ps-shadow-fab:      0 10px 30px -8px rgba(124,58,237,.45), 0 4px 10px -2px rgba(124,58,237,.25), inset 0 1px 0 rgba(255,255,255,.15);
+
+  /* ─── RADII ────────────────────────────────────────────── */
+  --ps-radius-input: 8px;
+  --ps-radius-card:  14px;
+  --ps-radius-modal: 16px;
+  --ps-radius-pill:  9999px;
+
+  /* ─── SPACING (4px base) ───────────────────────────────── */
+  --ps-space-1:  4px;
+  --ps-space-2:  8px;
+  --ps-space-3:  12px;
+  --ps-space-4:  16px;
+  --ps-space-5:  20px;
+  --ps-space-6:  24px;
+  --ps-space-8:  32px;
+  --ps-space-10: 40px;
+  --ps-space-12: 48px;
+  --ps-space-16: 64px;
+
+  /* ─── MOTION ───────────────────────────────────────────── */
+  --ps-ease:     cubic-bezier(0.4, 0, 0.2, 1);
+  --ps-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ps-dur-fast: 150ms;
+  --ps-dur-base: 200ms;
+  --ps-dur-slow: 300ms;
+
+  /* ─── TOUCH ────────────────────────────────────────────── */
+  --ps-touch: 44px;
+
+  /* ─── TYPE ─────────────────────────────────────────────── */
+  --ps-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --ps-font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  /* ─── ROOT STYLES ──────────────────────────────────────── */
+  font-family: var(--ps-font-sans);
+  font-size: 15px;
+  line-height: 24px;
+  letter-spacing: -0.005em;
+  font-feature-settings: "cv11", "ss03", "cv02";
+  color: var(--ps-fg);
+  color-scheme: light;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(124, 58, 237, 0.07), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(99, 102, 241, 0.05), transparent 50%),
+    var(--ps-bg);
+  background-attachment: fixed;
+}
+
+.propulspace-portal * { border-color: var(--ps-border-soft); }
+.propulspace-portal h1, .propulspace-portal h2, .propulspace-portal h3 { letter-spacing: -0.025em; }
+.propulspace-portal a       { color: var(--ps-primary); transition: color var(--ps-dur-base) var(--ps-ease); }
+.propulspace-portal a:hover { color: var(--ps-primary-hover); }
+
+/* ─── SEMANTIC TYPE CLASSES ────────────────────────────── */
+.propulspace-portal .ps-display { font-size: 32px; line-height: 40px; font-weight: 700; letter-spacing: -0.025em; }
+.propulspace-portal .ps-h1      { font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: -0.025em; margin: 0; }
+.propulspace-portal .ps-h2      { font-size: 18px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em; margin: 0; }
+.propulspace-portal .ps-h3      { font-size: 15px; line-height: 22px; font-weight: 600; letter-spacing: -0.005em; margin: 0; }
+.propulspace-portal .ps-body    { font-size: 15px; line-height: 24px; font-weight: 400; color: var(--ps-fg-secondary); }
+.propulspace-portal .ps-small   { font-size: 13px; line-height: 20px; font-weight: 400; color: var(--ps-fg-secondary); }
+.propulspace-portal .ps-tiny    { font-size: 12px; line-height: 16px; font-weight: 500; color: var(--ps-fg-muted); }
+.propulspace-portal .ps-eyebrow { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ps-primary-text); }
+.propulspace-portal .ps-eyebrow-muted { color: var(--ps-fg-muted); }
+.propulspace-portal .ps-num     { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+/* ─── SURFACES & EFFECTS ───────────────────────────────── */
+.propulspace-portal .ps-surface {
+  background: var(--ps-bg-elevated);
+  border: 1px solid var(--ps-border-soft);
+  border-radius: var(--ps-radius-card);
+  box-shadow: var(--ps-shadow-card);
+  transition: transform var(--ps-dur-base) var(--ps-ease),
+              box-shadow  var(--ps-dur-base) var(--ps-ease);
+}
+.propulspace-portal .ps-surface-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--ps-shadow-raised);
+}
+.propulspace-portal .ps-frosted {
+  background: var(--ps-bg-frosted);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+.propulspace-portal .ps-gradient-text {
+  background: linear-gradient(135deg, var(--ps-fg) 0%, var(--ps-primary-deep) 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
+}
+.propulspace-portal .ps-brand-gradient {
+  background: linear-gradient(135deg, var(--ps-primary) 0%, var(--ps-primary-deep) 100%);
+}
+.propulspace-portal .ps-hero-blur {
+  pointer-events: none; position: absolute; right: -50px; top: -50px;
+  width: 220px; height: 220px; border-radius: 9999px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.18), transparent 70%);
+}
+
+/* ─── MOTION PRIMITIVES ────────────────────────────────── */
+@keyframes ps-fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ps-pulse   { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@keyframes ps-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes ps-fab-pulse {
+  0%, 100% { box-shadow: var(--ps-shadow-fab); }
+  50%      { box-shadow: var(--ps-shadow-fab), 0 0 0 8px rgba(124, 58, 237, 0.12); }
+}
+@keyframes ps-spin { to { transform: rotate(360deg); } }
+
+.propulspace-portal .ps-fade-in { animation: ps-fade-up 320ms var(--ps-ease-out) both; }
+.propulspace-portal .ps-pulse   { animation: ps-pulse 2s var(--ps-ease) infinite; }
+.propulspace-portal .ps-fab     { animation: ps-fab-pulse 2.4s var(--ps-ease) 1s 2; }
+.propulspace-portal .ps-skeleton {
+  background: linear-gradient(90deg, rgba(124,58,237,0.04) 25%, rgba(124,58,237,0.10) 50%, rgba(124,58,237,0.04) 75%);
+  background-size: 200% 100%;
+  animation: ps-shimmer 1.5s infinite;
+  border-radius: var(--ps-radius-input);
+}
+
+/* ─── FOCUS (accessible violet ring) ───────────────────── */
+.propulspace-portal :focus-visible {
+  outline: 2px solid var(--ps-primary);
+  outline-offset: 2px;
+  border-radius: var(--ps-radius-input);
+}
+
+/* ─── SAFE-AREA (iOS bottom nav) ───────────────────────── */
+@supports (padding: max(0px)) {
+  .propulspace-portal .ps-safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
+  .propulspace-portal .ps-safe-top    { padding-top: max(env(safe-area-inset-top), 0px); }
+}

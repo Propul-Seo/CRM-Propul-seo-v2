@@ -10,6 +10,12 @@ const ClientPortalPage = lazy(() =>
   import('./modules/ClientPortal/ClientPortalPage').then(m => ({ default: m.ClientPortalPage }))
 );
 
+// TEMPORARY (Task A3): preview-only route for the new Propul'Space PortalLayout.
+// Remove or replace at Task A5 when real client pages + routing land.
+const PortalLayoutPreview = lazy(() =>
+  import('./modules/EspaceClient/shared/layouts/PortalLayout.preview').then(m => ({ default: m.PortalLayoutPreview }))
+);
+
 const ClientBriefPage = lazy(() =>
   import('./modules/ClientBrief/ClientBriefPage').then(m => ({ default: m.ClientBriefPage }))
 );
@@ -94,6 +100,16 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route
+          path="/espace-client/__preview"
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<div className="min-h-screen bg-white" />}>
+                <PortalLayoutPreview />
+              </Suspense>
+            </ErrorBoundary>
+          }
+        />
         <Route path="/portal/:token" element={<PortalPageRoute />} />
         <Route path="/brief/:token" element={<BriefPageRoute />} />
         <Route path="/brief-invite/:token" element={<BriefInvitePageRoute />} />

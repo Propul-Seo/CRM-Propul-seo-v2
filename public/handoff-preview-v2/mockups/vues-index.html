@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"><title>Propul'Space v2 — Index 17 nouvelles vues + 10 emails</title>
+  <link rel="stylesheet" href="../tokens/colors_and_type.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+    body { font-family: var(--ps-font-sans); padding: 48px 24px 80px; color: #2a2418; }
+    .wrap { max-width: 1240px; margin: 0 auto; }
+    h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.025em; margin: 0; }
+    .lede { font-size: 16px; color: #6b6357; margin: 10px 0 0; max-width: 760px; line-height: 1.55; }
+    .group-h { margin: 40px 0 12px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #6b6357; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .card { background: #fff; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04); padding: 16px; text-decoration: none; color: inherit; transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px -8px rgba(91, 33, 182, 0.18); border-color: rgba(124, 58, 237, 0.2); }
+    .card.admin { background: linear-gradient(180deg, #0f0b1e 0%, #070512 100%); color: #ECECEE; border-color: rgba(139, 92, 246, 0.15); }
+    .card.admin:hover { box-shadow: 0 8px 24px -8px rgba(139, 92, 246, 0.5); }
+    .card.email { background: linear-gradient(180deg, #fdf6ff, #fff); border-color: rgba(124, 58, 237, 0.12); }
+    .num { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: #5B21B6; }
+    .card.admin .num { color: #A78BFA; }
+    .name { font-size: 15px; font-weight: 700; letter-spacing: -0.015em; margin: 6px 0 4px; line-height: 1.3; }
+    .desc { font-size: 11.5px; color: #6b6357; margin: 0; line-height: 1.5; min-height: 36px; }
+    .card.admin .desc { color: #A8A4B5; }
+    .arrow { color: #A1A1AA; transition: transform 200ms; position: absolute; top: 14px; right: 14px; }
+    .card:hover .arrow { transform: translate(2px, -2px); color: #7C3AED; }
+    .card.admin:hover .arrow { color: #A78BFA; }
+    .note { font-size: 13px; color: #6b6357; margin: 12px 0 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Propul'Space — Compléments v2</h1>
+    <p class="lede">17 nouvelles vues + 10 emails transactionnels pour compléter le front. Tous les fichiers utilisent les <strong>mêmes tokens</strong> et <strong>mêmes primitives</strong> que le bundle v1 — rien à réapprendre.</p>
+
+    <div class="group-h">Portail client · pages d'erreur &amp; retours</div>
+    <div class="grid">
+      <a class="card" href="vue-13-magic-link-expired.html"><span class="num">Vue 13</span><div class="name">Magic link expiré</div><p class="desc">2 états : expiré (15 min) et invalide.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card" href="vue-14-404-portal.html"><span class="num">Vue 14</span><div class="name">404 portail</div><p class="desc">Dans le PortalLayout. Big 404 gradient + retour.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card" href="vue-16-stripe-success.html"><span class="num">Vue 16</span><div class="name">Stripe success</div><p class="desc">Retour paiement OK · facture + montant + reçu.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card" href="vue-17-stripe-cancel.html"><span class="num">Vue 17</span><div class="name">Stripe cancel</div><p class="desc">Paiement interrompu · ton neutre.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card" href="vue-18-docuseal-success.html"><span class="num">Vue 18</span><div class="name">Signature OK</div><p class="desc">Confirmation + audit trail.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card" href="vue-19-docuseal-cancel.html"><span class="num">Vue 19</span><div class="name">Signature interrompue</div><p class="desc">Reprendre + date d'expiration.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+    </div>
+
+    <div class="group-h">Portail client · pages annexes</div>
+    <div class="grid">
+      <a class="card" href="vue-15-qualif-recap.html"><span class="num">Vue 15</span><div class="name">Récap qualification</div><p class="desc">Read-only après création compte. 2 modes (prospect / activé).</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card" href="vue-20-portal-suspended.html"><span class="num">Vue 20</span><div class="name">Portail suspendu</div><p class="desc">Mode désactivé + contacts WhatsApp / Email.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card" href="vue-21-profil-client.html"><span class="num">Vue 21</span><div class="name">Profil &amp; paramètres</div><p class="desc">3 sections + dropdown header.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card" href="vue-22-maintenance.html"><span class="num">Vue 22</span><div class="name">Maintenance</div><p class="desc">Page maintenance générique avec ETA.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+    </div>
+
+    <div class="group-h">Admin CRM · Sheets &amp; AlertDialogs</div>
+    <div class="grid">
+      <a class="card admin" href="vue-23-sheet-send-signature.html"><span class="num">Vue 23</span><div class="name">Sheet envoi signature</div><p class="desc">Template + upload + expiration + signataire + message.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card admin" href="vue-24-sheet-upload-doc.html"><span class="num">Vue 24</span><div class="name">Sheet upload doc</div><p class="desc">Multi-fichiers + type + visibilité par fichier.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card admin" href="vue-25-alert-deactivate-portal.html"><span class="num">Vue 25</span><div class="name">Désactiver portail</div><p class="desc">Confirmation destructive + raison obligatoire.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card admin" href="vue-26-alert-delete-document.html"><span class="num">Vue 26</span><div class="name">Supprimer document</div><p class="desc">Soft delete 30 jours.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card admin" href="vue-27-alert-cancel-invoice.html"><span class="num">Vue 27</span><div class="name">Annuler facture</div><p class="desc">Status cancelled + motif d'audit.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card admin" href="vue-28-alert-disqualify-lead.html"><span class="num">Vue 28</span><div class="name">Disqualifier lead</div><p class="desc">5 raisons + précisions.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card admin" href="vue-29-notifications-panel.html"><span class="num">Vue 29</span><div class="name">Notifications</div><p class="desc">Bell + popover 3 sections + empty state.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+    </div>
+
+    <div class="group-h">Emails transactionnels · 10 templates Brevo</div>
+    <div class="grid">
+      <a class="card email" href="../emails/index.html"><span class="num">Aperçu</span><div class="name">Tous les emails</div><p class="desc">Index avec les 10 mails en iframes.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card email" href="../emails/30-magic-link.html"><span class="num">#30</span><div class="name">Magic link</div><p class="desc">Lien de connexion 15 min.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card email" href="../emails/31-qualif-confirmation.html"><span class="num">#31</span><div class="name">Qualif reçue</div><p class="desc">Merci + timeline 3 étapes.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card email" href="../emails/32-new-lead-alert.html"><span class="num">#32 ·  Admin</span><div class="name">Nouveau lead</div><p class="desc">Alerte interne avec score.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card email" href="../emails/33-invoice-sent.html"><span class="num">#33</span><div class="name">Facture émise</div><p class="desc">CTA Stripe direct.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card email" href="../emails/34-invoice-reminder.html"><span class="num">#34</span><div class="name">Rappel retard</div><p class="desc">Ton bienveillant.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card email" href="../emails/35-payment-received.html"><span class="num">#35</span><div class="name">Paiement reçu</div><p class="desc">Confirmation + reçu PDF.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card email" href="../emails/36-signature-requested.html"><span class="num">#36</span><div class="name">À signer</div><p class="desc">Lien DocuSeal.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card email" href="../emails/37-signature-completed.html"><span class="num">#37</span><div class="name">Signé</div><p class="desc">PDF joint.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card email" href="../emails/38-portal-welcome.html"><span class="num">#38</span><div class="name">Bienvenue</div><p class="desc">Onboarding portail.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+      <a class="card email" href="../emails/39-new-deliverable.html"><span class="num">#39</span><div class="name">Nouveau livrable</div><p class="desc">Doc disponible.</p><span class="arrow"><i data-lucide="arrow-up-right"></i></span></a>
+    </div>
+
+    <p class="note"><strong>Lecture du bundle</strong> : ce v2 ajoute aux 12 vues de v1. À déballer en parallèle dans le repo CRM.</p>
+  </div>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

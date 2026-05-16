@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8"><title>Vue 23 — Sheet envoi signature</title>
+<link rel="stylesheet" href="../tokens/colors_and_type.css">
+<link rel="stylesheet" href="../tokens/portal.css">
+<link rel="stylesheet" href="../tokens/admin.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+  body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+  .container { max-width: 1340px; margin: 0 auto; }
+</style></head>
+<body><div id="head"></div>
+<div class="container"><div id="root"></div></div>
+<script type="text/babel" src="_lib/primitives.jsx"></script>
+<script type="text/babel" src="_lib/shell.jsx"></script>
+<script type="text/babel" src="_lib/desktop-shell.jsx"></script>
+<script type="text/babel" src="_lib/admin-shell.jsx"></script>
+
+<script type="text/babel">
+function SendSignSheet() {
+  return (
+    <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 480, background: "var(--a-bg-2)", borderLeft: "1px solid var(--a-border-2)", boxShadow: "-20px 0 40px -20px rgba(0,0,0,0.6)", zIndex: 40, overflowY: "auto", color: "var(--a-fg)" }}>
+      <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--a-border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div>
+          <span className="a-eyebrow">Nouveau document</span>
+          <div className="a-h2" style={{ marginTop: 4, fontSize: 16 }}>Envoyer à signer</div>
+        </div>
+        <button className="a-btn a-btn-ghost" style={{ padding: "0 8px" }}><Icon name="x" size={14} stroke={2} /></button>
+      </div>
+
+      <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Template */}
+        <div className="ps-field">
+          <label className="ps-label" style={{ color: "var(--a-fg)" }}>Type de document</label>
+          <select className="a-input">
+            <option>Devis</option>
+            <option selected>Contrat de prestation</option>
+            <option>Avenant</option>
+            <option>Autre</option>
+          </select>
+          <div style={{ fontSize: 11, color: "var(--a-fg-muted)", marginTop: 4 }}>Template DocuSeal associé : <code style={{ fontFamily: "var(--ps-font-mono)" }}>tpl_contract_v3</code></div>
+        </div>
+
+        {/* Upload */}
+        <div className="ps-field">
+          <label className="ps-label" style={{ color: "var(--a-fg)" }}>Document à signer</label>
+          <div style={{ padding: 18, border: "1.5px dashed var(--a-border-2)", borderRadius: 10, background: "rgba(0,0,0,0.2)", display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ width: 38, height: 38, borderRadius: 9, background: "rgba(239,68,68,0.15)", color: "#F87171", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Icon name="file-text" size={17} stroke={2.2} />
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 500 }}>contrat-precieuse-v4.pdf</div>
+              <div className="ps-num" style={{ fontSize: 11, color: "var(--a-fg-muted)" }}>450 KB · uploadé il y a 12 sec</div>
+            </div>
+            <button style={{ background: "transparent", border: "none", color: "var(--a-fg-muted)", cursor: "pointer", padding: 4 }}>
+              <Icon name="x" size={14} stroke={2} />
+            </button>
+          </div>
+          <div style={{ fontSize: 11, color: "var(--a-fg-muted)", marginTop: 4 }}>1 fichier PDF max, 25 MB</div>
+        </div>
+
+        {/* Expiration */}
+        <div className="ps-field">
+          <label className="ps-label" style={{ color: "var(--a-fg)" }}>Date d'expiration</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input className="a-input" type="date" defaultValue="2026-05-30" style={{ flex: 1 }} />
+            <select className="a-input" style={{ width: 110 }}>
+              <option>+ 7 jours</option>
+              <option selected>+ 14 jours</option>
+              <option>+ 30 jours</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Signataire (read-only) */}
+        <div className="ps-field">
+          <label className="ps-label" style={{ color: "var(--a-fg)" }}>Signataire <span style={{ fontWeight: 400, color: "var(--a-fg-muted)" }}>· hérité du projet</span></label>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 8, background: "rgba(0,0,0,0.25)", border: "1px solid var(--a-border)" }}>
+            <span style={{ width: 32, height: 32, borderRadius: 9999, background: "#d4a574", color: "#fff", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>EL</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 500 }}>Eméline Le Ray</div>
+              <div style={{ fontSize: 11, color: "var(--a-fg-muted)", fontFamily: "var(--ps-font-mono)" }}>eml@precieuse.fr</div>
+            </div>
+            <Icon name="lock" size={13} stroke={2} style={{ color: "var(--a-fg-muted)" }} />
+          </div>
+        </div>
+
+        {/* Message */}
+        <div className="ps-field">
+          <label className="ps-label" style={{ color: "var(--a-fg)" }}>Message au signataire <span style={{ fontWeight: 400, color: "var(--a-fg-muted)" }}>· optionnel</span></label>
+          <textarea className="a-input" rows="3" placeholder="Ex : Voici votre contrat à signer. N'hésitez pas à me contacter si vous avez la moindre question." style={{ height: "auto", padding: "10px 12px", resize: "none" }} defaultValue="Voici votre contrat de prestation pour la refonte du site. Tout est bien en règle, je reste disponible pour toute question." />
+        </div>
+
+        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 6 }}>
+          <button className="a-btn a-btn-ghost">Annuler</button>
+          <button className="a-btn a-btn-primary"><Icon name="send" size={13} stroke={2.2} />Envoyer pour signature</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Backdrop({ children }) {
+  return (
+    <AdminWindow>
+      <div style={{ position: "relative" }}>
+        <AdminShell activeKey="portals" title="Précieuse Joaillerie" breadcrumb="Portails clients ›">
+          <div style={{ filter: "blur(1px)", opacity: 0.7 }}>
+            <div className="a-card" style={{ padding: 18, marginBottom: 16, height: 80 }} />
+            <div className="a-card" style={{ padding: 18, height: 240 }} />
+          </div>
+        </AdminShell>
+        {children}
+      </div>
+    </AdminWindow>
+  );
+}
+
+function Head() {
+  return <PageHead num="23" title="Sheet — Envoyer un document à signer" subtitle="Déclenché depuis vue 11 tab Signatures. Sheet right 480px. Form template + upload + expiration + signataire + message." />;
+}
+ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+ReactDOM.createRoot(document.getElementById("root")).render(<Backdrop><SendSignSheet /></Backdrop>);
+</script>
+</body></html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Propul'Space — Index des 12 vues</title>
+  <link rel="stylesheet" href="../tokens/colors_and_type.css">
+  <link rel="stylesheet" href="../tokens/portal.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+    body { font-family: var(--ps-font-sans); padding: 48px 24px 80px; color: #2a2418; }
+    .wrap { max-width: 1200px; margin: 0 auto; }
+    h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.025em; margin: 0; }
+    .lede { font-size: 16px; color: #6b6357; margin: 10px 0 0; max-width: 720px; line-height: 1.55; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 32px; }
+    .card { background: #fff; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04); padding: 18px; text-decoration: none; color: inherit; transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px -8px rgba(91, 33, 182, 0.18), 0 2px 6px rgba(16, 24, 40, 0.06); border-color: rgba(124, 58, 237, 0.2); }
+    .card.admin { background: linear-gradient(180deg, #0f0b1e 0%, #070512 100%); color: #ECECEE; border-color: rgba(139, 92, 246, 0.15); }
+    .card.admin:hover { box-shadow: 0 8px 24px -8px rgba(139, 92, 246, 0.5); border-color: rgba(139, 92, 246, 0.4); }
+    .num { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ps-primary-deep); }
+    .card.admin .num { color: #A78BFA; }
+    .name { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; margin: 8px 0 4px; }
+    .desc { font-size: 12.5px; color: #6b6357; margin: 0 0 14px; line-height: 1.5; min-height: 56px; }
+    .card.admin .desc { color: #A8A4B5; }
+    .meta { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.05); font-size: 11px; color: #A1A1AA; }
+    .card.admin .meta { border-color: rgba(255,255,255,0.06); color: #6E6885; }
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 9999px; background: rgba(124,58,237,0.10); color: var(--ps-primary-deep); font-weight: 600; }
+    .card.admin .pill { background: rgba(139, 92, 246, 0.18); color: #C4B5FD; }
+    .group-h { margin-top: 40px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #6b6357; }
+    .arrow { color: #A1A1AA; transition: transform 200ms; }
+    .card:hover .arrow { transform: translate(3px, -3px); color: var(--ps-primary); }
+    .card.admin:hover .arrow { color: #A78BFA; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Propul'Space — 12 vues desktop</h1>
+    <p class="lede">Toutes les pages du brief, version ordinateur. <strong>État normal + empty state + loading state</strong> sur les pages avec data. Le portail client (vues 1-8, 12) et l'admin CRM (vues 9-11) sont visuellement distincts.</p>
+
+    <div class="group-h">Portail client</div>
+    <div class="grid">
+      <a class="card" href="vue-01-login.html">
+        <span class="num">Vue 1</span>
+        <div class="name">Login client</div>
+        <p class="desc">Magic-link. Premier contact, ultra-épuré. 3 états : initial, loading, success.</p>
+        <div class="meta"><span class="pill">Magic-link</span><span class="arrow"><i data-lucide="arrow-up-right"></i></span></div>
+      </a>
+      <a class="card" href="vue-02-dashboard.html">
+        <span class="num">Vue 2</span>
+        <div class="name">Dashboard client</div>
+        <p class="desc">V2 sidebar focus (validée). Le "money shot". Empty &amp; loading inclus.</p>
+        <div class="meta"><span class="pill">★ Validé</span><span class="arrow"><i data-lucide="arrow-up-right"></i></span></div>
+      </a>
+      <a class="card" href="vue-03-qualification.html">
+        <span class="num">Vue 3</span>
+        <div class="name">Qualification 7 étapes</div>
+        <p class="desc">Formulaire public. Auto-save, 13 règles conditionnelles, page merci avec timeline.</p>
+        <div class="meta"><span class="pill">Public</span><span class="arrow"><i data-lucide="arrow-up-right"></i></span></div>
+      </a>
+      <a class="card" href="vue-04-factures.html">
+        <span class="num">Vue 4</span>
+        <div class="name">Factures</div>
+        <p class="desc">Table + Sheet détail avec échéances. Bouton Payer impossible à rater.</p>
+        <div class="meta"><span class="pill">Stripe</span><span class="arrow"><i data-lucide="arrow-up-right"></i></span></div>
+      </a>
+      <a class="card" href="vue-05-projet.html">
+        <span class="num">Vue 5</span>
+        <div class="name">Projet — timeline</div>
+        <p class="desc">Timeline verticale 6 étapes, KPI + livrables en sidebar.</p>
+        <div class="meta"><span class="pill">Preuve</span><span class="arrow"><i data-lucide="arrow-up-right"></i></span></div>
+      </a>
+      <a class="card" href="vue-06-documents.html">
+        <span class="num">Vue 6</span>
+        <div class="name">Documents — GED</div>
+        <p class="desc">Recherche + filtres + table 10 docs + zone upload drag &amp; drop.</p>
+        <div class="meta"><span class="pill">Drive light</span><span class="arrow"><i data-lucide="arrow-up-right"></i></span></div>
+      </a>
+      <a class="card" href="vue-07-signatures.html">
+        <span class="num">Vue 7</span>
+        <div class="name">Signatures</div>
+        <p class="desc">Cartes signées/en attente + Sheet détail avec audit trail RGPD.</p>
+        <div class="meta"><span class="pill">DocuSeal</span><span class="arrow"><i data-lucide="arrow-up-right"></i></span></div>
+      </a>
+      <a class="card" href="vue-08-aide.html">
+        <span class="num">Vue 8</span>
+        <div class="name">Aide</div>
+        <p class="desc">FAQ accordion 5 questions + tutoriel + 3 contacts directs.</p>
+        <div class="meta"><span class="pill">FAQ + contact</span><span class="arrow"><i data-lucide="arrow-up-right"></i></span></div>
+      </a>
+    </div>
+
+    <div class="group-h">Onboarding (modal overlay)</div>
+    <div class="grid">
+      <a class="card" href="vue-12-onboarding.html">
+        <span class="num">Vue 12</span>
+        <div class="name">Onboarding wizard</div>
+        <p class="desc">Modal 3 étapes, fond flouté, dashboard en background. CTA final pulse.</p>
+        <div class="meta"><span class="pill">1ère connexion</span><span class="arrow"><i data-lucide="arrow-up-right"></i></span></div>
+      </a>
+    </div>
+
+    <div class="group-h">Admin CRM · Lyes &amp; Etienne</div>
+    <div class="grid">
+      <a class="card admin" href="vue-09-admin-leads.html">
+        <span class="num">Vue 9</span>
+        <div class="name">Leads qualifiés</div>
+        <p class="desc">KPI + filtres avancés + table avec score qualité visualisé.</p>
+        <div class="meta"><span class="pill">Acquisition</span><span class="arrow"><i data-lucide="arrow-up-right"></i></span></div>
+      </a>
+      <a class="card admin" href="vue-10-admin-portails.html">
+        <span class="num">Vue 10</span>
+        <div class="name">Portails actifs</div>
+        <p class="desc">Actions urgentes (impayés, inactivité) + table portails avec score usage.</p>
+        <div class="meta"><span class="pill">Production</span><span class="arrow"><i data-lucide="arrow-up-right"></i></span></div>
+      </a>
+      <a class="card admin" href="vue-11-admin-client-panel.html">
+        <span class="num">Vue 11</span>
+        <div class="name">Panel par client</div>
+        <p class="desc">6 onglets (3 démontrés : Overview, Factures avec création, Analytics).</p>
+        <div class="meta"><span class="pill">6 tabs</span><span class="arrow"><i data-lucide="arrow-up-right"></i></span></div>
+      </a>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

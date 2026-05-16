@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"><title>Vue 5 — Projet</title>
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="portal.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+    body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+    .container { max-width: 1340px; margin: 0 auto; }
+    .section-h { margin: 36px auto 16px; max-width: 1340px; }
+    .section-h h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; margin: 0; color: #2a2418; }
+    .section-h p { font-size: 13px; color: #6b6357; margin: 4px 0 0; }
+  </style>
+</head>
+<body>
+  <div id="head"></div>
+
+  <div class="section-h"><h2>État normal · 6 étapes, dont 1 en cours</h2><p>La preuve du travail. Timeline verticale qui prend la majorité de l'espace, KPI + livrables à droite.</p></div>
+  <div class="container"><div id="state-default"></div></div>
+
+  <div class="section-h"><h2>Empty state · projet pas encore démarré</h2></div>
+  <div class="container"><div id="state-empty"></div></div>
+
+  <script type="text/babel" src="primitives.jsx"></script>
+  <script type="text/babel" src="shell.jsx"></script>
+  <script type="text/babel" src="desktop-shell.jsx"></script>
+  <script type="text/babel" src="screens/project.jsx"></script>
+
+  <script type="text/babel">
+    function ProjectDesktop() {
+      const steps = [
+        { label: "Cadrage & brief",         dates: "1\u201310 mai",      status: "done" },
+        { label: "Design (maquettes)",      dates: "11\u201320 mai",     status: "done" },
+        { label: "Développement des pages", dates: "21 mai\u201310 juin", status: "current", desc: "65 % réalisé · 18 / 29 tâches terminées" },
+        { label: "Intégration contenu",     dates: "11\u201318 juin",    status: "upcoming" },
+        { label: "Tests & recette",         dates: "19\u201325 juin",    status: "upcoming" },
+        { label: "Mise en ligne",           dates: "26 juin",            status: "upcoming" },
+      ];
+
+      return (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: 24, alignItems: "flex-start" }}>
+          {/* LEFT — Timeline (the wow) */}
+          <main style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <header>
+              <div className="ps-eyebrow ps-eyebrow-muted">Projet en cours</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 4, flexWrap: "wrap" }}>
+                <h1 className="ps-h1 ps-gradient-text" style={{ fontSize: 32 }}>Site Précieuse Joaillerie</h1>
+                <Badge tone="violet">En cours</Badge>
+              </div>
+              <div style={{ marginTop: 18 }}>
+                <Progress value={65} label="Avancement global · Étape 3 sur 6" valueLabel="65 %" />
+              </div>
+            </header>
+
+            <section className="ps-card" style={{ padding: "22px 28px" }}>
+              <h2 className="ps-h3" style={{ marginBottom: 22 }}>Étapes du projet</h2>
+              <ol style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                {steps.map((s, i) => <TimelineStep key={i} step={s} last={i === steps.length - 1} />)}
+              </ol>
+            </section>
+          </main>
+
+          {/* RIGHT — KPI + Deliverables */}
+          <aside style={{ display: "flex", flexDirection: "column", gap: 16, position: "sticky", top: 8 }}>
+            <KpiTile eyebrow="Heures travaillées" value="42 h" delta="+6 cette semaine" icon="clock" tint="violet" />
+            <section className="ps-card" style={{ padding: 18 }}>
+              <div className="ps-eyebrow ps-eyebrow-muted" style={{ marginBottom: 10 }}>Prochain jalon</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: 11,
+                  background: "var(--ps-primary-subtle)", color: "var(--ps-primary-deep)",
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>JUIN</span>
+                  <span style={{ fontSize: 18, fontWeight: 700, lineHeight: 1 }}>22</span>
+                </div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600 }}>Livraison maquettes</div>
+                  <div className="ps-num" style={{ fontSize: 12, color: "var(--ps-fg-muted)", marginTop: 2 }}>Dans 5 semaines</div>
+                </div>
+              </div>
+            </section>
+
+            <section className="ps-card" style={{ overflow: "hidden" }}>
+              <SectionHead title="Derniers livrables" />
+              <Deliverable name="Maquette accueil v2.pdf" date="14 mai · 3.4 MB" />
+              <Deliverable name="Rapport SEO initial.pdf" date="8 mai · 1.1 MB" />
+              <Deliverable name="Brief créatif validé.pdf" date="3 mai · 180 KB" last />
+            </section>
+          </aside>
+        </div>
+      );
+    }
+
+    function Deliverable({ name, date, last }) {
+      return (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "11px 16px", borderBottom: last ? "none" : "1px solid var(--ps-border-soft)" }}>
+          <span style={{ width: 32, height: 32, borderRadius: 8, background: "#FEE2E2", color: "#DC2626", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Icon name="file-text" size={14} stroke={2.2} />
+          </span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 500, color: "var(--ps-fg)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{name}</div>
+            <div className="ps-num" style={{ fontSize: 11.5, color: "var(--ps-fg-muted)" }}>{date}</div>
+          </div>
+          <button style={{ background: "transparent", border: "none", color: "var(--ps-fg-secondary)", cursor: "pointer", padding: 4 }}>
+            <Icon name="download" size={14} stroke={2} />
+          </button>
+        </div>
+      );
+    }
+
+    function ProjectEmpty() {
+      return (
+        <div>
+          <div className="ps-eyebrow ps-eyebrow-muted">Projet</div>
+          <h1 className="ps-h1 ps-gradient-text" style={{ fontSize: 32, marginTop: 4, marginBottom: 24 }}>Mon projet</h1>
+          <EmptyState
+            icon="rocket"
+            title="Votre projet démarre bientôt."
+            body="Les étapes du projet apparaîtront ici dès le démarrage. Nous vous préviendrons par email."
+          />
+        </div>
+      );
+    }
+
+    function Head() {
+      return <PageHead num="5" title="Projet — timeline" subtitle="Marc voit la preuve du travail : chaque étape, les heures, les livrables. Justifie le prix premium." />;
+    }
+
+    ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+    ReactDOM.createRoot(document.getElementById("state-default")).render(<DesktopWindow activeTab="project"><ProjectDesktop /></DesktopWindow>);
+    ReactDOM.createRoot(document.getElementById("state-empty")).render(<DesktopWindow activeTab="project" minHeight={520}><ProjectEmpty /></DesktopWindow>);
+  </script>
+</body>
+</html>

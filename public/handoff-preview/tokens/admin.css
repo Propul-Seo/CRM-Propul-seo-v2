@@ -1,0 +1,119 @@
+/* Admin CRM dark theme — mirrors src/index.css upstream
+   Used by vue-09/10/11 to visually distinguish admin from client portal */
+
+.ps-admin {
+  --a-bg-0: #020205;
+  --a-bg-1: #070512;
+  --a-bg-2: #0f0b1e;
+  --a-bg-3: #171030;
+  --a-bg-4: #1e1540;
+
+  --a-fg:        #ECECEE;
+  --a-fg-2:      #A8A4B5;
+  --a-fg-muted:  #6E6885;
+
+  --a-neon:       #8B5CF6;
+  --a-neon-light: #A78BFA;
+  --a-neon-deep:  #6D28D9;
+  --a-neon-subtle: rgba(139, 92, 246, 0.10);
+
+  --a-border:    rgba(118, 74, 201, 0.12);
+  --a-border-2:  rgba(118, 74, 201, 0.22);
+
+  font-family: var(--ps-font-sans);
+  background: var(--a-bg-1);
+  color: var(--a-fg);
+  font-size: 13.5px;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ps-admin * { box-sizing: border-box; }
+
+.ps-admin .a-card {
+  background: rgba(15, 11, 30, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--a-border);
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12), 0 0 8px rgba(118, 74, 201, 0.06);
+}
+
+.ps-admin .a-h1 {
+  font-size: 22px; font-weight: 600; letter-spacing: -0.02em;
+  color: var(--a-fg); margin: 0;
+}
+.ps-admin .a-h2 {
+  font-size: 14px; font-weight: 600; color: var(--a-fg);
+  margin: 0; letter-spacing: -0.005em;
+}
+.ps-admin .a-eyebrow {
+  font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--a-neon-light);
+}
+
+.ps-admin .a-btn {
+  font-family: var(--ps-font-sans);
+  height: 34px; padding: 0 14px; border-radius: 8px;
+  font-size: 12.5px; font-weight: 600; letter-spacing: -0.005em;
+  border: none; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: all 200ms;
+}
+.ps-admin .a-btn-primary {
+  background: linear-gradient(135deg, var(--a-neon) 0%, var(--a-neon-deep) 100%);
+  color: #fff; box-shadow: 0 2px 10px -2px rgba(139, 92, 246, 0.45);
+}
+.ps-admin .a-btn-primary:hover { transform: translateY(-1px); }
+.ps-admin .a-btn-outline {
+  background: var(--a-bg-3); color: var(--a-fg);
+  border: 1px solid var(--a-border-2);
+}
+.ps-admin .a-btn-outline:hover { background: var(--a-bg-4); }
+.ps-admin .a-btn-ghost { background: transparent; color: var(--a-fg-2); }
+.ps-admin .a-btn-ghost:hover { background: var(--a-bg-3); color: var(--a-fg); }
+
+.ps-admin .a-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10.5px; font-weight: 600; letter-spacing: -0.005em;
+  padding: 3px 8px; border-radius: 9999px;
+}
+.ps-admin .a-badge-violet { background: rgba(139, 92, 246, 0.14); color: var(--a-neon-light); }
+.ps-admin .a-badge-green  { background: rgba(16, 185, 129, 0.14);  color: #34D399; }
+.ps-admin .a-badge-amber  { background: rgba(245, 158, 11, 0.14);  color: #FCD34D; }
+.ps-admin .a-badge-red    { background: rgba(239, 68, 68, 0.14);   color: #F87171; }
+.ps-admin .a-badge-gray   { background: rgba(255,255,255, 0.05);   color: var(--a-fg-2); }
+
+.ps-admin .a-input {
+  background: var(--a-bg-3); color: var(--a-fg);
+  border: 1px solid var(--a-border);
+  height: 34px; border-radius: 7px; padding: 0 12px;
+  font-family: var(--ps-font-sans); font-size: 13;
+  outline: none; transition: all 200ms;
+}
+.ps-admin .a-input::placeholder { color: var(--a-fg-muted); }
+.ps-admin .a-input:focus { border-color: var(--a-neon); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15); }
+
+.ps-admin .a-tab {
+  padding: 9px 14px; border-radius: 8px;
+  font-size: 12.5px; font-weight: 500; cursor: pointer;
+  color: var(--a-fg-2); background: transparent; border: none;
+  transition: all 200ms;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.ps-admin .a-tab:hover { background: var(--a-bg-3); color: var(--a-fg); }
+.ps-admin .a-tab.active {
+  background: rgba(139, 92, 246, 0.15); color: var(--a-neon-light);
+  font-weight: 600; box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.20);
+}
+
+.ps-admin a { color: var(--a-neon-light); text-decoration: none; }
+.ps-admin .ps-num { font-variant-numeric: tabular-nums; }
+
+/* Hide top-right neon glow behind hero/dashboard */
+.ps-admin .a-radial-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 68% 10%, rgba(118, 74, 201, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 25% 85%, rgba(90, 47, 160, 0.05) 0%, transparent 55%);
+  z-index: 0;
+}

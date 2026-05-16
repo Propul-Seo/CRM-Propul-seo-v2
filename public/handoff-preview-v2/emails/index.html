@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8">
+<title>Aperçu emails — Propul'Space v2</title>
+<style>
+  html, body { margin: 0; background: #f4f1eb; font-family: -apple-system, 'Inter', sans-serif; }
+  body { padding: 32px 24px 80px; }
+  .wrap { max-width: 1400px; margin: 0 auto; }
+  h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.025em; margin: 0 0 8px; color: #2a2418; }
+  .lede { font-size: 14px; color: #6b6357; margin: 0 0 32px; max-width: 720px; line-height: 1.55; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 36px; }
+  .card { background: #fff; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04); overflow: hidden; }
+  .meta { padding: 14px 18px; border-bottom: 1px solid #F0F0F2; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .meta .n { font-size: 11px; font-weight: 700; color: #5B21B6; text-transform: uppercase; letter-spacing: 0.14em; padding: 3px 9px; border-radius: 9999px; background: rgba(124,58,237,0.08); }
+  .meta .subj { font-size: 13.5px; font-weight: 600; color: #18181B; flex: 1; }
+  .meta a { font-size: 11.5px; font-weight: 600; color: #5B21B6; text-decoration: none; }
+  iframe { width: 100%; height: 580px; border: 0; display: block; background: #FAFAFA; }
+</style></head>
+<body>
+<div class="wrap">
+  <h1>10 emails transactionnels — preview</h1>
+  <p class="lede">Versions « rendues » avec valeurs d'exemple. Chaque email a aussi une version <code>.brevo.html</code> avec les variables <code>{{ params.X }}</code> prêtes à coller dans Brevo.</p>
+  <div class="row">
+    <Card n="30" subj="Magic link de connexion" />
+    <Card n="31" subj="Qualification reçue — merci" />
+    <Card n="32" subj="🎯 Nouveau lead (admin)" />
+    <Card n="33" subj="Facture émise" />
+    <Card n="34" subj="Rappel facture en retard" />
+    <Card n="35" subj="Paiement reçu" />
+    <Card n="36" subj="Document à signer" />
+    <Card n="37" subj="Document signé" />
+    <Card n="38" subj="Portail activé — bienvenue" />
+    <Card n="39" subj="Nouveau livrable" />
+  </div>
+</div>
+<script>
+  const cards = [
+    [30, "magic-link", "Votre lien de connexion Propul'Space"],
+    [31, "qualif-confirmation", "Votre diagnostic a bien été reçu"],
+    [32, "new-lead-alert", "🎯 Nouveau lead qualifié (interne)"],
+    [33, "invoice-sent", "Facture PS-1031 — 5 000,00 €"],
+    [34, "invoice-reminder", "Rappel : facture en retard"],
+    [35, "payment-received", "Paiement bien reçu — merci"],
+    [36, "signature-requested", "Document à signer"],
+    [37, "signature-completed", "Document signé"],
+    [38, "portal-welcome", "Bienvenue dans votre espace 🎉"],
+    [39, "new-deliverable", "Nouveau livrable disponible"],
+  ];
+  const row = document.querySelector('.row');
+  row.innerHTML = cards.map(([n, slug, subj]) => `
+    <div class="card">
+      <div class="meta">
+        <span class="n">#${n}</span>
+        <span class="subj">${subj}</span>
+        <a href="${n}-${slug}.brevo.html" target="_blank">Version Brevo →</a>
+      </div>
+      <iframe src="${n}-${slug}.html" loading="lazy"></iframe>
+    </div>
+  `).join('');
+</script>
+</body></html>

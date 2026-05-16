@@ -3083,6 +3083,7 @@ export type Database = {
           portal_activated_at: string | null
           portal_brand_logo_url: string | null
           portal_brand_primary_color: string | null
+          portal_client_email: string | null
           portal_deactivated_at: string | null
           portal_deactivation_reason: string | null
           portal_enabled: boolean | null
@@ -3138,6 +3139,7 @@ export type Database = {
           portal_activated_at?: string | null
           portal_brand_logo_url?: string | null
           portal_brand_primary_color?: string | null
+          portal_client_email?: string | null
           portal_deactivated_at?: string | null
           portal_deactivation_reason?: string | null
           portal_enabled?: boolean | null
@@ -3193,6 +3195,7 @@ export type Database = {
           portal_activated_at?: string | null
           portal_brand_logo_url?: string | null
           portal_brand_primary_color?: string | null
+          portal_client_email?: string | null
           portal_deactivated_at?: string | null
           portal_deactivation_reason?: string | null
           portal_enabled?: boolean | null
@@ -3805,6 +3808,7 @@ export type Database = {
           language: string | null
           last_login: string | null
           name: string
+          onboarding_completed: boolean
           phone: string | null
           portal_enabled: boolean | null
           portal_last_login_at: string | null
@@ -3840,6 +3844,7 @@ export type Database = {
           language?: string | null
           last_login?: string | null
           name: string
+          onboarding_completed?: boolean
           phone?: string | null
           portal_enabled?: boolean | null
           portal_last_login_at?: string | null
@@ -3875,6 +3880,7 @@ export type Database = {
           language?: string | null
           last_login?: string | null
           name?: string
+          onboarding_completed?: boolean
           phone?: string | null
           portal_enabled?: boolean | null
           portal_last_login_at?: string | null

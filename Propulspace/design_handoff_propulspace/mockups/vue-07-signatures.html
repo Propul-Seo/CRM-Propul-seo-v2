@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"><title>Vue 7 — Signatures</title>
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="portal.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+    body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+    .container { max-width: 1340px; margin: 0 auto; }
+    .section-h { margin: 36px auto 16px; max-width: 1340px; }
+    .section-h h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; margin: 0; color: #2a2418; }
+    .section-h p { font-size: 13px; color: #6b6357; margin: 4px 0 0; }
+  </style>
+</head>
+<body>
+  <div id="head"></div>
+  <div class="section-h"><h2>État normal · 1 en attente + 2 signés</h2><p>Le bouton "Signer maintenant" est impossible à rater.</p></div>
+  <div class="container"><div id="state-default"></div></div>
+
+  <div class="section-h"><h2>Détail signature signée · Sheet avec audit trail</h2></div>
+  <div class="container"><div id="state-detail"></div></div>
+
+  <div class="section-h"><h2>Empty state · aucune signature en attente</h2></div>
+  <div class="container"><div id="state-empty"></div></div>
+
+  <script type="text/babel" src="primitives.jsx"></script>
+  <script type="text/babel" src="shell.jsx"></script>
+  <script type="text/babel" src="desktop-shell.jsx"></script>
+
+  <script type="text/babel">
+    const SIGS = [
+      { name: "Avenant SEO mensuel",    type: "Avenant", date: "15 mai 2026", status: "pending" },
+      { name: "Contrat de prestation",  type: "Contrat", date: "1 mai 2026",  status: "signed", signedAt: "2 mai 2026 · 10:42", signerIp: "82.66.xx.xx" },
+      { name: "Devis refonte site",     type: "Devis",   date: "28 avr 2026", status: "signed", signedAt: "29 avr 2026 · 18:11", signerIp: "82.66.xx.xx" },
+    ];
+
+    function SignaturesDesktop() {
+      const pending = SIGS.filter(s => s.status === "pending");
+      return (
+        <div>
+          <header>
+            <div className="ps-eyebrow ps-eyebrow-muted">Signatures</div>
+            <h1 className="ps-h1 ps-gradient-text" style={{ fontSize: 32, marginTop: 4 }}>Mes signatures</h1>
+            <p style={{ fontSize: 14, color: "var(--ps-fg-secondary)", margin: "6px 0 0" }}>Signez vos documents en quelques clics.</p>
+          </header>
+
+          {pending.length > 0 && (
+            <div style={{
+              marginTop: 22, padding: "12px 18px",
+              background: "var(--ps-primary-subtle)", borderRadius: 12,
+              color: "var(--ps-primary-deep)",
+              display: "flex", alignItems: "center", gap: 12,
+            }}>
+              <Icon name="pen-line" size={17} stroke={2.2} />
+              <span style={{ fontSize: 14, fontWeight: 500 }}>
+                <strong style={{ fontWeight: 700 }}>{pending.length} document</strong> en attente de votre signature.
+              </span>
+            </div>
+          )}
+
+          <section style={{ marginTop: 18, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            {SIGS.map((s, i) => <SignatureCard key={i} sig={s} />)}
+          </section>
+        </div>
+      );
+    }
+
+    function SignatureCard({ sig }) {
+      const isPending = sig.status === "pending";
+      return (
+        <div className="ps-card" style={{
+          padding: 20,
+          ...(isPending ? {
+            borderColor: "rgba(124,58,237,0.25)",
+            boxShadow: "0 1px 2px rgba(16,24,40,.04), 0 0 0 1px rgba(124,58,237,0.06), 0 4px 14px -4px rgba(124,58,237,0.18)",
+          } : {}),
+        }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+            <span style={{
+              width: 44, height: 44, borderRadius: 9999, flexShrink: 0,
+              background: isPending ? "var(--ps-primary-subtle)" : "var(--ps-success-subtle)",
+              color: isPending ? "var(--ps-primary-deep)" : "var(--ps-success)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <Icon name={isPending ? "pen-line" : "check-circle-2"} size={19} stroke={2.2} />
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.005em" }}>{sig.name}</div>
+                {isPending ? <Badge tone="violet">En attente</Badge> : <Badge tone="success">Signé</Badge>}
+              </div>
+              <div className="ps-num" style={{ fontSize: 12, color: "var(--ps-fg-muted)", marginTop: 4 }}>
+                {sig.type} · Envoyé le {sig.date}
+                {sig.signedAt && <> · Signé le {sig.signedAt}</>}
+              </div>
+            </div>
+          </div>
+          <div style={{ marginTop: 14, display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            {isPending && <Button variant="primary" iconRight="arrow-up-right">Signer maintenant</Button>}
+            {!isPending && <>
+              <Button variant="ghost" size="sm">Détails</Button>
+              <Button variant="outline" icon="download">PDF signé</Button>
+            </>}
+          </div>
+        </div>
+      );
+    }
+
+    function SignatureSheet({ sig, onClose }) {
+      return (
+        <div style={{
+          position: "absolute", right: 0, top: 0, bottom: 0,
+          width: 440, background: "#fff",
+          borderLeft: "1px solid var(--ps-border-soft)",
+          boxShadow: "-20px 0 40px -20px rgba(0,0,0,0.08)",
+          zIndex: 40, overflowY: "auto",
+        }}>
+          <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--ps-border-soft)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <div className="ps-eyebrow ps-eyebrow-muted">{sig.type}</div>
+              <div style={{ fontSize: 17, fontWeight: 600, marginTop: 2 }}>{sig.name}</div>
+            </div>
+            <Badge tone="success">Signé</Badge>
+            <button onClick={onClose} className="ps-btn ps-btn-ghost ps-btn-icon" aria-label="Fermer">
+              <Icon name="x" size={16} stroke={2} />
+            </button>
+          </div>
+          <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 22 }}>
+            <div>
+              <div className="ps-eyebrow ps-eyebrow-muted">Statut</div>
+              <div className="ps-gradient-text" style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.025em", marginTop: 4 }}>
+                Signé le {sig.signedAt}
+              </div>
+            </div>
+            <div>
+              <div className="ps-eyebrow ps-eyebrow-muted" style={{ marginBottom: 10 }}>Audit trail</div>
+              <div className="ps-card" style={{ padding: 0, boxShadow: "none", border: "1px solid var(--ps-border-soft)" }}>
+                <AuditRow label="Document envoyé" value={sig.date} />
+                <AuditRow label="Email ouvert" value="29 avr 2026 · 09:14" />
+                <AuditRow label="Document consulté" value="29 avr 2026 · 14:02" />
+                <AuditRow label="Signature électronique" value={sig.signedAt} />
+                <AuditRow label="IP du signataire" value={sig.signerIp} mono />
+                <AuditRow label="Émulateur d'agent" value="Safari · iPhone 15 · iOS 17.4" last />
+              </div>
+            </div>
+            <Button variant="outline" size="lg" block icon="download">Télécharger le PDF signé</Button>
+          </div>
+        </div>
+      );
+    }
+
+    function AuditRow({ label, value, mono, last }) {
+      return (
+        <div style={{ display: "flex", justifyContent: "space-between", padding: "11px 14px", borderBottom: last ? "none" : "1px solid var(--ps-border-soft)", fontSize: 12.5 }}>
+          <span style={{ color: "var(--ps-fg-muted)" }}>{label}</span>
+          <span className={mono ? "" : "ps-num"} style={{ fontFamily: mono ? "var(--ps-font-mono)" : undefined, color: "var(--ps-fg)", fontWeight: 500 }}>{value}</span>
+        </div>
+      );
+    }
+
+    function SignaturesEmpty() {
+      return (
+        <div>
+          <div className="ps-eyebrow ps-eyebrow-muted">Signatures</div>
+          <h1 className="ps-h1 ps-gradient-text" style={{ fontSize: 32, marginTop: 4, marginBottom: 24 }}>Mes signatures</h1>
+          <EmptyState
+            icon="pen-line"
+            title="Aucune signature en attente"
+            body="Quand un document nécessitera votre signature, il apparaîtra ici."
+          />
+        </div>
+      );
+    }
+
+    function Head() {
+      return <PageHead num="7" title="Signatures — DocuSeal en 2 clics" subtitle="Documents à signer + historique. Bouton 'Signer maintenant' prominent, audit trail RGPD." />;
+    }
+
+    ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+    ReactDOM.createRoot(document.getElementById("state-default")).render(<DesktopWindow activeTab="signatures"><SignaturesDesktop /></DesktopWindow>);
+    ReactDOM.createRoot(document.getElementById("state-detail")).render(
+      <DesktopWindow activeTab="signatures" withFab={false}>
+        <SignaturesDesktop />
+        <SignatureSheet sig={SIGS[1]} onClose={() => {}} />
+      </DesktopWindow>
+    );
+    ReactDOM.createRoot(document.getElementById("state-empty")).render(<DesktopWindow activeTab="signatures" minHeight={520}><SignaturesEmpty /></DesktopWindow>);
+  </script>
+</body>
+</html>

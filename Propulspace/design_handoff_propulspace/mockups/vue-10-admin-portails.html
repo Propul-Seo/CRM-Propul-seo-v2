@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"><title>Vue 10 — Admin portails actifs</title>
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="portal.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+    body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+    .container { max-width: 1340px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <div id="head"></div>
+  <div class="container" style="margin-top:24px"><div id="state-default"></div></div>
+
+  <script type="text/babel" src="primitives.jsx"></script>
+  <script type="text/babel" src="desktop-shell.jsx"></script>
+  <script type="text/babel" src="admin-shell.jsx"></script>
+
+  <script type="text/babel">
+    const PORTALS = [
+      { project: "Site Précieuse Joaillerie", client: "Eméline Le Ray", initials: "EL", color: "#d4a574", lastLogin: "Aujourd'hui · 09:42", pending: 1, score: 92 },
+      { project: "Dupont Immo SaaS",          client: "Thomas Dupont",  initials: "TD", color: "#5a7ec9", lastLogin: "Hier · 18:11",        pending: 0, score: 78 },
+      { project: "Tech Innov landing",        client: "Julie Chen",     initials: "JC", color: "#7c3aed", lastLogin: "Il y a 21 jours",     pending: 0, score: 22, inactive: true },
+    ];
+
+    function PortalsPage() {
+      return (
+        <AdminShell
+          activeKey="portals"
+          title="Portails clients actifs"
+          breadcrumb="Production › Propul'Space"
+          headerActions={
+            <div style={{ display: "flex", gap: 8 }}>
+              <button className="a-btn a-btn-outline"><Icon name="bar-chart-3" size={13} stroke={2} />Rapport mensuel</button>
+              <button className="a-btn a-btn-primary"><Icon name="plus" size={13} stroke={2.4} />Activer un portail</button>
+            </div>
+          }
+        >
+          {/* KPI */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+            <AdminKpi label="Portails actifs" value="3" sub="Sur 4 clients premium" icon="sparkles" tone="violet" />
+            <AdminKpi label="Actions en attente" value="2" sub="À traiter cette semaine" icon="alert-triangle" tone="amber" />
+            <AdminKpi label="Taux d'usage hebdo" value="67 %" sub="2 clients connectés / 3" icon="trending-up" tone="green" />
+          </div>
+
+          {/* Urgent actions */}
+          <div className="a-card" style={{ padding: 16, marginBottom: 16, borderColor: "rgba(239, 68, 68, 0.25)", background: "linear-gradient(180deg, rgba(239,68,68,0.05), rgba(15,11,30,0.6))" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+              <span style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(239,68,68,0.15)", color: "#F87171", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon name="alert-triangle" size={14} stroke={2.4} />
+              </span>
+              <h2 className="a-h2">Actions urgentes</h2>
+              <span className="a-badge a-badge-red" style={{ marginLeft: "auto" }}>2 alertes</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <UrgentRow tone="red" icon="receipt" title="Facture PS-1033 en retard de 45 jours" sub="Précieuse Joaillerie · 2 500,00 € · échéance 1 avr" cta="Relancer" />
+              <UrgentRow tone="amber" icon="user-x" title="Tech Innov inactif depuis 21 jours" sub="Dernière connexion : 24 avr · 0 doc téléchargé ce mois" cta="Contacter" />
+            </div>
+          </div>
+
+          {/* Active portals table */}
+          <div className="a-card" style={{ padding: 0, overflow: "hidden" }}>
+            <div style={{ padding: "14px 18px", borderBottom: "1px solid var(--a-border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h2 className="a-h2">Portails actifs</h2>
+              <span style={{ fontSize: 11.5, color: "var(--a-fg-muted)" }}>{PORTALS.length} clients</span>
+            </div>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
+              <thead>
+                <tr style={{ background: "var(--a-bg-2)" }}>
+                  {["Projet", "Client", "Dernière connexion", "Actions pending", "Score d'usage", ""].map((h, i) => (
+                    <th key={i} style={{ padding: "10px 16px", textAlign: i === 5 ? "right" : "left", fontSize: 10.5, fontWeight: 600, color: "var(--a-fg-muted)", textTransform: "uppercase", letterSpacing: "0.07em" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {PORTALS.map((p, i) => (
+                  <tr key={i} style={{ borderTop: "1px solid var(--a-border)", cursor: "pointer", opacity: p.inactive ? 0.7 : 1 }}>
+                    <td style={{ padding: "13px 16px", color: "var(--a-fg)", fontWeight: 500 }}>{p.project}</td>
+                    <td style={{ padding: "13px 16px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                        <span style={{ width: 26, height: 26, borderRadius: 9999, background: p.color, color: "#fff", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{p.initials}</span>
+                        <span style={{ color: "var(--a-fg-2)" }}>{p.client}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: "13px 16px", color: p.inactive ? "#F87171" : "var(--a-fg-2)" }} className="ps-num">{p.lastLogin}</td>
+                    <td style={{ padding: "13px 16px" }}>
+                      {p.pending > 0 ? (
+                        <span className="a-badge a-badge-amber">{p.pending} action{p.pending > 1 ? "s" : ""}</span>
+                      ) : <span style={{ color: "var(--a-fg-muted)" }}>—</span>}
+                    </td>
+                    <td style={{ padding: "13px 16px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span className="ps-num" style={{ fontSize: 12, fontWeight: 700, color: p.score >= 60 ? "#34D399" : p.score >= 30 ? "#FCD34D" : "#F87171", width: 36 }}>{p.score}%</span>
+                        <div style={{ width: 60, height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 9999, overflow: "hidden" }}>
+                          <div style={{ width: `${p.score}%`, height: "100%", background: p.score >= 60 ? "#34D399" : p.score >= 30 ? "#FCD34D" : "#F87171" }} />
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{ padding: "13px 16px", textAlign: "right" }}>
+                      <a href="#" style={{ fontSize: 12, fontWeight: 600 }}>Ouvrir panel →</a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </AdminShell>
+      );
+    }
+
+    function UrgentRow({ tone, icon, title, sub, cta }) {
+      const tones = { red: { bg: "rgba(239,68,68,0.12)", fg: "#F87171" }, amber: { bg: "rgba(245,158,11,0.12)", fg: "#FCD34D" } };
+      const t = tones[tone] || tones.red;
+      return (
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 8, background: "rgba(0,0,0,0.2)", border: "1px solid var(--a-border)" }}>
+          <span style={{ width: 32, height: 32, borderRadius: 8, background: t.bg, color: t.fg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Icon name={icon} size={14} stroke={2.2} />
+          </span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--a-fg)" }}>{title}</div>
+            <div className="ps-num" style={{ fontSize: 11.5, color: "var(--a-fg-muted)", marginTop: 2 }}>{sub}</div>
+          </div>
+          <button className="a-btn a-btn-outline">{cta}</button>
+        </div>
+      );
+    }
+
+    function Head() {
+      return <PageHead num="10" title="Admin — Overview portails actifs" subtitle="Vue d'ensemble pour Lyes/Etienne. Actions urgentes en haut (impayés, clients inactifs), puis table des portails avec score d'usage." />;
+    }
+
+    ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+    ReactDOM.createRoot(document.getElementById("state-default")).render(<AdminWindow><PortalsPage /></AdminWindow>);
+  </script>
+</body>
+</html>
