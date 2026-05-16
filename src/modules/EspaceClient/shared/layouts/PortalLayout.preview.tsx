@@ -49,8 +49,7 @@ function DemoContent({ activeTab }: { activeTab: PortalTab }) {
       <section className="ps-surface relative overflow-hidden p-7 md:p-9">
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full opacity-60 blur-3xl"
-          style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.18), transparent 70%)' }}
+          className="ps-hero-glow pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full opacity-60 blur-3xl"
         />
         <p className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-[var(--ps-primary-text)]">
           Tableau de bord
@@ -99,7 +98,11 @@ function DemoContent({ activeTab }: { activeTab: PortalTab }) {
           <h2 className="text-[14px] font-semibold tracking-tight text-[var(--ps-text-primary)]">
             Activité récente
           </h2>
-          <button className="text-[12px] font-medium text-[var(--ps-primary-text)] hover:underline">
+          <button
+            type="button"
+            aria-label="Voir toute l'activité"
+            className="text-[12px] font-medium text-[var(--ps-primary-text)] hover:underline"
+          >
             Tout voir
           </button>
         </header>

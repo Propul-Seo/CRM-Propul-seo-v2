@@ -57,12 +57,11 @@ export function PortalTabBar({ activeTab, onTabChange, variant }: PortalTabBarPr
             >
               <span
                 className={cn(
-                  'flex h-7 w-12 items-center justify-center rounded-full transition-all duration-300',
+                  'flex h-7 w-12 items-center justify-center rounded-full transition-all duration-300 [transition-timing-function:var(--ps-ease-out)]',
                   active
                     ? 'bg-[var(--ps-primary-subtle)] scale-100'
                     : 'bg-transparent scale-95 group-hover:bg-[var(--ps-background-subtle)]',
                 )}
-                style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
               >
                 <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.4 : 1.8} />
               </span>
@@ -91,13 +90,12 @@ export function PortalTabBar({ activeTab, onTabChange, variant }: PortalTabBarPr
             onClick={() => onTabChange(tab.key)}
             aria-current={active ? 'page' : undefined}
             className={cn(
-              'relative flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-[13px] font-medium tracking-tight transition-all duration-200',
+              'relative flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-[13px] font-medium tracking-tight transition-all duration-200 [transition-timing-function:var(--ps-ease)]',
               'my-1.5',
               active
                 ? 'bg-[var(--ps-primary-subtle)] text-[var(--ps-primary-text)] shadow-[inset_0_0_0_1px_rgba(124,58,237,0.12)]'
                 : 'text-[var(--ps-text-secondary)] hover:bg-[var(--ps-background-subtle)] hover:text-[var(--ps-text-primary)]',
             )}
-            style={{ transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
           >
             <Icon className="h-[15px] w-[15px]" strokeWidth={active ? 2.4 : 1.9} />
             {tab.label}

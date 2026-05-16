@@ -38,13 +38,7 @@ export function PortalContactFab({ projectName }: PortalContactFabProps) {
           type="button"
           aria-label="Contacter Propul'SEO"
           aria-haspopup="dialog"
-          className="ps-fab fixed bottom-20 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full text-white transition-all duration-200 hover:scale-[1.06] active:scale-95 md:bottom-6 md:right-6"
-          style={{
-            background:
-              'linear-gradient(135deg, var(--ps-primary) 0%, var(--ps-primary-deep) 100%)',
-            boxShadow: 'var(--ps-shadow-fab)',
-            transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-          }}
+          className="ps-fab ps-fab-button fixed bottom-20 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full text-white transition-all duration-200 hover:scale-[1.06] active:scale-95 md:bottom-6 md:right-6"
         >
           <MessageCircle className="h-[22px] w-[22px]" strokeWidth={2.1} />
         </button>

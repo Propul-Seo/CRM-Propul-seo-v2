@@ -37,11 +37,15 @@ export function PortalLayout({
   // a global `dark` class on <html>). The portal is only ever mounted from
   // inside the CRM, which always sets `dark` — so we unconditionally
   // restore it on unmount (idempotent if it was never removed).
+  // Force light theme while the portal is mounted. Mémorise l'état initial
+  // pour restaurer fidèlement au démontage — robuste aux contextes hors CRM
+  // (Storybook, tests, future page standalone).
   useEffect(() => {
     const html = document.documentElement;
+    const hadDark = html.classList.contains('dark');
     html.classList.remove('dark');
     return () => {
-      html.classList.add('dark');
+      if (hadDark) html.classList.add('dark');
     };
   }, []);
 
@@ -51,11 +55,7 @@ export function PortalLayout({
         <div className="mx-auto flex h-[60px] max-w-6xl items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3">
             <div
-              className="flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[12px] font-bold tracking-tight text-white shadow-[0_2px_8px_-2px_rgba(124,58,237,0.45),inset_0_1px_0_rgba(255,255,255,0.18)]"
-              style={{
-                background:
-                  'linear-gradient(135deg, var(--ps-primary) 0%, var(--ps-primary-deep) 100%)',
-              }}
+              className="ps-brand-gradient flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[12px] font-bold tracking-tight text-white shadow-[0_2px_8px_-2px_rgba(124,58,237,0.45),inset_0_1px_0_rgba(255,255,255,0.18)]"
             >
               <Sparkles className="h-3.5 w-3.5" strokeWidth={2.4} />
               {AGENCY_NAME}
@@ -78,15 +78,10 @@ export function PortalLayout({
               )}
             </div>
             <Avatar
-              className="h-9 w-9 ring-2 ring-[var(--ps-primary-subtle)] ring-offset-2 ring-offset-white transition-transform duration-200 hover:scale-105"
-              style={{ transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
+              className="h-9 w-9 ring-2 ring-[var(--ps-primary-subtle)] ring-offset-2 ring-offset-white transition-transform duration-200 [transition-timing-function:var(--ps-ease)] hover:scale-105"
             >
               <AvatarFallback
-                className="text-[12px] font-bold text-white"
-                style={{
-                  background:
-                    'linear-gradient(135deg, var(--ps-primary) 0%, var(--ps-primary-deep) 100%)',
-                }}
+                className="ps-brand-gradient text-[12px] font-bold text-white"
               >
                 {getInitials(clientName)}
               </AvatarFallback>

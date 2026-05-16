@@ -150,6 +150,14 @@
   width: 220px; height: 220px; border-radius: 9999px;
   background: radial-gradient(circle, rgba(124, 58, 237, 0.18), transparent 70%);
 }
+.propulspace-portal .ps-hero-glow {
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.18), transparent 70%);
+}
+.propulspace-portal .ps-fab-button {
+  background: linear-gradient(135deg, var(--ps-primary) 0%, var(--ps-primary-deep) 100%);
+  box-shadow: var(--ps-shadow-fab);
+  transition-timing-function: var(--ps-ease);
+}
 
 /* ─── MOTION PRIMITIVES ────────────────────────────────── */
 @keyframes ps-fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
