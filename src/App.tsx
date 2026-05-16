@@ -14,6 +14,14 @@ const EspaceClientApp = lazy(() =>
   import('./modules/EspaceClient/client/EspaceClientApp').then(m => ({ default: m.EspaceClientApp }))
 );
 
+const QualificationFlowPage = lazy(() =>
+  import('./modules/EspaceClient/qualification/QualificationFlowPage').then(m => ({ default: m.QualificationFlowPage }))
+);
+
+const QualificationThankYouPage = lazy(() =>
+  import('./modules/EspaceClient/qualification/ThankYouPage').then(m => ({ default: m.ThankYouPage }))
+);
+
 const ClientBriefPage = lazy(() =>
   import('./modules/ClientBrief/ClientBriefPage').then(m => ({ default: m.ClientBriefPage }))
 );
@@ -104,6 +112,26 @@ function App() {
             <ErrorBoundary>
               <Suspense fallback={<div className="min-h-screen bg-white" />}>
                 <EspaceClientApp />
+              </Suspense>
+            </ErrorBoundary>
+          }
+        />
+        <Route
+          path="/diagnostic"
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<div className="min-h-screen bg-white" />}>
+                <QualificationFlowPage />
+              </Suspense>
+            </ErrorBoundary>
+          }
+        />
+        <Route
+          path="/diagnostic-envoye"
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<div className="min-h-screen bg-white" />}>
+                <QualificationThankYouPage />
               </Suspense>
             </ErrorBoundary>
           }

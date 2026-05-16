@@ -158,6 +158,10 @@
   box-shadow: var(--ps-shadow-fab);
   transition-timing-function: var(--ps-ease);
 }
+/* Barre de progression — largeur dynamique via custom prop --ps-bar-w. */
+.propulspace-portal .ps-progress-fill {
+  width: var(--ps-bar-w, 0%);
+}
 
 /* ─── MOTION PRIMITIVES ────────────────────────────────── */
 @keyframes ps-fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
@@ -177,6 +181,28 @@
   background-size: 200% 100%;
   animation: ps-shimmer 1.5s infinite;
   border-radius: var(--ps-radius-input);
+}
+
+/* ─── FORM CONTROLS (override theme dark CRM) ──────────── */
+/* Le CRM admin n'a qu'un theme dark unique au :root. Les <Input>/<Textarea>
+   shadcn héritent donc d'un fond foncé. Scoper le look light au portail. */
+.propulspace-portal input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.propulspace-portal textarea,
+.propulspace-portal select {
+  background-color: var(--ps-bg-elevated);
+  color: var(--ps-fg);
+  border-color: var(--ps-border);
+}
+.propulspace-portal input::placeholder,
+.propulspace-portal textarea::placeholder {
+  color: var(--ps-fg-muted);
+  opacity: 1;
+}
+.propulspace-portal input:focus-visible,
+.propulspace-portal textarea:focus-visible,
+.propulspace-portal select:focus-visible {
+  border-color: var(--ps-primary);
+  box-shadow: 0 0 0 3px var(--ps-primary-subtle);
 }
 
 /* ─── FOCUS (accessible violet ring) ───────────────────── */
