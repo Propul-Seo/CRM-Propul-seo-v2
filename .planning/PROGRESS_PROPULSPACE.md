@@ -8,11 +8,11 @@
 ## 1. État global
 
 - **Sprint en cours** : A — Foundations
-- **Tâche en cours** : A.2 — Bouton "Activer le portail" sur fiche projet CRM (à attaquer après validation A.1)
-- **Phase produit** : Phase 2 (portail livré, prépa client Précieuse)
+- **Tâche en cours** : A.3 — Tests sécurité `portal_project_id()` + durcissement RLS (à attaquer)
+- **Phase produit** : Phase 2 (portail livré, activation UI OK, prépa client Précieuse)
 - **Branche** : `feature/propulspace-phase-2-front` (exception multi-phases assumée, merge dans `main` fin Phase 2)
 - **Project Supabase** : ERP (`tbuqctfgjjxnevmsvucl`)
-- **Dernière mise à jour** : 2026-05-17 (clôture A.1)
+- **Dernière mise à jour** : 2026-05-17 (clôture A.2a)
 
 ---
 
@@ -20,7 +20,8 @@
 
 ### Sprint A — Foundations (3-4 jours)
 - [x] **A.1** Dump des 15 migrations distantes Propul'Space — terminé 2026-05-17
-- [ ] **A.2** Bouton "Activer le portail" sur fiche projet CRM
+- [x] **A.2a** Bouton "Activer le portail" sur fiche projet CRM — terminé 2026-05-17
+- [ ] **A.2b** Refonte ClientLoginPage (login email/mdp + reset password + UX) — reporté
 - [ ] **A.3** Tests sécurité `portal_project_id()` + durcissement RLS (priorité R-011, R-008, R-012, R-013)
 
 → ✋ STOP validation Sprint A complet avant Sprint B
@@ -44,6 +45,63 @@
 ## 3. Journal des tâches (cumulatif)
 
 > Ordre chronologique. Une entrée par tâche close.
+
+### ✅ A.2a — Bouton "Activer le portail" sur fiche projet V3 (terminé 2026-05-17)
+**Démarré** : 2026-05-17
+**Terminé** : 2026-05-17 (test E2E validé)
+**Périmètre** : permettre à l'admin d'activer/désactiver le portail client depuis l'UI CRM (plus de SQL manuel). Bouton sur la fiche projet V3 → dialog → invitation Supabase Auth → page setup-password → login email/mdp côté client. Découpé en A.2a (cette session) + A.2b (refonte ClientLoginPage, reportée).
+
+**Approche** : 4 questions de cadrage à Lyes (V2/V3, magic link vs invite, RLS, raison désactivation), brainstorming ADR avant code, code review en cours de route (3 fixes critiques appliqués).
+
+**Fichiers créés (10)** :
+
+Migration SQL :
+- `supabase/migrations/20260517205900_propulspace_160_portal_activation_metadata.sql` — 3 colonnes manquantes + index `portal_client_email` (R-009) + trigger BEFORE UPDATE `guard_portal_columns_admin_only` + REVOKE EXECUTE de la trigger fn
+
+Edge functions (toutes JWT verifié + helper inliné) :
+- `supabase/functions/admin-portal-invite/index.ts` — v3 (rollback deleteUser si update KO + CORS x-application-name)
+- `supabase/functions/admin-portal-resend-invite/index.ts` — v3 (signInWithOtp au lieu de generateLink qui n'envoie pas l'email)
+- `supabase/functions/admin-portal-deactivate/index.ts` — v2 (copie email vers portal_previous_client_email + raison optionnelle)
+
+Front admin :
+- `src/modules/EspaceClient/admin/hooks/usePortalActivation.ts` — 3 mutations + flags loading
+- `src/modules/EspaceClient/admin/components/PortalStatusSection.tsx` — section sidebar (badge actif/inactif + dropdown actions + création contact optionnelle)
+- `src/modules/EspaceClient/admin/components/ActivatePortalDialog.tsx` — email obligatoire + Prénom/Nom/Téléphone optionnels + checkbox confirmation
+- `src/modules/EspaceClient/admin/components/DeactivatePortalDialog.tsx` — confirmation typée nom du projet + raison optionnelle
+
+Front client :
+- `src/modules/EspaceClient/client/pages/SetupPasswordPage.tsx` — création mdp post-invitation + garde internal-user (refuse les comptes de `public.users`)
+
+**Fichiers modifiés (4)** :
+- `src/modules/EspaceClient/client/EspaceClientApp.tsx` — route `/espace-client/setup-password`
+- `src/modules/ProjectDetailsV3Preview/components/ProjectV3RightSidebar.tsx` — intégration PortalStatusSection en haut + branchement `createAndLink`
+- `src/types/database.ts` — 3 nouvelles colonnes ajoutées dans Row/Insert/Update
+- `src/types/project-v2.ts` — bloc PORTAIL PROPUL'SPACE (7 colonnes)
+
+**Migrations appliquées en prod** : `propulspace_160_portal_activation_metadata` via MCP.
+
+**Edge functions déployées en prod** : 3 fonctions, JWT verify activé.
+
+**Tests** : E2E manuel par Lyes → activation OK, mail reçu, setup-password OK, login espace client OK.
+
+**Hors-périmètre (reporté A.2b)** :
+- Refonte ClientLoginPage avec formulaire email/mdp soigné + reset password flow + tests Vitest.
+- Pré-remplissage email depuis liste complète des contacts du projet (actuellement = 1er contact lié uniquement).
+
+**Code review** : 4 findings high-confidence ; 3 vrais corrigés (C-1 race rollback, C-2 generateLink→signInWithOtp, H-2 garde internal-user) ; 1 faux positif validé (H-1 is_admin marche avec JWT user).
+
+**Risques sécurité résolus** : R-009 (index `portal_client_email`).
+
+**Risques restants à traiter** :
+- Sprint A.3 — refonte policies `projects_v2` (policy globale `USING true` toujours en place, trigger pose un filet sur portal_* seulement).
+- Sprint A.3 — R-011 (fuite RGPD anon qualification_leads).
+
+**ADR implicites** :
+- Auth client = email/mdp (pas magic link permanent), via flow invitation Supabase Auth.
+- Trigger BEFORE UPDATE chirurgical sur colonnes portal_* plutôt que refonte complète des policies projects_v2.
+- Helper edge function inliné dans chaque fonction (Edge Runtime ne supporte pas `_shared/`).
+
+---
 
 ### ✅ A.1 — Dump des 15 migrations distantes (terminé 2026-05-17)
 **Démarré** : 2026-05-17

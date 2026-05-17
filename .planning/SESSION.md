@@ -1,23 +1,30 @@
-# Session State — 2026-05-17 fin (Sprint A.1 livré)
+# Session State — 2026-05-17 fin (Sprint A.2a livré)
 
 ## Branch
 `feature/propulspace-phase-2-front` — exception multi-phases assumée (merge dans `main` fin Phase 2).
 
 ## Completed This Session
-- ✅ Reprise matin : test E2E magic link validé (flow client portail end-to-end OK)
-- ✅ Audit complet Propul'Space → `.planning/AUDIT_PROPULSPACE.md`
-- ✅ Création du système de suivi vivant (`PROGRESS_PROPULSPACE.md` + skill `token-saver` enrichi pour gérer les PROGRESS par feature)
-- ✅ **Sprint A — Tâche A.1** : dump des 15 migrations propulspace + 4 docs baseline + code review (3 issues nouveaux R-015/R-016/R-017) → commit `55525fa`
+- ✅ Migration `propulspace_160_portal_activation_metadata` (3 colonnes + index + trigger guard + REVOKE EXECUTE)
+- ✅ 3 edge functions déployées : `admin-portal-invite` (v3), `admin-portal-resend-invite` (v3), `admin-portal-deactivate` (v2)
+- ✅ Hook `usePortalActivation` + 3 composants admin (ActivatePortalDialog, DeactivatePortalDialog, PortalStatusSection)
+- ✅ Page `/espace-client/setup-password` avec garde internal-user
+- ✅ Intégration dans `ProjectV3RightSidebar` (sidebar droite, admin only)
+- ✅ Code review → 3 fixes critiques (C-1 rollback deleteUser, C-2 signInWithOtp pour resend, H-2 garde internal-user)
+- ✅ Fix CORS (`x-application-name` autorisé)
+- ✅ Ajout 3 champs optionnels Prénom/Nom/Téléphone → crée un contact lié si rempli
+- ✅ **Test E2E validé** : activation → mail reçu → setup-password → login espace client OK
 
 ## Next Task
-**Sprint A — Tâche A.2** : Bouton "Activer le portail" sur fiche projet CRM.
-⚠️ Lyes doit envoyer le prompt A.2 (règles globales + contexte + étapes) avant que je démarre. Je n'attaque rien sans prompt.
+**Sprint A.3** — Tests sécurité `portal_project_id()` + durcissement RLS.
+Priorités : R-011 (fuite RGPD anon qualification_leads), R-008/R-012/R-013 (RLS + GRANTs + colonnes vues).
 
 ## Blockers
-None.
+None. Précieuse débloqué côté activation portail.
 
 ## Key Context
-- 10 risques sécurité documentés (R-008 à R-017) — dont 2 critiques (R-011 fuite RGPD anon, R-015 escalade privilèges audit). Tous bookés Sprint A.3.
-- ADR-004 acté : multi-projets par client → switcher UI à venir, pas d'UNIQUE sur `portal_client_email`.
+- Bouton "Activer le portail" visible en haut sidebar droite V3 (admin only).
+- Dialog : email obligatoire + Prénom/Nom/Téléphone optionnels (crée contact si remplis).
+- Désactivation = confirmation typée (nom du projet) + raison optionnelle.
+- A.2b reporté : refonte complète `ClientLoginPage` (login email/mdp + reset password + UX soignée).
+- Sécurité DB : trigger `guard_portal_columns_admin_only` protège les colonnes portal_*. Refonte complète policies projects_v2 = Sprint A.3.
 - PROGRESS_PROPULSPACE.md à lire en début de reprise (avant ce SESSION.md).
-- 17 items backlog dans `.planning/BACKLOG_PROPULSPACE.md`.

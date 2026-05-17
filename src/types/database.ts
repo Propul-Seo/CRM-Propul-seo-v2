@@ -3081,6 +3081,7 @@ export type Database = {
           next_action_due: string | null
           next_action_label: string | null
           portal_activated_at: string | null
+          portal_activated_by: string | null
           portal_brand_logo_url: string | null
           portal_brand_primary_color: string | null
           portal_client_email: string | null
@@ -3088,9 +3089,11 @@ export type Database = {
           portal_deactivation_reason: string | null
           portal_enabled: boolean | null
           portal_expires_at: string | null
+          portal_last_invite_sent_at: string | null
           portal_next_milestone_date: string | null
           portal_next_milestone_label: string | null
           portal_phase: string | null
+          portal_previous_client_email: string | null
           portal_progress_percent: number | null
           portal_published_hours_worked: number | null
           portal_short_code: string | null
@@ -3137,6 +3140,7 @@ export type Database = {
           next_action_due?: string | null
           next_action_label?: string | null
           portal_activated_at?: string | null
+          portal_activated_by?: string | null
           portal_brand_logo_url?: string | null
           portal_brand_primary_color?: string | null
           portal_client_email?: string | null
@@ -3144,9 +3148,11 @@ export type Database = {
           portal_deactivation_reason?: string | null
           portal_enabled?: boolean | null
           portal_expires_at?: string | null
+          portal_last_invite_sent_at?: string | null
           portal_next_milestone_date?: string | null
           portal_next_milestone_label?: string | null
           portal_phase?: string | null
+          portal_previous_client_email?: string | null
           portal_progress_percent?: number | null
           portal_published_hours_worked?: number | null
           portal_short_code?: string | null
@@ -3193,6 +3199,7 @@ export type Database = {
           next_action_due?: string | null
           next_action_label?: string | null
           portal_activated_at?: string | null
+          portal_activated_by?: string | null
           portal_brand_logo_url?: string | null
           portal_brand_primary_color?: string | null
           portal_client_email?: string | null
@@ -3200,9 +3207,11 @@ export type Database = {
           portal_deactivation_reason?: string | null
           portal_enabled?: boolean | null
           portal_expires_at?: string | null
+          portal_last_invite_sent_at?: string | null
           portal_next_milestone_date?: string | null
           portal_next_milestone_label?: string | null
           portal_phase?: string | null
+          portal_previous_client_email?: string | null
           portal_progress_percent?: number | null
           portal_published_hours_worked?: number | null
           portal_short_code?: string | null

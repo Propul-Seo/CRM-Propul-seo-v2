@@ -13,6 +13,8 @@ import { AddProjectContactModalV3 } from './AddProjectContactModalV3'
 import { ContactCardV3 } from './ContactCardV3'
 import { PipelineSelect } from './pipeline-previews/PipelineSelect'
 import { useProjectContactsV3 } from '../hooks/useProjectContactsV3'
+import { PortalStatusSection } from '@/modules/EspaceClient/admin/components/PortalStatusSection'
+import { usePropulspaceAdmin } from '@/modules/EspaceClient/admin/hooks/usePropulspaceAdmin'
 
 interface TeamUser { id: string; name: string; email: string }
 
@@ -49,6 +51,8 @@ export function ProjectV3RightSidebar({ project, users, onContactSaved, onAssign
   const [addContactOpen, setAddContactOpen] = useState(false)
   const [editContactId, setEditContactId] = useState<string | null>(null)
   const [showAssignSelect, setShowAssignSelect] = useState(false)
+  const adminState = usePropulspaceAdmin()
+  const isAdmin = adminState.status === 'authorized' && adminState.role === 'admin'
   const {
     contacts,
     refetch: refetchContacts,
@@ -58,14 +62,41 @@ export function ProjectV3RightSidebar({ project, users, onContactSaved, onAssign
   } = useProjectContactsV3(project.id)
 
   const takenRoles = contacts.map((c) => c.role)
+  // Email suggéré pour pré-remplir le dialog d'activation : 1er contact lié au projet.
+  const suggestedPortalEmail = contacts[0]?.contact?.email ?? null
 
   const handleContactSaved = async () => {
     await refetchContacts()
     if (onContactSaved) await onContactSaved()
   }
 
+  const handlePortalRefresh = async () => {
+    if (onContactSaved) await onContactSaved()
+  }
+
   return (
     <div className="flex flex-col">
+      {/* Portail client (admin only) */}
+      <PortalStatusSection
+        project={{
+          id: project.id,
+          name: project.name,
+          portal_client_email: project.portal_client_email ?? null,
+          portal_previous_client_email: project.portal_previous_client_email ?? null,
+        }}
+        isAdmin={isAdmin}
+        suggestedEmail={suggestedPortalEmail}
+        onRefresh={handlePortalRefresh}
+        onCreateContact={async ({ name, email, phone }) => {
+          const ok = await createAndLink({ name, email, phone: phone ?? null, company: null }, 'primary')
+          if (ok) {
+            await refetchContacts()
+            if (onContactSaved) await onContactSaved()
+          }
+          return ok
+        }}
+      />
+
       {/* Contact client (multi-contacts) */}
       <RightSection
         title={`Contact client${contacts.length > 1 ? ` · ${contacts.length}` : ''}`}
