@@ -7,12 +7,12 @@
 
 ## 1. État global
 
-- **Sprint en cours** : A — Foundations
-- **Tâche en cours** : A.3 — Tests sécurité `portal_project_id()` + durcissement RLS (à attaquer)
-- **Phase produit** : Phase 2 (portail livré, activation UI OK, prépa client Précieuse)
+- **Sprint en cours** : A — Foundations (complet sauf A.2b reporté)
+- **Tâche en cours** : Sprint B.3 (Stripe) à attaquer — compte Stripe à créer côté Lyes
+- **Phase produit** : Phase 2 (portail livré, sécurité durcie, prépa client Précieuse)
 - **Branche** : `feature/propulspace-phase-2-front` (exception multi-phases assumée, merge dans `main` fin Phase 2)
 - **Project Supabase** : ERP (`tbuqctfgjjxnevmsvucl`)
-- **Dernière mise à jour** : 2026-05-17 (clôture A.2a)
+- **Dernière mise à jour** : 2026-05-18 (clôture A.3 + recon B.3)
 
 ---
 
@@ -22,7 +22,7 @@
 - [x] **A.1** Dump des 15 migrations distantes Propul'Space — terminé 2026-05-17
 - [x] **A.2a** Bouton "Activer le portail" sur fiche projet CRM — terminé 2026-05-17
 - [ ] **A.2b** Refonte ClientLoginPage (login email/mdp + reset password + UX) — reporté
-- [ ] **A.3** Tests sécurité `portal_project_id()` + durcissement RLS (priorité R-011, R-008, R-012, R-013)
+- [x] **A.3** Durcissement RLS + R-011/R-008/R-012/R-013 fermés — terminé 2026-05-18
 
 → ✋ STOP validation Sprint A complet avant Sprint B
 
@@ -45,6 +45,47 @@
 ## 3. Journal des tâches (cumulatif)
 
 > Ordre chronologique. Une entrée par tâche close.
+
+### ✅ A.3 — Durcissement RLS + sécurité portail (terminé 2026-05-18)
+**Démarré** : 2026-05-18
+**Terminé** : 2026-05-18 (script de tests vert + code review traitée)
+**Périmètre** : fermer les 4 risques sécurité documentés (R-011/R-013/R-012/R-008) avant d'attaquer Stripe (B.3).
+
+**Approche** : 1 sous-tâche par risque, migration séparée à chaque fois, code review en fin de sprint, script de tests rejouable.
+
+**Fichiers créés (6 migrations + 1 script tests)** :
+- `supabase/migrations/20260518090000_propulspace_170_qualif_secure_draft.sql` — colonne `draft_session_token UUID NOT NULL`, drop 3 policies anon, 3 RPC `propulspace.qualif_*_draft` (SD) + 3 wrappers `public.qualif_*_draft` (PostgREST). Whitelist ~30 colonnes en update.
+- `supabase/migrations/20260518100000_propulspace_180_revoke_anon_grants.sql` — REVOKE ALL FROM anon sur 13 tables/vues sensibles.
+- `supabase/migrations/20260518110000_propulspace_190_restrict_client_views.sql` — DROP+CREATE 5 vues `propulspace_*_v2` avec whitelist colonnes safe (miroir des types `Portal*`). REVOKE anon inline (leçon hotfix).
+- `supabase/migrations/20260518120000_propulspace_200_storage_path_filter.sql` — durcir policy Storage avec `name LIKE portal_project_id()||'/%'`.
+- `supabase/migrations/20260518130000_propulspace_195_revoke_anon_views_after_recreate.sql` — hotfix : CREATE VIEW dans public ré-attribue ACL anon par défaut. Détecté par les tests.
+- `supabase/migrations/20260518140000_propulspace_201_storage_policy_simplify.sql` — code review C-1 : un seul appel `portal_project_id()`.
+- `.planning/A3_TESTS.sql` — script rejouable (3 sections : assertions structurelles + runtime anon + whitelist RPC).
+
+**Fichiers modifiés (3)** :
+- `src/modules/EspaceClient/qualification/hooks/useQualificationDraft.ts` — refonte complète : sessionStorage + 3 RPC + nouvelle méthode `submit()`. Purge ancienne clé localStorage.
+- `src/modules/EspaceClient/qualification/QualificationFlowPage.tsx` — utilise `submit()` au lieu d'UPDATE direct sur vue, retire import `v2`.
+- `src/modules/EspaceClient/qualification/constants.ts` — nouvelle clé `QUALIFICATION_TOKEN_SESSIONSTORAGE_KEY`.
+
+**Migrations appliquées en prod** : 170, 180, 190, 195, 200, 201 (toutes vérifiées via MCP).
+
+**Code review** : 7 findings ; 3 VRAIS corrigés (C-1, H-3 clearToken défensif, M-1 REVOKE inline 190) ; 4 FAUX/DIFFÉRÉS (H-1 chaînes vides volontaires, H-2 race préexistante hors-scope, M-2 DEFAULT 0 vérifié, L-1 supabase import).
+
+**Risques résolus** :
+- R-011 🔴 (fuite RGPD anon SELECT qualification_leads drafts)
+- R-008 🟠 (Storage cross-tenant `propulspace-documents`)
+- R-012 🟠 (colonnes admin exposées via vues SELECT *)
+- R-013 🟠 (GRANTs anon excessifs sur tables/vues portail)
+
+**Risques restants** : R-003 (tests RLS automatisés CI — différé), R-010 (doublon `qualification_uploads`/colonnes texte — backlog).
+
+**ADR implicites** :
+- Auth qualif anon = `draft_session_token` UUID en sessionStorage (perdu à la fermeture d'onglet, accepté pour V1, lien email de récup à Sprint B.1).
+- Pas de vues `propulspace_*_admin_v2` créées maintenant (YAGNI ; pas de consommateur admin actuel).
+- `qualification_leads_v2` reste `SELECT *` (admin-only de fait, pas de risque client).
+- Tout `CREATE VIEW` dans `public` doit être suivi de `REVOKE ALL FROM anon` explicite (règle à appliquer désormais).
+
+---
 
 ### ✅ A.2a — Bouton "Activer le portail" sur fiche projet V3 (terminé 2026-05-17)
 **Démarré** : 2026-05-17
@@ -256,12 +297,12 @@ Documentation (4) :
 | R-005 | `audit_log` non câblé alors qu'il sert au RGPD | 🟠 Élevée | À planifier — pas dans roadmap actuelle | 🟡 Ouvert |
 | R-006 | Wrappers intégrations `stripe/docuseal/brevo/calcom.ts` stubs non appelés | 🟡 Moyenne | Sprints B.3 / B.4 | 🟡 Ouvert |
 | R-007 | Aucun test (Vitest absent, pas de pgTAP) | 🟠 Élevée | Sprint A.3 amorce | 🟡 Ouvert |
-| **R-008** | **Storage `propulspace-documents` : policy client SELECT sans filtre projet (fuite cross-tenant théorique)** | 🟠 Élevée | Sprint A.3 (durcir policy avec `name LIKE portal_project_id() || '/%'`) | 🟡 Ouvert |
+| ~~R-008~~ | ~~Storage `propulspace-documents` policy client SELECT sans filtre projet~~ | 🟠 Élevée | Migration 200/201 | 🟢 **Résolu 2026-05-18** |
 | **R-009** | **`projects_v2.portal_client_email` sans INDEX (perf — full scan à chaque appel RLS)** — ⚠️ partie UNIQUE retirée suite ADR-004 (multi-projets souhaité) | 🟡 Moyenne (perf seule) | Sprint A.3 ou backlog perf | 🟡 Ouvert |
 | **R-010** | **Doublon stockage uploads qualification : table `qualification_uploads` ET colonnes `logo_file_url/brand_guide_url/existing_site_screenshots` sur `qualification_leads` (désync possible)** | 🟡 Moyenne | Backlog (consolider une source de vérité) | 🟡 Ouvert |
-| **R-011** | **🔴 Fuite RGPD : policies anon SELECT/UPDATE `qualification_leads` sans filtre identité — un anon peut SELECT tous les drafts (nom, email, tel, budget)** | 🔴 **Critique** | **Sprint A.3 prio 1** (session_token signé ou RPC SECURITY DEFINER) | 🟡 Ouvert |
-| **R-012** | **Vues `qualification_leads_v2` et `propulspace_*_v2` font `SELECT *` (exposent `internal_notes`, `stripe_payment_intent_id`, `created_by`, `signer_ip`, `quality_score_breakdown`, `pappers_enrichment`, etc.)** | 🟠 Élevée | Sprint A.3 (SELECT explicite des colonnes nécessaires) | 🟡 Ouvert |
-| **R-013** | **`GRANT INSERT, UPDATE` à `anon` sur tables portail (invoices, documents, signatures, etc.) — défense en profondeur cassée, RLS unique filet** | 🟠 Élevée | Sprint A.3 (retirer anon des GRANTs sur tables portail) | 🟡 Ouvert |
+| ~~R-011~~ | ~~Fuite RGPD anon SELECT/UPDATE qualification_leads drafts~~ | 🔴 Critique | Migration 170 (draft_session_token + 3 RPC SECURITY DEFINER) | 🟢 **Résolu 2026-05-18** |
+| ~~R-012~~ | ~~Vues `propulspace_*_v2` exposent colonnes admin via SELECT *~~ | 🟠 Élevée | Migration 190+195 (whitelist explicite + hotfix REVOKE) | 🟢 **Résolu 2026-05-18** (5 vues client ; `qualification_leads_v2` reste admin-only de fait) |
+| ~~R-013~~ | ~~GRANTs anon excessifs sur 13 tables/vues portail~~ | 🟠 Élevée | Migration 180+195 (REVOKE ALL FROM anon + hotfix post-CREATE VIEW) | 🟢 **Résolu 2026-05-18** |
 | **R-014** | **Try/catch silencieux dans `handle_new_user()` peut masquer INSERT failures pour internes** | 🟡 Moyenne | Monitoring logs Supabase (chercher "handle_new_user INSERT failed") | 🟡 Ouvert |
 | **R-015** | **🔴 Escalade privilèges : `ps_docs_client_insert` ne contraint pas `uploaded_by` — un client peut s'auto-attribuer un user interne dans l'audit trail** (migration 070) | 🔴 Critique | Sprint A.3 (ajouter `AND uploaded_by IS NULL` au WITH CHECK) | 🟡 Ouvert |
 | **R-016** | **`anon` peut INSERT dans `propulspace-uploads` sans path prefix — pollution/écrasement fichiers d'autres leads si UUID connu** (migration 080) | 🟠 Élevée | Sprint A.3 (`WITH CHECK ... name LIKE 'qualification/%'` ou RPC SECURITY DEFINER) | 🟡 Ouvert |

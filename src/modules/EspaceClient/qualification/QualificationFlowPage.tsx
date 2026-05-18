@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Loader2, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { supabase, v2 } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { BrandPill } from '@/modules/EspaceClient/shared/components';
 import { useForceLightTheme } from '@/modules/EspaceClient/shared/hooks/useForceLightTheme';
 import '@/modules/EspaceClient/shared/layouts/portal-theme.css';
@@ -26,7 +26,7 @@ type StepErrors = Record<string, string | undefined>;
 export function QualificationFlowPage() {
   useForceLightTheme();
   const navigate = useNavigate();
-  const { draft, leadId, loading, saving, savedJustNow, setField, flush, clearDraft } = useQualificationDraft();
+  const { draft, leadId, loading, saving, savedJustNow, setField, submit, clearDraft } = useQualificationDraft();
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState<StepErrors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -75,20 +75,12 @@ export function QualificationFlowPage() {
     }
     if (!validateCurrent()) return;
     setSubmitting(true);
-    const { leadId: id, error: saveErr } = await flush();
-    if (saveErr || !id) {
+    // Bascule draft→submitted via RPC (flush + qualif_update_draft{status:'submitted'}).
+    // L'ancien UPDATE direct sur la vue est retiré (Sprint A.3.2 — REVOKE anon UPDATE).
+    const { leadId: id, error: submitErr } = await submit();
+    if (submitErr || !id) {
       setSubmitting(false);
-      setErrors({ _global: saveErr ?? 'Échec de la sauvegarde. Réessayez.' });
-      return;
-    }
-    // Marquer comme soumis (via la vue public.qualification_leads_v2)
-    const { error: updErr } = await v2
-      .from('qualification_leads')
-      .update({ status: 'submitted', submitted_at: new Date().toISOString() })
-      .eq('id', id);
-    if (updErr) {
-      setSubmitting(false);
-      setErrors({ _global: 'Échec de la finalisation. Réessayez.' });
+      setErrors({ _global: submitErr ?? 'Échec de la soumission. Réessayez.' });
       return;
     }
     // Edge Function emails (best-effort, n'empêche pas la redirection)

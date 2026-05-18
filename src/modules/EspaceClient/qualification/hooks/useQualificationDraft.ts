@@ -1,16 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { v2 } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import {
   QUALIFICATION_SESSION_LOCALSTORAGE_KEY,
+  QUALIFICATION_TOKEN_SESSIONSTORAGE_KEY,
 } from '../constants';
 import type { QualificationDraft } from '../schema';
 import { resetOrphanFields } from '../conditionalRules';
 
-// Le schéma `propulspace` n'est pas exposable via PostgREST sur Supabase
-// hébergé — on passe par la vue public.qualification_leads_v2 (1:1 sur
-// propulspace.qualification_leads, security_invoker = true). Le proxy `v2`
-// fait le mapping `qualification_leads` → `qualification_leads_v2`.
-const TABLE = 'qualification_leads';
+// Sprint A.3.1 — bascule des écritures directes sur `qualification_leads_v2`
+// vers les RPC `public.qualif_*_draft` qui valident le `draft_session_token`
+// stocké en sessionStorage. R-011 (fuite RGPD anon SELECT/UPDATE) fermé.
+//
+// Cycle de vie :
+//   - mount : lit le token en sessionStorage. Si présent, appelle qualif_get_draft.
+//             Purge silencieuse de l'ancienne clé localStorage (id de row).
+//   - 1er save : appelle qualif_create_draft, stocke (lead_id, session_token).
+//   - saves suivants : appelle qualif_update_draft(token, payload JSONB).
+//   - clearDraft : remove sessionStorage token, reset état.
+// L'utilisateur perd son draft s'il ferme l'onglet (sessionStorage volatile).
+// Accepté pour V1 ; lien de récup email à prévoir post-Brevo (Sprint B.1).
+
 const DEBOUNCE_MS = 500;
 const SAVED_INDICATOR_MS = 1500;
 
@@ -22,19 +31,47 @@ interface UseQualificationDraftResult {
   savedJustNow: boolean;
   setField: <K extends keyof QualificationDraft>(key: K, value: QualificationDraft[K]) => void;
   setFields: (patch: Partial<QualificationDraft>) => void;
-  // Force un upsert immédiat (utile avant le submit final).
   flush: () => Promise<{ leadId: string | null; error: string | null }>;
+  submit: () => Promise<{ leadId: string | null; error: string | null }>;
   clearDraft: () => void;
 }
 
-function getOrCreateSessionId(): string {
-  const existing = localStorage.getItem(QUALIFICATION_SESSION_LOCALSTORAGE_KEY);
-  if (existing) return existing;
-  const fresh = crypto.randomUUID();
-  localStorage.setItem(QUALIFICATION_SESSION_LOCALSTORAGE_KEY, fresh);
-  return fresh;
+function readToken(): string | null {
+  return sessionStorage.getItem(QUALIFICATION_TOKEN_SESSIONSTORAGE_KEY);
 }
 
+function writeToken(token: string): void {
+  sessionStorage.setItem(QUALIFICATION_TOKEN_SESSIONSTORAGE_KEY, token);
+}
+
+function clearToken(): void {
+  sessionStorage.removeItem(QUALIFICATION_TOKEN_SESSIONSTORAGE_KEY);
+}
+
+// Strippe les clés que la RPC update_draft refuserait (admin-only) ou qui ne
+// font pas partie de la whitelist serveur. Robuste si le composant envoie un
+// objet plus large que prévu.
+const UPDATE_WHITELIST: ReadonlyArray<keyof QualificationDraft | 'status' | 'draft_progress_percent'> = [
+  'full_name', 'email', 'phone', 'company_name', 'business_sector', 'business_sector_custom',
+  'has_existing_site', 'existing_site_url', 'monthly_traffic', 'main_problems', 'has_domain_only',
+  'main_goal', 'target_audience', 'competitors',
+  'desired_features', 'ecommerce_platform', 'product_count_range', 'monthly_orders_range',
+  'reservation_type', 'health_specific_needs',
+  'has_visual_identity', 'wants_identity_creation', 'logo_file_url', 'brand_guide_url',
+  'existing_site_screenshots',
+  'budget_range', 'desired_timeline', 'timeline_reason',
+  'is_decision_maker', 'preferred_contact_method', 'final_cta_choice',
+  'draft_progress_percent', 'status',
+];
+
+function buildPayload(draft: QualificationDraft): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const key of UPDATE_WHITELIST) {
+    const v = (draft as Record<string, unknown>)[key as string];
+    if (v !== undefined) out[key as string] = v;
+  }
+  return out;
+}
 
 export function useQualificationDraft(): UseQualificationDraftResult {
   const [draft, setDraft] = useState<QualificationDraft>({});
@@ -47,49 +84,49 @@ export function useQualificationDraft(): UseQualificationDraftResult {
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const draftRef = useRef<QualificationDraft>({});
   const leadIdRef = useRef<string | null>(null);
-  // Mutex anti-double-INSERT : si une opération persist() est en vol,
-  // les suivantes sont ignorées (le debounce planifiera un nouveau save
-  // après).
+  const tokenRef = useRef<string | null>(null);
   const persistingRef = useRef(false);
 
-  // Garde une ref synchrone des dernières valeurs pour flush() et le timer.
   useEffect(() => { draftRef.current = draft; }, [draft]);
   useEffect(() => { leadIdRef.current = leadId; }, [leadId]);
 
-  // Au mount : tente de récupérer une row 'draft' via l'ID en localStorage.
+  // Mount : récupère le draft via token sessionStorage, purge l'ancienne clé localStorage.
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const sessionId = localStorage.getItem(QUALIFICATION_SESSION_LOCALSTORAGE_KEY);
-      if (!sessionId) { setLoading(false); return; }
+      // Purge silencieuse de l'ancien stockage (Sprint A.3.1 migration)
+      try { localStorage.removeItem(QUALIFICATION_SESSION_LOCALSTORAGE_KEY); } catch {}
 
-      const { data, error } = await v2
-        .from(TABLE)
-        .select('*')
-        .eq('id', sessionId)
-        .eq('status', 'draft')
-        .maybeSingle();
+      const token = readToken();
+      if (!token) { setLoading(false); return; }
+      tokenRef.current = token;
 
-      if (!cancelled && data && !error) {
-        setLeadId(sessionId);
-        setDraft(data as QualificationDraft);
+      const { data, error } = await supabase.rpc('qualif_get_draft', { p_token: token });
+      if (!cancelled && Array.isArray(data) && data.length > 0 && !error) {
+        const row = data[0] as QualificationDraft & { id: string };
+        setLeadId(row.id);
+        leadIdRef.current = row.id;
+        setDraft(row);
+      } else if (error || !Array.isArray(data) || data.length === 0) {
+        // Token périmé / row inexistante / submitted : on nettoie.
+        clearToken();
+        tokenRef.current = null;
       }
       if (!cancelled) setLoading(false);
     })();
     return () => { cancelled = true; };
   }, []);
 
-  // Persistance : INSERT au 1er save (quand step1 validée → tous les NOT NULL
-  // sont présents), UPDATE ensuite. Le mutex `persistingRef` empêche un
-  // 2e INSERT concurrent. Une fois la row créée, on UPDATE même si certains
-  // champs sont temporairement vides — la DB rejettera elle-même les
-  // violations NOT NULL, ce qu'on veut.
-  const persist = useCallback(async (data: QualificationDraft): Promise<{ leadId: string | null; error: string | null }> => {
+  const persist = useCallback(async (
+    data: QualificationDraft,
+  ): Promise<{ leadId: string | null; error: string | null }> => {
     if (persistingRef.current) {
       return { leadId: leadIdRef.current, error: null };
     }
     const currentId = leadIdRef.current;
-    // Premier INSERT : besoin des NOT NULL. Sinon, attend.
+    const currentToken = tokenRef.current;
+
+    // Premier save : besoin des NOT NULL (sinon attend que l'utilisateur remplisse step 1)
     if (!currentId) {
       if (!data.email || !data.full_name || !data.phone || !data.business_sector) {
         return { leadId: null, error: null };
@@ -99,26 +136,33 @@ export function useQualificationDraft(): UseQualificationDraftResult {
     setSaving(true);
 
     try {
-      if (!currentId) {
-        const newId = getOrCreateSessionId();
-        const { error } = await v2.from(TABLE).insert({
-          id: newId,
-          ...data,
-          status: 'draft',
-          budget_range: data.budget_range ?? '<2000',
-          source: 'portal_diagnostic',
+      // INSERT initial via RPC create_draft, puis UPDATE pour pousser les champs
+      if (!currentId || !currentToken) {
+        const { data: created, error: createErr } = await supabase.rpc('qualif_create_draft', {
+          p_source: 'portal_diagnostic',
         });
-        if (error) return { leadId: null, error: error.message };
-        setLeadId(newId);
-        leadIdRef.current = newId;
+        if (createErr || !Array.isArray(created) || created.length === 0) {
+          return { leadId: null, error: createErr?.message ?? 'create_draft failed' };
+        }
+        const { lead_id, session_token } = created[0] as { lead_id: string; session_token: string };
+        writeToken(session_token);
+        tokenRef.current = session_token;
+        setLeadId(lead_id);
+        leadIdRef.current = lead_id;
+
+        const { error: updErr } = await supabase.rpc('qualif_update_draft', {
+          p_token: session_token,
+          p_payload: buildPayload(data),
+        });
+        if (updErr) return { leadId: lead_id, error: updErr.message };
         triggerSavedIndicator();
-        return { leadId: newId, error: null };
+        return { leadId: lead_id, error: null };
       }
 
-      const { error } = await v2.from(TABLE).update({
-        ...data,
-        updated_at: new Date().toISOString(),
-      }).eq('id', currentId).eq('status', 'draft');
+      const { error } = await supabase.rpc('qualif_update_draft', {
+        p_token: currentToken,
+        p_payload: buildPayload(data),
+      });
       if (error) return { leadId: currentId, error: error.message };
       triggerSavedIndicator();
       return { leadId: currentId, error: null };
@@ -164,16 +208,39 @@ export function useQualificationDraft(): UseQualificationDraftResult {
     return persist(draftRef.current);
   }, [persist]);
 
+  // Bascule explicite draft → submitted via la RPC (autorise cette transition).
+  // Flush d'abord pour pousser les derniers champs métier, puis envoie un
+  // payload minimal { status: 'submitted' } : la RPC met submitted_at = NOW()
+  // automatiquement et bloque toute écriture ultérieure (status reste 'submitted',
+  // submitted_at NOT NULL).
+  const submit = useCallback(async (): Promise<{ leadId: string | null; error: string | null }> => {
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    const { leadId: id, error: flushErr } = await persist(draftRef.current);
+    if (flushErr || !id) return { leadId: id, error: flushErr ?? 'Draft non initialisé' };
+    const token = tokenRef.current;
+    if (!token) return { leadId: id, error: 'Session token absent' };
+
+    const { error } = await supabase.rpc('qualif_update_draft', {
+      p_token: token,
+      p_payload: { status: 'submitted' },
+    });
+    if (error) return { leadId: id, error: error.message };
+    // Défensif (review H-3) : on nettoie le token immédiatement après submit
+    // réussi côté serveur, indépendamment du clearDraft() côté composant
+    // (qui peut être interrompu par navigate / crash JS).
+    clearToken();
+    tokenRef.current = null;
+    return { leadId: id, error: null };
+  }, [persist]);
+
   const clearDraft = useCallback(() => {
-    localStorage.removeItem(QUALIFICATION_SESSION_LOCALSTORAGE_KEY);
+    clearToken();
+    tokenRef.current = null;
     setDraft({});
     setLeadId(null);
     leadIdRef.current = null;
   }, []);
 
-  // Cleanup au unmount : si un save est planifié (debounce non écoulé),
-  // on le flush sans attendre — évite de perdre la dernière modif si
-  // l'utilisateur navigue ailleurs juste après avoir tapé.
   useEffect(() => () => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
@@ -183,5 +250,5 @@ export function useQualificationDraft(): UseQualificationDraftResult {
     if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
   }, [persist]);
 
-  return { draft, leadId, loading, saving, savedJustNow, setField, setFields, flush, clearDraft };
+  return { draft, leadId, loading, saving, savedJustNow, setField, setFields, flush, submit, clearDraft };
 }

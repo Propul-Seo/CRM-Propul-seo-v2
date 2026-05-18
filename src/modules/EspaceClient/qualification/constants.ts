@@ -111,7 +111,11 @@ export const PREFERRED_CONTACTS = [
   { value: 'email',     label: 'Par email' },
 ] as const;
 
+// Sprint A.3.1 — l'ancienne clé localStorage (id de row, publique) est remplacée
+// par un draft_session_token UUID secret stocké en sessionStorage.
+// L'ancienne clé est purgée silencieusement au mount du hook.
 export const QUALIFICATION_SESSION_LOCALSTORAGE_KEY = 'propulseo_qualification_session_id';
+export const QUALIFICATION_TOKEN_SESSIONSTORAGE_KEY = 'propulseo_qualification_session_token';
 export const QUALIFICATION_STORAGE_BUCKET = 'propulspace-uploads';
 export const QUALIFICATION_STORAGE_FOLDER = 'qualification';
 
