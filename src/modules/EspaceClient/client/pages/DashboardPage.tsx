@@ -10,6 +10,7 @@ import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext';
 import {
   usePortalProjectSteps, usePortalInvoices, usePortalSignatures, usePortalDocuments,
 } from '../hooks/usePortalData';
+import { OnboardingBanner } from '../onboarding/OnboardingBanner';
 
 function formatShortDate(iso: string | null): string {
   if (!iso) return '';
@@ -64,6 +65,8 @@ export function DashboardPage() {
         subtitle={`Voici un aperçu de ${project.name ?? 'votre projet'} aujourd'hui.`}
         phasePill={project.status ? `Phase · ${project.status}` : undefined}
       />
+
+      <OnboardingBanner projectId={project.id} />
 
       <section className="grid gap-4 md:grid-cols-3">
         <KpiTile
