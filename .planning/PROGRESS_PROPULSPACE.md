@@ -7,12 +7,12 @@
 
 ## 1. État global
 
-- **Sprint en cours** : A — Foundations (complet sauf A.2b reporté)
-- **Tâche en cours** : Sprint B.3 (Stripe) à attaquer — compte Stripe à créer côté Lyes
-- **Phase produit** : Phase 2 (portail livré, sécurité durcie, prépa client Précieuse)
-- **Branche** : `feature/propulspace-phase-2-front` (exception multi-phases assumée, merge dans `main` fin Phase 2)
+- **Sprint en cours** : Sprint A + B livrés côté code. **QA E2E à dérouler** prochaine session.
+- **Tâche en cours** : QA E2E sur 18 tests (cf `docs/propulspace/QA_E2E_RUNBOOK.md`). Décisions en attente : verdict B.2 wizard (α/β) + multi-projets ADR-004.
+- **Phase produit** : Phase 2 (code complet, branchements infra Stripe/DocuSeal/Brevo à faire par Lyes, QA E2E à dérouler avant prod)
+- **Branche** : `feature/propulspace-phase-2-front` (exception multi-phases assumée, merge dans `main` fin Phase 2 après QA validée)
 - **Project Supabase** : ERP (`tbuqctfgjjxnevmsvucl`)
-- **Dernière mise à jour** : 2026-05-18 (clôture A.3 + recon B.3)
+- **Dernière mise à jour** : 2026-05-18 (clôture Sprint B complet + tests runtime portail réussis + bug multi-projets identifié)
 
 ---
 
@@ -27,11 +27,13 @@
 → ✋ STOP validation Sprint A complet avant Sprint B
 
 ### Sprint B — Préparation Précieuse (5-7 jours)
-- [ ] **B.1** Custom SMTP Brevo (fix branding LOCAGAME)
-- [ ] **B.2** OnboardingWizard 1er login (Vue 12)
-- [ ] **B.3** Edge function Stripe (création checkout + webhook `invoice.paid`)
-- [ ] **B.4** Edge function DocuSeal (envelope + webhook signature)
-- [ ] **B.5** QA end-to-end parcours Précieuse
+- [x] **B.1** Runbook Brevo Custom SMTP — code 0, doc complète. Branchement à faire par Lyes.
+- [x] **B.2** OnboardingWizard livré MAIS **scope incorrect** (collecte d'infos métier au lieu de wizard d'accueil chaleureux). À refaire selon brief original (option α ou β).
+- [x] **B.3** Stripe complet (2 edge fns + UI portail + migrations + runbook). Branchement compte Stripe à faire.
+- [x] **B.4** DocuSeal (2 edge fns + runbook). UI signatures portail déjà existante. Branchement compte DocuSeal à faire.
+- [x] **B.5** QA_E2E_RUNBOOK.md livré (18 tests). **À dérouler en prochaine session.**
+
+→ ✋ Reste : décider verdict B.2 wizard (α/β) + ADR-004 multi-projets + faire QA E2E
 
 → ✋ STOP validation Sprint B complet avant Sprint C
 
@@ -45,6 +47,34 @@
 ## 3. Journal des tâches (cumulatif)
 
 > Ordre chronologique. Une entrée par tâche close.
+
+### ✅ Sprint B complet — Brevo + Onboarding + Stripe + DocuSeal + QA (terminé 2026-05-18)
+**Démarré** : 2026-05-18
+**Terminé** : 2026-05-18 (commits 57ca272 → d0e895a → a3d3e11)
+**Périmètre** : compléter toute la prépa client Précieuse côté code, sans branchement infra (Stripe/DocuSeal/Brevo à brancher par Lyes via runbooks).
+
+**Livrables clés** :
+- **B.3 Stripe** : 2 migrations (210 statuts/colonnes Stripe + trigger recalc, 211 vue admin) + 2 edge functions (`portal-create-checkout-session` JWT verify ON, `stripe-webhook` JWT OFF + HMAC) + refonte UI InvoicesPage (boutons Payer par acompte + entière, bannière retour, polling 4×2s) + STRIPE_RUNBOOK.md.
+- **B.1 Brevo** : BREVO_RUNBOOK.md exhaustif (compte, DKIM/SPF, templates 3 emails Auth, diagnostic).
+- **B.2 OnboardingWizard** : migration 220/221 (vue + UNIQUE project_id) + hook useOnboarding (autosave + upsert StrictMode-safe) + Wizard 5 étapes + 5 step components + Banner sur dashboard. **⚠️ Scope incorrect** — refonte selon brief original Lyes prévue.
+- **B.4 DocuSeal** : 2 edge functions (`admin-docuseal-create-submission` admin only, `docuseal-webhook` HMAC SHA-256 + idempotency key sans timestamp pour expired) + DOCUSEAL_RUNBOOK.md.
+- **B.5 QA** : QA_E2E_RUNBOOK.md (18 tests E2E couvrant auth/onboarding/Stripe/DocuSeal/sécurité/robustesse).
+
+**Code reviews** : 12 findings au total entre les sprints A.3, A.2b, B.3, B.2+B.4. 9 fixes appliqués, 3 différés (race webhook protégée par UNIQUE, orphelin DocuSeal V1 acceptable, edge case DELETE installments documenté).
+
+**Tests runtime effectués** :
+- Magic link → dashboard portail OK (après refresh HMR initial)
+- Bannière onboarding visible et fonctionnelle
+- Wizard 5 étapes interactif + stepper + autosave
+- Login admin CRM OK avec `team@propulseo-site.com`
+- Tentative activation portail sur 2e projet avec même email → **bug identifié** : Supabase Auth refuse (1 email = 1 user). Décision ADR-004 multi-projets non implémentée.
+
+**Risques résiduels à traiter session QA** :
+- Décision verdict B.2 wizard (α tout supprimer / β déplacer côté admin) → impacte combien de code à jeter
+- Décision multi-projets (coder ~3-4h ou contournement V1)
+- Branchements infra (Stripe / DocuSeal / Brevo) — bloque les tests live
+
+---
 
 ### ✅ A.3 — Durcissement RLS + sécurité portail (terminé 2026-05-18)
 **Démarré** : 2026-05-18
