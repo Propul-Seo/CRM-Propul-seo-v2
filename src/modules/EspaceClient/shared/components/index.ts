@@ -9,3 +9,4 @@ export { TimelineStep } from './TimelineStep';
 export { StatusPage, type StatusTone } from './StatusPage';
 export { FileIcon } from './FileIcon';
 export { BrandPill } from './BrandPill';
+export { PasswordSetForm, PORTAL_PASSWORD_MIN } from './PasswordSetForm';

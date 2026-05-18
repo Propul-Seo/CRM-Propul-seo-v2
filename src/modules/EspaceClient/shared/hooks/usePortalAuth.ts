@@ -21,7 +21,9 @@ export type PortalAuthState =
 
 export interface UsePortalAuthResult {
   state: PortalAuthState;
+  signInWithPassword: (email: string, password: string) => Promise<{ error: string | null }>;
   signInWithMagicLink: (email: string, redirectTo?: string) => Promise<{ error: string | null }>;
+  requestPasswordReset: (email: string, redirectTo?: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -65,16 +67,41 @@ export function usePortalAuth(): UsePortalAuthResult {
     };
   }, []);
 
-  // shouldCreateUser: true — les clients externes n'ont pas de row préexistante
-  // dans auth.users. Supabase la crée automatiquement à la 1re connexion.
+  // Code review C-2 (A.2b) : shouldCreateUser: false. Les clients portail sont
+  // créés UNIQUEMENT via l'invitation admin (Sprint A.2a). Autoriser la création
+  // ici permettrait à n'importe qui de spammer auth.users avec des emails forgés.
   const signInWithMagicLink = useCallback<UsePortalAuthResult['signInWithMagicLink']>(
     async (email, redirectTo) => {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           emailRedirectTo: redirectTo ?? `${window.location.origin}/espace-client`,
-          shouldCreateUser: true,
+          shouldCreateUser: false,
         },
+      });
+      return { error: error?.message ?? null };
+    },
+    [],
+  );
+
+  // A.2b — login direct par email + mot de passe (post-SetupPasswordPage).
+  // Si Supabase retourne "Invalid login credentials", on traduit en message
+  // user-friendly côté UI (cf ClientLoginPage).
+  const signInWithPassword = useCallback<UsePortalAuthResult['signInWithPassword']>(
+    async (email, password) => {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      return { error: error?.message ?? null };
+    },
+    [],
+  );
+
+  // A.2b — envoi du lien de réinitialisation. Le lien retombe sur
+  // /espace-client/reset-password (recovery token dans le hash), où l'utilisateur
+  // saisit son nouveau mot de passe.
+  const requestPasswordReset = useCallback<UsePortalAuthResult['requestPasswordReset']>(
+    async (email, redirectTo) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectTo ?? `${window.location.origin}/espace-client/reset-password`,
       });
       return { error: error?.message ?? null };
     },
@@ -85,5 +112,5 @@ export function usePortalAuth(): UsePortalAuthResult {
     await supabase.auth.signOut();
   }, []);
 
-  return { state, signInWithMagicLink, signOut, refresh };
+  return { state, signInWithPassword, signInWithMagicLink, requestPasswordReset, signOut, refresh };
 }

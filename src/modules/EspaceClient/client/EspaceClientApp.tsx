@@ -13,6 +13,7 @@ import { MagicLinkExpiredPage } from './pages/MagicLinkExpiredPage';
 import { PortalSuspendedPage } from './pages/PortalSuspendedPage';
 import { NotFoundPortalPage } from './pages/NotFoundPortalPage';
 import { SetupPasswordPage } from './pages/SetupPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 
 // Sous-router /espace-client/*. Routes publiques (login + statuts) en dehors
 // du PortalGuard ; routes protégées via PortalGuard → PortalShell → Outlet.
@@ -21,6 +22,7 @@ export function EspaceClientApp() {
     <Routes>
       <Route path="login" element={<ClientLoginPage />} />
       <Route path="setup-password" element={<SetupPasswordPage />} />
+      <Route path="reset-password" element={<ResetPasswordPage />} />
       <Route path="expired" element={<div className="propulspace-portal min-h-screen"><MagicLinkExpiredPage /></div>} />
       <Route path="suspended" element={<div className="propulspace-portal min-h-screen"><PortalSuspendedPage /></div>} />
 

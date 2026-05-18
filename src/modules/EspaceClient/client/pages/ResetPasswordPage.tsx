@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Lock, Loader2, AlertCircle } from 'lucide-react'
+import { KeyRound, Loader2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import { PasswordSetForm } from '@/modules/EspaceClient/shared/components'
 import '@/modules/EspaceClient/shared/layouts/portal-theme.css'
 
-// Page atterrissage après clic sur le lien d'invitation Supabase Auth.
-// Le client arrive ici avec une session déjà active (Supabase auto-login via
-// hash) et doit définir son mot de passe pour pouvoir se reconnecter avec
-// email + mot de passe ultérieurement.
+// Sprint A.2b — page de réinitialisation du mot de passe.
+// Atterrissage après clic sur le lien envoyé par requestPasswordReset().
+// Supabase auto-login l'utilisateur via le recovery token dans le hash URL,
+// donc une session est active à l'arrivée. On affiche le form de nouveau mdp
+// puis on déconnecte et on redirige vers /login (cf décision A.2b : reset
+// → login avec toast de confirmation, pas auto-redirect espace-client).
 
 type GateState =
   | { kind: 'loading' }
@@ -17,13 +19,14 @@ type GateState =
   | { kind: 'internal-user'; email: string }
   | { kind: 'ok'; email: string }
 
-export function SetupPasswordPage() {
+export function ResetPasswordPage() {
   const navigate = useNavigate()
   const [gate, setGate] = useState<GateState>({ kind: 'loading' })
 
   // Code review H-1 : sur mobile / nav lent, getSession() peut tirer avant que
-  // Supabase ait parsé le hash invitation (event SIGNED_IN) → faux "no-session".
-  // On combine getSession() + onAuthStateChange + timeout 8s.
+  // Supabase ait parsé le hash recovery → faux "no-session". On combine donc
+  // getSession() (cas warm cache) + onAuthStateChange (cas hash recovery) +
+  // timeout de fallback 8s.
   useEffect(() => {
     let cancelled = false
     let resolved = false
@@ -65,6 +68,23 @@ export function SetupPasswordPage() {
     }
   }, [])
 
+  // Code review H-2 + M-1 :
+  // - signOut IMMÉDIATEMENT après updateUser pour fermer la fenêtre de session
+  //   zombie (avant : 1500ms de session recovery active).
+  // - Toast côté login déclenché via sessionStorage (éphémère, non forgeable
+  //   via URL) au lieu de ?reset=success.
+  // Le délai 1500ms reste sur le navigate uniquement pour laisser l'utilisateur
+  // voir le message de succès.
+  async function handleSuccess() {
+    try {
+      sessionStorage.setItem('propulspace_reset_success', '1')
+    } catch { /* ignore */ }
+    await supabase.auth.signOut()
+    setTimeout(() => {
+      navigate('/espace-client/login', { replace: true })
+    }, 1500)
+  }
+
   if (gate.kind === 'loading') {
     return (
       <div className="propulspace-portal min-h-screen flex items-center justify-center">
@@ -79,8 +99,8 @@ export function SetupPasswordPage() {
         <AlertCircle className="h-12 w-12 text-amber-500 mb-3" />
         <h1 className="text-lg font-semibold mb-2">Lien expiré ou invalide</h1>
         <p className="text-sm text-[var(--ps-fg-muted)] mb-5 max-w-sm">
-          Le lien d'invitation a expiré ou a déjà été utilisé. Demandez à votre
-          agence de vous renvoyer un nouveau lien d'accès.
+          Le lien de réinitialisation a expiré ou a déjà été utilisé. Demandez
+          un nouveau lien depuis la page de connexion.
         </p>
         <Button onClick={() => navigate('/espace-client/login')}>
           Aller à la page de connexion
@@ -97,7 +117,6 @@ export function SetupPasswordPage() {
         <p className="text-sm text-[var(--ps-fg-muted)] mb-5 max-w-sm">
           Vous êtes connecté en tant que <strong>{gate.email}</strong> (compte
           interne de l'agence). Cette page est réservée aux clients du portail.
-          Pour changer votre mot de passe interne, utilisez les paramètres du CRM.
         </p>
       </div>
     )
@@ -108,21 +127,21 @@ export function SetupPasswordPage() {
       <div className="w-full max-w-sm bg-white rounded-lg shadow-sm border border-[var(--ps-border)] p-6 space-y-4">
         <div className="flex flex-col items-center text-center">
           <div className="h-12 w-12 rounded-full bg-violet-50 text-violet-700 flex items-center justify-center mb-3">
-            <Lock className="h-6 w-6" strokeWidth={2.2} />
+            <KeyRound className="h-6 w-6" strokeWidth={2.2} />
           </div>
           <h1 className="text-lg font-semibold text-[var(--ps-fg)]">
-            Créez votre mot de passe
+            Réinitialiser votre mot de passe
           </h1>
           <p className="text-[12.5px] text-[var(--ps-fg-muted)] mt-1">
-            Connecté en tant que <strong>{gate.email}</strong>. Vous pourrez
-            ensuite vous reconnecter avec votre email et ce mot de passe.
+            Connecté en tant que <strong>{gate.email}</strong>. Choisissez un
+            nouveau mot de passe. Vous serez redirigé vers la page de connexion.
           </p>
         </div>
 
         <PasswordSetForm
-          submitLabel="Enregistrer et accéder à mon espace"
-          successMessage="Mot de passe enregistré. Redirection…"
-          onSuccess={() => setTimeout(() => navigate('/espace-client', { replace: true }), 1500)}
+          submitLabel="Réinitialiser et me reconnecter"
+          successMessage="Mot de passe modifié. Redirection vers la connexion…"
+          onSuccess={handleSuccess}
         />
       </div>
     </div>
