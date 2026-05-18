@@ -7,12 +7,12 @@
 
 ## 1. État global
 
-- **Sprint en cours** : Sprint A + B livrés côté code. **QA E2E à dérouler** prochaine session.
-- **Tâche en cours** : QA E2E sur 18 tests (cf `docs/propulspace/QA_E2E_RUNBOOK.md`). Décisions en attente : verdict B.2 wizard (α/β) + multi-projets ADR-004.
-- **Phase produit** : Phase 2 (code complet, branchements infra Stripe/DocuSeal/Brevo à faire par Lyes, QA E2E à dérouler avant prod)
+- **Sprint en cours** : Sprint A + B livrés côté code. **QA E2E en cours** (3 bugs critiques fixés, scénario login portail validé).
+- **Tâche en cours** : Reprendre la QA E2E des 18 tests + décider verdict B.2 wizard (α/β) + multi-projets ADR-004.
+- **Phase produit** : Phase 2 (code complet + hot fixes auth, branchements infra Stripe/DocuSeal/Brevo à faire par Lyes, QA E2E à finaliser avant prod)
 - **Branche** : `feature/propulspace-phase-2-front` (exception multi-phases assumée, merge dans `main` fin Phase 2 après QA validée)
 - **Project Supabase** : ERP (`tbuqctfgjjxnevmsvucl`)
-- **Dernière mise à jour** : 2026-05-18 (clôture Sprint B complet + tests runtime portail réussis + bug multi-projets identifié)
+- **Dernière mise à jour** : 2026-05-18 (commit 9208e62 — isolation sessions auth CRM ↔ portail client)
 
 ---
 
@@ -47,6 +47,39 @@
 ## 3. Journal des tâches (cumulatif)
 
 > Ordre chronologique. Une entrée par tâche close.
+
+### ✅ Hot fixes QA + isolation sessions auth CRM ↔ portail (terminé 2026-05-18 PM)
+**Démarré** : 2026-05-18 (après-midi, début QA E2E)
+**Terminé** : 2026-05-18 (commit 9208e62)
+**Périmètre** : 3 bugs critiques détectés en QA + 1 refonte architecturale ciblée.
+
+**Bugs fixés en cours de QA** :
+- **Fix A — dialog activation portail** : `ActivatePortalDialog` masque les champs Prénom/Nom/Téléphone si un contact "Principal" existe déjà sur le projet. Avant : tentative de création doublon → 409 contrainte unique → message "Le contact n'a pas pu être créé". Maintenant : message info inline + l'activation passe juste l'email sans création contact.
+- **Fix message d'erreur edge function** : `usePortalActivation` lit le vrai body via `error.context.json()` au lieu du générique "Edge Function returned a non-2xx status code".
+- **Fix redirection post-login portail** : `ClientLoginPage` ajoute un `useEffect` qui détecte `state.status === 'ready'` et redirige vers `/espace-client`. Avant : le commentaire prétendait que `PortalGuard` redirigeait, mais `/login` est hors `PortalGuard` → user restait sur login sans feedback.
+
+**Refonte isolation auth (root cause du hang signInWithPassword)** :
+- Diagnostic : `Multiple GoTrueClient instances detected` + un seul `storageKey` partagé → un admin connecté au CRM bloquait toute connexion portail dans le même navigateur (hang indéfini).
+- Solution : 2 clients supabase-js distincts avec `storageKey` explicite :
+  - `supabase` → `'sb-crm-propulseo-auth'` (CRM admin)
+  - `portalSupabase` (nouveau) → `'sb-propulspace-auth'` (portail client)
+- Spec : `docs/superpowers/specs/2026-05-18-auth-isolation-portail-design.md`
+- Code basculé sur `portalSupabase` : `usePortalAuth`, `PasswordSetForm`, `SetupPasswordPage`, `ResetPasswordPage`, `InvoicesPage`, `usePortalData` (+ `v2Portal` proxy), `useOnboarding`.
+- Code review : 3 issues remontées, 2 vraies fixées (storageKey CRM explicite documenté dans spec migration, `getSession()` fallback dans `usePortalAuth` pour Safari ITP/PWA), 1 faux positif stylistique différé (`v2Portal` non utilisé dans `usePortalAuth` — appel direct `from('projects_v2')` équivalent).
+
+**Validation** :
+- `tsc --noEmit` clean.
+- Test runtime : `portalSupabase.signInWithPassword` répond en 112ms après un `supabase.signInWithPassword` (même browser) → plus de hang.
+- Storage keys distincts vérifiés via `supabase.auth.storageKey` / `portalSupabase.auth.storageKey`.
+
+**Limites assumées** :
+- Warning `Multiple GoTrueClient instances` persiste (déclenché par supabase-js sur le nombre d'instances, pas sur la collision de storage keys — cf [auth-js#762](https://github.com/supabase/auth-js/issues/762)). Cosmétique, inoffensif depuis que les storage keys sont distincts.
+- Migration : tous les utilisateurs devront se reconnecter une fois après déploiement (ancienne clé `sb-tbuqctfg-auth-token` orpheline). Acceptable phase QA.
+
+**Hors-périmètre** :
+- Multi-projets ADR-004 (un email = un projet) : non traité.
+- Refonte wizard onboarding B.2 (α/β) : non traité.
+- Suite QA E2E des 18 tests : reportée à la prochaine session, maintenant que le flow login portail est fonctionnel.
 
 ### ✅ Sprint B complet — Brevo + Onboarding + Stripe + DocuSeal + QA (terminé 2026-05-18)
 **Démarré** : 2026-05-18
