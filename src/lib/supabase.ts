@@ -14,7 +14,11 @@ const effectiveKey = isDemoMode ? 'demo-key' : supabaseAnonKey;
 
 export { isDemoMode };
 
-// ===== CLIENT SUPABASE SINGLETON =====
+// ===== CLIENT SUPABASE PRINCIPAL (CRM admin) =====
+// storageKey = 'sb-crm-propulseo-auth' : isolé du client portail (portalSupabase)
+// pour permettre la cohabitation des deux sessions dans le même navigateur.
+// L'admin connecté au CRM peut tester le portail client dans un autre onglet
+// sans écraser sa session admin (et vice versa).
 export const supabase: SupabaseClient<Database> = createClient<Database>(
   effectiveUrl,
   effectiveKey,
@@ -23,10 +27,41 @@ export const supabase: SupabaseClient<Database> = createClient<Database>(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
+      storageKey: 'sb-crm-propulseo-auth',
     },
     global: {
       headers: {
         'x-application-name': 'crm-propulseo',
+      },
+    },
+    db: {
+      schema: 'public',
+    },
+  }
+);
+
+// ===== CLIENT SUPABASE PORTAIL (Propul'Space) =====
+// Utilisé exclusivement par le code client portail sous /espace-client/*.
+// Même URL + anon key que `supabase`, mais session isolée via storageKey
+// distinct → permet à un admin CRM et à un client portail de cohabiter dans
+// le même navigateur sans interférence (deux entrées localStorage indépendantes).
+//
+// À utiliser dans : usePortalAuth, PasswordSetForm, SetupPasswordPage,
+// ResetPasswordPage, InvoicesPage (functions.invoke propage le JWT),
+// usePortalData (storage signed URLs), useOnboarding.
+export const portalSupabase: SupabaseClient<Database> = createClient<Database>(
+  effectiveUrl,
+  effectiveKey,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+      storageKey: 'sb-propulspace-auth',
+    },
+    global: {
+      headers: {
+        'x-application-name': 'crm-propulseo-portal',
       },
     },
     db: {
@@ -81,6 +116,8 @@ export const handleSupabaseSuccess = <T>(data: T): SupabaseResult<T> => {
 };
 
 // ===== CLIENT SUPABASE ANON (accès public, sans auth) =====
+// storageKey distinct pour éviter le warning "Multiple GoTrueClient instances
+// detected" (même si persistSession=false, l'instance GoTrueClient existe).
 export const supabaseAnon = createClient(
   effectiveUrl,
   effectiveKey,
@@ -88,6 +125,7 @@ export const supabaseAnon = createClient(
     auth: {
       persistSession: false,
       autoRefreshToken: false,
+      storageKey: 'sb-anon-noop',
     },
   }
 );
@@ -121,6 +159,10 @@ function createV2Proxy(client: SupabaseClient<Database>) {
 
 export const v2 = createV2Proxy(supabase);
 export const v2Anon = createV2Proxy(supabaseAnon);
+// Proxy v2 sur le client portail : pour que les lectures `v2.from('projects')`
+// faites depuis le code portail utilisent la session client (et non la session
+// admin si elle existe en parallèle dans le même navigateur).
+export const v2Portal = createV2Proxy(portalSupabase);
 
 // ===== INFO DEBUG (dev only) =====
 if (import.meta.env.DEV) {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { supabase, v2 } from '@/lib/supabase';
+import { portalSupabase as supabase, v2Portal as v2 } from '@/lib/supabase';
 
 // Hooks de lecture des entités portail (tables propulspace.* exposées via
 // vues public.propulspace_*_v2 + RLS security_invoker). Les hooks

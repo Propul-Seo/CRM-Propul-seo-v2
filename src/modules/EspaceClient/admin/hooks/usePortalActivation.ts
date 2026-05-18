@@ -28,11 +28,24 @@ async function invokeEdgeFn<T>(
   try {
     const { data, error } = await supabase.functions.invoke<EdgeFunctionResponse<T>>(name, { body })
     if (error) {
-      // Supabase wrap les erreurs HTTP non-2xx dans error.message + data peut contenir le payload.
+      // Sur non-2xx, supabase-js v2 ne fournit pas data — on doit lire le body
+      // depuis error.context (Response). Sinon on tombe sur le message générique.
+      let payloadError: string | null = null
+      try {
+        const ctx = (error as unknown as { context?: Response }).context
+        if (ctx && typeof ctx.json === 'function') {
+          const parsed = await ctx.clone().json()
+          if (parsed && typeof parsed === 'object' && 'error' in parsed) {
+            payloadError = String((parsed as { error: unknown }).error)
+          }
+        }
+      } catch {
+        // body non-JSON ou clone impossible — on fallback sur error.message
+      }
       const payload = (data as EdgeFunctionResponse<T> | null) ?? null
       return {
         success: false,
-        error: payload?.error ?? error.message ?? 'Erreur inconnue',
+        error: payload?.error ?? payloadError ?? error.message ?? 'Erreur inconnue',
       }
     }
     if (!data) return { success: false, error: 'Pas de réponse du serveur' }

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Lock, Loader2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { supabase } from '@/lib/supabase'
+import { portalSupabase as supabase } from '@/lib/supabase'
 import { PasswordSetForm } from '@/modules/EspaceClient/shared/components'
 import '@/modules/EspaceClient/shared/layouts/portal-theme.css'
 

@@ -11,7 +11,7 @@ import {
   usePortalInvoices, usePortalInstallments, getSignedStorageUrl,
   type PortalInvoice, type PortalInstallment,
 } from '../hooks/usePortalData';
-import { supabase } from '@/lib/supabase';
+import { portalSupabase as supabase } from '@/lib/supabase';
 
 const STORAGE_BUCKET = 'propulspace-documents';
 

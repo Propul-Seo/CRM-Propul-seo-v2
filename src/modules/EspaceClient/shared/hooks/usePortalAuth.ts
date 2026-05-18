@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { portalSupabase as supabase } from '@/lib/supabase';
 
 export interface PortalProject {
   id: string;
@@ -61,6 +61,16 @@ export function usePortalAuth(): UsePortalAuthResult {
       const next = await loadAuthState(session);
       if (!cancelled) setState(next);
     });
+    // Fallback : sur certains navigateurs (Safari ITP, PWA, parfois localStorage
+    // vide), l'event INITIAL_SESSION n'est pas émis → l'état resterait 'loading'
+    // indéfiniment. On force un getSession() au mount pour garantir une
+    // transition vers 'unauthenticated' (ou 'ready' si session restaurée).
+    void (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
+      const next = await loadAuthState(data.session);
+      if (!cancelled) setState(next);
+    })();
     return () => {
       cancelled = true;
       sub.subscription.unsubscribe();

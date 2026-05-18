@@ -28,6 +28,9 @@ interface Props {
   project: ProjectLike
   isAdmin: boolean
   suggestedEmail?: string | null
+  /** Si un contact "Principal" existe déjà sur le projet, on bloque la création
+   * d'un doublon depuis le dialog (contrainte unique 23505). */
+  primaryContactName?: string | null
   onRefresh: () => void | Promise<void>
   /** Crée et lie un contact au projet (rôle 'primary'). Optionnel : si non fourni,
    * la création de contact est désactivée. Retourne true si OK, false si échec. */
@@ -38,7 +41,7 @@ interface Props {
 // Inactif → bouton qui ouvre ActivatePortalDialog.
 // Actif   → badge email + dropdown (renvoyer invitation / désactiver).
 // Visible uniquement pour les admins (la garde DB existe via le trigger SQL).
-export function PortalStatusSection({ project, isAdmin, suggestedEmail, onRefresh, onCreateContact }: Props) {
+export function PortalStatusSection({ project, isAdmin, suggestedEmail, primaryContactName, onRefresh, onCreateContact }: Props) {
   const [activateOpen, setActivateOpen] = useState(false)
   const [deactivateOpen, setDeactivateOpen] = useState(false)
   const { activatePortal, resendInvite, deactivatePortal, isResending } = usePortalActivation()
@@ -174,6 +177,7 @@ export function PortalStatusSection({ project, isAdmin, suggestedEmail, onRefres
         projectName={project.name}
         defaultEmail={defaultEmail}
         defaultEmailHint={defaultEmailHint}
+        primaryContactName={primaryContactName ?? null}
         onConfirm={handleActivate}
       />
       {project.portal_client_email && (

@@ -48,7 +48,7 @@ Dans `src/lib/supabase.ts`, on garde le client `supabase` existant (CRM admin) e
 
 | Client | Usage | localStorage key |
 |---|---|---|
-| `supabase` | CRM (admin) — toutes routes hors `/espace-client/*` client | `sb-tbuqctfg-auth-token` (défaut) |
+| `supabase` | CRM (admin) — toutes routes hors `/espace-client/*` client | `sb-crm-propulseo-auth` (explicite) |
 | `portalSupabase` | Portail Propul'Space (client) — routes sous `/espace-client/*` non-admin | `sb-propulspace-auth` (explicite) |
 
 Les deux clients pointent vers la **même URL Supabase + même anon key**. Ils partagent la table `auth.users` et toutes les tables DB. L'isolation est strictement au niveau **stockage navigateur**.
@@ -147,8 +147,11 @@ La garde dans `SetupPasswordPage` (vérifie si l'`auth_user_id` matche une ligne
 
 ### Sessions existantes au moment du déploiement
 
-- Les sessions admin actuellement stockées dans `sb-tbuqctfg-auth-token` restent valides après déploiement (même storage key).
-- Les sessions client portail actuellement stockées dans `sb-tbuqctfg-auth-token` ne seront **pas lues** par `portalSupabase` (qui regarde `sb-propulspace-auth`). Conséquence : les clients déjà connectés devront se reconnecter une fois. Acceptable car phase QA, 1-2 clients max.
+Les sessions Supabase actuelles sont stockées sous la clé par défaut `sb-tbuqctfg-auth-token`. Après déploiement, les deux nouveaux storage keys explicites (`sb-crm-propulseo-auth` et `sb-propulspace-auth`) ne liront pas l'ancienne clé.
+
+**Conséquence** : tous les utilisateurs actuellement connectés (admin CRM comme client portail) devront se **reconnecter une fois** après le déploiement. Acceptable : seul Lyes utilise le CRM (1 reconnexion), et la phase QA Propul'Space a 0-2 clients max.
+
+L'ancienne clé `sb-tbuqctfg-auth-token` deviendra orpheline dans le `localStorage` des utilisateurs. À supprimer manuellement ou laisser expirer (Supabase nettoie les tokens expirés au prochain `getSession`).
 
 ### HMR Vite (dev mode)
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { portalSupabase as supabase } from '@/lib/supabase';
 
 // Sprint B.2 — hook onboarding portail.
 // Charge / crée / met à jour la row propulspace.onboarding_responses du projet

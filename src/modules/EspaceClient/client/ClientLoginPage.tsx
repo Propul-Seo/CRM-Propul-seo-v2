@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Send, LogIn, CheckCircle2, ArrowLeft, KeyRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,8 +33,20 @@ function humanizeAuthError(raw: string): string {
 }
 
 export function ClientLoginPage() {
-  const { signInWithPassword, signInWithMagicLink, requestPasswordReset } = usePortalAuth();
+  const navigate = useNavigate();
+  const { state, signInWithPassword, signInWithMagicLink, requestPasswordReset } = usePortalAuth();
   const [mode, setMode] = useState<Mode>('password');
+
+  // Redirection réactive : uniquement si la session correspond à un client portail
+  // ('ready' = email matché à projects_v2.portal_client_email). On NE redirige PAS
+  // sur 'no-project' : ce cas couvre les admins connectés (session CRM) qui
+  // arriveraient sur /espace-client/login — il faut leur laisser la page de login
+  // accessible pour qu'ils puissent se reconnecter avec un email client.
+  useEffect(() => {
+    if (state.status === 'ready') {
+      navigate('/espace-client', { replace: true });
+    }
+  }, [state.status, navigate]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [form, setForm] = useState<FormState>({ kind: 'idle' });
@@ -70,8 +83,8 @@ export function ClientLoginPage() {
       setForm({ kind: 'error', message: humanizeAuthError(error) });
       return;
     }
-    // Succès : le listener onAuthStateChange dans usePortalAuth + PortalGuard
-    // se chargent de rediriger vers /espace-client.
+    // Succès : le useEffect ci-dessus surveille state.status === 'ready' et
+    // redirige vers /espace-client. PortalGuard prend ensuite le relais.
     setForm({ kind: 'idle' });
   }
 

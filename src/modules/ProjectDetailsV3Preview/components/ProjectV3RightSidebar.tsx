@@ -64,6 +64,10 @@ export function ProjectV3RightSidebar({ project, users, onContactSaved, onAssign
   const takenRoles = contacts.map((c) => c.role)
   // Email suggéré pour pré-remplir le dialog d'activation : 1er contact lié au projet.
   const suggestedPortalEmail = contacts[0]?.contact?.email ?? null
+  // Nom du contact principal (s'il existe) : sert à masquer les champs de création
+  // dans le dialog d'activation pour éviter le doublon (contrainte unique 23505).
+  const primaryContact = contacts.find((c) => c.role === 'primary')?.contact ?? null
+  const primaryContactName = primaryContact?.name ?? null
 
   const handleContactSaved = async () => {
     await refetchContacts()
@@ -86,6 +90,7 @@ export function ProjectV3RightSidebar({ project, users, onContactSaved, onAssign
         }}
         isAdmin={isAdmin}
         suggestedEmail={suggestedPortalEmail}
+        primaryContactName={primaryContactName}
         onRefresh={handlePortalRefresh}
         onCreateContact={async ({ name, email, phone }) => {
           const ok = await createAndLink({ name, email, phone: phone ?? null, company: null }, 'primary')

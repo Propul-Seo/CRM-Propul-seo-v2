@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/lib/supabase';
+import { portalSupabase as supabase } from '@/lib/supabase';
 
 // Composant partagé pour la définition d'un mot de passe portail :
 // - utilisé par SetupPasswordPage (1re fois après invitation)

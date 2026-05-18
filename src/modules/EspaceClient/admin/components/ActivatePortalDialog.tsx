@@ -20,6 +20,9 @@ interface Props {
   projectName: string
   defaultEmail?: string | null
   defaultEmailHint?: string
+  /** Nom du contact principal déjà lié au projet. Si défini, on masque les
+   * champs de création de contact (sinon contrainte unique 23505 garantie). */
+  primaryContactName?: string | null
   onConfirm: (payload: ActivatePortalPayload) => Promise<{ success: boolean; error?: string }>
 }
 
@@ -34,8 +37,10 @@ export function ActivatePortalDialog({
   projectName,
   defaultEmail,
   defaultEmailHint,
+  primaryContactName,
   onConfirm,
 }: Props) {
+  const hasPrimary = !!primaryContactName
   const [email, setEmail] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -66,9 +71,11 @@ export function ActivatePortalDialog({
     setError(null)
     const result = await onConfirm({
       email: cleanedEmail,
-      firstName: firstName.trim() || undefined,
-      lastName: lastName.trim() || undefined,
-      phone: phone.trim() || undefined,
+      // Si un contact principal existe déjà, on n'envoie aucun champ contact :
+      // l'activation ne tente pas de créer un doublon (contrainte unique 23505).
+      firstName: hasPrimary ? undefined : (firstName.trim() || undefined),
+      lastName: hasPrimary ? undefined : (lastName.trim() || undefined),
+      phone: hasPrimary ? undefined : (phone.trim() || undefined),
     })
     setSubmitting(false)
     if (!result.success) {
@@ -119,6 +126,16 @@ export function ActivatePortalDialog({
             )}
           </div>
 
+          {hasPrimary ? (
+            <div className="flex items-start gap-2 rounded-md border border-[var(--ps-border)] bg-[var(--ps-bg-subtle)] px-3 py-2 text-[12px] text-[var(--ps-fg-muted)]">
+              <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+              <span>
+                Un contact principal est déjà lié à ce projet
+                {' '}(<span className="font-medium text-[var(--ps-fg)]">{primaryContactName}</span>).
+                L'activation utilisera l'email saisi ci-dessus sans créer de nouveau contact.
+              </span>
+            </div>
+          ) : (
           <div className="rounded-md border border-[var(--ps-border)] p-3 space-y-2.5">
             <p className="text-[11px] text-[var(--ps-fg-muted)]">
               Informations contact <span className="italic">(optionnel — crée un contact lié au projet)</span>
@@ -166,6 +183,7 @@ export function ActivatePortalDialog({
               />
             </div>
           </div>
+          )}
 
           <label className="flex items-start gap-2 cursor-pointer select-none">
             <input
