@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Receipt, Loader2, ExternalLink, Download } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Receipt, Loader2, CreditCard, Download, CheckCircle2, AlertCircle } from 'lucide-react';
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 } from '@/components/ui/sheet';
@@ -11,6 +11,7 @@ import {
   usePortalInvoices, usePortalInstallments, getSignedStorageUrl,
   type PortalInvoice, type PortalInstallment,
 } from '../hooks/usePortalData';
+import { supabase } from '@/lib/supabase';
 
 const STORAGE_BUCKET = 'propulspace-documents';
 
@@ -23,10 +24,70 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+type PaymentBanner =
+  | { kind: 'success' }
+  | { kind: 'cancel' }
+  | { kind: 'error'; message: string };
+
+async function startCheckout(target: 'invoice' | 'installment', target_id: string): Promise<{ url?: string; error?: string }> {
+  const { data, error } = await supabase.functions.invoke('portal-create-checkout-session', {
+    body: { target, target_id },
+  });
+  if (error) return { error: error.message };
+  const payload = data as { url?: string; error?: string };
+  if (payload?.error) return { error: payload.error };
+  if (!payload?.url) return { error: 'URL Stripe absente de la réponse' };
+  return { url: payload.url };
+}
+
 export function InvoicesPage() {
-  const { rows, loading, error } = usePortalInvoices();
-  const { rows: installments } = usePortalInstallments();
+  const { rows, loading, error, refresh } = usePortalInvoices();
+  const { rows: installments, refresh: refreshInstallments } = usePortalInstallments();
   const [selected, setSelected] = useState<PortalInvoice | null>(null);
+  const [payingId, setPayingId] = useState<string | null>(null);
+  const [banner, setBanner] = useState<PaymentBanner | null>(null);
+
+  // Lecture des query params au mount : paiement=reussi|annule (retour Stripe).
+  // Code review H-4 : le webhook Stripe peut arriver quelques secondes après
+  // la redirection. On polle 4× avec 2s d'intervalle pour rattraper le
+  // décalage et afficher le bon statut sans erreur UX.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const result = params.get('paiement');
+    if (result === 'reussi') {
+      setBanner({ kind: 'success' });
+      let count = 0;
+      const id = setInterval(() => {
+        void refresh();
+        void refreshInstallments();
+        count += 1;
+        if (count >= 4) clearInterval(id);
+      }, 2000);
+      // Premier refresh immédiat aussi
+      void refresh();
+      void refreshInstallments();
+    } else if (result === 'annule') {
+      setBanner({ kind: 'cancel' });
+    }
+    if (result) {
+      params.delete('paiement');
+      params.delete('session_id');
+      const newSearch = params.toString();
+      window.history.replaceState({}, '', window.location.pathname + (newSearch ? `?${newSearch}` : ''));
+    }
+  }, [refresh, refreshInstallments]);
+
+  async function handlePay(target: 'invoice' | 'installment', target_id: string) {
+    setPayingId(target_id);
+    const { url, error: payErr } = await startCheckout(target, target_id);
+    if (payErr || !url) {
+      setBanner({ kind: 'error', message: payErr ?? 'Échec de la création du paiement.' });
+      setPayingId(null);
+      return;
+    }
+    // Redirige vers la page de paiement Stripe hébergée
+    window.location.href = url;
+  }
 
   const installmentsByInvoice = useMemo(() => {
     const map = new Map<string, PortalInstallment[]>();
@@ -51,6 +112,25 @@ export function InvoicesPage() {
         title="Vos factures"
         subtitle="Vos factures, échéances et historique de paiement."
       />
+
+      {banner?.kind === 'success' && (
+        <div className="flex items-start gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[13px] text-emerald-800">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>Paiement reçu. La confirmation arrive dans quelques instants — votre facture sera mise à jour automatiquement.</span>
+        </div>
+      )}
+      {banner?.kind === 'cancel' && (
+        <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] text-amber-800">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>Paiement annulé. Votre facture reste impayée — vous pouvez réessayer quand vous voulez.</span>
+        </div>
+      )}
+      {banner?.kind === 'error' && (
+        <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-800">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>{banner.message}</span>
+        </div>
+      )}
 
       <section className="ps-surface overflow-hidden">
         <SectionHead title={`${rows.length} facture${rows.length > 1 ? 's' : ''}`} />
@@ -129,18 +209,33 @@ export function InvoicesPage() {
                 <div>
                   <p className="ps-eyebrow ps-eyebrow-muted mb-2">Échéances</p>
                   <ul className="divide-y divide-[var(--ps-border-soft)] rounded-xl border border-[var(--ps-border-soft)]">
-                    {installmentsByInvoice.get(selected.id)?.map(inst => (
-                      <li key={inst.id} className="flex items-center gap-3 px-3 py-2.5 text-[12.5px]">
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-[var(--ps-fg)]">{inst.label || `Échéance ${inst.installment_number}`}</p>
-                          <p className="text-[11px] text-[var(--ps-fg-muted)]">Due le {formatDate(inst.due_date)}</p>
-                        </div>
-                        <span className="ps-num font-semibold text-[var(--ps-fg)]">
-                          {formatMoney(inst.amount, selected.currency)}
-                        </span>
-                        <StatusBadge status={inst.status} />
-                      </li>
-                    ))}
+                    {installmentsByInvoice.get(selected.id)?.map(inst => {
+                      const isPayable = inst.status === 'pending' || inst.status === 'overdue';
+                      return (
+                        <li key={inst.id} className="flex items-center gap-3 px-3 py-2.5 text-[12.5px]">
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-[var(--ps-fg)]">{inst.label || `Échéance ${inst.installment_number}`}</p>
+                            <p className="text-[11px] text-[var(--ps-fg-muted)]">Due le {formatDate(inst.due_date)}</p>
+                          </div>
+                          <span className="ps-num font-semibold text-[var(--ps-fg)]">
+                            {formatMoney(inst.amount, selected.currency)}
+                          </span>
+                          <StatusBadge status={inst.status} />
+                          {isPayable && (
+                            <Button
+                              size="sm"
+                              onClick={() => handlePay('installment', inst.id)}
+                              disabled={payingId === inst.id}
+                              className="ps-brand-gradient text-white"
+                            >
+                              {payingId === inst.id
+                                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                : <>Payer</>}
+                            </Button>
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}
@@ -152,12 +247,19 @@ export function InvoicesPage() {
                     Télécharger le PDF
                   </Button>
                 )}
-                {selected.stripe_payment_link_url && (selected.status === 'sent' || selected.status === 'overdue') && (
-                  <Button asChild className="ps-brand-gradient text-white">
-                    <a href={selected.stripe_payment_link_url} target="_blank" rel="noopener noreferrer">
-                      Payer en ligne
-                      <ExternalLink className="ml-1.5 h-4 w-4" />
-                    </a>
+                {/* Code review M-5 : on retire "Payer la facture entière" si
+                    partially_paid pour éviter un trop-perçu (le client a déjà
+                    réglé un ou plusieurs acomptes). On force à compléter
+                    acompte par acompte via les boutons "Payer" individuels. */}
+                {(selected.status === 'sent' || selected.status === 'overdue') && (
+                  <Button
+                    onClick={() => handlePay('invoice', selected.id)}
+                    disabled={payingId === selected.id}
+                    className="ps-brand-gradient text-white"
+                  >
+                    {payingId === selected.id
+                      ? <><Loader2 className="mr-1.5 h-4 w-4 animate-spin" />Redirection…</>
+                      : <><CreditCard className="mr-1.5 h-4 w-4" />Payer la facture entière</>}
                   </Button>
                 )}
               </div>
