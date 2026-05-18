@@ -92,16 +92,19 @@ Tous les fichiers sous `src/modules/EspaceClient/client/**` **et** `src/modules/
 - appellent `supabase.auth.*` (signIn, signOut, getSession, onAuthStateChange, updateUser, resetPasswordForEmail, signInWithOtp)
 - ou lisent des données scope-utilisateur (`from('projects_v2')` filtré par email portail, `from('propulspace.documents')`, etc.)
 
-Fichiers identifiés à l'inspection :
-1. `src/modules/EspaceClient/shared/hooks/usePortalAuth.ts`
-2. `src/modules/EspaceClient/client/pages/SetupPasswordPage.tsx`
-3. `src/modules/EspaceClient/client/pages/ResetPasswordPage.tsx`
-4. `src/modules/EspaceClient/shared/components/PasswordSetForm.tsx` (vérifier usage `auth.updateUser`)
-5. `src/modules/EspaceClient/client/ClientLoginPage.tsx` (si appel direct à `supabase` — vérifier)
-6. `src/modules/EspaceClient/client/hooks/usePortalData.ts`
-7. Toute page sous `src/modules/EspaceClient/client/pages/**` qui fait des requêtes data scope-client (DocumentsPage, InvoicesPage, SignaturesPage, ProfilePage, etc.)
+Fichiers identifiés par audit `grep` (commande : `grep -rln "from '@/lib/supabase'" src/modules/EspaceClient`) :
 
-Liste exacte à dresser pendant le plan d'implémentation par `grep` ciblé.
+1. `src/modules/EspaceClient/shared/hooks/usePortalAuth.ts` — `auth.getSession`, `onAuthStateChange`, `signInWithOtp`, `signInWithPassword`, `resetPasswordForEmail`, `signOut`
+2. `src/modules/EspaceClient/shared/components/PasswordSetForm.tsx` — `auth.updateUser` (consommé uniquement par SetupPasswordPage et ResetPasswordPage)
+3. `src/modules/EspaceClient/client/pages/SetupPasswordPage.tsx` — `auth.getSession`, `onAuthStateChange`, `from('users')` (check interne)
+4. `src/modules/EspaceClient/client/pages/ResetPasswordPage.tsx` — `auth.getSession`, `onAuthStateChange`, `auth.signOut`
+5. `src/modules/EspaceClient/client/pages/InvoicesPage.tsx` — `functions.invoke('portal-create-checkout-session')` (le JWT doit être celui du client, pas de l'admin)
+6. `src/modules/EspaceClient/client/hooks/usePortalData.ts` — `storage.createSignedUrl` (lecture documents portail)
+7. `src/modules/EspaceClient/client/onboarding/useOnboarding.ts` — `from('propulspace.onboarding_responses')`
+
+**ClientLoginPage.tsx** : pas d'import direct de `supabase`, passe via `usePortalAuth`. Pas besoin de modifier.
+
+**Note importante sur `functions.invoke`** : Supabase joint automatiquement le JWT du client utilisé. Si on laisse `InvoicesPage` sur le client `supabase` principal alors que l'utilisateur est admin dans le même navigateur, l'edge function reçoit le JWT admin et ne trouve pas le projet portail → bug silencieux. D'où l'obligation de basculer ce fichier.
 
 ### C. Code admin — **inchangé**
 
