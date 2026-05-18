@@ -56,13 +56,16 @@ function computePercent(row: Partial<OnboardingRow>): number {
   return Math.round((done / total) * 100);
 }
 
+export type OnboardingSetField = <K extends keyof OnboardingRow>(key: K, value: OnboardingRow[K]) => void;
+
 interface UseOnboardingResult {
   row: Partial<OnboardingRow> | null;
   loading: boolean;
   saving: boolean;
+  saveError: string | null;
   percent: number;
   isComplete: boolean;
-  setField: <K extends keyof OnboardingRow>(key: K, value: OnboardingRow[K]) => void;
+  setField: OnboardingSetField;
   markComplete: () => Promise<{ error: string | null }>;
 }
 
@@ -70,28 +73,33 @@ export function useOnboarding(projectId: string): UseOnboardingResult {
   const [row, setRow] = useState<Partial<OnboardingRow> | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const rowRef = useRef<Partial<OnboardingRow> | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const persistingRef = useRef(false);
 
   useEffect(() => { rowRef.current = row; }, [row]);
 
-  // Mount : charge la row existante. Si absente, crée-la (1re visite).
+  // Mount : upsert atomique sur project_id (cf review B.2 #1).
+  // ignoreDuplicates: true → si la row existe déjà (autre onglet, StrictMode),
+  // on ne provoque pas de conflit, on enchaîne avec un SELECT pour récupérer
+  // la row courante.
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase.from(TABLE).select('*').eq('project_id', projectId).maybeSingle();
+      const { error: upsertErr } = await supabase
+        .from(TABLE)
+        .upsert(
+          { project_id: projectId, completion_percent: 0 },
+          { onConflict: 'project_id', ignoreDuplicates: true },
+        );
       if (cancelled) return;
-      if (data) {
-        setRow(data as Partial<OnboardingRow>);
-      } else {
-        const { data: created, error } = await supabase
-          .from(TABLE)
-          .insert({ project_id: projectId, completion_percent: 0 })
-          .select('*')
-          .maybeSingle();
-        if (!cancelled && created && !error) setRow(created as Partial<OnboardingRow>);
+      if (upsertErr) {
+        // Pas de blocage : on tente quand même le SELECT, peut-être que la row
+        // existait déjà sans nous (créée par admin).
       }
+      const { data } = await supabase.from(TABLE).select('*').eq('project_id', projectId).maybeSingle();
+      if (!cancelled && data) setRow(data as Partial<OnboardingRow>);
       if (!cancelled) setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -101,13 +109,17 @@ export function useOnboarding(projectId: string): UseOnboardingResult {
     if (persistingRef.current || !rowRef.current?.id) return;
     persistingRef.current = true;
     setSaving(true);
+    setSaveError(null);
     try {
       const next = { ...rowRef.current, ...patch };
       const percent = computePercent(next);
-      await supabase
+      const { error } = await supabase
         .from(TABLE)
         .update({ ...patch, completion_percent: percent })
         .eq('id', rowRef.current.id);
+      // Code review B.2 #4 : expose l'erreur au composant pour qu'il puisse
+      // afficher un message au lieu d'avaler silencieusement.
+      if (error) setSaveError(error.message);
     } finally {
       persistingRef.current = false;
       setSaving(false);
@@ -140,5 +152,5 @@ export function useOnboarding(projectId: string): UseOnboardingResult {
   const percent = row ? computePercent(row) : 0;
   const isComplete = row?.is_complete === true;
 
-  return { row, loading, saving, percent, isComplete, setField, markComplete };
+  return { row, loading, saving, saveError, percent, isComplete, setField, markComplete };
 }

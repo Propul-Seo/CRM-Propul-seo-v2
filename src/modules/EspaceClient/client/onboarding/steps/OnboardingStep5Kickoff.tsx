@@ -1,10 +1,10 @@
 import { CalendarClock, CheckCircle2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import type { OnboardingRow } from '../useOnboarding';
+import type { OnboardingRow, OnboardingSetField } from '../useOnboarding';
 
 interface Props {
   row: Partial<OnboardingRow> | null;
-  setField: <K extends keyof OnboardingRow>(k: K, v: OnboardingRow[K]) => void;
+  setField: OnboardingSetField;
 }
 
 // Format datetime-local : 'YYYY-MM-DDTHH:mm' (sans secondes, sans timezone)

@@ -1,9 +1,9 @@
 import { FileImage, FilePlus, Scale, FileCheck2 } from 'lucide-react';
-import type { OnboardingRow } from '../useOnboarding';
+import type { OnboardingRow, OnboardingSetField } from '../useOnboarding';
 
 interface Props {
   row: Partial<OnboardingRow> | null;
-  setField: <K extends keyof OnboardingRow>(k: K, v: OnboardingRow[K]) => void;
+  setField: OnboardingSetField;
 }
 
 interface ToggleProps {

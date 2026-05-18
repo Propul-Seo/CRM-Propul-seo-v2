@@ -1,9 +1,9 @@
 import { Textarea } from '@/components/ui/textarea';
-import type { OnboardingRow } from '../useOnboarding';
+import type { OnboardingRow, OnboardingSetField } from '../useOnboarding';
 
 interface Props {
   row: Partial<OnboardingRow> | null;
-  setField: <K extends keyof OnboardingRow>(k: K, v: OnboardingRow[K]) => void;
+  setField: OnboardingSetField;
 }
 
 export function OnboardingStep2Brand({ row, setField }: Props) {

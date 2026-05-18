@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, SkipForward } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { useOnboarding, type OnboardingRow } from './useOnboarding';
+import { useOnboarding } from './useOnboarding';
+import { AlertCircle } from 'lucide-react';
 import { OnboardingStep1Recap } from './steps/OnboardingStep1Recap';
 import { OnboardingStep2Brand } from './steps/OnboardingStep2Brand';
 import { OnboardingStep3Visual } from './steps/OnboardingStep3Visual';
@@ -19,7 +20,7 @@ interface OnboardingWizardProps {
 }
 
 export function OnboardingWizard({ projectId, open, onOpenChange }: OnboardingWizardProps) {
-  const { row, loading, saving, percent, isComplete, setField, markComplete } = useOnboarding(projectId);
+  const { row, loading, saving, saveError, percent, isComplete, setField, markComplete } = useOnboarding(projectId);
   const [step, setStep] = useState(1);
   const [finishing, setFinishing] = useState(false);
 
@@ -76,6 +77,14 @@ export function OnboardingWizard({ projectId, open, onOpenChange }: OnboardingWi
           {saving && <Loader2 className="h-3 w-3 animate-spin" />}
         </div>
 
+        {/* Code review B.2 #4 : exposition de l'erreur persist */}
+        {saveError && (
+          <div className="mt-2 flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-800">
+            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span>Sauvegarde échouée : {saveError}</span>
+          </div>
+        )}
+
         {/* Content */}
         <div className="mt-5 min-h-[280px]">
           {loading ? (
@@ -85,10 +94,10 @@ export function OnboardingWizard({ projectId, open, onOpenChange }: OnboardingWi
           ) : (
             <>
               {step === 1 && <OnboardingStep1Recap row={row} />}
-              {step === 2 && <OnboardingStep2Brand row={row} setField={setField as unknown as <K extends keyof OnboardingRow>(k: K, v: OnboardingRow[K]) => void} />}
-              {step === 3 && <OnboardingStep3Visual row={row} setField={setField as unknown as <K extends keyof OnboardingRow>(k: K, v: OnboardingRow[K]) => void} />}
-              {step === 4 && <OnboardingStep4Access row={row} setField={setField as unknown as <K extends keyof OnboardingRow>(k: K, v: OnboardingRow[K]) => void} />}
-              {step === 5 && <OnboardingStep5Kickoff row={row} setField={setField as unknown as <K extends keyof OnboardingRow>(k: K, v: OnboardingRow[K]) => void} />}
+              {step === 2 && <OnboardingStep2Brand row={row} setField={setField} />}
+              {step === 3 && <OnboardingStep3Visual row={row} setField={setField} />}
+              {step === 4 && <OnboardingStep4Access row={row} setField={setField} />}
+              {step === 5 && <OnboardingStep5Kickoff row={row} setField={setField} />}
             </>
           )}
         </div>

@@ -134,9 +134,15 @@ serve(async (req) => {
   })
 
   // DocuSeal ne fournit pas toujours un event_id unique — on synthétise une
-  // clé d'idempotence : event_type + submission_id + timestamp.
+  // clé d'idempotence stable. Code review B.4 #7 : on évite `new Date()` en
+  // fallback (changeait à chaque replay → idempotence cassée). Pour les events
+  // sans timestamp natif (submission.expired), on utilise event_type+submission_id
+  // seuls — c'est exactement la sémantique souhaitée (un expired par submission).
   const submissionId = ev.data.submission_id != null ? String(ev.data.submission_id) : String(ev.data.id)
-  const idempotencyKey = `${ev.event_type}:${submissionId}:${ev.timestamp ?? ev.data.completed_at ?? new Date().toISOString()}`
+  const stableTs = ev.timestamp ?? ev.data.completed_at ?? ev.data.declined_at ?? ev.data.expires_at ?? ''
+  const idempotencyKey = stableTs
+    ? `${ev.event_type}:${submissionId}:${stableTs}`
+    : `${ev.event_type}:${submissionId}`
 
   const { error: insertErr } = await admin
     .schema('propulspace')
