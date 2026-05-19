@@ -1,0 +1,13 @@
+-- ============================================================================
+-- Migration 232 — Fix RLS : GRANT SELECT/INSERT/UPDATE à authenticated
+-- ============================================================================
+-- La migration 220 a créé propulspace_onboarding_v2 sans poser les GRANTs
+-- directs sur la table sous-jacente. Tant que la vue était en SECURITY DEFINER
+-- (avant 231), les RLS étaient bypassées et le souci masqué. Depuis 231
+-- (security_invoker=true), Postgres exige que authenticated ait les droits
+-- TABLE directs AVANT d'évaluer les policies → sinon 403 sans erreur RLS.
+--
+-- Aligné sur le pattern propulspace.documents qui fonctionne. RLS conservées
+-- (filtrage par portal_project_id()).
+-- ============================================================================
+GRANT SELECT, INSERT, UPDATE ON propulspace.onboarding_responses TO authenticated;

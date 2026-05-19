@@ -94,14 +94,16 @@ export function useWelcomeWizard(projectId: string): UseWelcomeWizardResult {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      await supabase.from(TABLE).upsert(
+      const { error: upsertErr } = await supabase.from(TABLE).upsert(
         { project_id: projectId, welcome_current_step: 1 },
         { onConflict: 'project_id', ignoreDuplicates: true },
       );
+      if (upsertErr) console.error('[useWelcomeWizard] upsert failed:', upsertErr);
       if (cancelled) return;
 
-      const { data: rowData } = await supabase
+      const { data: rowData, error: selectErr } = await supabase
         .from(TABLE).select('*').eq('project_id', projectId).maybeSingle();
+      if (selectErr) console.error('[useWelcomeWizard] select failed:', selectErr);
       if (cancelled || !rowData) {
         if (!cancelled) setLoading(false);
         return;
@@ -150,7 +152,10 @@ export function useWelcomeWizard(projectId: string): UseWelcomeWizardResult {
     setSaveError(null);
     try {
       const { error } = await supabase.from(TABLE).update(patch).eq('id', rowRef.current.id);
-      if (error) setSaveError(error.message);
+      if (error) {
+        console.error('[useWelcomeWizard] update failed:', error, 'patch:', patch);
+        setSaveError(error.message);
+      }
     } finally {
       persistingRef.current = false;
       setSaving(false);

@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Clock, X, CheckCircle2 } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { BrandPill } from '@/modules/EspaceClient/shared/components';
 import { cn } from '@/lib/utils';
@@ -63,6 +63,12 @@ export function WelcomeWizard({ projectId, open, onOpenChange, onCompleted }: We
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) void handleDismiss(); else onOpenChange(true); }}>
       <DialogContent className="propulspace-portal max-w-[940px] gap-0 p-0 max-sm:h-[100dvh] max-sm:max-w-full max-sm:rounded-none">
+        {/* Accessibilité : titre + description pour les lecteurs d'écran (sr-only). */}
+        <DialogTitle className="sr-only">Bienvenue dans votre Propul'Space — étape {currentStep} sur 5</DialogTitle>
+        <DialogDescription className="sr-only">
+          Quelques minutes pour vérifier vos informations, caler vos préférences, et démarrer votre projet.
+        </DialogDescription>
+
         {/* ── Header ─────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between border-b border-[var(--ps-border)] px-6 py-3">
           <div className="flex items-center gap-3">
