@@ -26,6 +26,24 @@ const PropulspaceAdminApp = lazy(() =>
   import('./modules/EspaceClient/admin/PropulspaceAdminApp').then(m => ({ default: m.PropulspaceAdminApp }))
 );
 
+// DEV-WIZARD-VARIANTS — pages de prévisualisation (Step 5 + Wizard complet).
+// À retirer une fois les variantes choisies + intégrées.
+const WelcomeVariantsPreview = lazy(() =>
+  import('./modules/EspaceClient/client/welcome/dev/WelcomeVariantsPreview').then(m => ({ default: m.WelcomeVariantsPreview }))
+);
+const WizardVariantsPreview = lazy(() =>
+  import('./modules/EspaceClient/client/welcome/dev/WizardVariantsPreview').then(m => ({ default: m.WizardVariantsPreview }))
+);
+const AuroraLightVariants = lazy(() =>
+  import('./modules/EspaceClient/client/welcome/dev/AuroraLightVariants').then(m => ({ default: m.AuroraLightVariants }))
+);
+const SkyAuroraFullPreview = lazy(() =>
+  import('./modules/EspaceClient/client/welcome/dev/SkyAuroraFullPreview').then(m => ({ default: m.SkyAuroraFullPreview }))
+);
+const Sky5AnimationsPreview = lazy(() =>
+  import('./modules/EspaceClient/client/welcome/dev/Sky5AnimationsPreview').then(m => ({ default: m.Sky5AnimationsPreview }))
+);
+
 const ClientBriefPage = lazy(() =>
   import('./modules/ClientBrief/ClientBriefPage').then(m => ({ default: m.ClientBriefPage }))
 );
@@ -146,6 +164,61 @@ function App() {
             <ErrorBoundary>
               <Suspense fallback={<div className="min-h-screen bg-white" />}>
                 <PropulspaceAdminApp />
+              </Suspense>
+            </ErrorBoundary>
+          }
+        />
+        {/* DEV-WIZARD-VARIANTS — preview Step 5 Done */}
+        <Route
+          path="/dev/welcome-variants"
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<div className="min-h-screen bg-stone-100" />}>
+                <WelcomeVariantsPreview />
+              </Suspense>
+            </ErrorBoundary>
+          }
+        />
+        {/* DEV-WIZARD-VARIANTS — preview Wizard complet (Step 1) */}
+        <Route
+          path="/dev/wizard-variants"
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<div className="min-h-screen bg-stone-100" />}>
+                <WizardVariantsPreview />
+              </Suspense>
+            </ErrorBoundary>
+          }
+        />
+        {/* DEV-WIZARD-VARIANTS — sous-variantes light de la direction B */}
+        <Route
+          path="/dev/aurora-light"
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<div className="min-h-screen bg-stone-100" />}>
+                <AuroraLightVariants />
+              </Suspense>
+            </ErrorBoundary>
+          }
+        />
+        {/* DEV-WIZARD-VARIANTS — Sky Aurora décliné sur les 5 étapes */}
+        <Route
+          path="/dev/sky-aurora"
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<div className="min-h-screen bg-stone-100" />}>
+                <SkyAuroraFullPreview />
+              </Suspense>
+            </ErrorBoundary>
+          }
+        />
+        {/* DEV-WIZARD-VARIANTS — 5 variantes d'animation Step 5 */}
+        <Route
+          path="/dev/sky-step5-anims"
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<div className="min-h-screen bg-stone-100" />}>
+                <Sky5AnimationsPreview />
               </Suspense>
             </ErrorBoundary>
           }

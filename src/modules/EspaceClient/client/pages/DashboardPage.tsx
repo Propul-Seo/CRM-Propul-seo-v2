@@ -13,6 +13,7 @@ import {
 } from '../hooks/usePortalData';
 import { OnboardingBanner } from '../onboarding/OnboardingBanner';
 import { WelcomeWizard } from '../welcome/WelcomeWizard'; // DEV-WIZARD-230 — retirer au palier 10
+import { WelcomeBanner } from '../welcome/WelcomeBanner';
 
 function formatShortDate(iso: string | null): string {
   if (!iso) return '';
@@ -73,6 +74,7 @@ export function DashboardPage() {
       />
 
       <OnboardingBanner projectId={project.id} />
+      <WelcomeBanner projectId={project.id} onReopen={() => setDevWizardOpen(true)} />
 
       <section className="grid gap-4 md:grid-cols-3">
         <KpiTile
@@ -131,7 +133,7 @@ export function DashboardPage() {
       <Button
         type="button"
         onClick={() => setDevWizardOpen(true)}
-        className="fixed bottom-6 right-6 z-50 h-11 gap-2 bg-amber-500 px-4 text-white shadow-lg hover:bg-amber-600"
+        className="fixed right-6 top-20 z-50 h-11 gap-2 bg-amber-500 px-4 text-white shadow-lg hover:bg-amber-600"
         title="DEV — Test wizard d'accueil (à retirer au palier 10)"
       >
         <Sparkles className="h-4 w-4" />

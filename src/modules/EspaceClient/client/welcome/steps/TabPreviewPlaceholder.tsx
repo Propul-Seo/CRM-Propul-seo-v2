@@ -1,18 +1,15 @@
 import type { LucideIcon } from 'lucide-react';
 
-// Palier 7 — placeholder générique pour les 7 mini-mocks du carrousel.
-// Décision Q4 : on garde des placeholders pour l'instant, à remplacer par
-// des mini-mocks JSX réalistes une fois que les vraies pages portail seront
-// finalisées (évite le drift visuel pendant qu'elles bougent encore).
+// Placeholder Sky Aurora — gradient pastel + icône centrée.
 export function TabPreviewPlaceholder({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
   return (
-    <div
-      className="ps-skeleton relative flex h-[120px] w-full items-center justify-center overflow-hidden rounded-lg border border-[var(--ps-border-soft)] bg-[var(--ps-bg-subtle)] shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)]"
+    <div className="relative flex h-[100px] w-full items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-sky-50 via-violet-50 to-pink-50 ring-1 ring-violet-100"
+      style={{ boxShadow: 'inset 0 1px 2px rgba(139,92,246,0.08)' }}
     >
-      <Icon className="ps-pulse h-10 w-10 text-[var(--ps-fg-muted)] opacity-60" />
-      <span className="ps-eyebrow ps-eyebrow-muted absolute bottom-2 left-2.5 rounded-full bg-white/70 px-2 py-0.5 backdrop-blur-sm">
-        Aperçu · {label}
-      </span>
+      <div className="flex flex-col items-center gap-1.5 text-violet-400">
+        <Icon className="h-7 w-7 opacity-80" />
+        <span className="text-[10px] font-bold uppercase tracking-wider">Aperçu · {label}</span>
+      </div>
     </div>
   );
 }

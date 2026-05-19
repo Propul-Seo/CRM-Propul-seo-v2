@@ -8,7 +8,9 @@ import { portalSupabase as supabase } from '@/lib/supabase';
 
 const TABLE = 'propulspace_onboarding_v2';
 const DEBOUNCE_MS = 500;
-const DISMISS_THRESHOLD = 3;
+// Exporté pour être réutilisé par WelcomeBanner (évite la duplication
+// de la constante — leçon code review #3).
+export const DISMISS_THRESHOLD = 3;
 
 export type AvailabilitySlot = 'morning' | 'afternoon' | 'evening';
 export type PreferredChannel = 'email' | 'phone' | 'whatsapp';
