@@ -3061,8 +3061,11 @@ export type Database = {
           budget: number | null
           category: string | null
           client_address: string | null
+          client_company: string | null
+          client_first_name: string | null
           client_id: string | null
           client_name: string
+          client_phone: string | null
           client_represented_by: string | null
           client_vat_number: string | null
           comm_status: string | null
@@ -3120,8 +3123,11 @@ export type Database = {
           budget?: number | null
           category?: string | null
           client_address?: string | null
+          client_company?: string | null
+          client_first_name?: string | null
           client_id?: string | null
           client_name?: string
+          client_phone?: string | null
           client_represented_by?: string | null
           client_vat_number?: string | null
           comm_status?: string | null
@@ -3179,8 +3185,11 @@ export type Database = {
           budget?: number | null
           category?: string | null
           client_address?: string | null
+          client_company?: string | null
+          client_first_name?: string | null
           client_id?: string | null
           client_name?: string
+          client_phone?: string | null
           client_represented_by?: string | null
           client_vat_number?: string | null
           comm_status?: string | null
@@ -4023,6 +4032,609 @@ export type Database = {
           },
         ]
       }
+      propulspace_documents_v2: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          document_type: string | null
+          file_mime_type: string | null
+          file_size_bytes: number | null
+          file_url: string | null
+          id: string | null
+          name: string | null
+          project_id: string | null
+          uploaded_by_client: boolean | null
+          version: number | null
+          viewed_by_client_at: string | null
+          visible_to_client: boolean | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          document_type?: string | null
+          file_mime_type?: string | null
+          file_size_bytes?: number | null
+          file_url?: string | null
+          id?: string | null
+          name?: string | null
+          project_id?: string | null
+          uploaded_by_client?: boolean | null
+          version?: number | null
+          viewed_by_client_at?: string | null
+          visible_to_client?: boolean | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          document_type?: string | null
+          file_mime_type?: string | null
+          file_size_bytes?: number | null
+          file_url?: string | null
+          id?: string | null
+          name?: string | null
+          project_id?: string | null
+          uploaded_by_client?: boolean | null
+          version?: number | null
+          viewed_by_client_at?: string | null
+          visible_to_client?: boolean | null
+        }
+        Relationships: []
+      }
+      propulspace_invoice_installments_v2: {
+        Row: {
+          amount: number | null
+          due_date: string | null
+          id: string | null
+          installment_number: number | null
+          invoice_id: string | null
+          label: string | null
+          paid_at: string | null
+          status: string | null
+          stripe_payment_link_url: string | null
+        }
+        Insert: {
+          amount?: number | null
+          due_date?: string | null
+          id?: string | null
+          installment_number?: number | null
+          invoice_id?: string | null
+          label?: string | null
+          paid_at?: string | null
+          status?: string | null
+          stripe_payment_link_url?: string | null
+        }
+        Update: {
+          amount?: number | null
+          due_date?: string | null
+          id?: string | null
+          installment_number?: number | null
+          invoice_id?: string | null
+          label?: string | null
+          paid_at?: string | null
+          status?: string | null
+          stripe_payment_link_url?: string | null
+        }
+        Relationships: []
+      }
+      propulspace_invoices_admin_v2: {
+        Row: {
+          amount_subtotal: number | null
+          amount_total: number | null
+          amount_vat: number | null
+          client_snapshot: Json | null
+          client_visible_notes: string | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          due_date: string | null
+          id: string | null
+          internal_notes: string | null
+          invoice_number: string | null
+          is_deposit: boolean | null
+          is_locked: boolean | null
+          issue_date: string | null
+          line_items: Json | null
+          paid_at: string | null
+          pdf_hash_sha256: string | null
+          pdf_url: string | null
+          project_id: string | null
+          status: string | null
+          stripe_checkout_session_id: string | null
+          stripe_customer_id: string | null
+          stripe_paid_at: string | null
+          stripe_payment_intent_id: string | null
+          stripe_payment_link_id: string | null
+          stripe_payment_link_url: string | null
+          updated_at: string | null
+          vat_rate: number | null
+        }
+        Insert: {
+          amount_subtotal?: number | null
+          amount_total?: number | null
+          amount_vat?: number | null
+          client_snapshot?: Json | null
+          client_visible_notes?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          due_date?: string | null
+          id?: string | null
+          internal_notes?: string | null
+          invoice_number?: string | null
+          is_deposit?: boolean | null
+          is_locked?: boolean | null
+          issue_date?: string | null
+          line_items?: Json | null
+          paid_at?: string | null
+          pdf_hash_sha256?: string | null
+          pdf_url?: string | null
+          project_id?: string | null
+          status?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_paid_at?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_payment_link_id?: string | null
+          stripe_payment_link_url?: string | null
+          updated_at?: string | null
+          vat_rate?: number | null
+        }
+        Update: {
+          amount_subtotal?: number | null
+          amount_total?: number | null
+          amount_vat?: number | null
+          client_snapshot?: Json | null
+          client_visible_notes?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          due_date?: string | null
+          id?: string | null
+          internal_notes?: string | null
+          invoice_number?: string | null
+          is_deposit?: boolean | null
+          is_locked?: boolean | null
+          issue_date?: string | null
+          line_items?: Json | null
+          paid_at?: string | null
+          pdf_hash_sha256?: string | null
+          pdf_url?: string | null
+          project_id?: string | null
+          status?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_paid_at?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_payment_link_id?: string | null
+          stripe_payment_link_url?: string | null
+          updated_at?: string | null
+          vat_rate?: number | null
+        }
+        Relationships: []
+      }
+      propulspace_invoices_v2: {
+        Row: {
+          amount_subtotal: number | null
+          amount_total: number | null
+          amount_vat: number | null
+          client_snapshot: Json | null
+          client_visible_notes: string | null
+          created_at: string | null
+          currency: string | null
+          due_date: string | null
+          id: string | null
+          invoice_number: string | null
+          is_deposit: boolean | null
+          issue_date: string | null
+          line_items: Json | null
+          paid_at: string | null
+          pdf_url: string | null
+          project_id: string | null
+          status: string | null
+          stripe_payment_link_url: string | null
+          vat_rate: number | null
+        }
+        Insert: {
+          amount_subtotal?: number | null
+          amount_total?: number | null
+          amount_vat?: number | null
+          client_snapshot?: Json | null
+          client_visible_notes?: string | null
+          created_at?: string | null
+          currency?: string | null
+          due_date?: string | null
+          id?: string | null
+          invoice_number?: string | null
+          is_deposit?: boolean | null
+          issue_date?: string | null
+          line_items?: Json | null
+          paid_at?: string | null
+          pdf_url?: string | null
+          project_id?: string | null
+          status?: string | null
+          stripe_payment_link_url?: string | null
+          vat_rate?: number | null
+        }
+        Update: {
+          amount_subtotal?: number | null
+          amount_total?: number | null
+          amount_vat?: number | null
+          client_snapshot?: Json | null
+          client_visible_notes?: string | null
+          created_at?: string | null
+          currency?: string | null
+          due_date?: string | null
+          id?: string | null
+          invoice_number?: string | null
+          is_deposit?: boolean | null
+          issue_date?: string | null
+          line_items?: Json | null
+          paid_at?: string | null
+          pdf_url?: string | null
+          project_id?: string | null
+          status?: string | null
+          stripe_payment_link_url?: string | null
+          vat_rate?: number | null
+        }
+        Relationships: []
+      }
+      propulspace_onboarding_v2: {
+        Row: {
+          access_credentials_vault_id: string | null
+          availability_slots: string[] | null
+          brand_voice_notes: string | null
+          charter_uploaded: boolean | null
+          completed_at: string | null
+          completion_percent: number | null
+          content_strategy: string | null
+          content_uploaded: boolean | null
+          created_at: string | null
+          detailed_personas: Json | null
+          email_notifications: boolean | null
+          has_provided_dns_access: boolean | null
+          has_provided_google_access: boolean | null
+          has_provided_hosting_access: boolean | null
+          has_provided_social_access: boolean | null
+          id: string | null
+          inherited_from_qualification_id: string | null
+          is_complete: boolean | null
+          kickoff_call_scheduled_at: string | null
+          legal_mentions_provided: boolean | null
+          logo_uploaded: boolean | null
+          preferred_channel: string | null
+          project_id: string | null
+          updated_at: string | null
+          welcome_company: string | null
+          welcome_completed_at: string | null
+          welcome_current_step: number | null
+          welcome_dismissed_count: number | null
+          welcome_first_name: string | null
+          welcome_last_dismissed_at: string | null
+          welcome_last_name: string | null
+          welcome_phone: string | null
+        }
+        Insert: {
+          access_credentials_vault_id?: string | null
+          availability_slots?: string[] | null
+          brand_voice_notes?: string | null
+          charter_uploaded?: boolean | null
+          completed_at?: string | null
+          completion_percent?: number | null
+          content_strategy?: string | null
+          content_uploaded?: boolean | null
+          created_at?: string | null
+          detailed_personas?: Json | null
+          email_notifications?: boolean | null
+          has_provided_dns_access?: boolean | null
+          has_provided_google_access?: boolean | null
+          has_provided_hosting_access?: boolean | null
+          has_provided_social_access?: boolean | null
+          id?: string | null
+          inherited_from_qualification_id?: string | null
+          is_complete?: boolean | null
+          kickoff_call_scheduled_at?: string | null
+          legal_mentions_provided?: boolean | null
+          logo_uploaded?: boolean | null
+          preferred_channel?: string | null
+          project_id?: string | null
+          updated_at?: string | null
+          welcome_company?: string | null
+          welcome_completed_at?: string | null
+          welcome_current_step?: number | null
+          welcome_dismissed_count?: number | null
+          welcome_first_name?: string | null
+          welcome_last_dismissed_at?: string | null
+          welcome_last_name?: string | null
+          welcome_phone?: string | null
+        }
+        Update: {
+          access_credentials_vault_id?: string | null
+          availability_slots?: string[] | null
+          brand_voice_notes?: string | null
+          charter_uploaded?: boolean | null
+          completed_at?: string | null
+          completion_percent?: number | null
+          content_strategy?: string | null
+          content_uploaded?: boolean | null
+          created_at?: string | null
+          detailed_personas?: Json | null
+          email_notifications?: boolean | null
+          has_provided_dns_access?: boolean | null
+          has_provided_google_access?: boolean | null
+          has_provided_hosting_access?: boolean | null
+          has_provided_social_access?: boolean | null
+          id?: string | null
+          inherited_from_qualification_id?: string | null
+          is_complete?: boolean | null
+          kickoff_call_scheduled_at?: string | null
+          legal_mentions_provided?: boolean | null
+          logo_uploaded?: boolean | null
+          preferred_channel?: string | null
+          project_id?: string | null
+          updated_at?: string | null
+          welcome_company?: string | null
+          welcome_completed_at?: string | null
+          welcome_current_step?: number | null
+          welcome_dismissed_count?: number | null
+          welcome_first_name?: string | null
+          welcome_last_dismissed_at?: string | null
+          welcome_last_name?: string | null
+          welcome_phone?: string | null
+        }
+        Relationships: []
+      }
+      propulspace_project_steps_v2: {
+        Row: {
+          date_actual_end: string | null
+          date_planned_end: string | null
+          date_start: string | null
+          description: string | null
+          id: string | null
+          label: string | null
+          project_id: string | null
+          status: string | null
+          step_order: number | null
+          visible_to_client: boolean | null
+        }
+        Insert: {
+          date_actual_end?: string | null
+          date_planned_end?: string | null
+          date_start?: string | null
+          description?: string | null
+          id?: string | null
+          label?: string | null
+          project_id?: string | null
+          status?: string | null
+          step_order?: number | null
+          visible_to_client?: boolean | null
+        }
+        Update: {
+          date_actual_end?: string | null
+          date_planned_end?: string | null
+          date_start?: string | null
+          description?: string | null
+          id?: string | null
+          label?: string | null
+          project_id?: string | null
+          status?: string | null
+          step_order?: number | null
+          visible_to_client?: boolean | null
+        }
+        Relationships: []
+      }
+      propulspace_signatures_v2: {
+        Row: {
+          created_at: string | null
+          document_id: string | null
+          docuseal_signed_pdf_url: string | null
+          docuseal_signing_url: string | null
+          expires_at: string | null
+          id: string | null
+          name: string | null
+          project_id: string | null
+          sent_at: string | null
+          signature_type: string | null
+          signed_at: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_id?: string | null
+          docuseal_signed_pdf_url?: string | null
+          docuseal_signing_url?: string | null
+          expires_at?: string | null
+          id?: string | null
+          name?: string | null
+          project_id?: string | null
+          sent_at?: string | null
+          signature_type?: string | null
+          signed_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_id?: string | null
+          docuseal_signed_pdf_url?: string | null
+          docuseal_signing_url?: string | null
+          expires_at?: string | null
+          id?: string | null
+          name?: string | null
+          project_id?: string | null
+          sent_at?: string | null
+          signature_type?: string | null
+          signed_at?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      qualification_leads_v2: {
+        Row: {
+          ae_assigned: string | null
+          brand_guide_url: string | null
+          budget_range: string | null
+          business_sector: string | null
+          business_sector_custom: string | null
+          company_name: string | null
+          competitors: string | null
+          contacted_at: string | null
+          converted_at: string | null
+          converted_to_project_id: string | null
+          created_at: string | null
+          desired_features: string[] | null
+          desired_timeline: string | null
+          draft_progress_percent: number | null
+          ecommerce_platform: string | null
+          email: string | null
+          existing_site_screenshots: Json | null
+          existing_site_url: string | null
+          final_cta_choice: string | null
+          full_name: string | null
+          has_domain_only: boolean | null
+          has_existing_site: boolean | null
+          has_visual_identity: string | null
+          health_specific_needs: string | null
+          id: string | null
+          ip_address: unknown
+          is_decision_maker: string | null
+          logo_file_url: string | null
+          main_goal: string | null
+          main_problems: string[] | null
+          monthly_orders_range: string | null
+          monthly_traffic: string | null
+          notes: string | null
+          pappers_enrichment: Json | null
+          phone: string | null
+          preferred_contact_method: string | null
+          product_count_range: string | null
+          quality_score: number | null
+          quality_score_breakdown: Json | null
+          reservation_type: string | null
+          source: string | null
+          status: string | null
+          submitted_at: string | null
+          target_audience: string | null
+          timeline_reason: string | null
+          updated_at: string | null
+          user_agent: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          wants_identity_creation: boolean | null
+        }
+        Insert: {
+          ae_assigned?: string | null
+          brand_guide_url?: string | null
+          budget_range?: string | null
+          business_sector?: string | null
+          business_sector_custom?: string | null
+          company_name?: string | null
+          competitors?: string | null
+          contacted_at?: string | null
+          converted_at?: string | null
+          converted_to_project_id?: string | null
+          created_at?: string | null
+          desired_features?: string[] | null
+          desired_timeline?: string | null
+          draft_progress_percent?: number | null
+          ecommerce_platform?: string | null
+          email?: string | null
+          existing_site_screenshots?: Json | null
+          existing_site_url?: string | null
+          final_cta_choice?: string | null
+          full_name?: string | null
+          has_domain_only?: boolean | null
+          has_existing_site?: boolean | null
+          has_visual_identity?: string | null
+          health_specific_needs?: string | null
+          id?: string | null
+          ip_address?: unknown
+          is_decision_maker?: string | null
+          logo_file_url?: string | null
+          main_goal?: string | null
+          main_problems?: string[] | null
+          monthly_orders_range?: string | null
+          monthly_traffic?: string | null
+          notes?: string | null
+          pappers_enrichment?: Json | null
+          phone?: string | null
+          preferred_contact_method?: string | null
+          product_count_range?: string | null
+          quality_score?: number | null
+          quality_score_breakdown?: Json | null
+          reservation_type?: string | null
+          source?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          target_audience?: string | null
+          timeline_reason?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          wants_identity_creation?: boolean | null
+        }
+        Update: {
+          ae_assigned?: string | null
+          brand_guide_url?: string | null
+          budget_range?: string | null
+          business_sector?: string | null
+          business_sector_custom?: string | null
+          company_name?: string | null
+          competitors?: string | null
+          contacted_at?: string | null
+          converted_at?: string | null
+          converted_to_project_id?: string | null
+          created_at?: string | null
+          desired_features?: string[] | null
+          desired_timeline?: string | null
+          draft_progress_percent?: number | null
+          ecommerce_platform?: string | null
+          email?: string | null
+          existing_site_screenshots?: Json | null
+          existing_site_url?: string | null
+          final_cta_choice?: string | null
+          full_name?: string | null
+          has_domain_only?: boolean | null
+          has_existing_site?: boolean | null
+          has_visual_identity?: string | null
+          health_specific_needs?: string | null
+          id?: string | null
+          ip_address?: unknown
+          is_decision_maker?: string | null
+          logo_file_url?: string | null
+          main_goal?: string | null
+          main_problems?: string[] | null
+          monthly_orders_range?: string | null
+          monthly_traffic?: string | null
+          notes?: string | null
+          pappers_enrichment?: Json | null
+          phone?: string | null
+          preferred_contact_method?: string | null
+          product_count_range?: string | null
+          quality_score?: number | null
+          quality_score_breakdown?: Json | null
+          reservation_type?: string | null
+          source?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          target_audience?: string | null
+          timeline_reason?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          wants_identity_creation?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _access_passphrase: { Args: never; Returns: string }
@@ -4284,6 +4896,63 @@ export type Database = {
           p_title: string
         }
         Returns: unknown
+      }
+      qualif_create_draft: {
+        Args: {
+          p_source?: string
+          p_utm_campaign?: string
+          p_utm_medium?: string
+          p_utm_source?: string
+        }
+        Returns: {
+          lead_id: string
+          session_token: string
+        }[]
+      }
+      qualif_get_draft: {
+        Args: { p_token: string }
+        Returns: {
+          brand_guide_url: string
+          budget_range: string
+          business_sector: string
+          business_sector_custom: string
+          company_name: string
+          competitors: string
+          created_at: string
+          desired_features: string[]
+          desired_timeline: string
+          draft_progress_percent: number
+          ecommerce_platform: string
+          email: string
+          existing_site_screenshots: Json
+          existing_site_url: string
+          final_cta_choice: string
+          full_name: string
+          has_domain_only: boolean
+          has_existing_site: boolean
+          has_visual_identity: string
+          health_specific_needs: string
+          id: string
+          is_decision_maker: string
+          logo_file_url: string
+          main_goal: string
+          main_problems: string[]
+          monthly_orders_range: string
+          monthly_traffic: string
+          phone: string
+          preferred_contact_method: string
+          product_count_range: string
+          reservation_type: string
+          status: string
+          target_audience: string
+          timeline_reason: string
+          updated_at: string
+          wants_identity_creation: boolean
+        }[]
+      }
+      qualif_update_draft: {
+        Args: { p_payload: Json; p_token: string }
+        Returns: string
       }
       refresh_kpi_views: { Args: never; Returns: undefined }
       search_procedures: {

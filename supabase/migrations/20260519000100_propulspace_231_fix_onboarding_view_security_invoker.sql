@@ -1,0 +1,13 @@
+-- ============================================================================
+-- Migration 231 — Fix sécurité : vue onboarding en security_invoker
+-- ============================================================================
+-- L'advisor security_definer_view détecte que propulspace_onboarding_v2 hérite
+-- du mode SECURITY DEFINER par défaut (créateur = postgres → bypass des RLS de
+-- la table sous-jacente). Les 6 autres vues propulspace_*_v2 sont en
+-- security_invoker=true. On aligne onboarding_v2 sur ce pattern.
+--
+-- Leçon migration 220 + 230 : tout CREATE VIEW dans le schéma public DOIT être
+-- suivi de SET (security_invoker = true), sinon la vue bypass les RLS.
+-- À documenter dans README_PROPULSPACE.md (cf reco audit migrations).
+-- ============================================================================
+ALTER VIEW public.propulspace_onboarding_v2 SET (security_invoker = true);
