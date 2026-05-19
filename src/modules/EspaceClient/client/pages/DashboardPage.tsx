@@ -1,16 +1,18 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  TrendingUp, Clock, CheckCircle2, Receipt, PenLine, FileText, ArrowUpRight,
+  TrendingUp, Clock, CheckCircle2, Receipt, PenLine, FileText, ArrowUpRight, Sparkles,
 } from 'lucide-react';
 import {
   Hero, KpiTile, SectionHead, ActivityRow, EmptyState,
 } from '@/modules/EspaceClient/shared/components';
+import { Button } from '@/components/ui/button';
 import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext';
 import {
   usePortalProjectSteps, usePortalInvoices, usePortalSignatures, usePortalDocuments,
 } from '../hooks/usePortalData';
 import { OnboardingBanner } from '../onboarding/OnboardingBanner';
+import { WelcomeWizard } from '../welcome/WelcomeWizard'; // DEV-WIZARD-230 — retirer au palier 10
 
 function formatShortDate(iso: string | null): string {
   if (!iso) return '';
@@ -20,6 +22,10 @@ function formatShortDate(iso: string | null): string {
 export function DashboardPage() {
   const { email, project } = usePortal();
   const firstName = project.client_name?.split(' ')[0] ?? email.split('@')[0] ?? 'Client';
+
+  // DEV-WIZARD-230 — bouton flottant de test pour le WelcomeWizard v2.
+  // À retirer au palier 10 quand l'ouverture auto via PortalShell sera branchée.
+  const [devWizardOpen, setDevWizardOpen] = useState(false);
 
   const steps      = usePortalProjectSteps();
   const invoices   = usePortalInvoices();
@@ -120,6 +126,23 @@ export function DashboardPage() {
           </ul>
         )}
       </section>
+
+      {/* ── DEV-WIZARD-230 — BLOC TEMPORAIRE, retirer au palier 10 ─────────── */}
+      <Button
+        type="button"
+        onClick={() => setDevWizardOpen(true)}
+        className="fixed bottom-6 right-6 z-50 h-11 gap-2 bg-amber-500 px-4 text-white shadow-lg hover:bg-amber-600"
+        title="DEV — Test wizard d'accueil (à retirer au palier 10)"
+      >
+        <Sparkles className="h-4 w-4" />
+        DEV · Ouvrir wizard
+      </Button>
+      <WelcomeWizard
+        projectId={project.id}
+        open={devWizardOpen}
+        onOpenChange={setDevWizardOpen}
+      />
+      {/* ── /DEV-WIZARD-230 ──────────────────────────────────────────────── */}
     </div>
   );
 }
