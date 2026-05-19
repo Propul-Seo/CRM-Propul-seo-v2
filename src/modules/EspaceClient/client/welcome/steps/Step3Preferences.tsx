@@ -28,10 +28,19 @@ const SLOTS: SlotOption[] = [
   { value: 'evening',   label: 'Soir',        hint: '18 h – 20 h' },
 ];
 
+// Classe partagée pour le rendu de base d'une pill (channel + slot).
+const PILL_BASE =
+  'ps-tap inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-all duration-[var(--ps-dur-fast)]';
+
+// Divider doux en dégradé (transparent → border → transparent) pour les séparateurs de lignes.
+const ROW_DIVIDER =
+  '[&>*+*]:relative [&>*+*]:before:absolute [&>*+*]:before:inset-x-0 [&>*+*]:before:top-0 [&>*+*]:before:h-px ' +
+  "[&>*+*]:before:bg-[linear-gradient(to_right,transparent,var(--ps-border-soft),transparent)] [&>*+*]:before:content-['']";
+
 // Layout commun pour chaque ligne (label + sous-label à gauche, contrôle à droite).
 function PrefRow({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
   return (
-    <div className="grid gap-3 py-5 md:grid-cols-[180px_1fr] md:gap-6">
+    <div className="grid gap-3 py-6 md:grid-cols-[180px_1fr] md:gap-8">
       <div>
         <p className="text-[13.5px] font-semibold text-[var(--ps-fg)]">{title}</p>
         <p className="mt-0.5 text-[11.5px] text-[var(--ps-fg-muted)]">{subtitle}</p>
@@ -58,7 +67,7 @@ export function Step3Preferences({ wizard }: Step3PreferencesProps) {
 
   return (
     <div className="mx-auto max-w-[640px]">
-      <div className="divide-y divide-[var(--ps-border-soft)]">
+      <div className={ROW_DIVIDER}>
         {/* Ligne 1 — Canal préféré (mutex) */}
         <PrefRow title="Canal préféré" subtitle="Comment vous prévenir en priorité.">
           <div role="radiogroup" aria-label="Canal préféré" className="flex flex-wrap gap-2">
@@ -73,10 +82,10 @@ export function Step3Preferences({ wizard }: Step3PreferencesProps) {
                   aria-checked={active}
                   onClick={() => setField('preferred_channel', opt.value)}
                   className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors',
+                    PILL_BASE,
                     active
-                      ? 'bg-[var(--ps-primary)] text-white shadow-sm'
-                      : 'border border-[var(--ps-border)] bg-white text-[var(--ps-fg)] hover:bg-[var(--ps-bg-subtle)]',
+                      ? 'ps-pill-active bg-[var(--ps-primary)] text-white'
+                      : 'border border-[var(--ps-border)] bg-white text-[var(--ps-fg)] hover:border-[var(--ps-primary)]/40 hover:bg-[var(--ps-bg-subtle)]',
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" />
@@ -100,10 +109,10 @@ export function Step3Preferences({ wizard }: Step3PreferencesProps) {
                   aria-checked={active}
                   onClick={() => toggleSlot(opt.value)}
                   className={cn(
-                    'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors',
+                    PILL_BASE,
                     active
-                      ? 'bg-[var(--ps-primary-subtle)] text-[var(--ps-primary-text)]'
-                      : 'border border-[var(--ps-border)] bg-white text-[var(--ps-fg)] hover:bg-[var(--ps-bg-subtle)]',
+                      ? 'ps-pill-active bg-[var(--ps-primary-subtle)] text-[var(--ps-primary-text)]'
+                      : 'border border-[var(--ps-border)] bg-white text-[var(--ps-fg)] hover:border-[var(--ps-primary)]/40 hover:bg-[var(--ps-bg-subtle)]',
                   )}
                 >
                   {active && <Check className="h-3.5 w-3.5" />}
@@ -122,8 +131,16 @@ export function Step3Preferences({ wizard }: Step3PreferencesProps) {
               checked={notif}
               onCheckedChange={v => setField('email_notifications', v)}
               aria-label="Notifications email"
+              className="ps-tap transition-transform hover:scale-[1.04]"
             />
-            <span className="text-[12.5px] text-[var(--ps-fg-muted)]">
+            <span
+              className={cn(
+                'rounded-md border-l-2 py-0.5 pl-2.5 text-[12.5px] transition-colors duration-200',
+                notif
+                  ? 'border-[var(--ps-primary)]/60 text-[var(--ps-fg-secondary)]'
+                  : 'border-[var(--ps-border)] text-[var(--ps-fg-muted)]',
+              )}
+            >
               {notif
                 ? 'Activé · vous recevrez livrables, factures, signatures à effectuer'
                 : 'Désactivé · uniquement notifications dans l\'app'}
@@ -132,7 +149,7 @@ export function Step3Preferences({ wizard }: Step3PreferencesProps) {
         </PrefRow>
       </div>
 
-      <p className="mt-2 px-1 text-[11.5px] text-[var(--ps-fg-muted)]">
+      <p className="mt-3 px-1 text-[11.5px] text-[var(--ps-fg-muted)]">
         Vous pouvez ajuster ces préférences à tout moment depuis votre profil.
       </p>
     </div>

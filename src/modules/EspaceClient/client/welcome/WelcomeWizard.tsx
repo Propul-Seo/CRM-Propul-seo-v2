@@ -28,7 +28,7 @@ const STEPS: ReadonlyArray<{ num: number; label: string; minutesLeft: number }> 
   { num: 5, label: 'Tout est prêt', minutesLeft: 0 },
 ];
 
-const TRANSITION = { duration: 0.2, ease: [0.4, 0, 0.2, 1] as const };
+const TRANSITION = { duration: 0.28, ease: [0.16, 1, 0.3, 1] as const };
 
 export function WelcomeWizard({ projectId, open, onOpenChange, onCompleted }: WelcomeWizardProps) {
   const wizard = useWelcomeWizard(projectId);
@@ -62,7 +62,14 @@ export function WelcomeWizard({ projectId, open, onOpenChange, onCompleted }: We
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) void handleDismiss(); else onOpenChange(true); }}>
-      <DialogContent className="propulspace-portal max-w-[940px] gap-0 p-0 max-sm:h-[100dvh] max-sm:max-w-full max-sm:rounded-none">
+      <DialogContent
+        className={cn(
+          'propulspace-portal ps-shadow-floating max-w-[940px] gap-0 overflow-hidden p-0',
+          'before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px',
+          'before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent',
+          'max-sm:h-[100dvh] max-sm:max-w-full max-sm:rounded-none',
+        )}
+      >
         {/* Accessibilité : titre + description pour les lecteurs d'écran (sr-only). */}
         <DialogTitle className="sr-only">Bienvenue dans votre Propul'Space — étape {currentStep} sur 5</DialogTitle>
         <DialogDescription className="sr-only">
@@ -70,22 +77,25 @@ export function WelcomeWizard({ projectId, open, onOpenChange, onCompleted }: We
         </DialogDescription>
 
         {/* ── Header ─────────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between border-b border-[var(--ps-border)] px-6 py-3">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between border-b border-[var(--ps-border)] px-7 py-4">
+          <div className="flex items-center gap-3.5">
             <BrandPill size="md" />
             <span
               role="status"
               aria-live="polite"
-              className="text-[12.5px] font-medium text-[var(--ps-fg-muted)]"
+              className="ps-eyebrow-muted inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-bg-subtle)] px-2.5 py-1 text-[11px] tracking-wide"
             >
-              Onboarding · {currentStep}/5
+              Onboarding
+              <span className="ps-num text-[var(--ps-fg)]">{currentStep}</span>
+              <span className="opacity-50">/</span>
+              <span className="ps-num opacity-60">5</span>
             </span>
           </div>
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={handleDismiss}
-            className="h-8 gap-1.5 text-[12px]"
+            className="ps-tap h-8 gap-1.5 text-[12px] text-[var(--ps-fg-muted)] hover:text-[var(--ps-fg)]"
           >
             <X className="h-3.5 w-3.5" />
             Terminer plus tard
@@ -93,20 +103,37 @@ export function WelcomeWizard({ projectId, open, onOpenChange, onCompleted }: We
         </div>
 
         {/* ── Progress dots ─────────────────────────────────────────── */}
-        <div className="flex gap-1.5 px-6 py-3" role="progressbar"
-             aria-valuemin={1} aria-valuemax={5} aria-valuenow={currentStep}>
-          {STEPS.map(s => (
-            <div
-              key={s.num}
-              className={cn(
-                'h-1 flex-1 rounded-full transition-colors',
-                s.num === currentStep && 'ps-brand-gradient',
-                s.num < currentStep && 'bg-[var(--ps-primary)]',
-                s.num > currentStep && 'bg-[var(--ps-bg-subtle)]',
-              )}
-              aria-label={s.label}
-            />
-          ))}
+        <div
+          className="flex items-center gap-1.5 px-7 py-3.5"
+          role="progressbar"
+          aria-valuemin={1}
+          aria-valuemax={5}
+          aria-valuenow={currentStep}
+        >
+          {STEPS.map(s => {
+            const isActive = s.num === currentStep;
+            const isPast = s.num < currentStep;
+            return (
+              <div
+                key={s.num}
+                className={cn(
+                  'relative h-[5px] flex-1 overflow-hidden rounded-full bg-[var(--ps-bg-subtle)]',
+                )}
+                aria-hidden="true"
+              >
+                <motion.div
+                  className={cn(
+                    'absolute inset-y-0 left-0 rounded-full',
+                    isActive && 'ps-brand-gradient ps-glow-violet-soft',
+                    isPast && 'bg-[var(--ps-primary)]',
+                  )}
+                  initial={false}
+                  animate={{ width: isActive || isPast ? '100%' : '0%' }}
+                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                />
+              </div>
+            );
+          })}
         </div>
 
         {/* ── Content area ──────────────────────────────────────────── */}
@@ -119,9 +146,9 @@ export function WelcomeWizard({ projectId, open, onOpenChange, onCompleted }: We
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStep}
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -16 }}
+                initial={{ opacity: 0, x: 18, scale: 0.985 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -18, scale: 0.985 }}
                 transition={TRANSITION}
               >
                 {currentStep === 1 && <Step1Welcome wizard={wizard} />}
@@ -135,9 +162,9 @@ export function WelcomeWizard({ projectId, open, onOpenChange, onCompleted }: We
         </div>
 
         {/* ── Footer ────────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between border-t border-[var(--ps-border)] px-6 py-3">
+        <div className="flex items-center justify-between border-t border-[var(--ps-border)] px-7 py-4">
           {currentStep > 1 ? (
-            <Button variant="ghost" size="sm" onClick={handlePrev} className="h-9 gap-1.5">
+            <Button variant="ghost" size="sm" onClick={handlePrev} className="ps-tap h-9 gap-1.5 text-[var(--ps-fg-muted)] hover:text-[var(--ps-fg)]">
               <ArrowLeft className="h-3.5 w-3.5" />
               Précédent
             </Button>
@@ -146,17 +173,18 @@ export function WelcomeWizard({ projectId, open, onOpenChange, onCompleted }: We
           )}
           <div className="flex items-center gap-3">
             {!isLast && stepMeta.minutesLeft > 0 && (
-              <span className="flex items-center gap-1 text-[12px] text-[var(--ps-fg-muted)]">
-                <Clock className="h-3 w-3" />~ {stepMeta.minutesLeft} min
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-bg-subtle)] px-2.5 py-1 text-[11.5px] text-[var(--ps-fg-muted)]">
+                <Clock className="h-3 w-3" />
+                <span className="ps-num">~ {stepMeta.minutesLeft} min</span>
               </span>
             )}
             {isLast ? (
-              <Button onClick={handleComplete} className="ps-brand-gradient h-9 gap-1.5 text-white">
+              <Button onClick={handleComplete} className="ps-brand-gradient ps-glow-violet-soft ps-tap h-9 gap-1.5 text-white">
                 <CheckCircle2 className="h-4 w-4" />
                 Accéder à mon espace
               </Button>
             ) : (
-              <Button onClick={handleNext} className="ps-brand-gradient h-9 gap-1.5 text-white">
+              <Button onClick={handleNext} className="ps-brand-gradient ps-glow-violet-soft ps-tap h-9 gap-1.5 text-white">
                 Suivant
                 <ArrowRight className="h-3.5 w-3.5" />
               </Button>

@@ -6,12 +6,13 @@ import type { LucideIcon } from 'lucide-react';
 // finalisées (évite le drift visuel pendant qu'elles bougent encore).
 export function TabPreviewPlaceholder({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
   return (
-    <div className="relative flex h-[120px] w-full items-center justify-center overflow-hidden rounded-lg border border-dashed border-[var(--ps-border)] bg-[var(--ps-bg-subtle)]">
-      <div className="flex flex-col items-center gap-2 text-[var(--ps-fg-muted)]">
-        <Icon className="h-8 w-8 opacity-50" />
-        <span className="text-[11px] font-medium uppercase tracking-wider">Aperçu · {label}</span>
-      </div>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent" />
+    <div
+      className="ps-skeleton relative flex h-[120px] w-full items-center justify-center overflow-hidden rounded-lg border border-[var(--ps-border-soft)] bg-[var(--ps-bg-subtle)] shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)]"
+    >
+      <Icon className="ps-pulse h-10 w-10 text-[var(--ps-fg-muted)] opacity-60" />
+      <span className="ps-eyebrow ps-eyebrow-muted absolute bottom-2 left-2.5 rounded-full bg-white/70 px-2 py-0.5 backdrop-blur-sm">
+        Aperçu · {label}
+      </span>
     </div>
   );
 }

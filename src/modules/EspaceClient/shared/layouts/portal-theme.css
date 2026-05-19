@@ -212,6 +212,94 @@
   border-radius: var(--ps-radius-input);
 }
 
+/* ─── WELCOME WIZARD PREMIUM TOKENS (palier polish) ─────── */
+/* Utilities supplémentaires pour le wizard d'accueil. Réutilisables ailleurs.
+   Documentés ici pour que les agents de polish s'y conforment plutôt que
+   d'inventer des valeurs magiques inline. */
+
+/* Glow violet diffus pour les tiles importants (icône Sparkles, avatar header). */
+.propulspace-portal .ps-glow-violet {
+  box-shadow:
+    0 8px 24px -4px rgba(124, 58, 237, 0.28),
+    0 2px 6px -1px rgba(124, 58, 237, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.20);
+}
+.propulspace-portal .ps-glow-violet-soft {
+  box-shadow:
+    0 4px 16px -2px rgba(124, 58, 237, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Lift hover générique — translateY + shadow plus marquée. */
+.propulspace-portal .ps-lift {
+  transition: transform var(--ps-dur-base) var(--ps-ease-out),
+              box-shadow  var(--ps-dur-base) var(--ps-ease-out);
+}
+.propulspace-portal .ps-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ps-shadow-raised);
+}
+
+/* Card interactive (cursor + lift + ring violet au focus-visible). */
+.propulspace-portal .ps-card-interactive {
+  cursor: pointer;
+  transition: transform var(--ps-dur-base) var(--ps-ease-out),
+              box-shadow  var(--ps-dur-base) var(--ps-ease-out),
+              border-color var(--ps-dur-fast) var(--ps-ease);
+}
+.propulspace-portal .ps-card-interactive:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--ps-shadow-raised);
+  border-color: var(--ps-border-strong);
+}
+.propulspace-portal .ps-card-interactive:active { transform: translateY(0); }
+
+/* Pill state — fond plein + ring subtil pour les pills actives mutex/check. */
+.propulspace-portal .ps-pill-active {
+  box-shadow:
+    0 1px 2px rgba(91, 33, 182, 0.15),
+    0 2px 8px -2px rgba(124, 58, 237, 0.25);
+}
+
+/* Halo pulsant pour Step 5 Done. Plus marqué que ps-pulse classique. */
+@keyframes ps-halo-pulse {
+  0%, 100% { transform: scale(1);    opacity: 0.65; }
+  50%      { transform: scale(1.18); opacity: 1; }
+}
+.propulspace-portal .ps-halo {
+  animation: ps-halo-pulse 3s var(--ps-ease) infinite;
+  background: radial-gradient(circle,
+    rgba(124, 58, 237, 0.28) 0%,
+    rgba(124, 58, 237, 0.04) 50%,
+    transparent 70%);
+}
+
+/* Sparks — petits dots qui montent en boucle (Step 5 Done). */
+@keyframes ps-spark-rise {
+  0%   { opacity: 0; transform: translateY(20px) scale(0.6); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-60px) scale(1); }
+}
+.propulspace-portal .ps-spark {
+  animation: ps-spark-rise 2.6s var(--ps-ease-out) infinite;
+}
+
+/* Scale feedback au clic (tap state pour boutons/pills). */
+.propulspace-portal .ps-tap { transition: transform var(--ps-dur-fast) var(--ps-ease); }
+.propulspace-portal .ps-tap:active { transform: scale(0.97); }
+
+/* Reduced motion — désactive les animations lourdes. */
+@media (prefers-reduced-motion: reduce) {
+  .propulspace-portal .ps-halo,
+  .propulspace-portal .ps-spark,
+  .propulspace-portal .ps-pulse,
+  .propulspace-portal .ps-fab {
+    animation: none;
+  }
+  .propulspace-portal .ps-lift:hover,
+  .propulspace-portal .ps-card-interactive:hover { transform: none; }
+}
+
 /* ─── SAFE-AREA (iOS bottom nav) ───────────────────────── */
 @supports (padding: max(0px)) {
   .propulspace-portal .ps-safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }

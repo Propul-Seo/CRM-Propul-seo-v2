@@ -54,9 +54,9 @@ export function Step4Tour({ wizard: _wizard }: Step4TourProps) {
         {/* Peeking gauche — caché sur mobile (max-sm) */}
         <div
           onClick={goPrev}
-          className="absolute left-0 hidden h-[280px] w-[140px] cursor-pointer items-center sm:flex"
+          className="ps-tap absolute left-0 hidden h-[280px] w-[140px] cursor-pointer items-center sm:flex"
         >
-          <div className="w-full scale-[0.92] rounded-2xl border border-[var(--ps-border)] bg-white p-4 opacity-55 shadow-sm transition-opacity hover:opacity-75">
+          <div className="ps-lift group w-full scale-[0.92] rounded-2xl border border-[var(--ps-border)] bg-white p-4 opacity-55 shadow-sm transition-all duration-[var(--ps-dur-base)] hover:scale-[0.96] hover:opacity-85">
             <FeaturedHeader section={prev} index={(active - 1 + total) % total} total={total} compact />
           </div>
         </div>
@@ -68,7 +68,7 @@ export function Step4Tour({ wizard: _wizard }: Step4TourProps) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.2}
@@ -76,7 +76,7 @@ export function Step4Tour({ wizard: _wizard }: Step4TourProps) {
               if (info.offset.x < -SWIPE_THRESHOLD) goNext();
               else if (info.offset.x > SWIPE_THRESHOLD) goPrev();
             }}
-            className="relative z-10 mx-auto w-[80%] max-w-[420px] cursor-grab rounded-2xl border border-[var(--ps-border)] bg-white p-5 shadow-lg active:cursor-grabbing"
+            className="ps-tap ps-shadow-floating ps-glow-violet-soft relative z-10 mx-auto w-[80%] max-w-[420px] cursor-grab rounded-2xl border border-[var(--ps-border)] bg-white p-5 active:cursor-grabbing"
             aria-current="true"
           >
             <FeaturedHeader section={current} index={active} total={total} />
@@ -90,9 +90,9 @@ export function Step4Tour({ wizard: _wizard }: Step4TourProps) {
         {/* Peeking droite */}
         <div
           onClick={goNext}
-          className="absolute right-0 hidden h-[280px] w-[140px] cursor-pointer items-center justify-end sm:flex"
+          className="ps-tap absolute right-0 hidden h-[280px] w-[140px] cursor-pointer items-center justify-end sm:flex"
         >
-          <div className="w-full scale-[0.92] rounded-2xl border border-[var(--ps-border)] bg-white p-4 opacity-55 shadow-sm transition-opacity hover:opacity-75">
+          <div className="ps-lift group w-full scale-[0.92] rounded-2xl border border-[var(--ps-border)] bg-white p-4 opacity-55 shadow-sm transition-all duration-[var(--ps-dur-base)] hover:scale-[0.96] hover:opacity-85">
             <FeaturedHeader section={next} index={(active + 1) % total} total={total} compact />
           </div>
         </div>
@@ -107,18 +107,18 @@ export function Step4Tour({ wizard: _wizard }: Step4TourProps) {
             onClick={() => setActive(i)}
             aria-label={`Aller à la section ${s.title}`}
             className={cn(
-              'h-1.5 rounded-full transition-all',
+              'ps-tap h-1.5 rounded-full transition-all duration-200',
               i === active
-                ? 'w-[18px] bg-[var(--ps-primary)]'
+                ? 'ps-glow-violet-soft w-[18px] bg-[var(--ps-primary)]'
                 : 'w-1.5 bg-[var(--ps-border)] hover:bg-[var(--ps-fg-muted)]',
             )}
           />
         ))}
       </div>
 
-      {/* Hint contact bandeau */}
-      <div className="flex items-center gap-2 rounded-lg bg-[var(--ps-primary-subtle)] px-3.5 py-2.5 text-[12px] text-[var(--ps-primary-text)]">
-        <Phone className="h-3.5 w-3.5 shrink-0" />
+      {/* Hint contact bandeau — dégradé subtil primary-subtle → bg-subtle */}
+      <div className="flex items-center gap-2 rounded-lg bg-[linear-gradient(to_right,var(--ps-primary-subtle),var(--ps-bg-subtle))] px-3.5 py-2.5 text-[12px] text-[var(--ps-primary-text)]">
+        <Phone className="ps-pulse h-3.5 w-3.5 shrink-0" />
         <span>
           Bouton bleu en bas à droite de chaque page : votre raccourci pour nous contacter, n'importe quand.
         </span>
@@ -134,7 +134,8 @@ function FeaturedHeader({ section, index, total, compact = false }: {
   return (
     <div className="flex items-start justify-between gap-3">
       <div className={cn(
-        'flex shrink-0 items-center justify-center rounded-lg bg-[var(--ps-primary-subtle)]',
+        'flex shrink-0 items-center justify-center rounded-lg bg-[var(--ps-primary-subtle)] ring-1 ring-inset ring-[var(--ps-primary)]/15',
+        !compact && 'ps-glow-violet-soft',
         compact ? 'h-9 w-9' : 'h-11 w-11',
       )}>
         <Icon className={cn(compact ? 'h-4 w-4' : 'h-5 w-5', 'text-[var(--ps-primary-text)]')} />
@@ -147,7 +148,7 @@ function FeaturedHeader({ section, index, total, compact = false }: {
           {section.title}
         </p>
       </div>
-      <span className="text-[10.5px] font-medium tabular-nums text-[var(--ps-fg-muted)]">
+      <span className="ps-num text-[10.5px] font-medium text-[var(--ps-fg-muted)]">
         {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
       </span>
     </div>

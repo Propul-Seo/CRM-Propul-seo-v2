@@ -30,7 +30,7 @@ interface MiniCardProps {
 
 function MiniCard({ icon: Icon, label, value, tint }: MiniCardProps) {
   return (
-    <div className="rounded-lg border border-[var(--ps-border)] p-2.5">
+    <div className="ps-surface ps-lift rounded-lg p-2.5">
       <div className={cn('mb-1.5 inline-flex h-7 w-7 items-center justify-center rounded-md', TINT_BG[tint])}>
         <Icon className="h-3.5 w-3.5" />
       </div>
@@ -50,20 +50,23 @@ export function Step1QualifRecap({ qualif }: Step1QualifRecapProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="ps-eyebrow text-[var(--ps-primary-text)]">Récap de votre demande</p>
-        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10.5px] font-medium text-emerald-700">
-          ✓ Pré-rempli
+        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10.5px] font-semibold text-emerald-700 ring-1 ring-emerald-200/60">
+          <span className="h-1 w-1 rounded-full bg-emerald-500" aria-hidden />
+          Pré-rempli
         </span>
       </div>
 
       {/* Carte hero projet */}
-      <div className="rounded-xl border border-[var(--ps-border)] p-4">
+      <div className="ps-surface ps-lift rounded-xl p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-yellow-100 to-amber-200 font-serif text-[18px] font-bold italic text-amber-700">
+          <div
+            className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-yellow-100 via-amber-150 to-amber-300 font-serif text-[19px] font-bold italic text-amber-800 shadow-[inset_0_1px_0_rgba(255,255,255,.6),inset_0_-1px_0_rgba(146,64,14,.12),0_1px_2px_rgba(146,64,14,.08)]"
+          >
             {monogram(qualif.company_name)}
           </div>
           <div className="min-w-0 flex-1">
             <p className="ps-eyebrow ps-eyebrow-muted">Votre projet</p>
-            <p className="truncate text-[17px] font-bold text-[var(--ps-fg)]">{qualif.company_name ?? '—'}</p>
+            <p className="truncate text-[17px] font-bold tracking-tight text-[var(--ps-fg)]">{qualif.company_name ?? '—'}</p>
             {qualif.business_sector && (
               <p className="flex items-center gap-1.5 text-[12.5px] text-[var(--ps-fg-muted)]">
                 <Gem className="h-3 w-3" />
@@ -84,13 +87,13 @@ export function Step1QualifRecap({ qualif }: Step1QualifRecapProps) {
 
       {/* Chips modules */}
       {features.length > 0 && (
-        <div className="rounded-xl border border-[var(--ps-border)] p-3">
+        <div className="ps-surface rounded-xl p-3">
           <p className="ps-eyebrow ps-eyebrow-muted mb-2">Modules à construire</p>
           <div className="flex flex-wrap gap-1.5">
             {features.map(f => (
               <span
                 key={f}
-                className="rounded-full bg-[var(--ps-primary-subtle)] px-2.5 py-0.5 text-[11.5px] font-medium text-[var(--ps-primary-text)]"
+                className="ps-tap cursor-default rounded-full bg-[var(--ps-primary-subtle)] px-2.5 py-0.5 text-[11.5px] font-medium text-[var(--ps-primary-text)] transition-colors hover:bg-[var(--ps-primary)]/15"
               >
                 {f}
               </span>
