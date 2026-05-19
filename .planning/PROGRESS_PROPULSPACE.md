@@ -7,12 +7,12 @@
 
 ## 1. État global
 
-- **Sprint en cours** : Sprint A + B livrés côté code. **QA E2E en cours** (3 bugs critiques fixés, scénario login portail validé).
-- **Tâche en cours** : Reprendre la QA E2E des 18 tests + décider verdict B.2 wizard (α/β) + multi-projets ADR-004.
-- **Phase produit** : Phase 2 (code complet + hot fixes auth, branchements infra Stripe/DocuSeal/Brevo à faire par Lyes, QA E2E à finaliser avant prod)
+- **Sprint en cours** : Sprint B.2 recadré (WelcomeWizard v2) **livré côté code + DA Sky Aurora appliquée**. Restent paliers 10 (PortalShell auto-open) + cleanup + tests parcours.
+- **Tâche en cours** : Finaliser les tests E2E du welcome wizard + refonte du questionnaire qualif (à brief par Lyes).
+- **Phase produit** : Phase 2 (welcome wizard recadré + branchements infra Stripe/DocuSeal/Brevo à faire par Lyes, QA E2E à dérouler après PortalShell auto-open).
 - **Branche** : `feature/propulspace-phase-2-front` (exception multi-phases assumée, merge dans `main` fin Phase 2 après QA validée)
 - **Project Supabase** : ERP (`tbuqctfgjjxnevmsvucl`)
-- **Dernière mise à jour** : 2026-05-18 (commit 9208e62 — isolation sessions auth CRM ↔ portail client)
+- **Dernière mise à jour** : 2026-05-19 (commit e1de4e3 — DA Sky Aurora + palier 9 banner + fix code review)
 
 ---
 
@@ -28,7 +28,7 @@
 
 ### Sprint B — Préparation Précieuse (5-7 jours)
 - [x] **B.1** Runbook Brevo Custom SMTP — code 0, doc complète. Branchement à faire par Lyes.
-- [x] **B.2** OnboardingWizard livré MAIS **scope incorrect** (collecte d'infos métier au lieu de wizard d'accueil chaleureux). À refaire selon brief original (option α ou β).
+- [x] **B.2** OnboardingWizard v1 scope incorrect → **B.2 recadré livré 2026-05-19** : nouveau WelcomeWizard 5 étapes (Bienvenue / Coordonnées / Préférences / Tour / Done) avec DA Sky Aurora (B3) + animation E (orbes flottants). V1 conservée pour future page Configuration du projet (PR 2).
 - [x] **B.3** Stripe complet (2 edge fns + UI portail + migrations + runbook). Branchement compte Stripe à faire.
 - [x] **B.4** DocuSeal (2 edge fns + runbook). UI signatures portail déjà existante. Branchement compte DocuSeal à faire.
 - [x] **B.5** QA_E2E_RUNBOOK.md livré (18 tests). **À dérouler en prochaine session.**
@@ -426,3 +426,56 @@ Headlines :
 4. **Jamais effacer** : le journal (3) reste intact. Une tâche close ne disparaît pas.
 5. **Date format** : ISO `YYYY-MM-DD` partout.
 6. **Statut emoji** : 🟡 en cours / 🟢 résolu / 🔴 critique ouvert / 🟠 élevé ouvert.
+
+### ✅ WelcomeWizard v2 recadré + DA Sky Aurora + Animation E (terminé 2026-05-19)
+**Démarré** : 2026-05-19 (matin, recadrage Sprint B.2 par Lyes via brief Claude design)
+**Terminé** : 2026-05-19 (commit e1de4e3)
+**Périmètre** : refonte complète du wizard d'accueil portail client (5 étapes), direction artistique Sky Aurora, animation finale orbes flottants, code review.
+
+**Migrations DB appliquées** :
+- `230_welcome_wizard.sql` : +11 colonnes welcome_* sur `onboarding_responses`, +3 colonnes `client_first_name/phone/company` sur `projects_v2`, trigger SECURITY DEFINER `sync_onboarding_to_project_v2`, backfill rétroactif `inherited_from_qualification_id`, vue `propulspace_onboarding_v2` étendue avec REVOKE anon.
+- `231_fix_onboarding_view_security_invoker.sql` : ALTER VIEW SET (security_invoker=true) — bug latent depuis 220, révélé par 230.
+- `232_onboarding_grant_authenticated.sql` : GRANT SELECT/INSERT/UPDATE à authenticated sur la TABLE sous-jacente. La migration 220 avait oublié les GRANTs, masqué par SECURITY DEFINER, révélé par 231 → 403 sur tous les SELECT/INSERT du wizard.
+- `233_fix_sync_trigger_direct_assign.sql` : trigger sync — COALESCE → assignation directe NEW. Fix HIGH #1 code review : désync silencieuse si client efface volontairement un champ.
+
+**Fichiers code** :
+- `welcome/useWelcomeWizard.ts` (199 lignes) — hook autosave debounce 500ms, fetch qualif, pré-remplissage one-shot, dismiss/complete/shouldOpenAutomatically. Export `DISMISS_THRESHOLD` partagé.
+- `welcome/WelcomeWizard.tsx` (175 lignes) — shell Dialog full-screen avec DA Sky Aurora (backgroundImage + backgroundColor inline pour override theme dark CRM), header pill brandée tricolore, progress dots animés framer-motion, footer avec CTA gradient. Fix `[&>button]:hidden` (masque X auto shadcn) + retrait du `relative` qui cassait le centrage `fixed`.
+- `welcome/steps/Step1Welcome.tsx` + `Step1QualifRecap.tsx` — split chaleureux gauche + mini-cards 2×2 droite (gradient pastel par catégorie) ou CTA `/diagnostic` si pas de qualif.
+- `welcome/steps/Step2Contact.tsx` — carte identité avec liseré tricolore top, 5 lignes éditables inline + autosave.
+- `welcome/steps/Step3Preferences.tsx` — pills mutex/multi + toggle custom (le Switch shadcn applique bg-background dark sur le thumb → rond noir invisible).
+- `welcome/steps/Step4Tour.tsx` — carrousel spotlight 7 sections, flèches navigation, swipe trackpad onWheel + drag framer-motion.
+- `welcome/steps/Step5Done.tsx` — animation E (orbes flottants) : 5 grandes particules qui dérivent en boucle 8s, vibe organique premium. Halo + gradient text italic prénom.
+- `welcome/WelcomeBanner.tsx` (palier 9) — bannière dashboard "Reprendre l'onboarding" affichée si `welcome_dismissed_count ≥ DISMISS_THRESHOLD`. Note dette technique : double instance du hook avec WelcomeWizard, à refondre palier 10.
+
+**Pages DEV preview** (à retirer au cleanup) :
+- `/dev/welcome-variants` (5 variantes Step 5)
+- `/dev/wizard-variants` (5 directions wizard A-E)
+- `/dev/aurora-light` (4 sous-variantes light de B)
+- `/dev/sky-aurora` (Sky Aurora décliné sur 5 steps)
+- `/dev/sky-step5-anims` (5 variantes animation Step 5)
+
+**Décisions design tranchées par Lyes** :
+- Direction B3 Sky Aurora (bleu pâle + auroras diagonales sky/violet/peach + cards blanches)
+- Animation Step 5 = E (orbes flottants)
+- Modale 820px × ~380px (carré aplati centré)
+- Bouton "Terminer plus tard" en outline white (visible)
+- Bouton DEV temporaire top-right pour test (à retirer palier 10)
+
+**Code review (verdict NEEDS FIXES)** :
+- HIGH #1 : COALESCE silent erasure → fixé via migration 233.
+- HIGH #2 : double instance hook Banner+Wizard → différé palier 10 (PortalShell context). Note ajoutée dans WelcomeBanner.tsx.
+- MEDIUM #3 : DISMISS_THRESHOLD dupliqué → fixé via export.
+- MEDIUM #4 : inline styles shadows magic values → différé (refacto tokens design ultérieure).
+
+**Hors-périmètre / différé** :
+- Palier 10 : PortalShell auto-open au login (retire le bouton DEV).
+- Cleanup pages /dev/* (à supprimer après validation Lyes).
+- Tokenization des shadows inline en variables CSS portal-theme.css.
+- Tests E2E parcours complet du wizard (T5/T6/T7 du QA_E2E_RUNBOOK + tests autosave + sync trigger).
+
+**Validation** :
+- `tsc --noEmit` clean après chaque palier.
+- 0 erreur browser console.
+- Sync trigger validé en SQL : `welcome_first_name="Lyes"` → `client_first_name="Lyes"` dans projects_v2.
+- 3 fixes critiques en cours de polish (Switch noir, modale non centrée, bg-surface-3 dark theme) résolus en debug live avec systematic-debugging skill.

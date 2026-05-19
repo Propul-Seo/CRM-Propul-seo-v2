@@ -1,33 +1,37 @@
-# Session State — 2026-05-18 fin (isolation auth CRM ↔ portail livrée)
+# Session State — 2026-05-19 fin (WelcomeWizard v2 + DA Sky Aurora livrés)
 
 ## Branch
 `feature/propulspace-phase-2-front` — exception multi-phases assumée (merge dans `main` fin Phase 2 après QA E2E validée).
 
 ## Completed This Session
-- ✅ **QA E2E démarrée** sur portail Propul'Space (3 bugs critiques détectés et fixés).
-- ✅ **Fix A — dialog activation portail** : masque champs création contact si primary existe déjà (évite 409 doublon).
-- ✅ **Fix lecture erreur edge function** : `usePortalActivation` extrait le vrai message depuis `error.context.json()` au lieu du générique.
-- ✅ **Fix redirection post-login portail** : `ClientLoginPage` useEffect → `navigate('/espace-client')` si `state.status === 'ready'`.
-- ✅ **Isolation sessions auth CRM ↔ portail (refonte ciblée)** : 2 clients supabase-js avec storageKey distincts (`sb-crm-propulseo-auth` + `sb-propulspace-auth`). Spec : `docs/superpowers/specs/2026-05-18-auth-isolation-portail-design.md`. 7 fichiers basculés sur `portalSupabase` + nouveau proxy `v2Portal`.
-- ✅ **Code review** : 3 issues remontées, 2 vraies fixées (getSession fallback Safari ITP + spec migration), 1 différée (stylistique).
-- ✅ Tests runtime : `signInWithPassword` portail répond en 112ms après signin admin (plus de hang). `tsc --noEmit` clean.
+- ✅ **Migration 230** — Welcome Wizard schema (11 colonnes welcome_* + 3 colonnes client_* + trigger SECURITY DEFINER + backfill + vue exposée).
+- ✅ **Migration 231** — Hotfix sécurité `security_invoker=true` sur la vue.
+- ✅ **Migration 232** — GRANT SELECT/INSERT/UPDATE authenticated (manquait depuis 220, bug latent révélé par 231).
+- ✅ **Migration 233** — Fix code review : trigger COALESCE → assignation directe.
+- ✅ **Hook useWelcomeWizard** + autosave debounce + fetch qualif + dismiss/complete.
+- ✅ **Shell WelcomeWizard** + 5 steps complets (Bienvenue / Coordonnées / Préférences / Tour / Done).
+- ✅ **DA Sky Aurora** appliquée sur les 5 étapes (gradient sky→lavande→peach + auroras diagonales + cards blanches + gradient text sky→violet→pink).
+- ✅ **Step 5 Done animation E** (orbes flottants).
+- ✅ **Palier 9 WelcomeBanner** (apparition après 3 dismissals).
+- ✅ **Toggle custom** Step 3 (fix Switch shadcn dark theme).
+- ✅ **5 pages DEV preview** pour arbitrer la DA (à retirer au cleanup).
+- ✅ Code review → fixes HIGH #1 + MEDIUM #3 appliqués, HIGH #2 + MEDIUM #4 différés et documentés.
 
-## Next Task — Session QA E2E (reprise)
-Reprendre les **18 tests de `docs/propulspace/QA_E2E_RUNBOOK.md`** (les bugs auth bloquants sont fixés, on peut maintenant tester end-to-end).
+## Next Task
+Finaliser les **tests E2E du wizard** (parcours complet 1→5 + autosave + sync trigger + dismiss/reopen) + travailler sur la **refonte du questionnaire qualif** (brief à venir de Lyes).
 
-Décisions toujours en attente :
-1. **Wizard onboarding (B.2)** — verdict α ou β.
-2. **Multi-projets (ADR-004)** — code ou limite V1 assumée.
-3. **Comptes Stripe / DocuSeal / Brevo** — créés côté Lyes pour tests payants live ?
+Avant ça, palier 10 — **PortalShell auto-open** au login (retire le bouton DEV + remplace par ouverture automatique si `shouldOpenAutomatically === true` et fixe la dette technique HIGH #2 via une instance unique du hook partagée Banner+Wizard).
 
 ## Blockers
-- Aucun blocker auth — flow portail (activation + invitation + magic link + setup mdp + login mdp + dashboard) fonctionnel après cette session.
-- Décisions α/β B.2 + ADR-004 multi-projets toujours en suspens.
+- Aucun blocker code/DB.
+- Décisions Stripe/DocuSeal/Brevo branchements live toujours en attente Lyes.
+- Brief refonte questionnaire qualif à recevoir de Lyes.
 
 ## Key Context
-- **Migration auth** : après déploiement de ce commit, tous les utilisateurs devront se reconnecter une fois (ancienne clé `sb-tbuqctfg-auth-token` orpheline). Acceptable en QA.
-- **Warning `Multiple GoTrueClient instances`** persiste mais cosmétique (déclenché sur le count d'instances, pas la collision de storage keys). Voir auth-js#762.
-- **Cohabitation admin + client validée** : admin CRM sur un onglet + client portail sur un autre = OK, les deux sessions indépendantes.
-- Dernier commit : `9208e62` pushé sur `feature/propulspace-phase-2-front`.
-- 6 migrations Stripe + sécurité en prod (170, 180, 190, 195, 200, 201, 210, 211, 220, 221).
-- 6 edge functions codées (4 pas encore déployées : portal-create-checkout-session, stripe-webhook, admin-docuseal-create-submission, docuseal-webhook).
+- **Direction artistique validée** : Sky Aurora (B3) + animation E (orbes flottants).
+- **Modale 820×380px** centrée, gradient sky/lavande/peach.
+- **Bouton DEV top-right** sur dashboard portail temporaire — à retirer palier 10.
+- **Dette technique HIGH #2** : `WelcomeBanner` instancie sa propre instance de `useWelcomeWizard`. Risque de désync avec celle du `WelcomeWizard` modal si les deux sont montés. À refondre palier 10 via context PortalShell.
+- **Dernière commit** : `e1de4e3` pushé sur `feature/propulspace-phase-2-front`.
+- **4 migrations appliquées** en prod cette session (230, 231, 232, 233).
+- **Pages DEV à supprimer** au cleanup : `/dev/welcome-variants`, `/dev/wizard-variants`, `/dev/aurora-light`, `/dev/sky-aurora`, `/dev/sky-step5-anims` + tous les fichiers `welcome/dev/*`.
