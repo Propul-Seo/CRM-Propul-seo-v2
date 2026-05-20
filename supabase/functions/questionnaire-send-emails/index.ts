@@ -52,11 +52,20 @@ const PROJECT_TYPE_LABELS: Record<string, string> = {
   erp:      '⚙️ ERP / Outil métier',
 };
 
+// Échappe les caractères HTML pour éviter une injection XSS depuis les champs
+// libres du questionnaire (un nom comme `<script>...</script>` deviendrait du
+// HTML brut dans l'email équipe).
+function escHtml(s: string | null | undefined): string {
+  return (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function buildEmailHtml(lead: Lead): string {
   const row = (label: string, value: string | null | undefined) => value
-    ? `<tr><td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:13px;">${label}</td><td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;color:#111827;font-size:14px;font-weight:500;">${value}</td></tr>`
+    ? `<tr><td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:13px;">${escHtml(label)}</td><td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;color:#111827;font-size:14px;font-weight:500;">${escHtml(value)}</td></tr>`
     : '';
   const projectLabel = lead.project_type ? PROJECT_TYPE_LABELS[lead.project_type] ?? lead.project_type : null;
+  const headerTitle = escHtml(lead.company_name ?? lead.full_name ?? lead.email);
+  const leadIdSafe = escHtml(lead.id);
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Nouveau lead diagnostic</title></head>
@@ -64,7 +73,7 @@ function buildEmailHtml(lead: Lead): string {
   <div style="max-width:600px;margin:32px auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);">
     <div style="background:linear-gradient(135deg,#0ea5e9 0%,#8b5cf6 50%,#ec4899 100%);padding:24px 32px;color:white;">
       <div style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;opacity:0.9;">Nouveau lead diagnostic</div>
-      <div style="font-size:22px;font-weight:bold;margin-top:4px;">${lead.company_name ?? lead.full_name ?? lead.email}</div>
+      <div style="font-size:22px;font-weight:bold;margin-top:4px;">${headerTitle}</div>
     </div>
     <table style="width:100%;border-collapse:collapse;">
       ${row('Type de projet', projectLabel)}
@@ -79,7 +88,7 @@ function buildEmailHtml(lead: Lead): string {
     </table>
     <div style="padding:24px 32px;text-align:center;background:#f9fafb;border-top:1px solid #e5e7eb;">
       <a href="${CRM_BASE_URL}/leads-v3" style="display:inline-block;background:linear-gradient(135deg,#0ea5e9,#8b5cf6);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Voir le lead dans le CRM →</a>
-      <div style="margin-top:16px;font-size:12px;color:#9ca3af;">ID: ${lead.id}</div>
+      <div style="margin-top:16px;font-size:12px;color:#9ca3af;">ID: ${leadIdSafe}</div>
     </div>
   </div>
 </body></html>`;
