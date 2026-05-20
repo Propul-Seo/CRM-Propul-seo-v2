@@ -2,7 +2,17 @@
 // Les `value` sont les énumérations stockées en DB (cf CHECK constraints
 // ou conventions Phase 1). Les `label` sont l'UI FR.
 
-export const QUALIF_TOTAL_STEPS = 7;
+// Total steps dépend du project_type — voir getTotalSteps()
+export const QUALIF_TOTAL_STEPS_SITE = 8;        // Step0 type + 7 steps site
+export const QUALIF_TOTAL_STEPS_ERP = 7;         // Step0 type + 4 steps ERP + budget + décideur (skip 1)
+export const QUALIF_TOTAL_STEPS_SITE_ERP = 12;   // Step0 + 7 site + 4 ERP - budget/décideur partagés
+export const QUALIF_TOTAL_STEPS = QUALIF_TOTAL_STEPS_SITE; // legacy fallback
+
+export const PROJECT_TYPES = [
+  { value: 'site',     label: 'Site web',          hint: 'Vitrine, e-commerce, réservation, blog…' },
+  { value: 'site_erp', label: 'Site web + ERP',    hint: 'J\'ai besoin des deux à la fois' },
+  { value: 'erp',      label: 'ERP / Outil métier', hint: 'Gestion interne : clients, stock, facturation, planning…' },
+] as const;
 
 export const SECTORS = [
   { value: 'ecommerce',                label: 'E-commerce' },
@@ -118,6 +128,12 @@ export const PREFERRED_CONTACTS = [
   { value: 'whatsapp',  label: 'Par WhatsApp' },
   { value: 'email',     label: 'Par email' },
 ] as const;
+
+// ERP enums déplacés dans ./constants.erp.ts (règle 200 lignes max).
+export {
+  ERP_CURRENT_SYSTEMS, ERP_DATA_VOLUMES, ERP_MODULES,
+  ERP_USERS_COUNT, ERP_SSO_TYPES, ERP_INTEGRATIONS,
+} from './constants.erp';
 
 // Sprint A.3.1 — l'ancienne clé localStorage (id de row, publique) est remplacée
 // par un draft_session_token UUID secret stocké en sessionStorage.

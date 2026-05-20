@@ -1,34 +1,30 @@
-# Session State — 2026-05-20 fin (Refonte qualif Phase 2 + migrations 240/241)
+# Session State — 2026-05-20 (Migration 242 + constants ERP — Bloc A partiel)
 
 ## Branch
 `feature/propulspace-phase-2-front` — exception multi-phases assumée (merge dans `main` fin Phase 2 après QA E2E validée).
 
 ## Completed This Session
-- ✅ **Cleanup palier 10** : retrait OnboardingBanner V1 + 5 pages DEV preview + dossier `welcome/dev/*` (26 fichiers).
-- ✅ **PortalShell auto-open WelcomeWizard** + context partagé (dette HIGH #2 fermée).
-- ✅ **Refonte questionnaire qualif `/diagnostic`** — DA Sky Aurora, apparition progressive (uniquement branches conditionnelles), 4 champs "Autre" éditables.
-- ✅ **Migration 240** — `has_existing_site` boolean→text (fix bug envoi 400) + 4 colonnes `*_other`.
-- ✅ **Migration 241** — `brand_guide_external_link text` (WeTransfer/Notion/Drive).
-- ✅ **P3 Réservation** — RESERVATION_TYPES (5 options) + conditional + recap (sans migration, colonne déjà en DB).
-- ✅ **P4 Charte souple** — formats élargis + champ Input URL externe + validation OR.
-- ✅ **Page ThankYou** — Variante A validée (CTA Réserver appel + Voir nos accompagnements `propulseo-site.com/nos-accompagnements`).
-- ✅ **Fixes UX/scroll** : overflow-x-hidden retiré du wrapper, bg gradient inline override, 5 placeholders neutralisés.
-- ✅ **2 code reviews** (round 1 + round 2 post-fixes) — 9 issues triées, 7 fixées, 2 différées documentées.
+- ✅ **URL Calendly** réelle dans ThankYouA.tsx (remplace placeholder `cal.com/propulseo/diagnostic`).
+- ✅ **Migration 242** appliquée en prod : `project_type` (site/site_erp/erp) + 10 colonnes ERP + view + RPC `qualif_update_draft` whitelist étendue.
+- ✅ **constants.erp.ts** (nouveau, 55 lignes) — 6 enums ERP : systèmes, volumes, modules, users, SSO, intégrations.
+- ✅ **constants.ts** modifié — ajout `PROJECT_TYPES` + 3 totaux dynamiques + re-export ERP_*.
+- ✅ **Décisions tranchées avec Lyes** : project_type 3 valeurs / questionnaire ERP complet (4 nouveaux steps) / pas de status `archived` (réutiliser `unqualified`) / hard delete projet avec confirmation (Session B) / notif équipe via Brevo email seulement (pas WhatsApp).
 
 ## Next Task
-**Discussion process post-envoi diagnostic** (à reprendre nouvelle session) :
-- Notification équipe Slack/email à chaque submitted_at ?
-- Branchement Brevo (email récap client + email équipe) — nécessite clé API
-- Conversion lead → projet CRM (manuel / auto / semi-auto avec quality_score)
-- URL placeholder `cal.com/propulseo/diagnostic` à remplacer par vrai lien
+**Reprendre le Bloc A** (questionnaire ERP — partie front) :
+1. Schema Zod : ajouter `step0Schema` + 4 schemas ERP dans `schema.ts`
+2. Step0 component (3 cards site/site_erp/erp) + 4 nouveaux step components ERP
+3. QualificationFlowPage routage conditionnel selon `project_type`
+4. ProgressBar dynamique (total = QUALIF_TOTAL_STEPS_SITE/ERP/SITE_ERP)
+5. RecapAccordion sections ERP
+6. Puis Bloc B (LeadsV3 colonne "Questionnaire complété" + routage Site/ERP)
 
 ## Blockers
 - Aucun blocker code/DB.
-- Edge function `questionnaire-send-emails` = stub (aucun email parti).
-- Pas de notif équipe en place — risque "rater un lead" si formulaire mis live.
+- Brevo : compte créé (sender `lyes.triki@propulseo-site.com` vérifié DKIM+DMARC). Clé API + 2 templates à fournir pour brancher l'edge function en Bloc D.
 
 ## Key Context
-- **2 migrations prod livrées** (240 + 241). View `qualification_leads_v2` + 2 RPC recréées.
-- **Branche** : exception multi-phases assumée, pas de merge avant fin Phase 2.
-- **Audit thématiques pertinentes** : toujours pas clarifié par Lyes (question ouverte).
-- **TODO inline** dans `ThankYouA.tsx` : URL cal.com à remplacer avant mise en prod.
+- **Code review session** : 2 issues, 0 fixe bloquant (1 faux positif styles inline pré-existants, 1 différé `autre_erp` orphelin dans CHECK SQL).
+- **Plan Session A** : Bloc A (questionnaire ERP) → B (LeadsV3 colonne+conversion) → C (archive) → D (Brevo) → E (review final). ~10h total, on a fait ~1.5h.
+- **Session B (autre jour)** : hard delete leads + projets avec confirmation typée.
+- **Parallélisme** : Option A validée — Lyes attend merge Phase 2 avant de paralléliser sur main.

@@ -44,9 +44,8 @@ export function ThankYouA() {
           Notre équipe l'examine en ce moment. Vous recevrez un retour personnalisé sous <span className="font-semibold text-stone-800">24h ouvrées</span>.
         </motion.p>
 
-        {/* TODO: remplacer l'URL placeholder par le vrai lien cal.com/Calendly Propul'SEO avant mise en prod */}
         <motion.a
-          href="https://cal.com/propulseo/diagnostic"
+          href="https://calendly.com/team-propulseo-site/30min"
           target="_blank"
           rel="noopener noreferrer"
           initial={{ opacity: 0, y: 10 }}

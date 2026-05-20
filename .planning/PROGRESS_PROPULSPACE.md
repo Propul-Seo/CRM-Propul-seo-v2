@@ -7,12 +7,12 @@
 
 ## 1. État global
 
-- **Sprint en cours** : Sprint B.2.5 — Refonte questionnaire qualif `/diagnostic` **livrée** (DA Sky Aurora + 4 "Autre" éditables + Réservation + Charte souple + ThankYou variante A).
-- **Tâche en cours** : Discussion process post-envoi (notif équipe, email récap, conversion lead→projet CRM).
-- **Phase produit** : Phase 2 (welcome wizard recadré + qualif refondue, branchements infra Stripe/DocuSeal/Brevo à faire par Lyes, QA E2E à dérouler).
+- **Sprint en cours** : **Sprint B.2.6 — Routage Site/ERP qualif + Lead→Projet conversion** (Bloc A partiel : migration 242 + constants ERP livrés).
+- **Tâche en cours** : Bloc A — questionnaire ERP front (schema Zod + Step0 + 4 steps ERP + routage conditionnel).
+- **Phase produit** : Phase 2 (welcome wizard recadré + qualif refondue + routage Site/ERP en cours, branchements infra Stripe/DocuSeal/Brevo à faire par Lyes, QA E2E à dérouler).
 - **Branche** : `feature/propulspace-phase-2-front` (exception multi-phases assumée, merge dans `main` fin Phase 2 après QA validée)
 - **Project Supabase** : ERP (`tbuqctfgjjxnevmsvucl`)
-- **Dernière mise à jour** : 2026-05-20 — Refonte qualif Phase 2 + migrations 240/241 livrées
+- **Dernière mise à jour** : 2026-05-20 — Migration 242 + constants ERP livrés (Bloc A partiel)
 
 ---
 
@@ -536,3 +536,66 @@ Headlines :
 - Pas de conversion automatique lead → projet CRM (`converted_to_project_id` reste NULL).
 - URL `cal.com/propulseo/diagnostic` dans ThankYouA = placeholder fictif, TODO inline ajouté.
 - "Audit + recherche thématique pertinente" (demande Lyes du 2026-05-19) jamais clarifié.
+
+---
+
+### ✅ Bloc A partiel — Migration 242 + constants ERP + URL Calendly (terminé 2026-05-20 PM)
+
+**Démarré** : 2026-05-20 (après-midi)
+**Terminé** : 2026-05-20 (avant atteinte 50% contexte, save préventif)
+**Périmètre** : démarrer le routage Site/Site+ERP/ERP du questionnaire de qualification. Côté DB livré. Côté front : constants seulement (schema + composants reportés à prochaine session).
+
+**Décisions tranchées avec Lyes en début de session** :
+- **Q1 — Notification équipe post-submit** : email Brevo vers `team@propulseo-site.com` (pas de WhatsApp / CallMeBot finalement, simplification).
+- **Q2 — Brevo** : compte créé par Lyes, sender `lyes.triki@propulseo-site.com` vérifié DKIM+DMARC. Clé API + templates à fournir avant Bloc D.
+- **Q3 — Conversion lead→projet** : approche semi-auto avec colonne dédiée "Questionnaire complété" dans LeadsV3 Kanban (tout à gauche, onglet selon project_type). Bouton "Convertir en projet" → crée projet + active portail en 1 clic.
+- **Q4 — Suppression** : hard delete avec confirmation (pour virer les projets fakes). Reporté à Session B.
+- **Q5 — Parallélisme** : Option A — Lyes attend merge Phase 2 avant de paralléliser sur main.
+- **Q6 — ERP scope** : projets ERP stratégiques, on fait le questionnaire complet avec branche dédiée (Option A). Pas juste un tag de routage.
+- **Q7 — Status archive** : pas de nouveau status `archived`, on réutilise `unqualified` existant.
+
+**Livré DB** :
+- **Migration 242** appliquée en prod (`propulspace_242_qualif_project_type_and_erp`) :
+  - `project_type text NOT NULL DEFAULT 'site'` CHECK in (site/site_erp/erp). Backfill : 4 leads existants → 'site'.
+  - 10 colonnes ERP nullable : `erp_current_system` (excel/odoo/sage/pennylane/notion/papier/aucun/autre_erp/autre), `erp_current_system_other`, `erp_data_volume` (<1000/1000_10000/>10000/je_sais_pas), `erp_modules text[]`, `erp_modules_other`, `erp_users_count` (<5/5_20/20_50/>50), `erp_mobile_required boolean`, `erp_sso_type` (google/microsoft/email_password/none), `erp_integrations text[]`, `erp_integrations_other`.
+  - View `public.qualification_leads_v2` recréée avec 11 nouvelles colonnes + REVOKE anon + GRANT authenticated/service_role.
+  - RPC `propulspace.qualif_update_draft` recréée — whitelist étendue à `project_type` + 10 colonnes ERP (avec gestion `boolean` et `text[]` via jsonb).
+
+**Livré code** :
+- `src/modules/EspaceClient/qualification/constants.ts` (150 lignes) :
+  - Constante `PROJECT_TYPES` (3 valeurs : site/site_erp/erp avec label + hint FR).
+  - 3 totaux dynamiques : `QUALIF_TOTAL_STEPS_SITE=8`, `QUALIF_TOTAL_STEPS_ERP=7`, `QUALIF_TOTAL_STEPS_SITE_ERP=12`.
+  - Re-export des 6 enums ERP depuis `./constants.erp`.
+- `src/modules/EspaceClient/qualification/constants.erp.ts` (nouveau, 55 lignes) — split anti-200-lignes :
+  - `ERP_CURRENT_SYSTEMS` (8 options), `ERP_DATA_VOLUMES` (4), `ERP_MODULES` (9 multi-select), `ERP_USERS_COUNT` (4), `ERP_SSO_TYPES` (4), `ERP_INTEGRATIONS` (6 multi-select).
+- `src/modules/EspaceClient/qualification/thankyou/ThankYouA.tsx` — URL `cal.com/propulseo/diagnostic` (placeholder) remplacée par `calendly.com/team-propulseo-site/30min` (réel). Commentaire TODO inline retiré.
+
+**Code review** (1 round, 2 findings) :
+- MEDIUM — styles inline ThankYouA.tsx (lignes 8, 13, 15, 54) : **FAUX POSITIF** — dette pré-existante intentionnelle (override bg dark theme du portal-theme), hors scope cette session.
+- LOW — `'autre_erp'` orphelin dans CHECK SQL (présent mais pas dans constants TS) : **DIFFÉRÉ** — non bloquant, `'autre'` couvre le cas, à nettoyer dans une mini-migration plus tard si on rebouge ces CHECKs.
+
+**Hors-périmètre (reporté prochaine session)** :
+- Schema Zod : step0 + 4 schemas ERP
+- Step0 component (3 cards site/site_erp/erp)
+- 4 step components ERP (system / modules / users / integrations)
+- QualificationFlowPage : routage conditionnel selon project_type
+- ProgressBar dynamique
+- RecapAccordion : sections ERP-specific
+
+**Hors-périmètre (Bloc B)** : Colonne LeadsV3 "Questionnaire complété" + routage Site/ERP + LeadCardV3 + panel détails qualif.
+
+**Hors-périmètre (Bloc C)** : Conversion 1 clic + activation portail + bouton archiver lead (status `unqualified` + raison dans `notes`).
+
+**Hors-périmètre (Bloc D)** : Edge function Brevo email équipe (attend clé API + 2 templates de Lyes).
+
+**Hors-périmètre (Session B autre jour)** : Hard delete leads + projets avec confirmation typée + cascade documents/factures/portail/signatures/contacts.
+
+**Validation** :
+- Migration 242 : `apply_migration` MCP success ; verif `SELECT project_type FROM qualification_leads GROUP BY project_type` → 4 leads avec 'site'.
+- Advisors : 1 warning `security_definer_view` sur `qualification_leads_v2` = dette pré-existante (la vue était déjà SECURITY DEFINER avant 242). Pas notre régression.
+- Pas de validation runtime (front pas encore consommateur des constants).
+
+**Risques résiduels** :
+- View `qualification_leads_v2` toujours en SECURITY DEFINER (warning Supabase advisor). Aligner sur le pattern `propulspace_onboarding_v2` (security_invoker=true) → nécessite une policy RLS admin SELECT sur la table. À traiter en backlog sécurité.
+- `'autre_erp'` orphelin dans CHECK SQL (différé code review).
+- Notif équipe post-submit toujours absente (edge function reste stub). Risque "rater un lead" si formulaire mis live.
