@@ -225,6 +225,7 @@ export function LeadsV3Page() {
         lead={selectedQualif}
         open={selectedQualif !== null}
         onOpenChange={(open) => { if (!open) setSelectedQualif(null) }}
+        onActionComplete={() => qualif.refetch()}
       />
     </div>
   )
