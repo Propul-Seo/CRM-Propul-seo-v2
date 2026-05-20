@@ -86,15 +86,12 @@ export function useConvertQualifLead() {
       }
 
       // Activation portail (best-effort)
+      // Contrat edge function admin-portal-invite : { projectId, email } (camelCase strict).
       let portalInvited = false
       if (activatePortal) {
         try {
           const { error: inviteErr } = await supabase.functions.invoke('admin-portal-invite', {
-            body: { project_id: projectId, email: lead.email, create_contact: true,
-              contact_first_name: lead.full_name?.split(' ')[0] ?? null,
-              contact_last_name: lead.full_name?.split(' ').slice(1).join(' ') || null,
-              contact_phone: lead.phone ?? null,
-            },
+            body: { projectId, email: lead.email },
           })
           portalInvited = !inviteErr
           if (inviteErr && import.meta.env.DEV) console.error('[useConvertQualifLead] portal invite failed:', inviteErr)
