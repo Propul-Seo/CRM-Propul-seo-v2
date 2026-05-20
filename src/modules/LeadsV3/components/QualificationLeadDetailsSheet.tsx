@@ -77,18 +77,18 @@ export function QualificationLeadDetailsSheet({ lead, open, onOpenChange, onActi
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="right" className="flex w-full flex-col overflow-hidden bg-white text-stone-900 sm:max-w-xl">
+        <SheetContent side="right" className="flex w-full flex-col overflow-hidden border-l border-[#1f1830] bg-[#0a0814] text-[#ede9fe] sm:max-w-xl">
           <SheetHeader className="space-y-2 pb-4 text-left">
-            <div className="inline-flex w-fit items-center gap-1.5 rounded-full bg-sky-100 px-2.5 py-1 text-[11px] font-semibold text-sky-700">
+            <div className="inline-flex w-fit items-center gap-1.5 rounded-full bg-sky-500/15 px-2.5 py-1 text-[11px] font-semibold text-sky-300">
               📋 Questionnaire complété
             </div>
-            <SheetTitle className="text-[20px] font-bold text-stone-900">
+            <SheetTitle className="text-[20px] font-bold text-[#ede9fe]">
               {lead.full_name ?? lead.email}
             </SheetTitle>
-            <SheetDescription className="text-[13px] text-stone-500">
+            <SheetDescription className="text-[13px] text-[#9ca3af]">
               {lead.company_name ?? 'Entreprise non renseignée'}
             </SheetDescription>
-            <div className="flex flex-wrap items-center gap-3 pt-2 text-[12px] text-stone-600">
+            <div className="flex flex-wrap items-center gap-3 pt-2 text-[12px] text-[#9ca3af]">
               <span className="inline-flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" />{lead.email}</span>
               {lead.phone && <span className="inline-flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" />{lead.phone}</span>}
               <span className="inline-flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />Soumis le {formatDate(lead.submitted_at)}</span>
@@ -99,14 +99,14 @@ export function QualificationLeadDetailsSheet({ lead, open, onOpenChange, onActi
             <RecapAccordion draft={draft} />
           </div>
 
-          <div className="border-t border-stone-200 bg-stone-50 px-1 py-4">
+          <div className="border-t border-[#1f1830] bg-[#0f0a1f] px-1 py-4">
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button onClick={() => setConfirmConvert(true)} disabled={converting || archiving}
                 className="h-11 flex-1 gap-1.5 bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 font-semibold text-white shadow-md hover:shadow-lg">
                 {converting ? <><Loader2 className="h-4 w-4 animate-spin" />Conversion…</> : <>Convertir en projet<ArrowRight className="h-4 w-4" /></>}
               </Button>
               <Button onClick={() => setConfirmArchive(true)} disabled={converting || archiving}
-                variant="outline" className="h-11 gap-1.5 border-stone-300 text-stone-700 hover:bg-stone-100">
+                variant="outline" className="h-11 gap-1.5 border-[#2a1f3d] bg-transparent text-[#ede9fe] hover:bg-[#1f1830]">
                 <Archive className="h-4 w-4" />Archiver
               </Button>
             </div>
