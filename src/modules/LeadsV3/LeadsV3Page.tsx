@@ -10,22 +10,9 @@ import { useLeadsV3SiteWeb } from './hooks/useLeadsV3SiteWeb'
 import { useLeadsV3Erp } from './hooks/useLeadsV3Erp'
 import { useLeadsV3Qualification, type QualificationLead } from './hooks/useLeadsV3Qualification'
 import { useConvertLeadToProject } from './hooks/useConvertLeadToProject'
-import { siteWebToCard, erpToCard, qualifToCard, matchesQuery, sortSiteWebLeads, sortErpLeads } from './utils/leadAdapters'
+import { useLeadsV3Cards } from './hooks/useLeadsV3Cards'
 import type { LeadCardData } from './components/LeadCardV3'
 import { QualificationLeadDetailsSheet } from './components/QualificationLeadDetailsSheet'
-import {
-  SITE_WEB_STATUS_ORDER,
-  SITE_WEB_STATUS_LABELS,
-  SITE_WEB_STATUS_COLORS,
-  ERP_STATUS_ORDER,
-  ERP_STATUS_LABELS,
-  ERP_STATUS_COLORS,
-  isSiteWebStatus,
-  isErpStatus,
-  normalizeErpStatus,
-  type SiteWebStatus,
-  type ErpStatus,
-} from './utils/leadStatusMapping'
 
 const TAB_KEY = 'propulseo:leads-v3:tab'
 
@@ -71,46 +58,11 @@ export function LeadsV3Page() {
   const loading = (tab === 'site_web' ? sw.loading : erp.loading) || qualif.loading
   const error = tab === 'site_web' ? sw.error : erp.error
 
-  // Set d'IDs qualif pour distinguer ces leads (onClick = sheet, pas navigate)
   const qualifIdSet = useMemo(() => new Set(qualif.leads.map(l => l.id)), [qualif.leads])
 
-  // Construction des cards + statusMap selon l'onglet (avec merge qualif en tête)
-  const { cards, leadStatus, columns, onStatusChange } = useMemo(() => {
-    // Cards qualif communes aux 2 onglets — status virtuel 'questionnaire_complete'
-    const qualifCards = qualif.leads.map(qualifToCard).filter(c => matchesQuery(c, debouncedSearch))
-    const qualifStatusMap: Record<string, string> = {}
-    for (const q of qualif.leads) qualifStatusMap[q.id] = 'questionnaire_complete'
-
-    if (tab === 'site_web') {
-      const filtered = sortSiteWebLeads(sw.leads.filter(l => !filterUserId || l.assigned_to === filterUserId))
-      const baseCards = filtered.map(siteWebToCard).filter(c => matchesQuery(c, debouncedSearch))
-      const statusMap: Record<string, string> = { ...qualifStatusMap }
-      for (const l of filtered) statusMap[l.id] = l.normalized_status
-      const cols = SITE_WEB_STATUS_ORDER.map(s => ({
-        id: s, label: SITE_WEB_STATUS_LABELS[s], color: SITE_WEB_STATUS_COLORS[s],
-      }))
-      const updater = async (id: string, newStatus: string) => {
-        if (!isSiteWebStatus(newStatus)) return
-        // Pas de transition d'un lead qualif vers les colonnes contacts via drag-drop
-        if (qualifIdSet.has(id)) return
-        await sw.updateStatus(id, newStatus as SiteWebStatus)
-      }
-      return { cards: [...qualifCards, ...baseCards], leadStatus: statusMap, columns: cols, onStatusChange: updater }
-    }
-    const filtered = sortErpLeads(erp.leads.filter(l => !filterUserId || l.assignee_id === filterUserId))
-    const baseCards = filtered.map(erpToCard).filter(c => matchesQuery(c, debouncedSearch))
-    const statusMap: Record<string, string> = { ...qualifStatusMap }
-    for (const l of filtered) statusMap[l.id] = normalizeErpStatus(l.status)
-    const cols = ERP_STATUS_ORDER.map(s => ({
-      id: s, label: ERP_STATUS_LABELS[s], color: ERP_STATUS_COLORS[s],
-    }))
-    const updater = async (id: string, newStatus: string) => {
-      if (!isErpStatus(newStatus)) return
-      if (qualifIdSet.has(id)) return
-      await erp.updateStatus(id, newStatus as ErpStatus)
-    }
-    return { cards: [...qualifCards, ...baseCards], leadStatus: statusMap, columns: cols, onStatusChange: updater }
-  }, [tab, sw, erp, qualif.leads, qualifIdSet, filterUserId, debouncedSearch])
+  const { cards, leadStatus, columns, onStatusChange } = useLeadsV3Cards({
+    tab, sw, erp, qualifLeads: qualif.leads, qualifIdSet, filterUserId, debouncedSearch,
+  })
 
   const handleLeadClick = (id: string) => {
     const qualifLead = qualif.leads.find(l => l.id === id)
