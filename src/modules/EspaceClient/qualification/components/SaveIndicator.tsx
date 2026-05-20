@@ -1,19 +1,19 @@
 import { Check, Loader2, Clock } from 'lucide-react';
-import { QUALIF_TOTAL_STEPS } from '../constants';
+import { QUALIF_TOTAL_STEPS_SITE } from '../constants';
 
 interface SaveIndicatorProps {
   saving: boolean;
   savedJustNow: boolean;
   currentStep: number;
+  totalSteps?: number;
 }
 
-// Estimation simple : ~1 min par étape restante. Pas un cron-meter mais
-// rassure le prospect sur la durée totale.
-function remainingMinutes(currentStep: number): number {
-  return Math.max(1, QUALIF_TOTAL_STEPS - currentStep + 1);
+// Estimation simple : ~1 min par étape restante.
+function remainingMinutes(currentStep: number, total: number): number {
+  return Math.max(1, total - currentStep + 1);
 }
 
-export function SaveIndicator({ saving, savedJustNow, currentStep }: SaveIndicatorProps) {
+export function SaveIndicator({ saving, savedJustNow, currentStep, totalSteps = QUALIF_TOTAL_STEPS_SITE }: SaveIndicatorProps) {
   return (
     <div className="flex items-center gap-3 text-[11.5px] text-stone-500">
       <span className="inline-flex items-center gap-1.5">
@@ -33,7 +33,7 @@ export function SaveIndicator({ saving, savedJustNow, currentStep }: SaveIndicat
       </span>
       <span className="inline-flex items-center gap-1.5">
         <Clock className="h-3 w-3" />
-        ≈ {remainingMinutes(currentStep)} min restantes
+        ≈ {remainingMinutes(currentStep, totalSteps)} min restantes
       </span>
     </div>
   );

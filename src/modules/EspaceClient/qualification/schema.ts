@@ -3,8 +3,15 @@ import {
   SECTORS, EXISTING_SITE_OPTIONS, MONTHLY_TRAFFIC, MAIN_PROBLEMS,
   MAIN_GOALS, TARGET_AUDIENCES, DESIRED_FEATURES, ECOMMERCE_PLATFORMS,
   PRODUCT_COUNT_RANGES, BRAND_STATUS, BUDGET_RANGES, DEADLINES,
-  DECISION_MAKERS, PREFERRED_CONTACTS, RESERVATION_TYPES,
+  DECISION_MAKERS, PREFERRED_CONTACTS, RESERVATION_TYPES, PROJECT_TYPES,
 } from './constants';
+import {
+  stepErp1Schema, stepErp2Schema, stepErp3Schema, stepErp4Schema,
+  type StepErp1Data, type StepErp2Data, type StepErp3Data, type StepErp4Data,
+} from './schema.erp';
+
+export { stepErp1Schema, stepErp2Schema, stepErp3Schema, stepErp4Schema };
+export type { StepErp1Data, StepErp2Data, StepErp3Data, StepErp4Data };
 
 const values = <T extends ReadonlyArray<{ value: string }>>(arr: T): [string, ...string[]] => {
   const vals = arr.map(o => o.value);
@@ -13,6 +20,13 @@ const values = <T extends ReadonlyArray<{ value: string }>>(arr: T): [string, ..
 
 // Validation téléphone : 10+ chiffres, accepte espaces/points/tirets/+
 const phoneRe = /^[+\d][\d\s.\-()]{8,}$/;
+
+// Step0 — Type de besoin (routage Site / Site+ERP / ERP)
+export const step0Schema = z.object({
+  project_type: z.enum(values(PROJECT_TYPES), { errorMap: () => ({ message: 'Sélectionnez un type de projet' }) }),
+});
+
+export type Step0Data = z.infer<typeof step0Schema>;
 
 export const step1Schema = z
   .object({
@@ -128,9 +142,28 @@ export const step7Schema = z.object({
   preferred_contact_method:  z.enum(values(PREFERRED_CONTACTS), { errorMap: () => ({ message: 'Choisissez un canal' }) }),
 });
 
+// Legacy array (compat) — équivalent à STEP_SCHEMAS_SITE sans le step0
 export const STEP_SCHEMAS = [
   step1Schema, step2Schema, step3Schema, step4Schema,
   step5Schema, step6Schema, step7Schema,
+] as const;
+
+// Arrays par project_type — incluent step0 en tête
+export const STEP_SCHEMAS_SITE = [
+  step0Schema, step1Schema, step2Schema, step3Schema, step4Schema,
+  step5Schema, step6Schema, step7Schema,
+] as const;
+
+export const STEP_SCHEMAS_ERP = [
+  step0Schema, step1Schema,
+  stepErp1Schema, stepErp2Schema, stepErp3Schema, stepErp4Schema,
+  step6Schema, step7Schema,
+] as const;
+
+export const STEP_SCHEMAS_SITE_ERP = [
+  step0Schema, step1Schema, step2Schema, step3Schema, step4Schema, step5Schema,
+  stepErp1Schema, stepErp2Schema, stepErp3Schema, stepErp4Schema,
+  step6Schema, step7Schema,
 ] as const;
 
 export type Step1Data = z.infer<typeof step1Schema>;
@@ -142,7 +175,8 @@ export type Step6Data = z.infer<typeof step6Schema>;
 export type Step7Data = z.infer<typeof step7Schema>;
 
 export type QualificationDraft = Partial<
-  Step1Data & Step2Data & Step3Data & Step4Data & Step5Data & Step6Data & Step7Data
+  Step0Data & Step1Data & Step2Data & Step3Data & Step4Data & Step5Data & Step6Data & Step7Data &
+  StepErp1Data & StepErp2Data & StepErp3Data & StepErp4Data
 > & {
   existing_site_screenshots?: string[];
 };

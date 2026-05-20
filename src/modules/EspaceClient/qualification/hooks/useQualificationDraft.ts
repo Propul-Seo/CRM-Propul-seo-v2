@@ -52,6 +52,7 @@ function clearToken(): void {
 // font pas partie de la whitelist serveur. Robuste si le composant envoie un
 // objet plus large que prévu.
 const UPDATE_WHITELIST: ReadonlyArray<keyof QualificationDraft | 'status' | 'draft_progress_percent'> = [
+  'project_type',
   'full_name', 'email', 'phone', 'company_name', 'business_sector', 'business_sector_custom',
   'has_existing_site', 'existing_site_url', 'monthly_traffic',
   'main_problems', 'main_problems_other', 'has_domain_only',
@@ -62,6 +63,12 @@ const UPDATE_WHITELIST: ReadonlyArray<keyof QualificationDraft | 'status' | 'dra
   'has_visual_identity', 'wants_identity_creation', 'logo_file_url', 'brand_guide_url',
   'brand_guide_external_link',
   'existing_site_screenshots',
+  // ERP (migration 242)
+  'erp_current_system', 'erp_current_system_other', 'erp_data_volume',
+  'erp_modules', 'erp_modules_other',
+  'erp_users_count', 'erp_mobile_required', 'erp_sso_type',
+  'erp_integrations', 'erp_integrations_other',
+  // Common (suite)
   'budget_range', 'desired_timeline', 'timeline_reason',
   'is_decision_maker', 'preferred_contact_method', 'final_cta_choice',
   'draft_progress_percent', 'status',

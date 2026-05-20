@@ -1,30 +1,30 @@
 import { motion } from 'framer-motion';
-import { QUALIF_TOTAL_STEPS } from '../constants';
+import { QUALIF_TOTAL_STEPS_SITE } from '../constants';
 
 interface ProgressBarProps {
-  currentStep: number; // 1..7
+  currentStep: number;     // 1..totalSteps
+  totalSteps?: number;     // dynamique selon project_type (default 8 = site)
 }
 
-// DA Sky Aurora : 7 dots gradient sky→violet→pink pour l'étape active,
-// violet plein pour les étapes passées, blanc semi-transparent pour à venir.
-// Calé visuellement sur le WelcomeWizard (palier 9/10).
-export function ProgressBar({ currentStep }: ProgressBarProps) {
+// DA Sky Aurora : dots gradient sky→violet→pink pour l'étape active,
+// violet plein pour les passées, fond stone pour à venir.
+export function ProgressBar({ currentStep, totalSteps = QUALIF_TOTAL_STEPS_SITE }: ProgressBarProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-baseline justify-between text-[12.5px]">
         <span className="font-semibold uppercase tracking-wider text-stone-500">
-          Étape {currentStep} sur {QUALIF_TOTAL_STEPS}
+          Étape {currentStep} sur {totalSteps}
         </span>
       </div>
       <div
         role="progressbar"
         aria-valuemin={1}
-        aria-valuemax={QUALIF_TOTAL_STEPS}
+        aria-valuemax={totalSteps}
         aria-valuenow={currentStep}
         aria-label="Progression du questionnaire"
         className="flex items-center gap-1.5"
       >
-        {Array.from({ length: QUALIF_TOTAL_STEPS }, (_, i) => i + 1).map(stepNum => {
+        {Array.from({ length: totalSteps }, (_, i) => i + 1).map(stepNum => {
           const isActive = stepNum === currentStep;
           const isPast = stepNum < currentStep;
           return (
