@@ -15,11 +15,11 @@ function remainingMinutes(currentStep: number): number {
 
 export function SaveIndicator({ saving, savedJustNow, currentStep }: SaveIndicatorProps) {
   return (
-    <div className="flex items-center gap-3 text-[11.5px] text-[var(--ps-fg-muted)]">
+    <div className="flex items-center gap-3 text-[11.5px] text-stone-500">
       <span className="inline-flex items-center gap-1.5">
         {saving ? (
           <>
-            <Loader2 className="h-3 w-3 animate-spin" />
+            <Loader2 className="h-3 w-3 animate-spin text-sky-600" />
             Sauvegarde…
           </>
         ) : savedJustNow ? (

@@ -1,38 +1,19 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 interface ConditionalBranchProps {
   show: boolean;
   children: ReactNode;
-  delayMs?: number;
 }
 
-// Wrapper fade-in/fade-out pour les branches conditionnelles. 150ms de
-// délai par défaut (le temps de "respirer" après le clic), 300ms de
-// transition opacity+translate.
-export function ConditionalBranch({ show, children, delayMs = 150 }: ConditionalBranchProps) {
-  const [mounted, setMounted] = useState(show);
-  const [visible, setVisible] = useState(show);
-
-  useEffect(() => {
-    if (show) {
-      setMounted(true);
-      const t = setTimeout(() => setVisible(true), delayMs);
-      return () => clearTimeout(t);
-    }
-    setVisible(false);
-    const t = setTimeout(() => setMounted(false), 300);
-    return () => clearTimeout(t);
-  }, [show, delayMs]);
-
-  if (!mounted) return null;
-  return (
-    <div
-      aria-hidden={!visible}
-      className={`transition-all duration-300 [transition-timing-function:var(--ps-ease)] ${
-        visible ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'
-      }`}
-    >
-      {children}
-    </div>
-  );
+// Version ultra simple : mount/unmount instantané + classe CSS ps-fade-in
+// pour un fade-in léger à l'apparition. Pas de timer, pas de state, pas de
+// risque d'animation bloquée. Les versions précédentes (Framer Motion puis
+// CSS avec setTimeout) ont buggé chez l'utilisateur — root cause non identifié
+// mais ce pattern simple élimine toute la surface de bug possible.
+//
+// Trade-off : pas d'animation d'exit (unmount instantané). Acceptable pour
+// notre cas car les branches conditionnelles métier sont des switch sans retour.
+export function ConditionalBranch({ show, children }: ConditionalBranchProps) {
+  if (!show) return null;
+  return <div className="ps-fade-in">{children}</div>;
 }

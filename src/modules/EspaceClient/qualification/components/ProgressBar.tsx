@@ -1,35 +1,53 @@
-import type { CSSProperties } from 'react';
+import { motion } from 'framer-motion';
 import { QUALIF_TOTAL_STEPS } from '../constants';
 
 interface ProgressBarProps {
   currentStep: number; // 1..7
 }
 
-// Largeur dynamique passée par CSS custom property `--ps-bar-w` (interprétée
-// dans portal-theme.css via la classe `.ps-progress-fill`). Évite le style
-// inline (règle projet "pas d'inline styles").
-type BarStyle = CSSProperties & { '--ps-bar-w': string };
-
+// DA Sky Aurora : 7 dots gradient sky→violet→pink pour l'étape active,
+// violet plein pour les étapes passées, blanc semi-transparent pour à venir.
+// Calé visuellement sur le WelcomeWizard (palier 9/10).
 export function ProgressBar({ currentStep }: ProgressBarProps) {
-  const percent = Math.round((currentStep / QUALIF_TOTAL_STEPS) * 100);
   return (
     <div className="space-y-2">
       <div className="flex items-baseline justify-between text-[12.5px]">
-        <span className="ps-eyebrow ps-eyebrow-muted">Étape {currentStep} sur {QUALIF_TOTAL_STEPS}</span>
-        <span className="ps-num font-semibold text-[var(--ps-primary-text)]">{percent}%</span>
+        <span className="font-semibold uppercase tracking-wider text-stone-500">
+          Étape {currentStep} sur {QUALIF_TOTAL_STEPS}
+        </span>
       </div>
       <div
         role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={percent}
+        aria-valuemin={1}
+        aria-valuemax={QUALIF_TOTAL_STEPS}
+        aria-valuenow={currentStep}
         aria-label="Progression du questionnaire"
-        className="h-1.5 overflow-hidden rounded-full bg-[var(--ps-bg-subtle)]"
+        className="flex items-center gap-1.5"
       >
-        <div
-          className="ps-progress-fill ps-brand-gradient h-full rounded-full transition-all duration-500 [transition-timing-function:var(--ps-ease-out)]"
-          style={{ '--ps-bar-w': `${percent}%` } as BarStyle}
-        />
+        {Array.from({ length: QUALIF_TOTAL_STEPS }, (_, i) => i + 1).map(stepNum => {
+          const isActive = stepNum === currentStep;
+          const isPast = stepNum < currentStep;
+          return (
+            <div
+              key={stepNum}
+              aria-hidden
+              className="relative h-[5px] flex-1 overflow-hidden rounded-full bg-stone-200/60"
+            >
+              <motion.div
+                className={
+                  isActive
+                    ? 'absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 shadow-sm shadow-violet-500/30'
+                    : isPast
+                      ? 'absolute inset-y-0 left-0 rounded-full bg-violet-500'
+                      : 'absolute inset-y-0 left-0 rounded-full'
+                }
+                initial={false}
+                animate={{ width: isActive || isPast ? '100%' : '0%' }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

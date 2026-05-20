@@ -1,37 +1,34 @@
-# Session State — 2026-05-19 fin (WelcomeWizard v2 + DA Sky Aurora livrés)
+# Session State — 2026-05-20 fin (Refonte qualif Phase 2 + migrations 240/241)
 
 ## Branch
 `feature/propulspace-phase-2-front` — exception multi-phases assumée (merge dans `main` fin Phase 2 après QA E2E validée).
 
 ## Completed This Session
-- ✅ **Migration 230** — Welcome Wizard schema (11 colonnes welcome_* + 3 colonnes client_* + trigger SECURITY DEFINER + backfill + vue exposée).
-- ✅ **Migration 231** — Hotfix sécurité `security_invoker=true` sur la vue.
-- ✅ **Migration 232** — GRANT SELECT/INSERT/UPDATE authenticated (manquait depuis 220, bug latent révélé par 231).
-- ✅ **Migration 233** — Fix code review : trigger COALESCE → assignation directe.
-- ✅ **Hook useWelcomeWizard** + autosave debounce + fetch qualif + dismiss/complete.
-- ✅ **Shell WelcomeWizard** + 5 steps complets (Bienvenue / Coordonnées / Préférences / Tour / Done).
-- ✅ **DA Sky Aurora** appliquée sur les 5 étapes (gradient sky→lavande→peach + auroras diagonales + cards blanches + gradient text sky→violet→pink).
-- ✅ **Step 5 Done animation E** (orbes flottants).
-- ✅ **Palier 9 WelcomeBanner** (apparition après 3 dismissals).
-- ✅ **Toggle custom** Step 3 (fix Switch shadcn dark theme).
-- ✅ **5 pages DEV preview** pour arbitrer la DA (à retirer au cleanup).
-- ✅ Code review → fixes HIGH #1 + MEDIUM #3 appliqués, HIGH #2 + MEDIUM #4 différés et documentés.
+- ✅ **Cleanup palier 10** : retrait OnboardingBanner V1 + 5 pages DEV preview + dossier `welcome/dev/*` (26 fichiers).
+- ✅ **PortalShell auto-open WelcomeWizard** + context partagé (dette HIGH #2 fermée).
+- ✅ **Refonte questionnaire qualif `/diagnostic`** — DA Sky Aurora, apparition progressive (uniquement branches conditionnelles), 4 champs "Autre" éditables.
+- ✅ **Migration 240** — `has_existing_site` boolean→text (fix bug envoi 400) + 4 colonnes `*_other`.
+- ✅ **Migration 241** — `brand_guide_external_link text` (WeTransfer/Notion/Drive).
+- ✅ **P3 Réservation** — RESERVATION_TYPES (5 options) + conditional + recap (sans migration, colonne déjà en DB).
+- ✅ **P4 Charte souple** — formats élargis + champ Input URL externe + validation OR.
+- ✅ **Page ThankYou** — Variante A validée (CTA Réserver appel + Voir nos accompagnements `propulseo-site.com/nos-accompagnements`).
+- ✅ **Fixes UX/scroll** : overflow-x-hidden retiré du wrapper, bg gradient inline override, 5 placeholders neutralisés.
+- ✅ **2 code reviews** (round 1 + round 2 post-fixes) — 9 issues triées, 7 fixées, 2 différées documentées.
 
 ## Next Task
-Finaliser les **tests E2E du wizard** (parcours complet 1→5 + autosave + sync trigger + dismiss/reopen) + travailler sur la **refonte du questionnaire qualif** (brief à venir de Lyes).
-
-Avant ça, palier 10 — **PortalShell auto-open** au login (retire le bouton DEV + remplace par ouverture automatique si `shouldOpenAutomatically === true` et fixe la dette technique HIGH #2 via une instance unique du hook partagée Banner+Wizard).
+**Discussion process post-envoi diagnostic** (à reprendre nouvelle session) :
+- Notification équipe Slack/email à chaque submitted_at ?
+- Branchement Brevo (email récap client + email équipe) — nécessite clé API
+- Conversion lead → projet CRM (manuel / auto / semi-auto avec quality_score)
+- URL placeholder `cal.com/propulseo/diagnostic` à remplacer par vrai lien
 
 ## Blockers
 - Aucun blocker code/DB.
-- Décisions Stripe/DocuSeal/Brevo branchements live toujours en attente Lyes.
-- Brief refonte questionnaire qualif à recevoir de Lyes.
+- Edge function `questionnaire-send-emails` = stub (aucun email parti).
+- Pas de notif équipe en place — risque "rater un lead" si formulaire mis live.
 
 ## Key Context
-- **Direction artistique validée** : Sky Aurora (B3) + animation E (orbes flottants).
-- **Modale 820×380px** centrée, gradient sky/lavande/peach.
-- **Bouton DEV top-right** sur dashboard portail temporaire — à retirer palier 10.
-- **Dette technique HIGH #2** : `WelcomeBanner` instancie sa propre instance de `useWelcomeWizard`. Risque de désync avec celle du `WelcomeWizard` modal si les deux sont montés. À refondre palier 10 via context PortalShell.
-- **Dernière commit** : `e1de4e3` pushé sur `feature/propulspace-phase-2-front`.
-- **4 migrations appliquées** en prod cette session (230, 231, 232, 233).
-- **Pages DEV à supprimer** au cleanup : `/dev/welcome-variants`, `/dev/wizard-variants`, `/dev/aurora-light`, `/dev/sky-aurora`, `/dev/sky-step5-anims` + tous les fichiers `welcome/dev/*`.
+- **2 migrations prod livrées** (240 + 241). View `qualification_leads_v2` + 2 RPC recréées.
+- **Branche** : exception multi-phases assumée, pas de merge avant fin Phase 2.
+- **Audit thématiques pertinentes** : toujours pas clarifié par Lyes (question ouverte).
+- **TODO inline** dans `ThankYouA.tsx` : URL cal.com à remplacer avant mise en prod.

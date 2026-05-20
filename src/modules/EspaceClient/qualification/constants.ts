@@ -64,6 +64,14 @@ export const DESIRED_FEATURES = [
   { value: 'autre',          label: 'Autre' },
 ] as const;
 
+export const RESERVATION_TYPES = [
+  { value: 'restaurant',          label: 'Restaurant / table',    hint: 'Créneaux par service, nombre de couverts' },
+  { value: 'hebergement',         label: 'Hébergement / nuit',    hint: 'Nuitées, occupation chambres' },
+  { value: 'rdv_professionnel',   label: 'RDV professionnel',     hint: 'Créneaux de 30 min à 1h (type Calendly)' },
+  { value: 'evenement_billet',    label: 'Événement / billetterie', hint: 'Places, sessions, dates fixes' },
+  { value: 'autre',               label: 'Autre',                 hint: 'Précisez votre cas' },
+] as const;
+
 export const ECOMMERCE_PLATFORMS = [
   { value: 'shopify',     label: 'Shopify' },
   { value: 'woocommerce', label: 'WooCommerce' },
@@ -122,5 +130,5 @@ export const QUALIFICATION_STORAGE_FOLDER = 'qualification';
 export const FILE_UPLOAD_LIMITS = {
   screenshots: { maxFiles: 3, maxSizeMb: 25, accept: 'image/png,image/jpeg,image/webp' },
   logo:        { maxFiles: 1, maxSizeMb: 10, accept: 'image/svg+xml,image/png,image/jpeg,.ai' },
-  brandGuide:  { maxFiles: 1, maxSizeMb: 25, accept: 'application/pdf' },
+  brandGuide:  { maxFiles: 1, maxSizeMb: 25, accept: 'application/pdf,image/*,application/zip,application/postscript,.sketch,.fig,.ai' },
 } as const;

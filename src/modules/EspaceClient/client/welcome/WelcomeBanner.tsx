@@ -1,47 +1,27 @@
 import { Sparkles, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useWelcomeWizard, DISMISS_THRESHOLD } from './useWelcomeWizard';
+import { DISMISS_THRESHOLD } from './useWelcomeWizard';
+import { useWelcomeWizardCtx } from './WelcomeWizardContext';
 
 // Palier 9 — bannière dashboard "Reprendre l'onboarding".
 // Visible uniquement si le client a fermé la modale d'accueil 3 fois ou plus
-// SANS l'avoir complétée. Cette logique anti-frustration empêche d'ouvrir
-// automatiquement la modale au-delà du seuil mais propose un point d'entrée
-// non-bloquant pour ceux qui veulent y revenir.
-//
-// La bannière ne pilote pas l'ouverture elle-même : elle remonte un callback
-// au parent (DashboardPage / PortalShell au palier 10). Le state d'ouverture
-// vit hors de la bannière pour éviter le couplage avec le WelcomeWizard.
-//
-// ⚠️ DETTE TECHNIQUE (code review HIGH #2, différé palier 10) : ce composant
-// instancie sa propre instance de useWelcomeWizard, distincte de celle du
-// WelcomeWizard modal. Si les deux sont montés simultanément (cas DashboardPage
-// actuel), risque de désync sur welcome_dismissed_count et welcome_completed_at.
-// À refondre au palier 10 : faire descendre une instance unique depuis
-// PortalShell via context ou prop drilling.
+// SANS l'avoir complétée. Palier 10 : consomme l'instance unique du wizard via
+// WelcomeWizardContext (plus de duplication d'instance — dette HIGH #2 fermée).
 
-interface WelcomeBannerProps {
-  projectId: string;
-  onReopen: () => void;
-}
+export function WelcomeBanner() {
+  const { wizard, openWizard } = useWelcomeWizardCtx();
+  const { row, loading, isCompleted, currentStep } = wizard;
 
-export function WelcomeBanner({ projectId, onReopen }: WelcomeBannerProps) {
-  const { row, loading, isCompleted, currentStep } = useWelcomeWizard(projectId);
-
-  // Phase de chargement initial : on n'affiche rien (évite un flash de
-  // bannière qui disparaît juste après si le user a complété).
   if (loading) return null;
   if (isCompleted) return null;
 
   const dismissed = row?.welcome_dismissed_count ?? 0;
   if (dismissed < DISMISS_THRESHOLD) return null;
 
-  // À ce stade : user a fermé 3+ fois sans terminer. On affiche la bannière
-  // discrète avec un indicateur d'où il en était (current_step).
   const stepLabel = `Étape ${currentStep}/5`;
 
   return (
     <div className="ps-surface ps-lift relative flex items-center gap-4 overflow-hidden rounded-2xl p-4">
-      {/* Halo violet diffus côté gauche pour l'identité visuelle */}
       <div
         aria-hidden
         className="pointer-events-none absolute -left-8 top-1/2 h-32 w-32 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,var(--ps-primary-subtle),transparent_70%)]"
@@ -67,7 +47,7 @@ export function WelcomeBanner({ projectId, onReopen }: WelcomeBannerProps) {
 
       <Button
         size="sm"
-        onClick={onReopen}
+        onClick={openWizard}
         className="ps-brand-gradient ps-glow-violet-soft ps-tap relative h-9 gap-1.5 font-semibold text-white"
       >
         Reprendre

@@ -7,12 +7,12 @@
 
 ## 1. État global
 
-- **Sprint en cours** : Sprint B.2 recadré (WelcomeWizard v2) **livré côté code + DA Sky Aurora appliquée**. Restent paliers 10 (PortalShell auto-open) + cleanup + tests parcours.
-- **Tâche en cours** : Finaliser les tests E2E du welcome wizard + refonte du questionnaire qualif (à brief par Lyes).
-- **Phase produit** : Phase 2 (welcome wizard recadré + branchements infra Stripe/DocuSeal/Brevo à faire par Lyes, QA E2E à dérouler après PortalShell auto-open).
+- **Sprint en cours** : Sprint B.2.5 — Refonte questionnaire qualif `/diagnostic` **livrée** (DA Sky Aurora + 4 "Autre" éditables + Réservation + Charte souple + ThankYou variante A).
+- **Tâche en cours** : Discussion process post-envoi (notif équipe, email récap, conversion lead→projet CRM).
+- **Phase produit** : Phase 2 (welcome wizard recadré + qualif refondue, branchements infra Stripe/DocuSeal/Brevo à faire par Lyes, QA E2E à dérouler).
 - **Branche** : `feature/propulspace-phase-2-front` (exception multi-phases assumée, merge dans `main` fin Phase 2 après QA validée)
 - **Project Supabase** : ERP (`tbuqctfgjjxnevmsvucl`)
-- **Dernière mise à jour** : 2026-05-19 (commit e1de4e3 — DA Sky Aurora + palier 9 banner + fix code review)
+- **Dernière mise à jour** : 2026-05-20 — Refonte qualif Phase 2 + migrations 240/241 livrées
 
 ---
 
@@ -32,8 +32,9 @@
 - [x] **B.3** Stripe complet (2 edge fns + UI portail + migrations + runbook). Branchement compte Stripe à faire.
 - [x] **B.4** DocuSeal (2 edge fns + runbook). UI signatures portail déjà existante. Branchement compte DocuSeal à faire.
 - [x] **B.5** QA_E2E_RUNBOOK.md livré (18 tests). **À dérouler en prochaine session.**
+- [x] **B.2.5** Refonte questionnaire qualif `/diagnostic` — terminée 2026-05-20 (DA Sky Aurora + 4 "Autre" éditables + Réservation + Charte souple + ThankYou variante A). Migrations 240 + 241 appliquées en prod.
 
-→ ✋ Reste : décider verdict B.2 wizard (α/β) + ADR-004 multi-projets + faire QA E2E
+→ ✋ Reste : décider verdict B.2 wizard (α/β) + ADR-004 multi-projets + faire QA E2E + brancher Brevo + ajouter notif équipe post-submit
 
 → ✋ STOP validation Sprint B complet avant Sprint C
 
@@ -479,3 +480,59 @@ Headlines :
 - 0 erreur browser console.
 - Sync trigger validé en SQL : `welcome_first_name="Lyes"` → `client_first_name="Lyes"` dans projects_v2.
 - 3 fixes critiques en cours de polish (Switch noir, modale non centrée, bg-surface-3 dark theme) résolus en debug live avec systematic-debugging skill.
+
+---
+
+### ✅ Refonte questionnaire qualif `/diagnostic` + Cleanup palier 10 (terminé 2026-05-20)
+
+**Démarré** : 2026-05-19 (palier 10 PortalShell)
+**Terminé** : 2026-05-20
+**Périmètre** : Palier 10 PortalShell + cleanup V1 + refonte complète du questionnaire de qualification public.
+
+**Livré côté palier 10** :
+- PortalShell auto-open du WelcomeWizard via context partagé (`WelcomeWizardContext.tsx`). Dette HIGH #2 fermée : Banner et Wizard partagent maintenant une seule instance de `useWelcomeWizard`.
+- Retrait `OnboardingBanner` (V1) du Dashboard + retrait 5 routes `/dev/*` dans `App.tsx` + suppression `welcome/dev/` (26 fichiers).
+- Module Onboarding V1 (`useOnboarding` + `OnboardingWizard`) **conservé** pour la future page Configuration projet (PR 2).
+
+**Livré côté qualif** :
+- DA Sky Aurora cohérente avec WelcomeWizard (gradient sky→lavande→peach + auroras diagonales + cards radio/checkbox gradient soft + dots progress).
+- `ConditionalBranch` réécrit v3 (ultra simple `if (!show) return null` + `.ps-fade-in`). Les versions Framer Motion AnimatePresence et CSS+setTimeout avaient bug (animations bloquées à mi-parcours).
+- Apparition progressive **uniquement** sur branches conditionnelles métier (Step 2 site, Step 4 e-commerce + Réservation, Step 5 charte). Step 1 simplifié : 5 champs visibles d'office (suite retour Lyes).
+- 5 champs "Précisez" qui apparaissent quand "Autre" coché (secteur, problèmes, objectif, fonctionnalités, plateforme).
+- P3 Réservation : `RESERVATION_TYPES` (5 options) + apparition conditionnelle après e-commerce dans Step 4.
+- P4 Charte souple : formats élargis (pdf/png/jpg/ai/svg/zip/sketch/fig) + champ Input URL externe (WeTransfer/Notion/Drive).
+- Page ThankYou : variante A retenue (Confirmation premium silencieuse) avec 2 CTAs : Réserver appel cal.com (TODO URL réelle) + Voir nos accompagnements (`propulseo-site.com/nos-accompagnements`).
+- Scroll fix : `overflow-x-hidden` retiré du wrapper (forçait `overflow-y: auto` qui bloquait le scroll vertical) + gradient inline override le bg portal-theme.
+- 5 placeholders client neutralisés (Sophie/Précieuse/messika.com → fake génériques).
+- `console.error` du hook wrappés en `if (import.meta.env.DEV)` (3 occurrences, anti-fuite info prod).
+
+**Migrations appliquées en prod** :
+- **240 — `propulspace_240_qualif_other_fields_and_existing_site_text`** :
+  - `has_existing_site` boolean→text (fix bug envoi 400, RPC plantait sur cast `'oui'::boolean`)
+  - 4 colonnes `desired_features_other`, `main_problems_other`, `main_goal_other`, `ecommerce_platform_other` text NULL
+  - View `public.qualification_leads_v2` recréée
+  - RPC `propulspace.qualif_update_draft` + `qualif_get_draft` recréées
+- **241 — `propulspace_241_qualif_brand_guide_external_link`** :
+  - 1 colonne `brand_guide_external_link text NULL`
+  - View + RPCs recréées
+
+**Fichiers touchés** :
+- Module qualif : `QualificationFlowPage.tsx`, `ThankYouPage.tsx`, `_StepShell.tsx`, `Step1` à `Step7`, `conditionalRules.ts`, `constants.ts`, `schema.ts`, `useQualificationDraft.ts`, `RecapAccordion.tsx`, `RadioCard.tsx`, `CheckboxCard.tsx`, `ProgressBar.tsx`, `SaveIndicator.tsx`, `ConditionalBranch.tsx`
+- Nouveaux : `hooks/useProgressiveReveal.ts`, `thankyou/ThankYouA.tsx`
+- Welcome / portal : `WelcomeWizardContext.tsx`, `PortalShell.tsx`, `WelcomeWizard.tsx`, `WelcomeBanner.tsx`, `DashboardPage.tsx`, `App.tsx`
+- Supprimés : 26 fichiers `welcome/dev/*` + 2 variantes ThankYouB/C
+
+**Code reviews** :
+- Round 1 (post-refonte) : 6 issues, 4 fixées (HIGH 1+2 orphan cleanup *_other + RecapAccordion, MED 4 console.error DEV, LOW 5 maxLength). 2 différées (MED 3 validation conditionnelle cohérente, LOW 6 useProgressiveReveal pas un hook React).
+- Round 2 (post-P3/P4/ThankYou) : 5 issues + 1 faux positif, 3 fixées (HIGH 1 brand_guide_external_link orphan reset, MED 1 TODO URL cal.com, LOW 2 doublon RecapAccordion section 5). 2 différées (HIGH 2 path erreur charte, MED 2 ecommerceRevealed complexité).
+
+**Validation Lyes** :
+- Variante A ThankYou validée le 2026-05-20 + ajout CTA "Voir nos accompagnements" → `propulseo-site.com/nos-accompagnements`.
+- Refonte testée côté browser (parcours complet → diagnostic-envoye atteint).
+
+**Hors-périmètre / risques actifs** :
+- Edge function `questionnaire-send-emails` reste un STUB. Aucun email envoyé client ni équipe.
+- Pas de notification équipe (Slack/email) sur `submitted_at` → risque "rater un lead" si formulaire mis live.
+- Pas de conversion automatique lead → projet CRM (`converted_to_project_id` reste NULL).
+- URL `cal.com/propulseo/diagnostic` dans ThankYouA = placeholder fictif, TODO inline ajouté.
+- "Audit + recherche thématique pertinente" (demande Lyes du 2026-05-19) jamais clarifié.

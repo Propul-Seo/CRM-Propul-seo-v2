@@ -1,3 +1,5 @@
+import { Link as LinkIcon } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { RadioCard } from '../components/RadioCard';
 import { ConditionalBranch } from '../components/ConditionalBranch';
 import { FileUploadZone } from '../components/FileUploadZone';
@@ -33,7 +35,7 @@ export function Step5Brand({ draft, leadId, setField, errors }: Step5Props) {
       </FieldGroup>
 
       <ConditionalBranch show={conditionalRules.showLogoUpload(draft)}>
-        <div className="space-y-5 border-l-2 border-[var(--ps-primary-subtle)] pl-4">
+        <div className="space-y-5 border-l-2 border-violet-200 pl-4">
           <FieldGroup label="Logo" required error={errors.logo_file_url}>
             <FileUploadZone
               kind="logo"
@@ -48,7 +50,12 @@ export function Step5Brand({ draft, leadId, setField, errors }: Step5Props) {
           </FieldGroup>
 
           <ConditionalBranch show={conditionalRules.showBrandGuideUpload(draft)}>
-            <FieldGroup label="Charte graphique PDF" required error={errors.brand_guide_url}>
+            <FieldGroup
+              label="Charte graphique"
+              required
+              hint="PDF, image, ou archive ZIP · max 25 MB. Sinon, collez un lien ci-dessous."
+              error={errors.brand_guide_url}
+            >
               <FileUploadZone
                 kind="brand-guide"
                 leadId={leadId}
@@ -57,7 +64,26 @@ export function Step5Brand({ draft, leadId, setField, errors }: Step5Props) {
                 maxFiles={FILE_UPLOAD_LIMITS.brandGuide.maxFiles}
                 maxSizeMb={FILE_UPLOAD_LIMITS.brandGuide.maxSizeMb}
                 accept={FILE_UPLOAD_LIMITS.brandGuide.accept}
-                hint="PDF uniquement · max 25 MB"
+                hint="Formats acceptés : PDF, PNG, JPG, AI, SVG, ZIP, Sketch, Figma…"
+              />
+            </FieldGroup>
+
+            <FieldGroup
+              label={
+                <span className="inline-flex items-center gap-1.5">
+                  <LinkIcon className="h-3.5 w-3.5 text-violet-600" />
+                  Ou un lien externe vers votre charte
+                </span>
+              }
+              hint="WeTransfer, Notion, Drive, Dropbox… (en alternative à l'upload)"
+              error={errors.brand_guide_external_link}
+            >
+              <Input
+                type="url"
+                placeholder="https://wetransfer.com/downloads/..."
+                value={draft.brand_guide_external_link ?? ''}
+                onChange={e => setField('brand_guide_external_link', e.target.value)}
+                className="h-11"
               />
             </FieldGroup>
           </ConditionalBranch>

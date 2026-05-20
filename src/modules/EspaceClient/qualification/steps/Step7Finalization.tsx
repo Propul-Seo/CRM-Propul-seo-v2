@@ -1,7 +1,9 @@
 import { CalendarDays } from 'lucide-react';
 import { RadioCard } from '../components/RadioCard';
 import { RecapAccordion } from '../components/RecapAccordion';
+import { ConditionalBranch } from '../components/ConditionalBranch';
 import { DECISION_MAKERS, PREFERRED_CONTACTS } from '../constants';
+import { useProgressiveReveal } from '../hooks/useProgressiveReveal';
 import type { QualificationDraft } from '../schema';
 import { StepShell, FieldGroup } from './_StepShell';
 
@@ -11,7 +13,12 @@ interface Step7Props {
   errors: Record<string, string | undefined>;
 }
 
+// Apparition progressive : décideur → canal de contact → récap + RDV.
 export function Step7Finalization({ draft, setField, errors }: Step7Props) {
+  const decisionFilled = !!draft.is_decision_maker;
+  const contactFilled = !!draft.preferred_contact_method;
+  const revealed = useProgressiveReveal([decisionFilled, contactFilled]);
+
   return (
     <StepShell title="Pour finaliser" subtitle="Dernière ligne droite. Vérifiez votre récap ci-dessous.">
       <FieldGroup label="Qui prend la décision ?" required error={errors.is_decision_maker}>
@@ -29,39 +36,45 @@ export function Step7Finalization({ draft, setField, errors }: Step7Props) {
         </div>
       </FieldGroup>
 
-      <FieldGroup label="Comment vous recontacter ?" required error={errors.preferred_contact_method}>
-        <div className="grid gap-2.5 sm:grid-cols-3">
-          {PREFERRED_CONTACTS.map(o => (
-            <RadioCard
-              key={o.value}
-              name="preferred_contact_method"
-              value={o.value}
-              checked={draft.preferred_contact_method === o.value}
-              onChange={v => setField('preferred_contact_method', v as QualificationDraft['preferred_contact_method'])}
-              label={o.label}
-            />
-          ))}
+      <ConditionalBranch show={revealed >= 2}>
+        <FieldGroup label="Comment vous recontacter ?" required error={errors.preferred_contact_method}>
+          <div className="grid gap-2.5 sm:grid-cols-3">
+            {PREFERRED_CONTACTS.map(o => (
+              <RadioCard
+                key={o.value}
+                name="preferred_contact_method"
+                value={o.value}
+                checked={draft.preferred_contact_method === o.value}
+                onChange={v => setField('preferred_contact_method', v as QualificationDraft['preferred_contact_method'])}
+                label={o.label}
+              />
+            ))}
+          </div>
+        </FieldGroup>
+      </ConditionalBranch>
+
+      <ConditionalBranch show={revealed >= 3}>
+        <div>
+          <p className="mb-2 text-[11.5px] font-semibold uppercase tracking-wider text-stone-500">Récapitulatif</p>
+          <RecapAccordion draft={draft} />
         </div>
-      </FieldGroup>
+      </ConditionalBranch>
 
-      <div>
-        <p className="ps-eyebrow ps-eyebrow-muted mb-2">Récapitulatif</p>
-        <RecapAccordion draft={draft} />
-      </div>
-
-      <div className="flex items-center gap-3 rounded-xl border border-[var(--ps-border-soft)] bg-[var(--ps-bg-subtle)] px-4 py-3">
-        <CalendarDays className="h-4 w-4 shrink-0 text-[var(--ps-primary-text)]" />
-        <p className="flex-1 text-[12.5px] text-[var(--ps-fg-secondary)]">
-          Vous pouvez aussi réserver un RDV 30 min directement.
-        </p>
-        <button
-          type="button"
-          disabled
-          className="rounded-md border border-[var(--ps-border)] bg-white px-3 py-1.5 text-[11.5px] font-semibold text-[var(--ps-fg-muted)] opacity-60"
-        >
-          Réserver — bientôt
-        </button>
-      </div>
+      <ConditionalBranch show={revealed >= 3}>
+        <div className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white/60 px-4 py-3 backdrop-blur-sm">
+          <CalendarDays className="h-4 w-4 shrink-0 text-violet-600" />
+          <p className="flex-1 text-[12.5px] text-stone-600">
+            Vous pouvez aussi réserver un RDV 30 min directement.
+          </p>
+          <button
+            type="button"
+            disabled
+            className="rounded-md border border-stone-200 bg-white px-3 py-1.5 text-[11.5px] font-semibold text-stone-400 opacity-60"
+          >
+            Réserver — bientôt
+          </button>
+        </div>
+      </ConditionalBranch>
     </StepShell>
   );
 }

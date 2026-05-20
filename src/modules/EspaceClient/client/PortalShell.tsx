@@ -2,6 +2,8 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { PortalLayout } from '@/modules/EspaceClient/shared/layouts/PortalLayout';
 import type { PortalTab } from '@/modules/EspaceClient/shared/constants';
 import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext';
+import { WelcomeWizardProvider } from './welcome/WelcomeWizardContext';
+import { WelcomeWizard } from './welcome/WelcomeWizard';
 
 const TAB_PATH: Record<PortalTab, string> = {
   dashboard:  '/espace-client',
@@ -32,17 +34,23 @@ export function PortalShell() {
   const clientName = project.client_name ?? email.split('@')[0] ?? email;
 
   return (
-    <PortalLayout
-      activeTab={activeTab}
-      onTabChange={tab => navigate(TAB_PATH[tab])}
-      clientName={clientName}
-      projectName={project.name ?? undefined}
-      onLogout={async () => {
-        await signOut();
-        navigate('/espace-client/login', { replace: true });
-      }}
-    >
-      <Outlet />
-    </PortalLayout>
+    <WelcomeWizardProvider projectId={project.id}>
+      <PortalLayout
+        activeTab={activeTab}
+        onTabChange={tab => navigate(TAB_PATH[tab])}
+        clientName={clientName}
+        projectName={project.name ?? undefined}
+        onLogout={async () => {
+          await signOut();
+          navigate('/espace-client/login', { replace: true });
+        }}
+      >
+        <Outlet />
+      </PortalLayout>
+      {/* Wizard monté au niveau shell : une seule instance pour tout le portail,
+          ouverture pilotée par le context (auto-open au login + bouton Reprendre
+          de WelcomeBanner). */}
+      <WelcomeWizard />
+    </WelcomeWizardProvider>
   );
 }

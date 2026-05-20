@@ -11,7 +11,11 @@ interface Step1Props {
   errors: Record<string, string | undefined>;
 }
 
+// Step 1 : tous les champs visibles d'office.
+// Le champ "Précisez votre secteur" apparaît uniquement si "Autre" est sélectionné.
 export function Step1Identity({ draft, setField, errors }: Step1Props) {
+  const showSectorCustom = draft.business_sector === 'autre';
+
   return (
     <StepShell
       title="Qui êtes-vous ?"
@@ -19,7 +23,7 @@ export function Step1Identity({ draft, setField, errors }: Step1Props) {
     >
       <FieldGroup label="Nom complet" required error={errors.full_name}>
         <Input
-          placeholder="Sophie Martin"
+          placeholder="Prénom Nom"
           value={draft.full_name ?? ''}
           onChange={e => setField('full_name', e.target.value)}
           className="h-11"
@@ -30,7 +34,7 @@ export function Step1Identity({ draft, setField, errors }: Step1Props) {
       <FieldGroup label="Email professionnel" required error={errors.email}>
         <Input
           type="email"
-          placeholder="sophie@precieuse.fr"
+          placeholder="vous@votre-entreprise.fr"
           value={draft.email ?? ''}
           onChange={e => setField('email', e.target.value)}
           className="h-11"
@@ -42,7 +46,7 @@ export function Step1Identity({ draft, setField, errors }: Step1Props) {
         label={
           <span className="inline-flex items-center gap-1.5">
             Téléphone
-            <span title="Pour vous rappeler sous 24h. Jamais partagé avec des tiers." className="text-[var(--ps-fg-muted)]">
+            <span title="Pour vous rappeler sous 24h. Jamais partagé avec des tiers." className="text-stone-400">
               <Lock className="h-3 w-3" />
             </span>
           </span>
@@ -61,9 +65,9 @@ export function Step1Identity({ draft, setField, errors }: Step1Props) {
         />
       </FieldGroup>
 
-      <FieldGroup label="Nom de l'entreprise · optionnel" error={errors.company_name}>
+      <FieldGroup label="Nom de l'entreprise" required error={errors.company_name}>
         <Input
-          placeholder="Précieuse Joaillerie"
+          placeholder="Nom de votre entreprise"
           value={draft.company_name ?? ''}
           onChange={e => setField('company_name', e.target.value)}
           className="h-11"
@@ -85,6 +89,23 @@ export function Step1Identity({ draft, setField, errors }: Step1Props) {
           ))}
         </div>
       </FieldGroup>
+
+      {showSectorCustom && (
+        <FieldGroup
+          label="Précisez votre secteur"
+          required
+          hint="Décrivez en quelques mots votre activité."
+          error={errors.business_sector_custom}
+        >
+          <Input
+            placeholder="Ex. coaching sportif, conseil RH, photographie événementielle…"
+            value={draft.business_sector_custom ?? ''}
+            onChange={e => setField('business_sector_custom', e.target.value)}
+            className="h-11"
+            maxLength={160}
+          />
+        </FieldGroup>
+      )}
     </StepShell>
   );
 }

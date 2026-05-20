@@ -53,11 +53,14 @@ function clearToken(): void {
 // objet plus large que prévu.
 const UPDATE_WHITELIST: ReadonlyArray<keyof QualificationDraft | 'status' | 'draft_progress_percent'> = [
   'full_name', 'email', 'phone', 'company_name', 'business_sector', 'business_sector_custom',
-  'has_existing_site', 'existing_site_url', 'monthly_traffic', 'main_problems', 'has_domain_only',
-  'main_goal', 'target_audience', 'competitors',
-  'desired_features', 'ecommerce_platform', 'product_count_range', 'monthly_orders_range',
+  'has_existing_site', 'existing_site_url', 'monthly_traffic',
+  'main_problems', 'main_problems_other', 'has_domain_only',
+  'main_goal', 'main_goal_other', 'target_audience', 'competitors',
+  'desired_features', 'desired_features_other',
+  'ecommerce_platform', 'ecommerce_platform_other', 'product_count_range', 'monthly_orders_range',
   'reservation_type', 'health_specific_needs',
   'has_visual_identity', 'wants_identity_creation', 'logo_file_url', 'brand_guide_url',
+  'brand_guide_external_link',
   'existing_site_screenshots',
   'budget_range', 'desired_timeline', 'timeline_reason',
   'is_decision_maker', 'preferred_contact_method', 'final_cta_choice',
@@ -142,6 +145,7 @@ export function useQualificationDraft(): UseQualificationDraftResult {
           p_source: 'portal_diagnostic',
         });
         if (createErr || !Array.isArray(created) || created.length === 0) {
+          if (import.meta.env.DEV) console.error('[useQualificationDraft] qualif_create_draft échoué:', createErr, 'data:', created);
           return { leadId: null, error: createErr?.message ?? 'create_draft failed' };
         }
         const { lead_id, session_token } = created[0] as { lead_id: string; session_token: string };
@@ -154,7 +158,10 @@ export function useQualificationDraft(): UseQualificationDraftResult {
           p_token: session_token,
           p_payload: buildPayload(data),
         });
-        if (updErr) return { leadId: lead_id, error: updErr.message };
+        if (updErr) {
+          if (import.meta.env.DEV) console.error('[useQualificationDraft] update_draft (post-create) échoué:', updErr);
+          return { leadId: lead_id, error: updErr.message };
+        }
         triggerSavedIndicator();
         return { leadId: lead_id, error: null };
       }
@@ -163,7 +170,10 @@ export function useQualificationDraft(): UseQualificationDraftResult {
         p_token: currentToken,
         p_payload: buildPayload(data),
       });
-      if (error) return { leadId: currentId, error: error.message };
+      if (error) {
+        if (import.meta.env.DEV) console.error('[useQualificationDraft] update_draft échoué:', error);
+        return { leadId: currentId, error: error.message };
+      }
       triggerSavedIndicator();
       return { leadId: currentId, error: null };
     } finally {

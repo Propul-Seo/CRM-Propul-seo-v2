@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, Clock, X, CheckCircle2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useWelcomeWizard } from './useWelcomeWizard';
+import { useWelcomeWizardCtx } from './WelcomeWizardContext';
 import { Step1Welcome } from './steps/Step1Welcome';
 import { Step2Contact } from './steps/Step2Contact';
 import { Step3Preferences } from './steps/Step3Preferences';
@@ -11,9 +11,6 @@ import { Step4Tour } from './steps/Step4Tour';
 import { Step5Done } from './steps/Step5Done';
 
 interface WelcomeWizardProps {
-  projectId: string;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   onCompleted?: () => void;
 }
 
@@ -27,17 +24,17 @@ const STEPS: ReadonlyArray<{ num: number; label: string; minutesLeft: number }> 
 
 const TRANSITION = { duration: 0.28, ease: [0.16, 1, 0.3, 1] as const };
 
-export function WelcomeWizard({ projectId, open, onOpenChange, onCompleted }: WelcomeWizardProps) {
-  const wizard = useWelcomeWizard(projectId);
+export function WelcomeWizard({ onCompleted }: WelcomeWizardProps) {
+  const { wizard, isOpen, openWizard, closeWizard } = useWelcomeWizardCtx();
   const { currentStep, loading, goToStep, dismiss, complete } = wizard;
 
-  const handleDismiss = async () => { await dismiss(); onOpenChange(false); };
+  const handleDismiss = async () => { await dismiss(); closeWizard(); };
   const handleNext = () => { if (currentStep < 5) goToStep(currentStep + 1); };
   const handlePrev = () => { if (currentStep > 1) goToStep(currentStep - 1); };
   const handleComplete = async () => {
     const { error } = await complete();
     if (error) return;
-    onOpenChange(false);
+    closeWizard();
     onCompleted?.();
   };
 
@@ -45,7 +42,7 @@ export function WelcomeWizard({ projectId, open, onOpenChange, onCompleted }: We
   const stepMeta = STEPS[currentStep - 1];
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) void handleDismiss(); else onOpenChange(true); }}>
+    <Dialog open={isOpen} onOpenChange={(o) => { if (!o) void handleDismiss(); else openWizard(); }}>
       <DialogContent
         className={cn(
           'max-w-[820px] gap-0 overflow-hidden border-0 p-0',
