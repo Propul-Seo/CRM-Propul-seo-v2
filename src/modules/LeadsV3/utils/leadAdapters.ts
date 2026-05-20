@@ -1,6 +1,7 @@
 import type { SiteWebLead } from '../hooks/useLeadsV3SiteWeb'
 import type { CRMERPLead } from '@/modules/CRMERPLeadDetails/types'
 import type { LeadCardData } from '../components/LeadCardV3'
+import type { QualificationLead } from '../hooks/useLeadsV3Qualification'
 import {
   SITE_WEB_STATUS_COLORS,
   SITE_WEB_STATUS_LABELS,
@@ -23,6 +24,26 @@ export function siteWebToCard(lead: SiteWebLead): LeadCardData {
     source: lead.source || null,
     createdAt: lead.created_at,
     amount: lead.project_price,
+  }
+}
+
+/**
+ * Convertit un lead qualif (questionnaire `/diagnostic` soumis) en LeadCardData.
+ * Status virtuel = `questionnaire_complete` (col en tête du Kanban).
+ */
+export function qualifToCard(lead: QualificationLead): LeadCardData {
+  return {
+    id: lead.id,
+    company: lead.company_name,
+    contact: lead.full_name,
+    email: lead.email || null,
+    phone: lead.phone,
+    statusColor: SITE_WEB_STATUS_COLORS.questionnaire_complete,
+    statusLabel: SITE_WEB_STATUS_LABELS.questionnaire_complete,
+    assignee: null,
+    source: 'Diagnostic en ligne',
+    createdAt: lead.submitted_at ?? lead.created_at,
+    amount: null,
   }
 }
 

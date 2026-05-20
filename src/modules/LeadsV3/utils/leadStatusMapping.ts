@@ -4,8 +4,9 @@
  * mais une API commune pour les composants UI.
  */
 
-// ===== Site web (table `contacts`) =====
+// ===== Site web (table `contacts` + qualif `questionnaire_complete` en tête) =====
 export type SiteWebStatus =
+  | 'questionnaire_complete'
   | 'prospect'
   | 'presentation_envoyee'
   | 'meeting_booke'
@@ -14,6 +15,7 @@ export type SiteWebStatus =
   | 'signe'
 
 export const SITE_WEB_STATUS_ORDER: SiteWebStatus[] = [
+  'questionnaire_complete',
   'prospect',
   'presentation_envoyee',
   'meeting_booke',
@@ -23,6 +25,7 @@ export const SITE_WEB_STATUS_ORDER: SiteWebStatus[] = [
 ]
 
 export const SITE_WEB_STATUS_LABELS: Record<SiteWebStatus, string> = {
+  questionnaire_complete: 'Questionnaire complété',
   prospect: 'Prospects',
   presentation_envoyee: 'Présentation envoyée',
   meeting_booke: 'Meeting booké',
@@ -32,6 +35,7 @@ export const SITE_WEB_STATUS_LABELS: Record<SiteWebStatus, string> = {
 }
 
 export const SITE_WEB_STATUS_COLORS: Record<SiteWebStatus, string> = {
+  questionnaire_complete: '#0ea5e9', // sky-500
   prospect: '#8B5CF6',
   presentation_envoyee: '#60a5fa',
   meeting_booke: '#f59e0b',
@@ -49,10 +53,11 @@ export function normalizeSiteWebStatus(raw: string | null | undefined): SiteWebS
   return isSiteWebStatus(raw) ? raw : 'prospect'
 }
 
-// ===== ERP (table `crmerp_leads`) =====
-export type ErpStatus = 'leads_contactes' | 'rendez_vous_effectues' | 'en_attente' | 'signes'
+// ===== ERP (table `crmerp_leads` + qualif `questionnaire_complete` en tête) =====
+export type ErpStatus = 'questionnaire_complete' | 'leads_contactes' | 'rendez_vous_effectues' | 'en_attente' | 'signes'
 
 export const ERP_STATUS_ORDER: ErpStatus[] = [
+  'questionnaire_complete',
   'leads_contactes',
   'rendez_vous_effectues',
   'en_attente',
@@ -60,6 +65,7 @@ export const ERP_STATUS_ORDER: ErpStatus[] = [
 ]
 
 export const ERP_STATUS_LABELS: Record<ErpStatus, string> = {
+  questionnaire_complete: 'Questionnaire complété',
   leads_contactes: 'Leads contactés',
   rendez_vous_effectues: 'RDV effectués',
   en_attente: 'En attente',
@@ -67,6 +73,7 @@ export const ERP_STATUS_LABELS: Record<ErpStatus, string> = {
 }
 
 export const ERP_STATUS_COLORS: Record<ErpStatus, string> = {
+  questionnaire_complete: '#0ea5e9',
   leads_contactes: '#60a5fa',
   rendez_vous_effectues: '#f59e0b',
   en_attente: '#9ca3af',
