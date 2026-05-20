@@ -7,12 +7,12 @@
 
 ## 1. État global
 
-- **Sprint en cours** : **Sprint B.2.6 — Routage Site/ERP qualif + Lead→Projet conversion** ✅ **LIVRÉ** (5 blocs A/B/C/D/E).
-- **Tâche en cours** : Action Lyes — set secrets Brevo + redéployer edge function + tester en main `/diagnostic` Site/ERP/Site+ERP.
-- **Phase produit** : Phase 2 (welcome wizard recadré + qualif refondue + routage Site/ERP livré, branchements infra Stripe/DocuSeal/Brevo à finaliser par Lyes, QA E2E à dérouler).
+- **Sprint en cours** : **Sprint B.2.6 — Routage Site/ERP + Lead→Projet** ✅ + **Debug session E2E** ✅ — Brevo fonctionnel + flow E2E validé.
+- **Tâche en cours** : Session B (autre jour) — P1 enrichir mapping qualif→projet, P2 fix H1 atomicité, P3 refacto LeadsV3Page <200, P4 hard delete leads/projets.
+- **Phase produit** : Phase 2 (welcome wizard + qualif refondue + routage Site/ERP + flow E2E debug livré, Brevo branché, QA E2E à dérouler).
 - **Branche** : `feature/propulspace-phase-2-front` (exception multi-phases assumée, merge dans `main` fin Phase 2 après QA validée)
 - **Project Supabase** : ERP (`tbuqctfgjjxnevmsvucl`)
-- **Dernière mise à jour** : 2026-05-20 PM — Session A complète (5 blocs livrés, 23 fichiers, 5 commits).
+- **Dernière mise à jour** : 2026-05-20 fin journée — Debug session E2E (4 bugs fixés + UI dark + Migration 243).
 
 ---
 
@@ -675,3 +675,57 @@ Bloc E — Code review :
 - H1 atomicité conversion : si update qualif échoue après insert projet, doublon possible. Mitigé par dialog confirmation typée.
 - LeadsV3Page > 200 lignes (dette H3 documentée).
 - Edge function `questionnaire-send-emails` re-déployée nécessaire avant que les emails partent (Brevo + secrets).
+
+---
+
+### ✅ Debug session E2E + UI dark theme (terminé 2026-05-20 fin de journée)
+
+**Démarré** : 2026-05-20 (post-Session A)
+**Terminé** : 2026-05-20 (test E2E validé en preview)
+**Périmètre** : debugger les bugs détectés lors du test E2E live par Lyes + adapter UI drawer Qualification au dark theme CRM.
+
+**Bugs fixés (via systematic-debugging)** :
+
+- **Bug 1 — Upload "Renseignez d'abord l'étape 1"** : root cause = garde dans `useQualificationDraft.persist()` trop stricte (exigeait 4 champs simultanés avant create_draft). Fix : créer le draft dès qu'au moins UN champ utilisateur est touché (project_type / full_name / email / phone / business_sector / company_name). La RPC qualif_create_draft accepte les strings vides. Validé via preview en réel : token créé en sessionStorage dès le click "Site web" sur Step0.
+
+- **Bug 2 — Précédent ramène à Suivante** : root cause = `flowRouter.shouldSkipBackward` testait `currentKey === 'objectives'` au lieu de `'features'`. Avec `has_existing_site='non'`, le skip forward saute step2→step4, donc le retour arrière depuis step4 (features) doit aussi skipper step3 (objectives jamais vu à l'aller). Fix : changement de la string.
+
+- **Bug 3 — Email équipe pas reçu (POST 401)** : 3 causes empilées (résolu une par une) :
+  1. `verify_jwt:true` par défaut sur l'edge function → 401 sur appels anonymes du front. Fix : désactivé côté Dashboard.
+  2. CORS `Access-Control-Allow-Headers` ne whitelist pas `x-application-name` (envoyé auto par client supabase-js) → preflight bloqué. Fix : ajouté à la liste.
+  3. Edge function utilisait `.schema('propulspace').from('qualification_leads')` qui n'était pas accessible via service_role dans Edge Runtime. Fix : `.from('qualification_leads_v2')` (vue publique).
+
+- **Bug 4 — Portail invite jamais envoyé après conversion** : root cause = mismatch contractuel. `useConvertQualifLead` envoyait `body: { project_id, ... }` (snake_case) mais l'edge function `admin-portal-invite` attend `body.projectId` (camelCase strict). → `projectId` undefined → 400 "projectId requis" silencieux. Fix : passage camelCase + retrait champs `create_contact` non reconnus. **Side effect** : Lyes a dû activer "Allow new users to sign up" côté Auth Supabase Dashboard car les invitations créent de nouveaux comptes via OTP.
+
+**UI demandée** :
+- **QualificationLeadDetailsSheet** : passage en dark theme aligné CRM (bg #0a0814, text #ede9fe, borders #1f1830, badge sky soft, bouton archive outline dark).
+
+**Migration 243 (appliquée en prod)** :
+- `erp_current_system text → text[]` (multi-select systèmes ERP actuels)
+- DROP+CREATE VIEW qualification_leads_v2 + CREATE OR REPLACE FUNCTION qualif_update_draft (gestion array via jsonb_array_elements_text)
+- StepErp1System refactor : RadioCard → CheckboxCard
+- recapSections.ts : labelOf → labelsOfMany pour erp_current_system
+
+**Step7Finalization** : retrait de l'encadré "Réserver — bientôt" (demande Lyes).
+
+**Commits** :
+- `b691b15` fix 3 bugs E2E + ERP multi-select + Migration 243 + retrait RDV encadré
+- `f07cd26` fix payload portal invite (camelCase)
+- `e5bd6e9` UI dark theme drawer + cleanup logs debug
+
+**Tests validés** :
+- ✅ Preview interactif : token sessionStorage créé après click Step0 → confirmé via preview_eval.
+- ✅ Step1 (identité) rempli + Suivant → atterrit sur Step2 (situation) sans message bloqué.
+- ✅ Email équipe Brevo : POST 200 sur edge function + email reçu côté Lyes.
+- ✅ Conversion qualif → projet créée en DB avec portal_client_email rempli.
+- ⚠️ Drawer dark theme : non testable via preview (pas de session admin), à valider par Lyes en main.
+
+**Code review (e5bd6e9)** : 2 findings, 0 fixe bloquant.
+- IMPORTANT — `bg-[#...]` arbitrary Tailwind values : faux positif (convention projet, identique à LeadsV3Page).
+- MEDIUM — useConvertQualifLead retourne success:true même si update qualif échoue : vrai mineur, déjà documenté inline et scopé Session B (fix H1 atomicité).
+
+**Hors-périmètre / Session B (priorités) — demandes Lyes** :
+1. **Enrichir mapping qualif → projet** : actuellement seul `company_name` est copié dans le CRM. Beaucoup d'infos qualif perdues (secteur, fonctionnalités, charte, ERP modules, etc.). À mapper sur les champs `projects_v2` appropriés (notes ? colonnes dédiées ?).
+2. Fix H1 — RPC atomique conversion (mini-migration 244).
+3. Fix H3 — refacto LeadsV3Page <200 lignes.
+4. Hard delete leads + projets avec confirmation typée (scope original Session B).

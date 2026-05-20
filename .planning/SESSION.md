@@ -1,34 +1,31 @@
-# Session State — 2026-05-20 (Session A complète — Lead→Projet end-to-end)
+# Session State — 2026-05-20 (Debug session E2E + UI dark theme)
 
 ## Branch
-`feature/propulspace-phase-2-front` — exception multi-phases assumée (merge dans `main` fin Phase 2 après QA E2E).
+`feature/propulspace-phase-2-front` — exception multi-phases assumée (merge dans `main` fin Phase 2 après QA validée).
 
 ## Completed This Session
-- ✅ **Migration 242** appliquée en prod (project_type + 10 colonnes ERP + view + RPC).
-- ✅ **Bloc A** — Questionnaire avec routage Site/Site+ERP/ERP : constants.erp.ts, schema.erp.ts (4 schemas Zod), Step0ProjectType + 4 steps ERP (system/modules/users/integrations), flowRouter.tsx, ProgressBar/SaveIndicator dynamiques, RecapAccordion + recapSections.ts (split).
-- ✅ **Bloc B** — Colonne "Questionnaire complété" dans LeadsV3 : statut virtuel `questionnaire_complete`, useLeadsV3Qualification (scope site/erp), qualifToCard adapter, QualificationLeadDetailsSheet (drawer + RecapAccordion réutilisé).
-- ✅ **Bloc C** — Conversion 1 clic + Archive : useConvertQualifLead (insert projects_v2 + update qualif + invoke admin-portal-invite), useArchiveQualifLead (status=unqualified + raison dans notes), 2 boutons drawer + 2 AlertDialogs.
-- ✅ **Bloc D** — Edge function Brevo : questionnaire-send-emails refonte (fetch lead service_role + envoi HTML email équipe + fallback graceful si BREVO_API_KEY absente).
-- ✅ **Bloc E** — Code review 6 findings, 1 fix appliqué (C1 XSS escape HTML email), 3 différés documentés, 2 faux positifs.
+- ✅ **Bug 1 — Upload bloqué résolu** : garde élargie dans `useQualificationDraft.persist()` (création draft dès qu'un seul champ touché). Validé via preview : token créé dès click sur Step0.
+- ✅ **Bug 2 — Précédent broken résolu** : `flowRouter.shouldSkipBackward` corrigé (`features` au lieu de `objectives`).
+- ✅ **Bug 3 — Email 401 résolu** : `verify_jwt:false` (Dashboard) + CORS `x-application-name` + `.from('qualification_leads_v2')` au lieu de `.schema('propulspace')`.
+- ✅ **Bug 4 — Portail invite payload** : `project_id` → `projectId` (camelCase strict edge function).
+- ✅ **UI dark theme drawer Qualification** : `QualificationLeadDetailsSheet` aligné CRM (bg #0a0814).
+- ✅ **Migration 243** : `erp_current_system text → text[]` (multi-select).
+- ✅ **Step7Finalization** : retrait encadré "RDV bientôt".
+- ✅ **StepErp1System** : RadioCard → CheckboxCard (multi-select systèmes).
 
 ## Next Task
-**Action Lyes (hors Claude Code)** :
-1. Set secrets edge function : `supabase secrets set BREVO_API_KEY=xkeysib-xxx` + `CRM_BASE_URL=https://crm.propulseo-site.com`.
-2. Déployer edge function : `supabase functions deploy questionnaire-send-emails`.
-3. Tester en main le parcours `/diagnostic` Site/Site+ERP/ERP (l'outil preview_click ne propage pas les events React sur input sr-only, validation interactive Lyes nécessaire).
-
-**Prochaine session Claude (Session B)** :
-- H1 (HIGH différé) — Mini-migration 243 : RPC `propulspace.admin_convert_qualif_to_project()` atomique pour fix race condition conversion.
-- H3 (HIGH différé) — Refacto LeadsV3Page (231 lignes → <200) via extraction `useLeadsV3Cards` hook.
-- M1 — Idem pour useArchiveQualifLead via RPC ou SQL atomique.
-- Session B (autre jour) — Hard delete leads + projets avec confirmation typée.
+**Session B (autre jour) — priorités** :
+1. **Enrichir mapping qualif → projet** (demandé Lyes) : actuellement seul `company_name` est copié. Étendre avec budget midpoint (déjà fait), secteur, délai, project_type → category/presta_type (déjà fait), notes (objectif, fonctionnalités, charte, ERP modules), `start_date_estimated` selon `desired_timeline`. Quels champs `projects_v2` mapper ?
+2. **Fix H1 (atomicité conversion)** : mini-migration 244 RPC `propulspace.admin_convert_qualif_to_project(qualif_id, project_payload)` SECURITY DEFINER (transaction atomique insert projet + update qualif).
+3. **Fix H3 (LeadsV3Page 231 lignes > 200)** : extraction `useLeadsV3Cards` hook.
+4. **Hard delete leads + projets** (scope original Session B) avec confirmation typée.
 
 ## Blockers
-- Aucun blocker code/DB.
-- Brevo API key non set → edge function retourne `sent:false` (graceful, n'empêche pas la soumission questionnaire).
+- Aucun.
+- Lyes a confirmé test E2E réussi côté front (preview). Doit valider en main que le drawer dark theme rend bien.
 
 ## Key Context
-- 4 commits cette session : `7261295` (constants+migration), `2a4c8fb` (Bloc A), `25750cc` (Bloc B), `29b1aa9` (Bloc C+D), `77b40b6` (fix XSS).
-- 23 fichiers livrés ou modifiés.
-- TypeScript clean (`tsc --noEmit`).
-- Code review : C1 (XSS) fix immédiat, H1+H3 différés Session B avec docs, FauxPositifs documentés.
+- 4 commits cette session : `b691b15`, `f07cd26`, `e5bd6e9` (+ migration 243 appliquée).
+- Tous les secrets Brevo configurés en prod par Lyes. Edge function `questionnaire-send-emails` v4 déployée.
+- `verify_jwt:false` activé pour `questionnaire-send-emails` côté Dashboard.
+- Code review session debug : 2 findings, 0 fixe bloquant (1 faux positif Tailwind arbitrary values, 1 vrai mineur déjà documenté/scopé Session B).
