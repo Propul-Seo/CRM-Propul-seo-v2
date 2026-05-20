@@ -1,30 +1,34 @@
-# Session State — 2026-05-20 (Migration 242 + constants ERP — Bloc A partiel)
+# Session State — 2026-05-20 (Session A complète — Lead→Projet end-to-end)
 
 ## Branch
-`feature/propulspace-phase-2-front` — exception multi-phases assumée (merge dans `main` fin Phase 2 après QA E2E validée).
+`feature/propulspace-phase-2-front` — exception multi-phases assumée (merge dans `main` fin Phase 2 après QA E2E).
 
 ## Completed This Session
-- ✅ **URL Calendly** réelle dans ThankYouA.tsx (remplace placeholder `cal.com/propulseo/diagnostic`).
-- ✅ **Migration 242** appliquée en prod : `project_type` (site/site_erp/erp) + 10 colonnes ERP + view + RPC `qualif_update_draft` whitelist étendue.
-- ✅ **constants.erp.ts** (nouveau, 55 lignes) — 6 enums ERP : systèmes, volumes, modules, users, SSO, intégrations.
-- ✅ **constants.ts** modifié — ajout `PROJECT_TYPES` + 3 totaux dynamiques + re-export ERP_*.
-- ✅ **Décisions tranchées avec Lyes** : project_type 3 valeurs / questionnaire ERP complet (4 nouveaux steps) / pas de status `archived` (réutiliser `unqualified`) / hard delete projet avec confirmation (Session B) / notif équipe via Brevo email seulement (pas WhatsApp).
+- ✅ **Migration 242** appliquée en prod (project_type + 10 colonnes ERP + view + RPC).
+- ✅ **Bloc A** — Questionnaire avec routage Site/Site+ERP/ERP : constants.erp.ts, schema.erp.ts (4 schemas Zod), Step0ProjectType + 4 steps ERP (system/modules/users/integrations), flowRouter.tsx, ProgressBar/SaveIndicator dynamiques, RecapAccordion + recapSections.ts (split).
+- ✅ **Bloc B** — Colonne "Questionnaire complété" dans LeadsV3 : statut virtuel `questionnaire_complete`, useLeadsV3Qualification (scope site/erp), qualifToCard adapter, QualificationLeadDetailsSheet (drawer + RecapAccordion réutilisé).
+- ✅ **Bloc C** — Conversion 1 clic + Archive : useConvertQualifLead (insert projects_v2 + update qualif + invoke admin-portal-invite), useArchiveQualifLead (status=unqualified + raison dans notes), 2 boutons drawer + 2 AlertDialogs.
+- ✅ **Bloc D** — Edge function Brevo : questionnaire-send-emails refonte (fetch lead service_role + envoi HTML email équipe + fallback graceful si BREVO_API_KEY absente).
+- ✅ **Bloc E** — Code review 6 findings, 1 fix appliqué (C1 XSS escape HTML email), 3 différés documentés, 2 faux positifs.
 
 ## Next Task
-**Reprendre le Bloc A** (questionnaire ERP — partie front) :
-1. Schema Zod : ajouter `step0Schema` + 4 schemas ERP dans `schema.ts`
-2. Step0 component (3 cards site/site_erp/erp) + 4 nouveaux step components ERP
-3. QualificationFlowPage routage conditionnel selon `project_type`
-4. ProgressBar dynamique (total = QUALIF_TOTAL_STEPS_SITE/ERP/SITE_ERP)
-5. RecapAccordion sections ERP
-6. Puis Bloc B (LeadsV3 colonne "Questionnaire complété" + routage Site/ERP)
+**Action Lyes (hors Claude Code)** :
+1. Set secrets edge function : `supabase secrets set BREVO_API_KEY=xkeysib-xxx` + `CRM_BASE_URL=https://crm.propulseo-site.com`.
+2. Déployer edge function : `supabase functions deploy questionnaire-send-emails`.
+3. Tester en main le parcours `/diagnostic` Site/Site+ERP/ERP (l'outil preview_click ne propage pas les events React sur input sr-only, validation interactive Lyes nécessaire).
+
+**Prochaine session Claude (Session B)** :
+- H1 (HIGH différé) — Mini-migration 243 : RPC `propulspace.admin_convert_qualif_to_project()` atomique pour fix race condition conversion.
+- H3 (HIGH différé) — Refacto LeadsV3Page (231 lignes → <200) via extraction `useLeadsV3Cards` hook.
+- M1 — Idem pour useArchiveQualifLead via RPC ou SQL atomique.
+- Session B (autre jour) — Hard delete leads + projets avec confirmation typée.
 
 ## Blockers
 - Aucun blocker code/DB.
-- Brevo : compte créé (sender `lyes.triki@propulseo-site.com` vérifié DKIM+DMARC). Clé API + 2 templates à fournir pour brancher l'edge function en Bloc D.
+- Brevo API key non set → edge function retourne `sent:false` (graceful, n'empêche pas la soumission questionnaire).
 
 ## Key Context
-- **Code review session** : 2 issues, 0 fixe bloquant (1 faux positif styles inline pré-existants, 1 différé `autre_erp` orphelin dans CHECK SQL).
-- **Plan Session A** : Bloc A (questionnaire ERP) → B (LeadsV3 colonne+conversion) → C (archive) → D (Brevo) → E (review final). ~10h total, on a fait ~1.5h.
-- **Session B (autre jour)** : hard delete leads + projets avec confirmation typée.
-- **Parallélisme** : Option A validée — Lyes attend merge Phase 2 avant de paralléliser sur main.
+- 4 commits cette session : `7261295` (constants+migration), `2a4c8fb` (Bloc A), `25750cc` (Bloc B), `29b1aa9` (Bloc C+D), `77b40b6` (fix XSS).
+- 23 fichiers livrés ou modifiés.
+- TypeScript clean (`tsc --noEmit`).
+- Code review : C1 (XSS) fix immédiat, H1+H3 différés Session B avec docs, FauxPositifs documentés.

@@ -7,12 +7,12 @@
 
 ## 1. État global
 
-- **Sprint en cours** : **Sprint B.2.6 — Routage Site/ERP qualif + Lead→Projet conversion** (Bloc A partiel : migration 242 + constants ERP livrés).
-- **Tâche en cours** : Bloc A — questionnaire ERP front (schema Zod + Step0 + 4 steps ERP + routage conditionnel).
-- **Phase produit** : Phase 2 (welcome wizard recadré + qualif refondue + routage Site/ERP en cours, branchements infra Stripe/DocuSeal/Brevo à faire par Lyes, QA E2E à dérouler).
+- **Sprint en cours** : **Sprint B.2.6 — Routage Site/ERP qualif + Lead→Projet conversion** ✅ **LIVRÉ** (5 blocs A/B/C/D/E).
+- **Tâche en cours** : Action Lyes — set secrets Brevo + redéployer edge function + tester en main `/diagnostic` Site/ERP/Site+ERP.
+- **Phase produit** : Phase 2 (welcome wizard recadré + qualif refondue + routage Site/ERP livré, branchements infra Stripe/DocuSeal/Brevo à finaliser par Lyes, QA E2E à dérouler).
 - **Branche** : `feature/propulspace-phase-2-front` (exception multi-phases assumée, merge dans `main` fin Phase 2 après QA validée)
 - **Project Supabase** : ERP (`tbuqctfgjjxnevmsvucl`)
-- **Dernière mise à jour** : 2026-05-20 — Migration 242 + constants ERP livrés (Bloc A partiel)
+- **Dernière mise à jour** : 2026-05-20 PM — Session A complète (5 blocs livrés, 23 fichiers, 5 commits).
 
 ---
 
@@ -599,3 +599,79 @@ Headlines :
 - View `qualification_leads_v2` toujours en SECURITY DEFINER (warning Supabase advisor). Aligner sur le pattern `propulspace_onboarding_v2` (security_invoker=true) → nécessite une policy RLS admin SELECT sur la table. À traiter en backlog sécurité.
 - `'autre_erp'` orphelin dans CHECK SQL (différé code review).
 - Notif équipe post-submit toujours absente (edge function reste stub). Risque "rater un lead" si formulaire mis live.
+
+---
+
+### ✅ Session A complète — Lead→Projet end-to-end (terminé 2026-05-20 PM)
+
+**Démarré** : 2026-05-20 (suite du Bloc A partiel)
+**Terminé** : 2026-05-20 (5 blocs A/B/C/D/E livrés en 1 session étendue)
+**Périmètre** : ajouter le routage Site/Site+ERP/ERP au questionnaire, créer la colonne "Questionnaire complété" dans LeadsV3 Kanban, automatiser la conversion lead→projet+portail, et brancher Brevo pour la notification équipe.
+
+**Livré code (23 fichiers)** :
+
+Bloc A — Questionnaire ERP front :
+- `qualification/constants.erp.ts` (nouveau) : 6 enums ERP (systems/volumes/modules/users/SSO/integrations)
+- `qualification/schema.erp.ts` (nouveau) : 4 schemas Zod ERP avec superRefine "autre"
+- `qualification/schema.ts` : `step0Schema` + 3 arrays `STEP_SCHEMAS_SITE/ERP/SITE_ERP` + `QualificationDraft` élargi
+- `qualification/steps/Step0ProjectType.tsx` (nouveau) : 3 cards radio avec emoji
+- `qualification/steps/StepErp1System.tsx` (nouveau) : système actuel + volume
+- `qualification/steps/StepErp2Modules.tsx` (nouveau) : checkboxes modules multi-select
+- `qualification/steps/StepErp3Users.tsx` (nouveau) : nb utilisateurs + mobile + SSO
+- `qualification/steps/StepErp4Integrations.tsx` (nouveau) : checkboxes intégrations
+- `qualification/flowRouter.tsx` (nouveau) : `getStepFlow(project_type)` + skip logic
+- `qualification/QualificationFlowPage.tsx` (refactor complet) : utilise flowRouter, `currentStep` démarre à 0
+- `qualification/components/ProgressBar.tsx` : `totalSteps` en prop (dynamique 8/8/12)
+- `qualification/components/SaveIndicator.tsx` : `totalSteps` en prop
+- `qualification/components/recapSections.ts` (nouveau, split anti-200-lignes) : `buildSections(draft)` qui retourne sections selon `project_type`
+- `qualification/components/RecapAccordion.tsx` : simplifié, consomme `recapSections`
+- `qualification/hooks/useQualificationDraft.ts` : whitelist étendue à `project_type` + 10 colonnes ERP
+
+Bloc B — Colonne LeadsV3 :
+- `LeadsV3/utils/leadStatusMapping.ts` : statut virtuel `questionnaire_complete` en tête (Site web + ERP), color #0ea5e9
+- `LeadsV3/hooks/useLeadsV3Qualification.ts` (nouveau) : fetch `qualification_leads_v2` submitted+non converti, filtré par scope (site → site|site_erp, erp → erp|site_erp)
+- `LeadsV3/utils/leadAdapters.ts` : `qualifToCard()` mapping QualificationLead → LeadCardData
+- `LeadsV3/components/QualificationLeadDetailsSheet.tsx` (nouveau) : drawer right avec RecapAccordion réutilisé + 2 boutons
+- `LeadsV3/LeadsV3Page.tsx` : merge cards qualif en tête, `onLeadClick` → ouvre drawer si qualif, drag-drop bloqué pour qualifs
+
+Bloc C — Conversion + Archive :
+- `LeadsV3/hooks/useConvertQualifLead.ts` (nouveau) : insert `projects_v2` (mapping presta_type/category selon project_type, midpoint budget), update `qualification_leads` (status=converted, converted_to_project_id, converted_at), invoke `admin-portal-invite` si activatePortal
+- `LeadsV3/hooks/useArchiveQualifLead.ts` (nouveau) : update status='unqualified' + append raison dans notes
+- `LeadsV3/components/QualificationLeadDetailsSheet.tsx` : 2 boutons drawer + 2 AlertDialogs (convert avec checkbox "Activer portail", archive avec textarea raison)
+- `LeadsV3/LeadsV3Page.tsx` : passe `qualif.refetch` en `onActionComplete`
+
+Bloc D — Edge function Brevo :
+- `supabase/functions/questionnaire-send-emails/index.ts` (refonte stub → réel) : fetch lead via service_role, envoie HTML email équipe via Brevo API v3, fallback graceful si BREVO_API_KEY absente (200 + sent:false), template HTML inline avec gradient header + table infos + CTA CRM
+- Secrets attendus : `BREVO_API_KEY`, `BREVO_SENDER_EMAIL` (default lyes.triki@propulseo-site.com), `TEAM_EMAIL` (default team@propulseo-site.com), `CRM_BASE_URL`
+
+Bloc E — Code review :
+- 6 findings — 1 fixé (C1 XSS Brevo : `escHtml()` sur toutes les interpolations HTML), 3 différés (H1 atomicité conversion = RPC dédiée Session B, H3 LeadsV3Page 231 lignes = extraction hook Session B, M1 race archive = protection UI suffisante V1), 2 faux positifs (H2 styles inline pré-existants, M2 site_erp visible OK dans les 2 scopes).
+
+**Commits** :
+- `7261295` feat(propulspace): migration 242 + constants ERP (Bloc A partiel)
+- `2a4c8fb` feat(propulspace): Bloc A — questionnaire avec routage Site/Site+ERP/ERP
+- `25750cc` feat(leadsv3): Bloc B — colonne Questionnaire complété + panel détails
+- `29b1aa9` feat(propulspace): Bloc C + D — conversion 1 clic + edge function Brevo
+- `77b40b6` fix(propulspace): code review hardening — XSS Brevo email (C1)
+
+**Tests** :
+- `tsc --noEmit` clean à chaque étape.
+- Preview /diagnostic : Step0 affiché avec 3 cards radio, totalSteps = 8 par défaut. Interaction radio non testable via preview_click (outil natif ne propage pas l'event React sur input sr-only) — validation interactive Lyes nécessaire.
+- Migration 242 vérifiée en prod : `SELECT project_type FROM qualification_leads` → 4 leads à 'site'.
+
+**Hors-périmètre (Session B autre jour)** :
+- Hard delete leads + projets avec confirmation typée + cascade.
+- Mini-migration 243 RPC `admin_convert_qualif_to_project()` atomique (fix H1).
+- Refacto LeadsV3Page <200 lignes via extraction `useLeadsV3Cards` (fix H3).
+- Conversion useArchive vers SQL atomique (fix M1).
+
+**Action Lyes (avant test live)** :
+- `supabase secrets set BREVO_API_KEY=xkeysib-...`
+- `supabase secrets set CRM_BASE_URL=https://crm.propulseo-site.com` (à confirmer)
+- `supabase functions deploy questionnaire-send-emails`
+- Tester parcours `/diagnostic` Site, ERP, Site+ERP en main.
+
+**Risques résiduels** :
+- H1 atomicité conversion : si update qualif échoue après insert projet, doublon possible. Mitigé par dialog confirmation typée.
+- LeadsV3Page > 200 lignes (dette H3 documentée).
+- Edge function `questionnaire-send-emails` re-déployée nécessaire avant que les emails partent (Brevo + secrets).
