@@ -115,11 +115,11 @@ const sBrand = (d: QualificationDraft, num: number): Section => ({
 });
 
 const sErpSystem = (d: QualificationDraft, num: number): Section => ({
-  num, title: 'ERP — Système actuel',
-  summary: [labelOf(ERP_CURRENT_SYSTEMS, d.erp_current_system), labelOf(ERP_DATA_VOLUMES, d.erp_data_volume)].filter(s => s !== '—').join(' · ') || '—',
+  num, title: 'ERP — Systèmes actuels',
+  summary: [labelsOfMany(ERP_CURRENT_SYSTEMS, d.erp_current_system), labelOf(ERP_DATA_VOLUMES, d.erp_data_volume)].filter(s => s !== '—').join(' · ') || '—',
   details: withOther([
-    { label: 'Système actuel',  value: labelOf(ERP_CURRENT_SYSTEMS, d.erp_current_system) },
-    { label: 'Volume données',  value: labelOf(ERP_DATA_VOLUMES, d.erp_data_volume) },
+    { label: 'Systèmes actuels', value: labelsOfMany(ERP_CURRENT_SYSTEMS, d.erp_current_system) },
+    { label: 'Volume données',   value: labelOf(ERP_DATA_VOLUMES, d.erp_data_volume) },
   ], 'Précision système', d.erp_current_system_other),
 });
 

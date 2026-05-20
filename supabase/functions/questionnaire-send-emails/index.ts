@@ -20,7 +20,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-application-name',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
@@ -134,8 +134,7 @@ serve(async (req) => {
 
     const supa = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
     const { data: lead, error: fetchErr } = await supa
-      .schema('propulspace')
-      .from('qualification_leads')
+      .from('qualification_leads_v2')
       .select('id, full_name, email, phone, company_name, business_sector, project_type, budget_range, desired_timeline, main_goal, submitted_at')
       .eq('id', body.lead_id)
       .single();

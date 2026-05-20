@@ -136,9 +136,18 @@ export function useQualificationDraft(): UseQualificationDraftResult {
     const currentId = leadIdRef.current;
     const currentToken = tokenRef.current;
 
-    // Premier save : besoin des NOT NULL (sinon attend que l'utilisateur remplisse step 1)
+    // Premier save : on crée le draft dès qu'on a au moins UN champ utilisateur.
+    // La RPC qualif_create_draft accepte les strings vides (DEFAULT en DB).
+    // Comme ça l'upload (qui exige un leadId) marche dès le Step2 (situation)
+    // même si l'utilisateur n'a pas encore validé Step1 fully.
+    // Garde minimale : avoir AU MOINS un champ touché pour éviter de créer un
+    // row au simple mount (l'utilisateur n'a rien fait).
     if (!currentId) {
-      if (!data.email || !data.full_name || !data.phone || !data.business_sector) {
+      const hasAnyInput = Boolean(
+        data.project_type || data.full_name || data.email || data.phone ||
+        data.business_sector || data.company_name,
+      );
+      if (!hasAnyInput) {
         return { leadId: null, error: null };
       }
     }

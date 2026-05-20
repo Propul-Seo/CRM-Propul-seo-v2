@@ -1,4 +1,3 @@
-import { CalendarDays } from 'lucide-react';
 import { RadioCard } from '../components/RadioCard';
 import { RecapAccordion } from '../components/RecapAccordion';
 import { ConditionalBranch } from '../components/ConditionalBranch';
@@ -57,22 +56,6 @@ export function Step7Finalization({ draft, setField, errors }: Step7Props) {
         <div>
           <p className="mb-2 text-[11.5px] font-semibold uppercase tracking-wider text-stone-500">Récapitulatif</p>
           <RecapAccordion draft={draft} />
-        </div>
-      </ConditionalBranch>
-
-      <ConditionalBranch show={revealed >= 3}>
-        <div className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white/60 px-4 py-3 backdrop-blur-sm">
-          <CalendarDays className="h-4 w-4 shrink-0 text-violet-600" />
-          <p className="flex-1 text-[12.5px] text-stone-600">
-            Vous pouvez aussi réserver un RDV 30 min directement.
-          </p>
-          <button
-            type="button"
-            disabled
-            className="rounded-md border border-stone-200 bg-white px-3 py-1.5 text-[11.5px] font-semibold text-stone-400 opacity-60"
-          >
-            Réserver — bientôt
-          </button>
         </div>
       </ConditionalBranch>
     </StepShell>

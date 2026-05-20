@@ -80,11 +80,15 @@ export function getStepFlow(projectType: QualificationDraft['project_type']): St
   }
 }
 
-// Skip logique : Step2 → Step3 si "pas de site existant"
+// Skip logique : si "pas de site existant", on saute 'objectives' (step3) car
+// les questions concurrents/objectifs site n'ont pas de sens sans site.
+// Forward : depuis 'situation' (step2) → saute 'objectives' (step3) → atterrit
+// sur 'features' (step4). Backward : depuis 'features' (step4) → re-saute
+// 'objectives' (jamais vu à l'aller) → revient à 'situation' (step2).
 export function shouldSkipForward(currentKey: string, draft: QualificationDraft): boolean {
   return currentKey === 'situation' && draft.has_existing_site === 'non';
 }
 
 export function shouldSkipBackward(currentKey: string, draft: QualificationDraft): boolean {
-  return currentKey === 'objectives' && draft.has_existing_site === 'non';
+  return currentKey === 'features' && draft.has_existing_site === 'non';
 }

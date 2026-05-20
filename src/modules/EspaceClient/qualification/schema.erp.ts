@@ -12,15 +12,17 @@ const values = <T extends ReadonlyArray<{ value: string }>>(arr: T): [string, ..
   return [vals[0], ...vals.slice(1)];
 };
 
-// StepErp1 — Système actuel + volume données
+// StepErp1 — Systèmes actuels (multi-select) + volume données
+// Migration 243 : erp_current_system est devenu text[] côté DB pour permettre
+// plusieurs outils en parallèle (Excel + Pennylane, par ex).
 export const stepErp1Schema = z
   .object({
-    erp_current_system:       z.enum(values(ERP_CURRENT_SYSTEMS), { errorMap: () => ({ message: 'Sélectionnez votre système actuel' }) }),
+    erp_current_system:       z.array(z.enum(values(ERP_CURRENT_SYSTEMS))).min(1, 'Cochez au moins un système'),
     erp_current_system_other: z.string().max(500).optional().or(z.literal('')),
     erp_data_volume:          z.enum(values(ERP_DATA_VOLUMES),    { errorMap: () => ({ message: 'Indiquez le volume de données' }) }),
   })
   .superRefine((data, ctx) => {
-    if (data.erp_current_system === 'autre' && !data.erp_current_system_other?.trim()) {
+    if (data.erp_current_system.includes('autre') && !data.erp_current_system_other?.trim()) {
       ctx.addIssue({ code: 'custom', path: ['erp_current_system_other'], message: 'Précisez votre système' });
     }
   });

@@ -1,4 +1,5 @@
 import { Input } from '@/components/ui/input';
+import { CheckboxCard } from '../components/CheckboxCard';
 import { RadioCard } from '../components/RadioCard';
 import { ConditionalBranch } from '../components/ConditionalBranch';
 import { ERP_CURRENT_SYSTEMS, ERP_DATA_VOLUMES } from '../constants.erp';
@@ -12,7 +13,15 @@ interface Props {
 }
 
 export function StepErp1System({ draft, setField, errors }: Props) {
-  const showOther = draft.erp_current_system === 'autre';
+  const selected = draft.erp_current_system ?? [];
+  const showOther = selected.includes('autre');
+
+  const toggle = (value: string, isChecked: boolean) => {
+    const next = isChecked
+      ? [...selected.filter(v => v !== value), value]
+      : selected.filter(v => v !== value);
+    setField('erp_current_system', next as QualificationDraft['erp_current_system']);
+  };
 
   return (
     <StepShell
@@ -22,17 +31,17 @@ export function StepErp1System({ draft, setField, errors }: Props) {
       <FieldGroup
         label="Qu'utilisez-vous aujourd'hui ?"
         required
-        hint="Le système principal sur lequel vous gérez votre activité."
+        hint="Cochez tous les outils que vous utilisez actuellement."
         error={errors.erp_current_system}
       >
         <div className="grid gap-2.5 sm:grid-cols-2">
           {ERP_CURRENT_SYSTEMS.map(s => (
-            <RadioCard
+            <CheckboxCard
               key={s.value}
               name="erp_current_system"
               value={s.value}
-              checked={draft.erp_current_system === s.value}
-              onChange={v => setField('erp_current_system', v as QualificationDraft['erp_current_system'])}
+              checked={selected.includes(s.value)}
+              onChange={checked => toggle(s.value, checked)}
               label={s.label}
               hint={s.hint}
             />
