@@ -16,6 +16,14 @@ interface RpcResponse {
   portal_activated: boolean
 }
 
+function isRpcResponse(v: unknown): v is RpcResponse {
+  if (typeof v !== 'object' || v === null) return false
+  const o = v as Record<string, unknown>
+  return typeof o.project_id === 'string'
+    && typeof o.documents_created === 'number'
+    && typeof o.portal_activated === 'boolean'
+}
+
 /**
  * Convertit un lead qualif `submitted` en projet V2 + crée les rows GED
  * depuis les fichiers uploadés (logo, charte, screenshots).
@@ -42,12 +50,11 @@ export function useConvertQualifLead() {
         return { success: false, error: error.message }
       }
 
-      const payload = data as RpcResponse | null
-      if (!payload?.project_id) {
-        return { success: false, error: 'RPC retour invalide (project_id manquant)' }
+      if (!isRpcResponse(data)) {
+        if (import.meta.env.DEV) console.error('[useConvertQualifLead] RPC shape inattendu:', data)
+        return { success: false, error: 'RPC retour invalide (shape inattendu)' }
       }
-
-      const projectId = payload.project_id
+      const projectId = data.project_id
 
       let portalInvited = false
       if (activatePortal) {
@@ -67,7 +74,7 @@ export function useConvertQualifLead() {
       return {
         success: true,
         projectId,
-        documentsCreated: payload.documents_created,
+        documentsCreated: data.documents_created,
         portalInvited,
       }
     } catch (e) {

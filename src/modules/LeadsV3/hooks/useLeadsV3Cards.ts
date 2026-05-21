@@ -8,6 +8,8 @@ import {
   isSiteWebStatus, isErpStatus, normalizeErpStatus,
   type SiteWebStatus, type ErpStatus,
 } from '../utils/leadStatusMapping'
+// Imports `type` uniquement : on extrait ReturnType<> de ces hooks pour typer
+// les paramètres du hook (sw/erp), sans embarquer leur implémentation.
 import type { useLeadsV3SiteWeb } from './useLeadsV3SiteWeb'
 import type { useLeadsV3Erp } from './useLeadsV3Erp'
 import type { QualificationLead } from './useLeadsV3Qualification'
