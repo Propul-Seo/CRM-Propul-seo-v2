@@ -48,6 +48,11 @@ DECLARE
   v_pass_count integer := 0;
   v_failed_list text := '';
 BEGIN
+  -- Sanity check : si le projet de référence n'existe plus en prod, abort immédiat
+  IF NOT EXISTS (SELECT 1 FROM public.projects_v2 WHERE id = v_portal_project_id) THEN
+    RAISE EXCEPTION 'Sanity check FAIL — projet de référence (%) introuvable dans projects_v2. Vérifier UUID et adapter le script.', v_portal_project_id;
+  END IF;
+
   -- Choix dynamique d'un projet "voisin" (autre que Miraux)
   SELECT id INTO v_neighbor_project_id
   FROM public.projects_v2
