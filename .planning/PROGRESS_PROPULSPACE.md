@@ -729,3 +729,60 @@ Bloc E — Code review :
 2. Fix H1 — RPC atomique conversion (mini-migration 244).
 3. Fix H3 — refacto LeadsV3Page <200 lignes.
 4. Hard delete leads + projets avec confirmation typée (scope original Session B).
+
+
+### ✅ BLOC 1+2+3 — Sécu RLS + Conversion atomique + Refacto LeadsV3 (terminé 2026-05-21)
+
+**Périmètre** : RLS hardening partiel (R-015 + R-016), RPC conversion qualif→projet atomique avec auto-GED, refacto LeadsV3Page < 200 lignes, fix code review.
+
+**Commits** :
+- `e7cdf4f` BLOC 1 — migrations 244c (storage path prefix) + 244d (uploaded_by no escalation)
+- `afa1a74` BLOC 2 — migration 245 RPC `admin_convert_qualif_to_project` + refacto `useConvertQualifLead`
+- `07498f2` BLOC 3 — refacto LeadsV3Page 232→184 lignes via extraction `useLeadsV3Cards.ts`
+- `44ff9a7` fix code review 4 findings — drop v_notes, v_screenshot_idx dédié, type guard isRpcResponse, commentaire type-only imports
+
+**Migrations appliquées en prod** (project tbuqctfgjjxnevmsvucl) :
+- 244c : `ps_uploads_public_insert` → prefixes `qualification/`, `documents/`, `signatures/` autorisés uniquement
+- 244d : `ps_docs_client_insert` → `uploaded_by IS NULL OR = auth.uid()` (bloque escalade audit trail)
+- 245 : RPC `propulspace.admin_convert_qualif_to_project(uuid, boolean)` SECURITY DEFINER (transaction atomique INSERT projects_v2 + INSERT documents x N + UPDATE qualif)
+- 246 : patch 245 (suppression v_notes mort + numérotation screenshots dédiée)
+
+**Mapping qualif → projects_v2 (BLOC 2)** :
+| Source qualif | Cible projects_v2 |
+|---|---|
+| company_name ‖ full_name | name, client_name |
+| split full_name | client_first_name |
+| phone | client_phone |
+| company_name | client_company |
+| email (si activate_portal) | portal_client_email |
+| project_type → enum | category + presta_type[] |
+| budget_range → midpoint | budget |
+| desired_timeline → date | start_date (today+7/30/60/90j) |
+| main_goal + target + features + erp_modules | description (markdown) |
+| pappers_enrichment | company_data |
+| pappers_enrichment->siret | siret |
+
+**GED auto (BLOC 2)** : pour chaque fichier qualif présent, INSERT row dans `propulspace.documents` (file_url pointe vers Storage path qualification/ existant — pas de copie de fichiers, accepté en Option A).
+- logo_file_url → document_type=asset_logo
+- brand_guide_url → document_type=asset_charter
+- brand_guide_external_link → document_type=other (catégorie brief_qualif_link)
+- existing_site_screenshots[] → document_type=asset_content, nommés "Capture site existant #N"
+
+**Tests validés** :
+- ✅ RPC testée bout-en-bout sur lead `5b539147` (logo + charte + screenshot) : projet créé avec mapping correct + 4 documents en GED + qualif marquée converted.
+- ✅ tsc --noEmit clean après refacto + fix.
+- ⚠️ Test E2E preview (click sur conversion depuis LeadsV3 réel) à valider par Lyes.
+
+**Code review (44ff9a7)** : 4 findings, 4 fix appliqués.
+- HIGH 1 — v_notes mort dans RPC (migration 246 drop + planifié réintégration après ajout colonne notes)
+- HIGH 2 — cast `data as RpcResponse` unsafe (remplacé par type guard isRpcResponse())
+- MEDIUM 1 — numérotation screenshots #4 (corrigée via v_screenshot_idx dédié)
+- LOW 1 — import type pattern (commentaire ajouté)
+
+**Hors-périmètre détectés (backlog)** :
+- 244a — RLS qualification_leads_v2 (CRITIQUE RGPD) : reporté session sécu dédiée. Pattern header custom inutilisable en Supabase cloud → nécessite refacto Voie A (edge functions service_role qualification-{get,update}-draft + refacto front ~5-10 hooks).
+- BLOC 4 hard delete : 7 tables propulspace référent project_id sans FK CASCADE (analytics_events, audit_log, documents, invoices, onboarding_responses, project_steps, signatures) + Storage cleanup + `TypedDeleteDialog` composant + 2 branchements front. Session destructive dédiée.
+- Ajouter colonne `projects_v2.notes` puis réintégrer mapping v_notes (HIGH 1 différé).
+- ADR Storage cleanup policy : décider sort des fichiers `qualification/` orphelins après hard-delete.
+
+**Validation** : Lyes a piloté les choix archi (Voie A pour 244a, Option A pour GED file_url sans copie, BLOC 4 reporté).
