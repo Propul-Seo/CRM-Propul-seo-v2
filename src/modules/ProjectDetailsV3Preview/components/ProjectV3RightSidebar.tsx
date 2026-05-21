@@ -87,6 +87,7 @@ export function ProjectV3RightSidebar({ project, users, onContactSaved, onAssign
           name: project.name,
           portal_client_email: project.portal_client_email ?? null,
           portal_previous_client_email: project.portal_previous_client_email ?? null,
+          portal_activated_at: project.portal_activated_at ?? null,
         }}
         isAdmin={isAdmin}
         suggestedEmail={suggestedPortalEmail}
