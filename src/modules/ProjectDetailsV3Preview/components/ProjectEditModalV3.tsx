@@ -7,14 +7,17 @@ import type { ProjectV2, ProjectStatusV2, PrestaType } from '@/types/project-v2'
 
 interface TeamUser { id: string; name: string }
 
+import { PropulspaceDangerZone } from '@/modules/EspaceClient/admin/components/PropulspaceDangerZone'
+
 interface Props {
   project: ProjectV2
   users: TeamUser[]
   onSave: (updates: Partial<ProjectV2>) => Promise<void>
   onClose: () => void
+  onDeleted?: () => void
 }
 
-export function ProjectEditModalV3({ project, users, onSave, onClose }: Props) {
+export function ProjectEditModalV3({ project, users, onSave, onClose, onDeleted }: Props) {
   const [form, setForm] = useState({
     name:        project.name,
     description: project.description ?? '',
@@ -292,6 +295,17 @@ export function ProjectEditModalV3({ project, users, onSave, onClose }: Props) {
             >
               {saving ? 'Enregistrement…' : 'Enregistrer'}
             </button>
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-[rgba(239,68,68,0.2)]">
+            <p className="text-xs font-semibold text-red-400 mb-2">Zone dangereuse</p>
+            <PropulspaceDangerZone
+              kind="project"
+              projectId={project.id}
+              projectName={project.name}
+              onAfterArchive={() => { onClose(); onDeleted?.() }}
+              onAfterDelete={() => { onClose(); onDeleted?.() }}
+            />
           </div>
         </form>
       </div>

@@ -15,6 +15,7 @@ import type { QualificationDraft } from '@/modules/EspaceClient/qualification/sc
 import type { QualificationLead } from '../hooks/useLeadsV3Qualification'
 import { useConvertQualifLead } from '../hooks/useConvertQualifLead'
 import { useArchiveQualifLead } from '../hooks/useArchiveQualifLead'
+import { PropulspaceDangerZone } from '@/modules/EspaceClient/admin/components/PropulspaceDangerZone'
 
 interface Props {
   lead: QualificationLead | null
@@ -155,6 +156,14 @@ export function QualificationLeadDetailsSheet({ lead, open, onOpenChange, onActi
                 className="h-11 gap-1.5 rounded-xl border-[#2a1f3d] bg-transparent text-[#a78bfa] hover:border-[#a78bfa]/50 hover:bg-[#1a1233] hover:text-[#ede9fe]">
                 <Archive className="h-4 w-4" />Archiver
               </Button>
+            </div>
+            <div className="mt-2 flex justify-end">
+              <PropulspaceDangerZone
+                kind="lead"
+                leadId={lead.id}
+                leadName={lead.full_name || lead.email}
+                onAfterDelete={() => { onOpenChange(false); onActionComplete?.() }}
+              />
             </div>
           </div>
         </SheetContent>
