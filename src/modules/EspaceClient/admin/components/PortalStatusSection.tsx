@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import {
-  Lock, Unlock, Mail, MoreVertical, RefreshCw, Power, CheckCircle2, Loader2, AlertTriangle,
+  Lock, Unlock, MoreVertical, RefreshCw, Power, Loader2,
 } from 'lucide-react'
+import { usePortalState } from '../hooks/usePortalState'
+import { PortalStateCard } from './PortalStateCard'
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
@@ -47,17 +49,19 @@ export function PortalStatusSection({ project, isAdmin, suggestedEmail, primaryC
   const [deactivateOpen, setDeactivateOpen] = useState(false)
   const { activatePortal, resendInvite, deactivatePortal, isResending } = usePortalActivation()
 
+  const { data: stateRow, refresh: refreshState } = usePortalState(project.id)
+
   if (!isAdmin) return null
 
-  // 3 états :
-  // - inactive : pas d'email → pas de portail
-  // - pending  : email présent mais portal_activated_at NULL → incohérent
-  //              (email saisi manuellement sans envoi d'invitation officielle)
-  // - active   : email + portal_activated_at remplis → invitation envoyée
-  const hasEmail = !!project.portal_client_email
-  const inviteSent = !!project.portal_activated_at
-  const active = hasEmail && inviteSent
-  const pending = hasEmail && !inviteSent
+  // État réel calculé côté DB (vue propulspace_portal_state_v2 joint auth.users).
+  // 5 états distincts : inactive | orphan | broken | invited | active.
+  const state = stateRow?.state ?? 'inactive'
+  const hasEmail = state !== 'inactive'
+  const canResend = state === 'active' || state === 'invited'
+
+  async function refreshAll() {
+    await Promise.all([onRefresh(), refreshState()])
+  }
 
   async function handleActivate(payload: ActivatePortalPayload) {
     // 1) Création optionnelle du contact si l'admin a rempli prénom/nom/téléphone.
@@ -80,7 +84,7 @@ export function PortalStatusSection({ project, isAdmin, suggestedEmail, primaryC
       toast.success('Portail activé', {
         description: `Le client recevra un email d'invitation à ${payload.email} dans quelques minutes.`,
       })
-      await onRefresh()
+      await refreshAll()
     }
     return result
   }
@@ -92,7 +96,7 @@ export function PortalStatusSection({ project, isAdmin, suggestedEmail, primaryC
       toast.success('Lien d\'accès renvoyé', {
         description: `Un nouveau lien a été envoyé à ${project.portal_client_email}.`,
       })
-      await onRefresh()
+      await refreshAll()
     } else {
       toast.error('Impossible de renvoyer le lien', { description: result.error })
     }
@@ -104,7 +108,7 @@ export function PortalStatusSection({ project, isAdmin, suggestedEmail, primaryC
       toast.success('Portail désactivé', {
         description: 'L\'accès du client expirera au prochain rafraîchissement.',
       })
-      await onRefresh()
+      await refreshAll()
     }
     return result
   }
@@ -133,7 +137,7 @@ export function PortalStatusSection({ project, isAdmin, suggestedEmail, primaryC
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              {active && (
+              {canResend && (
                 <DropdownMenuItem onClick={handleResend} disabled={isResending}>
                   {isResending
                     ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -153,39 +157,12 @@ export function PortalStatusSection({ project, isAdmin, suggestedEmail, primaryC
         )}
       </div>
 
-      {active && (
-        <div className="flex items-center gap-2 px-2.5 py-2 rounded-md bg-emerald-500/10 border border-emerald-500/30">
-          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-          <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-semibold text-emerald-300 uppercase tracking-wider">
-              Actif
-            </p>
-            <p className="text-xs text-[#ede9fe] truncate flex items-center gap-1 mt-0.5">
-              <Mail className="h-3 w-3 text-[#9ca3af] shrink-0" />
-              <span className="truncate">{project.portal_client_email}</span>
-            </p>
-          </div>
-        </div>
-      )}
-
-      {pending && (
-        <div className="px-2.5 py-2 rounded-md bg-amber-500/10 border border-amber-500/30">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-            <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-semibold text-amber-300 uppercase tracking-wider">
-                À régulariser
-              </p>
-              <p className="text-xs text-[#ede9fe] truncate flex items-center gap-1 mt-0.5">
-                <Mail className="h-3 w-3 text-[#9ca3af] shrink-0" />
-                <span className="truncate">{project.portal_client_email}</span>
-              </p>
-              <p className="mt-1 text-[10.5px] leading-snug text-amber-200/80">
-                Email présent mais aucune invitation officielle envoyée. Désactivez le portail puis réactivez-le pour envoyer le magic link.
-              </p>
-            </div>
-          </div>
-        </div>
+      {hasEmail && stateRow && (
+        <PortalStateCard
+          state={stateRow.state}
+          email={stateRow.portal_client_email}
+          lastLoginAt={stateRow.last_login_at}
+        />
       )}
 
       {!hasEmail && (
