@@ -7,12 +7,12 @@
 
 ## 1. État global
 
-- **Sprint en cours** : Test E2E complet validé bout-en-bout (qualif → projet → portail → wizard). Brevo SMTP branché (port 587).
-- **Tâche en cours** : reste R-018 critique + 9 emails transactionnels Brevo + INDEX perf + switcher multi-projets.
-- **Phase produit** : Phase 2 livrée à 95% (toutes les briques + chaîne E2E debug). Reste sécu R-018 et exploitation.
+- **Sprint en cours** : R-018 fermé. Test E2E complet validé. Brevo SMTP branché (port 587).
+- **Tâche en cours** : reste 9 emails transactionnels Brevo + INDEX perf + switcher multi-projets + tests pgTAP (R-007).
+- **Phase produit** : Phase 2 livrée à **97%** (R-018 RGPD critique fermé). Reste exploitation (Brevo emails) + R-019 audit RLS tables liées.
 - **Branche** : `feature/propulspace-phase-2-front` (exception multi-phases assumée, merge dans `main` fin Phase 2 après QA validée)
 - **Project Supabase** : ERP (`tbuqctfgjjxnevmsvucl`)
-- **Dernière mise à jour** : 2026-05-21 PM — Session XXL : 12 migrations (247→258) + BLOC 4 destructive + badges santé portail + enrichissement 4 pages portail + onglet Questionnaire + chaîne E2E fixée.
+- **Dernière mise à jour** : 2026-05-21 PM (session R-018) — 5 migrations RLS (259→263) + script tests SQL versionné + plan superpowers + tag git r-018-resolved. Fuite RGPD critique fermée (7/7 tests PASS).
 
 ---
 
@@ -48,6 +48,52 @@
 ## 3. Journal des tâches (cumulatif)
 
 > Ordre chronologique. Une entrée par tâche close.
+
+### ✅ R-018 — Refonte policy RLS projects_v2 (terminé 2026-05-21 PM)
+**Démarré** : 2026-05-21 (session R-018)
+**Terminé** : 2026-05-21 (commit à venir, tag git r-018-resolved)
+**Périmètre** : fermeture du trou RGPD critique. Ancienne policy `authenticated_all_projects_v2 FOR ALL USING (true)` laissait tout authentifié lire les 51 projets (incluant les clients portail).
+
+**Migrations appliquées (5)** :
+- 259 : helper `public.is_team_member()` (présence dans public.users avec role non-NULL)
+- 260 : extension `guard_portal_columns_admin_only` — approche jsonb whitelist [client_first_name, client_phone, client_company, updated_at, last_activity_at], fail-safe pour nouvelles colonnes
+- 261 : ajout des 3 nouvelles policies en mode additif (zéro impact app)
+- 262 : DROP de l'ancienne policy `authenticated_all_projects_v2` (bascule critique)
+- 263 : COMMENT ON TABLE + vérification atomique (RLS active, 3 policies, 1 trigger, 2 helpers)
+
+**Architecture finale** :
+| Policy | Cmd | USING |
+|---|---|---|
+| `projects_v2_team_all` | FOR ALL | `public.is_team_member()` |
+| `projects_v2_portal_select` | FOR SELECT | `id = propulspace.portal_project_id()` |
+| `projects_v2_portal_update` | FOR UPDATE | `id = propulspace.portal_project_id()` |
+
+Plus le trigger BEFORE UPDATE `trg_guard_portal_columns_admin_only` qui restreint les colonnes éditables côté portail à la whitelist.
+
+**Tests (7/7 PASS post-bascule)** : `tests/sql/projects_v2_rls.sql`
+- T1 admin voit 51 ✓
+- T2 sales voit 51 ✓
+- T3 portail voit 1 ✓
+- T4 portail ne voit pas le voisin ✓
+- T5 portail update son client_phone ✓
+- T6 portail ne peut pas update budget ✓
+- T7 portail ne peut pas update voisin ✓
+
+**Code review consolidée** (subagent feature-dev:code-reviewer) : 8 issues remontées, 2 vraies fixées (#1 drift migrations repo↔prod → 3 fichiers SQL versionnés ; #5 trigger jsonb confirmé en prod), 6 faux positifs documentés. `npm run build` clean.
+
+**Validation runtime à faire côté Lyes** :
+- [ ] CRM admin (team@propulseo-site.com) → Leads V3 affiche tous les projets
+- [ ] CRM sales (lebouterlucie@gmail.com) → Leads V3 affiche tous les projets
+- [ ] Portail client (lyes.triki@matera.eu) → /espace-client affiche uniquement le projet Miraux
+- [ ] Portail client → édition téléphone sur /profil → succès
+- [ ] Conversion lead→projet depuis CRM → projet créé, contact créé
+
+**Hors-périmètre** :
+- Conversion script SQL → pgTAP différée à R-007 (Sprint sécu dédié)
+- Audit policies sur `tasks`, `clients`, autres tables liées → R-019 futur
+- Issue 7 du code review (script tests hardcode `062020220`) : non bloquant, projet test, à nettoyer si on convertit en pgTAP
+
+---
 
 ### ✅ Hot fixes QA + isolation sessions auth CRM ↔ portail (terminé 2026-05-18 PM)
 **Démarré** : 2026-05-18 (après-midi, début QA E2E)

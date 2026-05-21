@@ -20,9 +20,10 @@ interface ProfileUpdates {
  * - changePassword : utilise supabase.auth.updateUser pour changer le mot de
  *   passe du compte connecté
  *
- * NB : la table projects_v2 a actuellement une policy permissive FOR ALL TO
- *      authenticated USING (true) (R-018 à corriger). On compense côté UI en
- *      filtrant par project.id du contexte portail.
+ * Sécurité : la table projects_v2 a une RLS scopée (R-018) qui restreint
+ *      le portail à son projet + 3 colonnes (client_first_name/phone/company).
+ *      Toute tentative d'update d'une autre colonne est rejetée par le trigger
+ *      guard_portal_columns_admin_only avec une erreur "insufficient_privilege".
  */
 export function usePortalProfileMutations() {
   const { project } = usePortal()
