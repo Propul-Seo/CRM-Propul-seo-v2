@@ -50,6 +50,9 @@ export function formatSize(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} Mo`
 }
 
+export type DocSource = 'crm' | 'portal'
+export type DocBucket = 'project-documents' | 'propulspace-documents' | 'propulspace-uploads' | 'external'
+
 export interface Doc {
   id: string
   project_id: string
@@ -61,4 +64,8 @@ export interface Doc {
   mime_type: string | null
   uploader_name: string | null
   created_at: string
+  source: DocSource
+  bucket: DocBucket
+  description: string | null
+  document_type: string | null
 }

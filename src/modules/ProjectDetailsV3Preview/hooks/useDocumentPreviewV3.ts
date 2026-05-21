@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
-import { BUCKET, type Doc } from '../tabs/documents/constants'
+import { type Doc } from '../tabs/documents/constants'
 import type { PreviewDocument } from '../components/DocumentPreviewModal'
 
 const SIGNED_URL_TTL_SECONDS = 600
@@ -22,8 +22,13 @@ export function useDocumentPreviewV3() {
       file_size: doc.file_size,
     })
     setPreviewUrl(null)
+    // Lien externe (charte URL) : on l'utilise directement, pas de signed URL.
+    if (doc.bucket === 'external') {
+      setPreviewUrl(doc.file_path)
+      return
+    }
     const { data, error } = await supabase.storage
-      .from(BUCKET)
+      .from(doc.bucket)
       .createSignedUrl(doc.file_path, SIGNED_URL_TTL_SECONDS)
     if (error || !data?.signedUrl) {
       toast.error('Erreur génération lien d’aperçu')
