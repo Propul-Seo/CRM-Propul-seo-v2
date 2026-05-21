@@ -111,16 +111,14 @@ export function useWelcomeWizard(projectId: string): UseWelcomeWizardResult {
         return;
       }
 
-      // Fetch qualif si rattachée (le backfill 230 a peuplé inherited_from_qualification_id).
+      // Fetch qualif si rattachée. On passe par la RPC portal_get_qualif_prefill
+      // (SECURITY DEFINER) qui contourne la policy admin-only sur
+      // qualification_leads — un client portail ne peut pas SELECT direct.
       let qualif: QualificationLead | null = null;
       if (rowData.inherited_from_qualification_id) {
-        const { data: qData } = await supabase
-          .schema('propulspace')
-          .from('qualification_leads')
-          .select('id, full_name, email, phone, company_name, business_sector, main_goal, budget_range, desired_timeline, desired_features')
-          .eq('id', rowData.inherited_from_qualification_id)
-          .maybeSingle();
-        qualif = (qData as QualificationLead) ?? null;
+        const { data: qRows } = await supabase.rpc('portal_get_qualif_prefill');
+        const qRow = Array.isArray(qRows) && qRows.length > 0 ? qRows[0] : null;
+        qualif = (qRow as QualificationLead) ?? null;
       }
 
       // Pré-remplissage one-shot des welcome_* depuis la qualif si vides.
