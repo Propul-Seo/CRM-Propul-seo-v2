@@ -57,6 +57,9 @@ export function TypedDeleteDialog({
     try {
       await fn()
       onOpenChange(false)
+    } catch {
+      // L'erreur a déjà été notifiée par le callback (toast côté DangerZone).
+      // On garde le dialog ouvert pour permettre une nouvelle tentative.
     } finally {
       setBusy(null)
     }

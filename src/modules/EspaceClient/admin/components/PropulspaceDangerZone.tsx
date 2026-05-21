@@ -65,22 +65,21 @@ export function PropulspaceDangerZone(props: DangerZoneProps) {
           label: 'Archiver à la place',
           onConfirm: async () => {
             const res = await archiveProject(props.projectId)
-            if (res.success) { toast.success('Projet archivé'); props.onAfterArchive() }
-            else toast.error(res.error ?? 'Erreur')
+            if (!res.success) { toast.error(res.error ?? 'Erreur'); throw new Error(res.error ?? 'archive failed') }
+            toast.success('Projet archivé'); props.onAfterArchive()
           },
         } : undefined}
         deleteCta={{
           label: hasLegalData ? 'Supprimer définitivement' : 'Supprimer',
           onConfirm: async () => {
             const res = await deleteProject(props.projectId, hasLegalData)
-            if (res.success) {
-              const cleanup = res.storageCleanup
-              const msg = cleanup && cleanup.deleted > 0
-                ? `Projet supprimé (${cleanup.deleted} fichier${cleanup.deleted > 1 ? 's' : ''} Storage nettoyé${cleanup.deleted > 1 ? 's' : ''})`
-                : 'Projet supprimé'
-              toast.success(msg)
-              props.onAfterDelete()
-            } else toast.error(res.error ?? 'Erreur')
+            if (!res.success) { toast.error(res.error ?? 'Erreur'); throw new Error(res.error ?? 'delete failed') }
+            const cleanup = res.storageCleanup
+            const msg = cleanup && cleanup.deleted > 0
+              ? `Projet supprimé (${cleanup.deleted} fichier${cleanup.deleted > 1 ? 's' : ''} Storage nettoyé${cleanup.deleted > 1 ? 's' : ''})`
+              : 'Projet supprimé'
+            toast.success(msg)
+            props.onAfterDelete()
           },
         }}
       />
@@ -100,8 +99,8 @@ export function PropulspaceDangerZone(props: DangerZoneProps) {
           label: 'Supprimer définitivement',
           onConfirm: async () => {
             const res = await deleteQualifLead(props.leadId)
-            if (res.success) { toast.success('Lead supprimé'); props.onAfterDelete() }
-            else toast.error(res.error ?? 'Erreur')
+            if (!res.success) { toast.error(res.error ?? 'Erreur'); throw new Error(res.error ?? 'delete failed') }
+            toast.success('Lead supprimé'); props.onAfterDelete()
           },
         }}
       />

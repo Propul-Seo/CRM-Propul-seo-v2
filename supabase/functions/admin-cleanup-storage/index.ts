@@ -72,8 +72,17 @@ serve(async (req) => {
 
     // 2. Parse input
     const body = await req.json() as CleanupInput;
-    const docPaths = (body.documents_bucket_paths ?? []).filter(p => typeof p === 'string' && p.length > 0);
-    const upPaths  = (body.uploads_bucket_paths   ?? []).filter(p => typeof p === 'string' && p.length > 0);
+    // Validation stricte des paths : pas de path absolu, pas de traversée, pas de \0,
+    // longueur raisonnable. Empêche un admin authentifié de supprimer des fichiers
+    // arbitraires en bypassant les RPC (qui retournent les paths "officiels").
+    const isSafePath = (p: unknown): p is string => {
+      if (typeof p !== 'string' || p.length === 0 || p.length > 1024) return false;
+      if (p.startsWith('/') || p.startsWith('\\')) return false;
+      if (p.includes('..') || p.includes('\0')) return false;
+      return true;
+    };
+    const docPaths = (body.documents_bucket_paths ?? []).filter(isSafePath);
+    const upPaths  = (body.uploads_bucket_paths   ?? []).filter(isSafePath);
 
     if (docPaths.length === 0 && upPaths.length === 0) {
       return new Response(JSON.stringify({ deleted: 0, errors: [] }), {
