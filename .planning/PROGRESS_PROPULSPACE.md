@@ -7,12 +7,12 @@
 
 ## 1. État global
 
-- **Sprint en cours** : **Sprint B.2.6 — Routage Site/ERP + Lead→Projet** ✅ + **Debug session E2E** ✅ — Brevo fonctionnel + flow E2E validé.
-- **Tâche en cours** : Session B (autre jour) — P1 enrichir mapping qualif→projet, P2 fix H1 atomicité, P3 refacto LeadsV3Page <200, P4 hard delete leads/projets.
-- **Phase produit** : Phase 2 (welcome wizard + qualif refondue + routage Site/ERP + flow E2E debug livré, Brevo branché, QA E2E à dérouler).
+- **Sprint en cours** : Test E2E complet validé bout-en-bout (qualif → projet → portail → wizard). Brevo SMTP branché (port 587).
+- **Tâche en cours** : reste R-018 critique + 9 emails transactionnels Brevo + INDEX perf + switcher multi-projets.
+- **Phase produit** : Phase 2 livrée à 95% (toutes les briques + chaîne E2E debug). Reste sécu R-018 et exploitation.
 - **Branche** : `feature/propulspace-phase-2-front` (exception multi-phases assumée, merge dans `main` fin Phase 2 après QA validée)
 - **Project Supabase** : ERP (`tbuqctfgjjxnevmsvucl`)
-- **Dernière mise à jour** : 2026-05-20 fin journée — Debug session E2E (4 bugs fixés + UI dark + Migration 243).
+- **Dernière mise à jour** : 2026-05-21 PM — Session XXL : 12 migrations (247→258) + BLOC 4 destructive + badges santé portail + enrichissement 4 pages portail + onglet Questionnaire + chaîne E2E fixée.
 
 ---
 
@@ -786,3 +786,69 @@ Bloc E — Code review :
 - ADR Storage cleanup policy : décider sort des fichiers `qualification/` orphelins après hard-delete.
 
 **Validation** : Lyes a piloté les choix archi (Voie A pour 244a, Option A pour GED file_url sans copie, BLOC 4 reporté).
+
+---
+
+### ✅ Session XXL — Sécu R-012 + BLOC 4 + Sprint C + Pages portail + Test E2E (terminé 2026-05-21 PM)
+**Démarré** : 2026-05-21 matin
+**Terminé** : 2026-05-21 PM (12 commits poussés : 2bf3b0e → ff41fb4)
+**Périmètre** : 12 migrations (247→258), 1 nouvelle edge function, 9 nouveaux composants/hooks front, chaîne E2E débuggée bout-en-bout.
+
+**Migrations** :
+- **247** — Fix R-012 critique : `qualification_leads_v2` security_invoker=true + nouvelle policy `ps_qualif_team_select` (équipe agence complète). Découvert en pre-flight : la vue exposait tous les leads à tout `authenticated`. Nouvelle fonction `propulspace.is_propulseo_team()` (6 rôles : admin/manager/sales/marketing/developer/ops).
+- **248** — RPC archive/delete projets/leads (SECURITY DEFINER, admin/manager only) + colonne `projects_v2.archived_at` + FK CASCADE invoices/signatures.
+- **249** — Vue `projects_portal_health_v2` pour badges santé portail sur ProjectCardV3 (factures en retard, signatures en attente, last_sign_in_at).
+- **250** — Clean SQL des 5 portails fantômes (DISABLE TRIGGER + UPDATE + ENABLE) + vue `propulspace_portal_state_v2` (5 états : inactive/orphan/broken/invited/active).
+- **251** — Fix 403 : les vues 249+250 passées de security_invoker=true à SECURITY DEFINER pour pouvoir joindre `auth.users`. Le filtre `WHERE is_propulseo_team()` compense.
+- **252** — Wrapper `public.admin_convert_qualif_to_project` manquant (404 PostgREST).
+- **253** — RPC conversion ne remplit plus `portal_client_email` (conflit avec admin-portal-invite qui refusait 409).
+- **254** — Vue `project_documents_unified_v2` UNION CRM + portail. Mapping document_type → category. Champ `bucket` calculé.
+- **255** — RPC crée auto un contact CRM (role 'primary') + liaison `project_contacts`.
+- **256** — RPC ajoute activité auto 'system' "Questionnaire rempli" dans timeline + backfill.
+- **257** — RPC `portal_get_qualif_prefill()` SECURITY DEFINER pour permettre au WelcomeWizard de récupérer les coordonnées qualif sans bypass RLS.
+- **258** — RPC crée le row `onboarding_responses` lié à la qualif (`inherited_from_qualification_id`) + backfill. Sans ça le WelcomeWizard demandait au client "remplir le questionnaire" alors qu'il l'avait fait.
+
+**Edge function** :
+- **admin-cleanup-storage** v2 (déployée) : suppression fichiers Storage via service_role avec validation `isSafePath` anti-traversal (pas de `..`, pas de path absolu, longueur max 1024).
+
+**Composants front nouveaux** :
+- `TypedDeleteDialog` (composant pur réutilisable) + `PropulspaceDangerZone` (logique métier delete projet/lead) + `usePropulspaceDeletion` (hook RPC + cleanup Storage)
+- `PortalHealthBadges` + `usePortalHealth` (badges kanban)
+- `PortalStateCard` + `usePortalState` (rendu 5 états distincts dans sidebar admin)
+- `usePortalProjectDetails` + `usePortalProfileMutations` (hooks portail client)
+- `QuestionnaireTabV3` (nouvel onglet fiche projet, réutilise `RecapAccordion`)
+
+**Pages portail enrichies** :
+- ProjectPage : 3 sections (Infos / Référent agence / Avancement timeline)
+- ProfilePage : édition coordonnées (UPDATE projects_v2) + changer mot de passe (`supabase.auth.updateUser`)
+- DocumentsPage : barre recherche + 5 pills filtres + EmptyState contextualisé
+- HelpPage : 5 accès rapide vers autres pages + recherche FAQ + 2 nouvelles FAQ
+
+**Branchements UI** :
+- `QualificationLeadDetailsSheet` : bouton "Supprimer définitivement" sous "Archiver"
+- `ProjectEditModalV3` : section "Zone dangereuse" + prop optionnelle `onDeleted` (parent navigue vers liste projets)
+- `ProjectCardV3` + `SortableProjectCardV3` : prop optionnelle `portalHealth?` + render `PortalHealthBadges`
+- `PortalStatusSection` : refonte complète (5 états via hook + composant)
+- `ProjectV3Tabs` : nouvel onglet "Questionnaire" entre Brief et Documents
+
+**Test E2E partiel validé** :
+- Qualif `/diagnostic` → submit → lead apparaît LeadsV3
+- Conversion atomique → projet créé avec : description markdown, contact auto, activité auto, documents GED unifiés
+- Activation portail → email reçu via Brevo (SMTP branché port 587)
+- Setup mot de passe → connexion `/espace-client`
+- ⚠️ WelcomeWizard pré-remplissage : code en place mais Lyes a démarré le wizard avant backfill 258 → champs welcome_* restent NULL. Au prochain reload, le pré-remplissage devrait fonctionner.
+
+**Code review** : 3 findings, 1 vrai fix appliqué (handleDelete utilise désormais `doc.bucket` dynamique au lieu de constante hardcodée). 2 faux positifs documentés.
+
+**Hors-périmètre détectés (backlog priorisé)** :
+- 🔴 **R-018 CRITIQUE** : `public.projects_v2` policy `FOR ALL TO authenticated USING (true)` → tout authenticated voit tous projets (fuite RGPD pour clients portail). À refaire avec 2 policies séparées (admin/team FOR ALL + portail FOR SELECT WHERE id IN portal_project_ids()).
+- 🟠 **Bug invitation portail** : observé "Activation..." qui tourne dans le vide, logs montrent 200 mais portal_client_email NULL en DB. À reproduire avec Network response body côté browser.
+- 🟠 **9 emails Brevo transactionnels** : templates HTML existent (`public/handoff-preview-v2/emails/`), edge functions à créer pour invoice-sent, payment-received, signature-requested, signature-completed, deliverable, portal-welcome, qualif-confirmation, invoice-reminder, new-deliverable.
+- 🟡 **R-009** (5 min) : INDEX sur `projects_v2.portal_client_email`.
+- 🟡 **R-014** (15 min) : retirer try/catch silencieux dans `handle_new_user()`.
+- 🟡 **Validation URL externe** : champ `brand_guide_external_link` devrait être normalisé (forcer http://) côté form qualif pour éviter edge case bucket='external' raté.
+- 🟡 **ADR-004 multi-projets** : implémenter switcher portail (PortalContext.projects + activeProject).
+- 🟡 **R-007** : zéro test automatisé. Au minimum pgTAP sur RPC critiques + Vitest sur hooks portail.
+- 🟢 **A.2b** "reportée" dans le PROGRESS est en fait livrée (vu en preview : `/espace-client/login` a déjà "Mot de passe oublié" + "Recevoir un lien à la place"). Marquer cochée.
+
+**Validation** : Lyes a piloté tous les arbitrages (Approche B badges au lieu Vue 10, Option C archive/delete forcé, Option A vue unifiée documents, onglet Questionnaire séparé du Brief).

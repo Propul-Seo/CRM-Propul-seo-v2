@@ -115,10 +115,10 @@ export function DocumentsTabV3({ project }: Props) {
       return
     }
     try {
-      if (doc.file_path) {
-        const { error: storageError } = await supabase.storage.from(BUCKET).remove([doc.file_path])
+      if (doc.file_path && doc.bucket !== 'external') {
+        const { error: storageError } = await supabase.storage.from(doc.bucket).remove([doc.file_path])
         if (storageError) {
-          console.error('[DocumentsTabV3] storage.remove failed', { path: doc.file_path, error: storageError })
+          console.error('[DocumentsTabV3] storage.remove failed', { path: doc.file_path, bucket: doc.bucket, error: storageError })
           throw new Error(`Suppression du fichier impossible : ${storageError.message}`)
         }
       }
