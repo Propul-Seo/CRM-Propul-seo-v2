@@ -26,6 +26,7 @@ import { SortableProjectCardV3Compact } from './components/SortableProjectCardV3
 import { statusToColumn, V3_COLUMN_ORDER, type V3Column } from './utils/statusMapping'
 import { getActivePoles, type V3Pole } from './utils/poleMapping'
 import { useProjectDragDropV3 } from './hooks/useProjectDragDropV3'
+import { usePortalHealth } from './hooks/usePortalHealth'
 import type { ProjectV2 } from '@/types/project-v2'
 
 const VIEW_MODE_STORAGE_KEY = 'propulseo:projects-v3:view-mode'
@@ -48,6 +49,7 @@ function useDebounced<T>(value: T, delay: number): T {
 export function ProjectsV3Page() {
   const navigate = useNavigate()
   const { projects, loading, updateProjectStatus, addProject } = useProjectsV3()
+  const { byProjectId: portalHealthByProjectId } = usePortalHealth()
   const [newOpen, setNewOpen] = useState(false)
 
   const [filterUserId, setFilterUserId] = useState('')
@@ -202,6 +204,7 @@ export function ProjectsV3Page() {
                       project={project}
                       index={index}
                       onClick={() => navigate(`/projets-v3-preview/${project.id}`)}
+                      portalHealth={portalHealthByProjectId.get(project.id)}
                     />
                   )
                 ))}
