@@ -51,7 +51,7 @@
 
 ### ✅ R-018 — Refonte policy RLS projects_v2 (terminé 2026-05-21 PM)
 **Démarré** : 2026-05-21 (session R-018)
-**Terminé** : 2026-05-21 (commit à venir, tag git r-018-resolved)
+**Terminé** : 2026-05-21 (commits d9eea21 / 59693c9, tag r-018-resolved). Validation runtime browser 2026-05-22.
 **Périmètre** : fermeture du trou RGPD critique. Ancienne policy `authenticated_all_projects_v2 FOR ALL USING (true)` laissait tout authentifié lire les 51 projets (incluant les clients portail).
 
 **Migrations appliquées (5)** :
