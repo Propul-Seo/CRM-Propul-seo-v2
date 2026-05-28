@@ -1,22 +1,14 @@
-// Edge Function : envoi de l'email équipe après soumission du questionnaire
-// de qualification (/diagnostic).
+// questionnaire-send-emails — Sprint B.2 / Phase 2
+// Envoie 2 emails après soumission du questionnaire /diagnostic :
+//   - #31 qualif-confirmation au lead (client)
+//   - #32 new-lead-alert à l'équipe interne
 //
-// Architecture :
-// - Récupère le lead via service_role (bypass RLS)
-// - Envoie un email via Brevo API à TEAM_EMAIL
-// - Fallback graceful si BREVO_API_KEY non configurée (retourne 200 + sent:false)
-//
-// Secrets attendus (à set par Lyes) :
-//   BREVO_API_KEY        — clé v3 Brevo (Settings → SMTP & API)
-//   BREVO_SENDER_EMAIL   — défaut: lyes.triki@propulseo-site.com (sender vérifié)
-//   BREVO_SENDER_NAME    — défaut: 'Propulseo'
-//   TEAM_EMAIL           — défaut: team@propulseo-site.com
-//
-// Invocation :
-//   await supabase.functions.invoke('questionnaire-send-emails', { body: { lead_id } });
+// Migration 2026-05-27 : passage au helper _shared/brevo.ts (templates versionnés,
+// dedupe via propulspace.transactional_emails_sent).
 
-import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { sendTransactional } from '../_shared/brevo.ts';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -26,9 +18,6 @@ const CORS_HEADERS = {
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-const BREVO_API_KEY = Deno.env.get('BREVO_API_KEY') ?? '';
-const BREVO_SENDER_EMAIL = Deno.env.get('BREVO_SENDER_EMAIL') ?? 'lyes.triki@propulseo-site.com';
-const BREVO_SENDER_NAME = Deno.env.get('BREVO_SENDER_NAME') ?? 'Propulseo';
 const TEAM_EMAIL = Deno.env.get('TEAM_EMAIL') ?? 'team@propulseo-site.com';
 const CRM_BASE_URL = Deno.env.get('CRM_BASE_URL') ?? 'https://crm.propulseo-site.com';
 
@@ -43,74 +32,7 @@ interface Lead {
   budget_range: string | null;
   desired_timeline: string | null;
   main_goal: string | null;
-  submitted_at: string | null;
-}
-
-const PROJECT_TYPE_LABELS: Record<string, string> = {
-  site:     '🌐 Site web',
-  site_erp: '🧩 Site web + ERP',
-  erp:      '⚙️ ERP / Outil métier',
-};
-
-// Échappe les caractères HTML pour éviter une injection XSS depuis les champs
-// libres du questionnaire (un nom comme `<script>...</script>` deviendrait du
-// HTML brut dans l'email équipe).
-function escHtml(s: string | null | undefined): string {
-  return (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
-function buildEmailHtml(lead: Lead): string {
-  const row = (label: string, value: string | null | undefined) => value
-    ? `<tr><td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:13px;">${escHtml(label)}</td><td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;color:#111827;font-size:14px;font-weight:500;">${escHtml(value)}</td></tr>`
-    : '';
-  const projectLabel = lead.project_type ? PROJECT_TYPE_LABELS[lead.project_type] ?? lead.project_type : null;
-  const headerTitle = escHtml(lead.company_name ?? lead.full_name ?? lead.email);
-  const leadIdSafe = escHtml(lead.id);
-
-  return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Nouveau lead diagnostic</title></head>
-<body style="margin:0;padding:0;background:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <div style="max-width:600px;margin:32px auto;background:white;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);">
-    <div style="background:linear-gradient(135deg,#0ea5e9 0%,#8b5cf6 50%,#ec4899 100%);padding:24px 32px;color:white;">
-      <div style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;opacity:0.9;">Nouveau lead diagnostic</div>
-      <div style="font-size:22px;font-weight:bold;margin-top:4px;">${headerTitle}</div>
-    </div>
-    <table style="width:100%;border-collapse:collapse;">
-      ${row('Type de projet', projectLabel)}
-      ${row('Contact',        lead.full_name)}
-      ${row('Email',          lead.email)}
-      ${row('Téléphone',      lead.phone)}
-      ${row('Entreprise',     lead.company_name)}
-      ${row('Secteur',        lead.business_sector)}
-      ${row('Budget',         lead.budget_range)}
-      ${row('Délai',          lead.desired_timeline)}
-      ${row('Objectif',       lead.main_goal)}
-    </table>
-    <div style="padding:24px 32px;text-align:center;background:#f9fafb;border-top:1px solid #e5e7eb;">
-      <a href="${CRM_BASE_URL}/leads-v3" style="display:inline-block;background:linear-gradient(135deg,#0ea5e9,#8b5cf6);color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Voir le lead dans le CRM →</a>
-      <div style="margin-top:16px;font-size:12px;color:#9ca3af;">ID: ${leadIdSafe}</div>
-    </div>
-  </div>
-</body></html>`;
-}
-
-async function sendEmail(lead: Lead): Promise<{ ok: boolean; error?: string }> {
-  const subject = `🌟 Nouveau lead diagnostic — ${lead.company_name ?? lead.full_name ?? lead.email}`;
-  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-    method: 'POST',
-    headers: { 'accept': 'application/json', 'api-key': BREVO_API_KEY, 'content-type': 'application/json' },
-    body: JSON.stringify({
-      sender: { email: BREVO_SENDER_EMAIL, name: BREVO_SENDER_NAME },
-      to: [{ email: TEAM_EMAIL }],
-      subject,
-      htmlContent: buildEmailHtml(lead),
-    }),
-  });
-  if (!res.ok) {
-    const errText = await res.text();
-    return { ok: false, error: `Brevo ${res.status}: ${errText}` };
-  }
-  return { ok: true };
+  preferred_contact_method: string | null;
 }
 
 serve(async (req) => {
@@ -124,18 +46,10 @@ serve(async (req) => {
       });
     }
 
-    if (!BREVO_API_KEY) {
-      console.log('[questionnaire-send-emails] BREVO_API_KEY non configurée — skip envoi');
-      return new Response(
-        JSON.stringify({ ok: true, sent: false, reason: 'BREVO_API_KEY not configured (admin must set secret)' }),
-        { headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } },
-      );
-    }
-
     const supa = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
     const { data: lead, error: fetchErr } = await supa
       .from('qualification_leads_v2')
-      .select('id, full_name, email, phone, company_name, business_sector, project_type, budget_range, desired_timeline, main_goal, submitted_at')
+      .select('id, full_name, email, phone, company_name, business_sector, project_type, budget_range, desired_timeline, main_goal, preferred_contact_method')
       .eq('id', body.lead_id)
       .single();
 
@@ -145,14 +59,42 @@ serve(async (req) => {
       });
     }
 
-    const result = await sendEmail(lead as Lead);
-    if (!result.ok) {
-      console.error('[questionnaire-send-emails] envoi échoué:', result.error);
-      return new Response(JSON.stringify({ ok: false, sent: false, error: result.error }), {
-        status: 500, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-      });
-    }
-    return new Response(JSON.stringify({ ok: true, sent: true, to: TEAM_EMAIL }), {
+    const l = lead as Lead;
+    const firstName = (l.full_name ?? '').split(' ')[0] || 'bonjour';
+
+    // #31 qualif-confirmation → client
+    const clientResult = await sendTransactional({
+      templateKey: 'qualif-confirmation',
+      to: { email: l.email, name: l.full_name ?? undefined },
+      params: {
+        first_name: firstName,
+        preferred_contact_method: l.preferred_contact_method ?? 'email',
+      },
+      dedupeKey: `${l.id}-lead`,
+    });
+
+    // #32 new-lead-alert → équipe (sans quality_score pour l'instant, à brancher si présent en DB)
+    const teamResult = await sendTransactional({
+      templateKey: 'new-lead-alert',
+      to: { email: TEAM_EMAIL, name: 'Équipe Propul\'SEO' },
+      params: {
+        company_name: l.company_name ?? '(sans nom)',
+        first_name: l.full_name ?? '',
+        sector: l.business_sector ?? '',
+        budget: l.budget_range ?? '',
+        timeline: l.desired_timeline ?? '',
+        quality_score: '',
+        lead_id: l.id,
+        admin_url: `${CRM_BASE_URL}/leads-v3`,
+      },
+      dedupeKey: `${l.id}-team`,
+    });
+
+    return new Response(JSON.stringify({
+      ok: clientResult.ok && teamResult.ok,
+      client: clientResult,
+      team: teamResult,
+    }), {
       headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
     });
   } catch (err) {
