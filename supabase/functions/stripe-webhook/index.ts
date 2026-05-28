@@ -5,6 +5,7 @@
 //   - checkout.session.completed → marque la cible (invoice OU installment) en 'paid'.
 //     Le trigger DB recalc_invoice_status_from_installments() recalcule
 //     automatiquement le statut de la facture parent (paid / partially_paid).
+//     Envoie également le template #35 payment-received au client.
 //   - payment_intent.payment_failed → log dans audit_log (admin visible).
 //
 // Idempotence : insertion préalable dans propulspace.stripe_webhook_events
@@ -19,10 +20,13 @@
 // Env requis :
 //   - STRIPE_SECRET_KEY
 //   - STRIPE_WEBHOOK_SECRET (whsec_…)
+//   - BREVO_API_KEY (optionnel — email non envoyé si absent)
+//   - PORTAL_BASE_URL (optionnel — défaut https://espace.propulseo-site.com)
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import Stripe from 'https://esm.sh/stripe@14.21.0?target=deno'
+import { sendTransactional } from '../_shared/brevo.ts'
 
 function plainResponse(body: string, status: number) {
   return new Response(body, { status, headers: { 'Content-Type': 'text/plain' } })
@@ -178,10 +182,100 @@ serve(async (req) => {
 
       if (metadata.target_type === 'invoice' && metadata.target_id) {
         const r = await markInvoicePaid(supabaseAdmin, metadata.target_id, paymentIntentId)
-        if (!r.ok) processingError = r.error ?? 'mark invoice paid failed'
+        if (!r.ok) {
+          processingError = r.error ?? 'mark invoice paid failed'
+        } else {
+          // #35 payment-received — dedupe sur stripe_event_id pour idempotence webhook retry
+          try {
+            const { data: invoice } = await supabaseAdmin
+              .schema('propulspace')
+              .from('invoices')
+              .select('id, invoice_number, amount_total, paid_at, project_id')
+              .eq('id', metadata.target_id)
+              .single()
+
+            if (invoice) {
+              const { data: project } = await supabaseAdmin
+                .from('projects_v2')
+                .select('portal_client_email, client_first_name')
+                .eq('id', invoice.project_id)
+                .single()
+
+              if (project?.portal_client_email) {
+                await sendTransactional({
+                  templateKey: 'payment-received',
+                  to: { email: project.portal_client_email, name: project.client_first_name ?? undefined },
+                  params: {
+                    first_name: project.client_first_name ?? '',
+                    invoice_number: invoice.invoice_number ?? '',
+                    amount: Number(invoice.amount_total ?? 0).toFixed(2),
+                    paid_at: new Date(invoice.paid_at ?? Date.now()).toLocaleDateString('fr-FR'),
+                    receipt_url: `${Deno.env.get('PORTAL_BASE_URL') ?? 'https://espace.propulseo-site.com'}/factures/${invoice.id}`,
+                  },
+                  dedupeKey: event.id,
+                })
+              }
+            }
+          } catch (err) {
+            console.error('[stripe-webhook] envoi #35 payment-received échec:', err)
+            // Ne pas faire échouer le webhook si l'email échoue (l'invoice est déjà marquée payée).
+          }
+        }
       } else if (metadata.target_type === 'installment' && metadata.target_id) {
         const r = await markInstallmentPaid(supabaseAdmin, metadata.target_id, paymentIntentId)
-        if (!r.ok) processingError = r.error ?? 'mark installment paid failed'
+        if (!r.ok) {
+          processingError = r.error ?? 'mark installment paid failed'
+        } else {
+          // #35 payment-received pour acompte — on remonte à la facture parent via invoice_id
+          try {
+            // invoice_id est dans la metadata Stripe (champ dédié) ou dans la table installments
+            const parentInvoiceId = metadata.invoice_id ?? null
+            if (parentInvoiceId) {
+              const { data: invoice } = await supabaseAdmin
+                .schema('propulspace')
+                .from('invoices')
+                .select('id, invoice_number, amount_total, paid_at, project_id')
+                .eq('id', parentInvoiceId)
+                .single()
+
+              if (invoice) {
+                const { data: project } = await supabaseAdmin
+                  .from('projects_v2')
+                  .select('portal_client_email, client_first_name')
+                  .eq('id', invoice.project_id)
+                  .single()
+
+                if (project?.portal_client_email) {
+                  // Pour un acompte, on récupère le montant de l'installment directement
+                  const { data: installment } = await supabaseAdmin
+                    .schema('propulspace')
+                    .from('invoice_installments')
+                    .select('amount, paid_at, installment_number, label')
+                    .eq('id', metadata.target_id)
+                    .single()
+
+                  await sendTransactional({
+                    templateKey: 'payment-received',
+                    to: { email: project.portal_client_email, name: project.client_first_name ?? undefined },
+                    params: {
+                      first_name: project.client_first_name ?? '',
+                      invoice_number: invoice.invoice_number
+                        ? `${invoice.invoice_number} — acompte ${installment?.installment_number ?? ''}`
+                        : '',
+                      amount: Number(installment?.amount ?? 0).toFixed(2),
+                      paid_at: new Date(installment?.paid_at ?? Date.now()).toLocaleDateString('fr-FR'),
+                      receipt_url: `${Deno.env.get('PORTAL_BASE_URL') ?? 'https://espace.propulseo-site.com'}/factures/${invoice.id}`,
+                    },
+                    dedupeKey: event.id,
+                  })
+                }
+              }
+            }
+          } catch (err) {
+            console.error('[stripe-webhook] envoi #35 payment-received (installment) échec:', err)
+            // Ne pas faire échouer le webhook si l'email échoue (l'acompte est déjà marqué payé).
+          }
+        }
       } else {
         processingError = 'metadata target_type/target_id manquants'
       }
