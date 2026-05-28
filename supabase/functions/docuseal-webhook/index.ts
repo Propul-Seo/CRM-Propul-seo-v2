@@ -17,6 +17,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendTransactional } from '../_shared/brevo.ts'
 
 function plain(body: string, status: number) {
   return new Response(body, { status, headers: { 'Content-Type': 'text/plain' } })
@@ -106,6 +107,43 @@ async function handleEvent(admin: SupabaseClient, ev: DocusealEvent): Promise<st
     .eq('id', sigRow.id)
 
   if (updErr) return `update failed: ${updErr.message}`
+
+  // #37 signature-completed — envoi email Brevo sur form.completed uniquement
+  if (ev.event_type === 'form.completed' || ev.event_type === 'submission.completed') {
+    try {
+      const { data: sigFull } = await admin
+        .schema('propulspace')
+        .from('signatures')
+        .select('id, name, signature_type, signed_at, project_id')
+        .eq('id', sigRow.id)
+        .single()
+
+      if (sigFull?.project_id) {
+        const { data: project } = await admin
+          .from('projects_v2')
+          .select('portal_client_email, client_first_name, name')
+          .eq('id', sigFull.project_id)
+          .single()
+
+        if (project?.portal_client_email) {
+          await sendTransactional({
+            templateKey: 'signature-completed',
+            to: { email: project.portal_client_email, name: project.client_first_name ?? undefined },
+            params: {
+              first_name: project.client_first_name ?? '',
+              doc_title: sigFull.name ?? '',
+              signed_at: new Date(sigFull.signed_at ?? Date.now()).toLocaleDateString('fr-FR'),
+              portal_url: `${Deno.env.get('PORTAL_BASE_URL') ?? 'https://espace.propulseo-site.com'}`,
+            },
+            dedupeKey: `${submissionId}-completed`,
+          })
+        }
+      }
+    } catch (err) {
+      console.error('[docuseal-webhook] envoi #37 signature-completed échec:', err)
+    }
+  }
+
   return null
 }
 
