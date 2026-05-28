@@ -21,6 +21,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendTransactional } from '../_shared/brevo.ts'
 
 const DOCUSEAL_API_URL = 'https://api.docuseal.com'
 
@@ -89,7 +90,6 @@ async function createDocusealSubmission(
   templateId: string,
   signerEmail: string,
   signerName: string | undefined,
-  sendEmail: boolean,
 ): Promise<{ submissionId: string; signingUrl: string } | { error: string }> {
   const res = await fetch(`${DOCUSEAL_API_URL}/submissions`, {
     method: 'POST',
@@ -99,7 +99,8 @@ async function createDocusealSubmission(
     },
     body: JSON.stringify({
       template_id: Number(templateId),
-      send_email: sendEmail,
+      // Option A — on envoie notre propre email Brevo (#36), DocuSeal ne doit pas envoyer le sien
+      send_email: false,
       submitters: [{
         email: signerEmail,
         name: signerName,
@@ -141,8 +142,8 @@ serve(async (req) => {
     return jsonResponse({ error: 'signature_type invalide' }, 400)
   }
 
-  // 1. Crée la submission côté DocuSeal
-  const r = await createDocusealSubmission(apiKey, body.template_id, body.signer_email, body.signer_name, body.send_email ?? true)
+  // 1. Crée la submission côté DocuSeal (send_email=false — on envoie #36 via Brevo ci-dessous)
+  const r = await createDocusealSubmission(apiKey, body.template_id, body.signer_email, body.signer_name)
   if ('error' in r) return jsonResponse({ error: r.error }, 502)
 
   // 2. Persiste dans propulspace.signatures
@@ -164,6 +165,24 @@ serve(async (req) => {
     .single()
 
   if (insertErr) return jsonResponse({ error: `Persist failed: ${insertErr.message}` }, 500)
+
+  // #36 signature-requested — notre template Brevo (DocuSeal email désactivé ci-dessus)
+  try {
+    await sendTransactional({
+      templateKey: 'signature-requested',
+      to: { email: body.signer_email, name: body.signer_name },
+      params: {
+        first_name: (body.signer_name ?? '').split(' ')[0] || '',
+        doc_title: body.name,
+        doc_type: body.signature_type,
+        expires_at: '',  // DocuSeal gère l'expiration, à enrichir si la valeur est disponible localement
+        sign_url: r.signingUrl,
+      },
+      dedupeKey: `${r.submissionId}-requested`,
+    })
+  } catch (err) {
+    console.error('[admin-docuseal-create-submission] envoi #36 signature-requested échec:', err)
+  }
 
   return jsonResponse({
     signature_id: (inserted as { id: string }).id,
