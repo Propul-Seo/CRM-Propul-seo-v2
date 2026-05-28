@@ -37,12 +37,14 @@ export function DocumentNotifyButton({ document: doc }: DocumentNotifyButtonProp
     }
     setSending(true);
 
-    // Générer un lien signé (60 s) pour le téléchargement
+    // Générer un lien signé valide 7 jours — le client peut ouvrir l'email
+    // plusieurs heures/jours après la notification sans tomber sur un lien mort.
+    const SIGNED_URL_TTL_SECONDS = 60 * 60 * 24 * 7;
     let downloadUrl = '';
     if (doc.file_path && doc.bucket !== 'external') {
       const { data: signed, error: signError } = await supabase.storage
         .from(doc.bucket)
-        .createSignedUrl(doc.file_path, 60);
+        .createSignedUrl(doc.file_path, SIGNED_URL_TTL_SECONDS);
       if (signError || !signed?.signedUrl) {
         setSending(false);
         toast.error('Impossible de générer le lien de téléchargement', {
