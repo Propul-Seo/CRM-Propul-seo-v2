@@ -55,6 +55,7 @@ export interface ProjectV2 {
   portal_short_code?: string | null
   portal_expires_at?: string | null
   // === PORTAIL PROPUL'SPACE ===
+  client_first_name?: string | null
   portal_client_email?: string | null
   portal_previous_client_email?: string | null
   portal_activated_at?: string | null
