@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Propul'Space — Toutes les vues</title>
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+    body { font-family: var(--ps-font-sans); padding: 32px 24px 80px; color: #2a2418; }
+    h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.025em; margin: 0 auto; max-width: 1400px; }
+    .lede { font-size: 14px; color: #6b6357; margin: 8px auto 0; max-width: 1400px; line-height: 1.55; }
+    .group-h {
+      max-width: 1400px; margin: 40px auto 12px;
+      font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; color: #6b6357;
+    }
+    .vue-block {
+      max-width: 1400px; margin: 0 auto 40px;
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      border: 1px solid rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+    .vue-head {
+      padding: 16px 22px; border-bottom: 1px solid rgba(0,0,0,0.05);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      background: linear-gradient(180deg, #fafafa, #fff);
+    }
+    .vue-head .num {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--ps-primary-deep); padding: 3px 9px; border-radius: 9999px;
+      background: rgba(124,58,237,0.10);
+    }
+    .vue-head .title {
+      flex: 1; font-size: 16px; font-weight: 700; letter-spacing: -0.015em;
+    }
+    .vue-head a {
+      font-size: 12.5px; font-weight: 600; color: var(--ps-primary-deep);
+      text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .vue-head a:hover { text-decoration: underline; }
+    iframe {
+      width: 100%; border: 0; display: block;
+      background: #f4f1eb;
+    }
+    .toc {
+      max-width: 1400px; margin: 24px auto 0;
+      padding: 16px; background: #fff; border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.05);
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .toc a {
+      font-size: 12px; font-weight: 600;
+      padding: 6px 12px; border-radius: 9999px;
+      background: rgba(124,58,237,0.08); color: var(--ps-primary-deep);
+      text-decoration: none;
+    }
+    .toc a:hover { background: rgba(124,58,237,0.15); }
+    .toc a.admin { background: rgba(15,11,30,0.85); color: #C4B5FD; }
+    .toc a.admin:hover { background: #2a1f4d; }
+  </style>
+</head>
+<body>
+  <h1>Propul'Space — Toutes les vues, une seule page</h1>
+  <p class="lede">12 vues desktop dans des iframes. Scroll pour défiler. Clique un numéro ci-dessous pour sauter directement.</p>
+
+  <nav class="toc">
+    <a href="#v1">V1 · Login</a>
+    <a href="#v2">V2 · Dashboard</a>
+    <a href="#v3">V3 · Qualification</a>
+    <a href="#v4">V4 · Factures</a>
+    <a href="#v5">V5 · Projet</a>
+    <a href="#v6">V6 · Documents</a>
+    <a href="#v7">V7 · Signatures</a>
+    <a href="#v8">V8 · Aide</a>
+    <a href="#v12">V12 · Onboarding</a>
+    <a href="#v9" class="admin">V9 · Admin leads</a>
+    <a href="#v10" class="admin">V10 · Admin portails</a>
+    <a href="#v11" class="admin">V11 · Admin panel</a>
+  </nav>
+
+  <div class="group-h">Portail client</div>
+
+  <section id="v1" class="vue-block">
+    <div class="vue-head"><span class="num">Vue 1</span><span class="title">Login client</span><a href="vue-01-login.html" target="_blank">Ouvrir en plein écran →</a></div>
+    <iframe src="vue-01-login.html" height="1700" loading="lazy"></iframe>
+  </section>
+
+  <section id="v2" class="vue-block">
+    <div class="vue-head"><span class="num">Vue 2</span><span class="title">Dashboard — V2 sidebar</span><a href="vue-02-dashboard.html" target="_blank">Ouvrir en plein écran →</a></div>
+    <iframe src="vue-02-dashboard.html" height="2400" loading="lazy"></iframe>
+  </section>
+
+  <section id="v3" class="vue-block">
+    <div class="vue-head"><span class="num">Vue 3</span><span class="title">Qualification — 7 étapes + merci</span><a href="vue-03-qualification.html" target="_blank">Ouvrir en plein écran →</a></div>
+    <iframe src="vue-03-qualification.html" height="6500" loading="lazy"></iframe>
+  </section>
+
+  <section id="v4" class="vue-block">
+    <div class="vue-head"><span class="num">Vue 4</span><span class="title">Factures + Sheet détail</span><a href="vue-04-factures.html" target="_blank">Ouvrir en plein écran →</a></div>
+    <iframe src="vue-04-factures.html" height="2300" loading="lazy"></iframe>
+  </section>
+
+  <section id="v5" class="vue-block">
+    <div class="vue-head"><span class="num">Vue 5</span><span class="title">Projet — timeline</span><a href="vue-05-projet.html" target="_blank">Ouvrir en plein écran →</a></div>
+    <iframe src="vue-05-projet.html" height="1700" loading="lazy"></iframe>
+  </section>
+
+  <section id="v6" class="vue-block">
+    <div class="vue-head"><span class="num">Vue 6</span><span class="title">Documents — GED</span><a href="vue-06-documents.html" target="_blank">Ouvrir en plein écran →</a></div>
+    <iframe src="vue-06-documents.html" height="1900" loading="lazy"></iframe>
+  </section>
+
+  <section id="v7" class="vue-block">
+    <div class="vue-head"><span class="num">Vue 7</span><span class="title">Signatures + audit trail</span><a href="vue-07-signatures.html" target="_blank">Ouvrir en plein écran →</a></div>
+    <iframe src="vue-07-signatures.html" height="2000" loading="lazy"></iframe>
+  </section>
+
+  <section id="v8" class="vue-block">
+    <div class="vue-head"><span class="num">Vue 8</span><span class="title">Aide — FAQ + contact</span><a href="vue-08-aide.html" target="_blank">Ouvrir en plein écran →</a></div>
+    <iframe src="vue-08-aide.html" height="1000" loading="lazy"></iframe>
+  </section>
+
+  <div class="group-h">Onboarding (modal)</div>
+
+  <section id="v12" class="vue-block">
+    <div class="vue-head"><span class="num">Vue 12</span><span class="title">Onboarding wizard — 3 étapes</span><a href="vue-12-onboarding.html" target="_blank">Ouvrir en plein écran →</a></div>
+    <iframe src="vue-12-onboarding.html" height="2300" loading="lazy"></iframe>
+  </section>
+
+  <div class="group-h">Admin CRM</div>
+
+  <section id="v9" class="vue-block">
+    <div class="vue-head"><span class="num">Vue 9</span><span class="title">Admin — Leads qualifiés</span><a href="vue-09-admin-leads.html" target="_blank">Ouvrir en plein écran →</a></div>
+    <iframe src="vue-09-admin-leads.html" height="1100" loading="lazy"></iframe>
+  </section>
+
+  <section id="v10" class="vue-block">
+    <div class="vue-head"><span class="num">Vue 10</span><span class="title">Admin — Portails actifs</span><a href="vue-10-admin-portails.html" target="_blank">Ouvrir en plein écran →</a></div>
+    <iframe src="vue-10-admin-portails.html" height="1000" loading="lazy"></iframe>
+  </section>
+
+  <section id="v11" class="vue-block">
+    <div class="vue-head"><span class="num">Vue 11</span><span class="title">Admin — Panel client (3 onglets)</span><a href="vue-11-admin-client-panel.html" target="_blank">Ouvrir en plein écran →</a></div>
+    <iframe src="vue-11-admin-client-panel.html" height="2600" loading="lazy"></iframe>
+  </section>
+</body>
+</html>

@@ -5,6 +5,9 @@
 .env.development
 .env.production
 .env.backup
+# Exceptions : templates publics (sans secrets)
+!.env.example
+!.env.test.example
 *.backup
 *.key
 *.pem

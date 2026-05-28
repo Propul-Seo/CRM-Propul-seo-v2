@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8"><title>Vue 15 — Récap qualification</title>
+<link rel="stylesheet" href="../tokens/colors_and_type.css">
+<link rel="stylesheet" href="../tokens/portal.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+  body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+  .container { max-width: 1340px; margin: 0 auto; }
+  .section-h { margin: 36px auto 16px; max-width: 1340px; }
+  .section-h h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; margin: 0; color: #2a2418; }
+  .section-h p { font-size: 13px; color: #6b6357; margin: 4px 0 0; }
+</style></head>
+<body><div id="head"></div>
+
+<div class="section-h"><h2>Prospect non encore activé · CTA "Retour au site"</h2></div>
+<div class="container"><div id="r-prospect"></div></div>
+
+<div class="section-h"><h2>Client activé · CTA "Retour à mon espace"</h2></div>
+<div class="container"><div id="r-active"></div></div>
+
+<script type="text/babel" src="_lib/primitives.jsx"></script>
+<script type="text/babel" src="_lib/shell.jsx"></script>
+<script type="text/babel" src="_lib/desktop-shell.jsx"></script>
+
+<script type="text/babel">
+function Section({ step, title, items, open }) {
+  return (
+    <div className="ps-card" style={{ overflow: "hidden", marginBottom: 10 }}>
+      <button style={{
+        width: "100%", padding: "14px 18px", display: "flex", alignItems: "center", gap: 12,
+        background: "transparent", border: "none", cursor: "pointer", textAlign: "left",
+      }}>
+        <span style={{ width: 28, height: 28, borderRadius: 9999, background: "var(--ps-primary-subtle)", color: "var(--ps-primary-deep)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, flexShrink: 0 }}>{step}</span>
+        <span style={{ flex: 1, fontSize: 14.5, fontWeight: 600, letterSpacing: "-0.005em" }}>{title}</span>
+        <Icon name={open ? "chevron-up" : "chevron-down"} size={15} stroke={2.2} style={{ color: "var(--ps-fg-muted)" }} />
+      </button>
+      {open && (
+        <div style={{ padding: "0 18px 16px 58px" }}>
+          {items.map((it, i) => (
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: i < items.length - 1 ? "1px solid var(--ps-border-soft)" : "none", fontSize: 13 }}>
+              <span style={{ color: "var(--ps-fg-muted)", maxWidth: "55%" }}>{it[0]}</span>
+              <span style={{ color: "var(--ps-fg)", fontWeight: 500, textAlign: "right", maxWidth: "45%" }}>{it[1]}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Recap({ activated }) {
+  const url = activated ? "espace.propulseo-site.com/mon-diagnostic" : "propulseo-site.com/diagnostic/mon-diagnostic";
+  const window = activated
+    ? <DesktopWindow url={url} activeTab="dashboard" withFab={false} minHeight={900}><Content activated /></DesktopWindow>
+    : <PublicWindow url={url} minHeight={900}><div className="ps-portal" style={{ padding: "40px 28px 60px" }}><Content /></div></PublicWindow>;
+  return window;
+}
+
+function Content({ activated }) {
+  return (
+    <div style={{ maxWidth: 720, margin: "0 auto" }}>
+      {/* Header */}
+      <div style={{ marginBottom: 24, display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <div>
+          <div className="ps-eyebrow ps-eyebrow-muted">Mon diagnostic</div>
+          <h1 className="ps-h1 ps-gradient-text" style={{ fontSize: 30, marginTop: 4 }}>Récap de votre demande</h1>
+          <p style={{ fontSize: 13.5, color: "var(--ps-fg-secondary)", margin: "8px 0 0" }}>Le formulaire que vous avez rempli, en lecture seule.</p>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 11px", borderRadius: 9999, background: "var(--ps-success-subtle)", color: "#166534", fontSize: 11.5, fontWeight: 600 }}>
+            <Icon name="check-circle-2" size={12} stroke={2.4} />
+            Soumis le 15 mai 2026
+          </span>
+        </div>
+      </div>
+
+      {/* Status banner */}
+      <div style={{
+        padding: "14px 18px", borderRadius: 12, marginBottom: 18,
+        background: "linear-gradient(180deg, var(--ps-primary-subtle), transparent)",
+        border: "1px solid rgba(124,58,237,0.18)",
+        display: "flex", alignItems: "center", gap: 12,
+      }}>
+        <span style={{ width: 36, height: 36, borderRadius: 9999, background: "linear-gradient(135deg, var(--ps-primary), var(--ps-primary-deep))", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px -4px rgba(124,58,237,0.4)", flexShrink: 0 }}>
+          <Icon name="phone" size={16} stroke={2.2} />
+        </span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 13.5, fontWeight: 600, color: "var(--ps-fg)" }}>Nous vous recontactons sous 24h.</div>
+          <div style={{ fontSize: 12, color: "var(--ps-fg-muted)", marginTop: 2 }}>Préférence renseignée : <strong style={{ color: "var(--ps-fg)" }}>WhatsApp · 06 12 34 56 78</strong></div>
+        </div>
+        {activated && <span className="ps-badge ps-badge-violet">Espace actif</span>}
+      </div>
+
+      {/* Sections */}
+      <Section step={1} title="Qui êtes-vous ?" open items={[
+        ["Nom", "Sophie Martin"],
+        ["Email", "sophie@precieuse.fr"],
+        ["Téléphone", "06 12 34 56 78"],
+        ["Entreprise", "Précieuse Joaillerie"],
+        ["Secteur", "Joaillerie / Artisanat haut de gamme"],
+      ]} />
+      <Section step={2} title="Votre situation actuelle" items={[
+        ["Site existant", "Oui, mais obsolète"],
+        ["URL", "https://precieuse-joaillerie.fr"],
+        ["Trafic mensuel", "500 – 2 000"],
+        ["Problèmes", "Design dépassé · Pas mobile · Mal référencé"],
+      ]} />
+      <Section step={3} title="Vos objectifs" items={[
+        ["Objectif principal", "Vendre en ligne"],
+        ["Public cible", "Particuliers (B2C)"],
+        ["Concurrents inspirants", "messika.com, dinhvan.com, dior.com/joaillerie"],
+      ]} />
+      <Section step={4} title="Fonctionnalités souhaitées" items={[
+        ["Sélectionnées", "E-commerce · SEO avancé"],
+        ["Plateforme actuelle", "Aucune"],
+        ["Volume produits", "50 – 500"],
+      ]} />
+      <Section step={5} title="Identité visuelle" items={[
+        ["Statut", "Charte complète fournie"],
+        ["Fichiers uploadés", "logo-precieuse-hd.svg · charte-graphique.pdf"],
+      ]} />
+      <Section step={6} title="Budget & délais" items={[
+        ["Budget", "5 000 – 10 000 €"],
+        ["Délai souhaité", "1 – 3 mois"],
+      ]} />
+      <Section step={7} title="Pour finaliser" items={[
+        ["Décideur", "Je décide seule"],
+        ["Contact préféré", "WhatsApp"],
+      ]} />
+
+      {/* CTA */}
+      <div style={{ marginTop: 24, display: "flex", gap: 10, justifyContent: "center" }}>
+        {activated ? (
+          <a href="/espace-client" style={{ textDecoration: "none" }}>
+            <button className="ps-btn ps-btn-primary ps-btn-lg">Retour à mon espace<Icon name="arrow-up-right" size={14} stroke={2.6} /></button>
+          </a>
+        ) : (
+          <a href="https://propulseo-site.com" style={{ textDecoration: "none" }}>
+            <button className="ps-btn ps-btn-outline ps-btn-lg">Retour au site Propul'SEO</button>
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Head() {
+  return <PageHead num="15" title="Récap qualification — read-only" subtitle="Page atterrissage après création de compte. Affiche le formulaire soumis en accordion par étape." />;
+}
+
+ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+ReactDOM.createRoot(document.getElementById("r-prospect")).render(<Recap />);
+ReactDOM.createRoot(document.getElementById("r-active")).render(<Recap activated />);
+</script>
+</body></html>

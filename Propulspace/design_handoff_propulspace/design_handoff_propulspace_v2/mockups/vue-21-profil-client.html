@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8"><title>Vue 21 — Profil & paramètres</title>
+<link rel="stylesheet" href="../tokens/colors_and_type.css">
+<link rel="stylesheet" href="../tokens/portal.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+  body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+  .container { max-width: 1340px; margin: 0 auto; }
+  .section-h { margin: 36px auto 16px; max-width: 1340px; }
+  .section-h h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; margin: 0; color: #2a2418; }
+  .section-h p { font-size: 13px; color: #6b6357; margin: 4px 0 0; }
+</style></head>
+<body><div id="head"></div>
+
+<div class="section-h"><h2>Page profil complète</h2></div>
+<div class="container"><div id="state-default"></div></div>
+
+<div class="section-h"><h2>Dropdown avatar (header header zoom)</h2></div>
+<div class="container"><div id="state-dropdown"></div></div>
+
+<script type="text/babel" src="_lib/primitives.jsx"></script>
+<script type="text/babel" src="_lib/shell.jsx"></script>
+<script type="text/babel" src="_lib/desktop-shell.jsx"></script>
+
+<script type="text/babel">
+function Toggle({ defaultChecked }) {
+  const [on, setOn] = React.useState(defaultChecked);
+  return (
+    <button onClick={() => setOn(!on)} style={{
+      width: 38, height: 22, borderRadius: 9999, border: "none", cursor: "pointer",
+      background: on ? "var(--ps-primary)" : "var(--ps-border-strong)",
+      position: "relative", transition: "background 200ms",
+    }}>
+      <span style={{
+        position: "absolute", top: 2, left: on ? 18 : 2,
+        width: 18, height: 18, borderRadius: 9999, background: "#fff",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+        transition: "left 200ms cubic-bezier(0.4,0,0.2,1)",
+      }} />
+    </button>
+  );
+}
+
+function NotifRow({ icon, label, sub, on = true }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: "1px solid var(--ps-border-soft)" }}>
+      <span style={{ width: 32, height: 32, borderRadius: 9, background: "var(--ps-primary-subtle)", color: "var(--ps-primary-deep)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <Icon name={icon} size={14} stroke={2.2} />
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13.5, fontWeight: 500 }}>{label}</div>
+        <div style={{ fontSize: 11.5, color: "var(--ps-fg-muted)", marginTop: 2 }}>{sub}</div>
+      </div>
+      <Toggle defaultChecked={on} />
+    </div>
+  );
+}
+
+function ProfilPage() {
+  return (
+    <DesktopWindow url="espace.propulseo-site.com/profil" activeTab="dashboard" withFab={false}>
+      <div style={{ maxWidth: 760, margin: "0 auto" }}>
+        <div className="ps-eyebrow ps-eyebrow-muted">Compte</div>
+        <h1 className="ps-h1 ps-gradient-text" style={{ fontSize: 30, marginTop: 4 }}>Mon profil</h1>
+        <p style={{ fontSize: 14, color: "var(--ps-fg-secondary)", margin: "8px 0 28px" }}>Vos informations, vos préférences de notification, et la sécurité de votre compte.</p>
+
+        {/* MES INFOS */}
+        <section className="ps-card" style={{ padding: 24, marginBottom: 16 }}>
+          <h2 className="ps-h3" style={{ marginBottom: 4 }}>Mes informations</h2>
+          <p style={{ fontSize: 12.5, color: "var(--ps-fg-muted)", margin: "0 0 18px" }}>Ces informations apparaissent dans nos communications avec vous.</p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <div className="ps-field">
+              <label className="ps-label">Nom complet</label>
+              <input className="ps-input" defaultValue="Sophie Martin" />
+            </div>
+            <div className="ps-field">
+              <label className="ps-label">Email <span style={{ fontWeight: 400, color: "var(--ps-fg-muted)" }}>· non modifiable</span></label>
+              <input className="ps-input" defaultValue="sophie@precieuse.fr" disabled style={{ background: "var(--ps-bg-subtle)", color: "var(--ps-fg-secondary)" }} />
+            </div>
+            <div className="ps-field">
+              <label className="ps-label">Téléphone</label>
+              <input className="ps-input" defaultValue="06 12 34 56 78" />
+            </div>
+            <div className="ps-field">
+              <label className="ps-label">Société</label>
+              <input className="ps-input" defaultValue="Précieuse Joaillerie" />
+            </div>
+          </div>
+          <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid var(--ps-border-soft)", display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <button className="ps-btn ps-btn-ghost">Annuler</button>
+            <button className="ps-btn ps-btn-primary">Enregistrer</button>
+          </div>
+        </section>
+
+        {/* NOTIFICATIONS */}
+        <section className="ps-card" style={{ padding: 24, marginBottom: 16 }}>
+          <h2 className="ps-h3" style={{ marginBottom: 4 }}>Préférences de notification</h2>
+          <p style={{ fontSize: 12.5, color: "var(--ps-fg-muted)", margin: "0 0 6px" }}>Choisissez quand nous vous envoyons un email.</p>
+
+          <NotifRow icon="receipt" label="Nouvelle facture émise" sub="Email envoyé dès qu'une facture est créée pour vous." />
+          <NotifRow icon="alert-triangle" label="Rappel facture en retard" sub="Email à J+3, J+7 et J+14 si non réglée." />
+          <NotifRow icon="pen-line" label="Document à signer" sub="Email + lien DocuSeal direct." />
+          <NotifRow icon="file-text" label="Nouveau document livré" sub="Email avec lien direct vers le document." on={false} />
+          <NotifRow icon="folder-kanban" label="Mise à jour du projet" sub="Email hebdomadaire récapitulatif." on={false} />
+        </section>
+
+        {/* SECURITY */}
+        <section className="ps-card" style={{ padding: 24 }}>
+          <h2 className="ps-h3" style={{ marginBottom: 4 }}>Sécurité</h2>
+          <p style={{ fontSize: 12.5, color: "var(--ps-fg-muted)", margin: "0 0 18px" }}>Vous utilisez l'authentification par lien magique — pas de mot de passe à mémoriser.</p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 10, background: "var(--ps-bg-subtle)" }}>
+              <Icon name="mail" size={16} stroke={2.2} style={{ color: "var(--ps-primary-deep)" }} />
+              <div style={{ flex: 1, fontSize: 13 }}>
+                Recevoir un nouveau lien de connexion par email
+              </div>
+              <button className="ps-btn ps-btn-outline">Envoyer</button>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 10, background: "var(--ps-danger-subtle)" }}>
+              <Icon name="log-out" size={16} stroke={2.2} style={{ color: "#991B1B" }} />
+              <div style={{ flex: 1, fontSize: 13 }}>
+                <div style={{ fontWeight: 500, color: "var(--ps-fg)" }}>Se déconnecter</div>
+                <div style={{ fontSize: 11.5, color: "var(--ps-fg-muted)", marginTop: 1 }}>Vous devrez à nouveau demander un lien pour vous reconnecter.</div>
+              </div>
+              <button className="ps-btn ps-btn-danger">Déconnexion</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </DesktopWindow>
+  );
+}
+
+function Dropdown() {
+  return (
+    <div style={{ position: "relative", background: "#fff", borderRadius: 14, boxShadow: "0 1px 3px rgba(0,0,0,0.06)", padding: 20, height: 380 }}>
+      <div style={{ fontSize: 12, color: "var(--ps-fg-muted)", marginBottom: 16 }}>Zoom — header desktop avec dropdown ouvert sous l'avatar :</div>
+
+      <div style={{ position: "relative", height: 300, background: "var(--ps-bg)", borderRadius: 12, padding: "0 20px", overflow: "visible" }}>
+        {/* Mini header */}
+        <div style={{ height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--ps-border-soft)" }}>
+          <span className="ps-brand-pill"><Icon name="sparkles" size={13} stroke={2.4} />Propul'SEO</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 13, fontWeight: 600 }}>Sophie Martin</div>
+              <div style={{ fontSize: 11, color: "var(--ps-fg-muted)" }}>Précieuse Joaillerie</div>
+            </div>
+            <div style={{
+              width: 36, height: 36, borderRadius: 9999, color: "#fff",
+              background: "linear-gradient(135deg, var(--ps-primary), var(--ps-primary-deep))",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 12, fontWeight: 700,
+              boxShadow: "0 0 0 2px var(--ps-primary-subtle), 0 0 0 4px #fff",
+            }}>SM</div>
+          </div>
+        </div>
+
+        {/* Dropdown menu */}
+        <div className="ps-card" style={{
+          position: "absolute", top: 70, right: 14, width: 240, padding: 8,
+          boxShadow: "0 12px 32px -8px rgba(0,0,0,0.18), 0 4px 12px -2px rgba(0,0,0,0.06)",
+          zIndex: 2,
+        }}>
+          {/* User block */}
+          <div style={{ padding: "8px 10px 12px", borderBottom: "1px solid var(--ps-border-soft)", marginBottom: 4 }}>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>Sophie Martin</div>
+            <div style={{ fontSize: 11.5, color: "var(--ps-fg-muted)" }}>sophie@precieuse.fr</div>
+          </div>
+          <MenuItem icon="user" label="Mon profil" />
+          <MenuItem icon="bell" label="Notifications" sub="2 non lues" />
+          <MenuItem icon="help-circle" label="Aide" />
+          <div style={{ borderTop: "1px solid var(--ps-border-soft)", margin: "6px 0" }} />
+          <MenuItem icon="log-out" label="Se déconnecter" danger />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MenuItem({ icon, label, sub, danger }) {
+  return (
+    <button style={{
+      width: "100%", display: "flex", alignItems: "center", gap: 10,
+      padding: "8px 10px", borderRadius: 7, border: "none", cursor: "pointer",
+      background: "transparent", textAlign: "left", fontFamily: "var(--ps-font-sans)",
+      color: danger ? "var(--ps-danger)" : "var(--ps-fg)",
+      transition: "background 150ms",
+    }} onMouseOver={e => e.currentTarget.style.background = "var(--ps-bg-subtle)"} onMouseOut={e => e.currentTarget.style.background = "transparent"}>
+      <Icon name={icon} size={14} stroke={2} />
+      <span style={{ flex: 1, fontSize: 13, fontWeight: 500 }}>{label}</span>
+      {sub && <span style={{ fontSize: 10.5, color: "var(--ps-fg-muted)", fontWeight: 500 }}>{sub}</span>}
+    </button>
+  );
+}
+
+function Head() {
+  return <PageHead num="21" title="Profil & paramètres" subtitle="Page profil avec 3 sections + dropdown menu sous l'avatar du header (Profil / Notifications / Aide / Déconnexion)." />;
+}
+ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+ReactDOM.createRoot(document.getElementById("state-default")).render(<ProfilPage />);
+ReactDOM.createRoot(document.getElementById("state-dropdown")).render(<Dropdown />);
+</script>
+</body></html>

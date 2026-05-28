@@ -10,6 +10,22 @@ const ClientPortalPage = lazy(() =>
   import('./modules/ClientPortal/ClientPortalPage').then(m => ({ default: m.ClientPortalPage }))
 );
 
+const EspaceClientApp = lazy(() =>
+  import('./modules/EspaceClient/client/EspaceClientApp').then(m => ({ default: m.EspaceClientApp }))
+);
+
+const QualificationFlowPage = lazy(() =>
+  import('./modules/EspaceClient/qualification/QualificationFlowPage').then(m => ({ default: m.QualificationFlowPage }))
+);
+
+const QualificationThankYouPage = lazy(() =>
+  import('./modules/EspaceClient/qualification/ThankYouPage').then(m => ({ default: m.ThankYouPage }))
+);
+
+const PropulspaceAdminApp = lazy(() =>
+  import('./modules/EspaceClient/admin/PropulspaceAdminApp').then(m => ({ default: m.PropulspaceAdminApp }))
+);
+
 const ClientBriefPage = lazy(() =>
   import('./modules/ClientBrief/ClientBriefPage').then(m => ({ default: m.ClientBriefPage }))
 );
@@ -94,6 +110,46 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route
+          path="/espace-client/*"
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<div className="min-h-screen bg-white" />}>
+                <EspaceClientApp />
+              </Suspense>
+            </ErrorBoundary>
+          }
+        />
+        <Route
+          path="/diagnostic"
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<div className="min-h-screen bg-white" />}>
+                <QualificationFlowPage />
+              </Suspense>
+            </ErrorBoundary>
+          }
+        />
+        <Route
+          path="/diagnostic-envoye"
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<div className="min-h-screen bg-white" />}>
+                <QualificationThankYouPage />
+              </Suspense>
+            </ErrorBoundary>
+          }
+        />
+        <Route
+          path="/admin/*"
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<div className="min-h-screen bg-white" />}>
+                <PropulspaceAdminApp />
+              </Suspense>
+            </ErrorBoundary>
+          }
+        />
         <Route path="/portal/:token" element={<PortalPageRoute />} />
         <Route path="/brief/:token" element={<BriefPageRoute />} />
         <Route path="/brief-invite/:token" element={<BriefInvitePageRoute />} />

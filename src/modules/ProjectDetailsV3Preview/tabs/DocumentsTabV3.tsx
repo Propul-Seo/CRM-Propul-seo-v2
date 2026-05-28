@@ -30,8 +30,10 @@ export function DocumentsTabV3({ project }: Props) {
   const { previewDoc, previewUrl, openPreview, closePreview } = useDocumentPreviewV3()
 
   const fetchDocs = async () => {
-    const { data, error } = await v2
-      .from('project_documents')
+    // Lecture depuis la vue unifiée (CRM + portail). Chaque ligne expose son
+    // bucket et son source pour permettre download/delete différenciés.
+    const { data, error } = await supabase
+      .from('project_documents_unified_v2')
       .select('*')
       .eq('project_id', projectId)
       .order('created_at', { ascending: false })
@@ -107,11 +109,16 @@ export function DocumentsTabV3({ project }: Props) {
   }
 
   const handleDelete = async (doc: Doc) => {
+    if (doc.source === 'portal') {
+      toast.info('Ce document a été fourni via le portail client. Supprimez-le depuis l\'onglet Documents du portail ou désactivez le portail.')
+      setConfirmDeleteId(null)
+      return
+    }
     try {
-      if (doc.file_path) {
-        const { error: storageError } = await supabase.storage.from(BUCKET).remove([doc.file_path])
+      if (doc.file_path && doc.bucket !== 'external') {
+        const { error: storageError } = await supabase.storage.from(doc.bucket).remove([doc.file_path])
         if (storageError) {
-          console.error('[DocumentsTabV3] storage.remove failed', { path: doc.file_path, error: storageError })
+          console.error('[DocumentsTabV3] storage.remove failed', { path: doc.file_path, bucket: doc.bucket, error: storageError })
           throw new Error(`Suppression du fichier impossible : ${storageError.message}`)
         }
       }
@@ -130,7 +137,12 @@ export function DocumentsTabV3({ project }: Props) {
 
   const handleDownload = async (doc: Doc) => {
     if (!doc.file_path) { toast.info('Fichier non disponible'); return }
-    const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(doc.file_path, 60)
+    // Lien externe (charte URL fournie au questionnaire) : pas de signed URL, ouverture directe.
+    if (doc.bucket === 'external') {
+      window.open(doc.file_path, '_blank', 'noopener,noreferrer')
+      return
+    }
+    const { data, error } = await supabase.storage.from(doc.bucket).createSignedUrl(doc.file_path, 60)
     if (error || !data?.signedUrl) {
       toast.error('Erreur génération lien')
       return
@@ -168,6 +180,12 @@ export function DocumentsTabV3({ project }: Props) {
           visible={visible}
           search={search}
           canDelete={isAdmin}
+          isAdmin={isAdmin}
+          project={{
+            name: project.name,
+            portal_client_email: project.portal_client_email ?? null,
+            client_first_name: project.client_first_name,
+          }}
           confirmDeleteId={confirmDeleteId}
           onPreview={openPreview}
           onDownload={handleDownload}

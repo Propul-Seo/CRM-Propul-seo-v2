@@ -8,22 +8,11 @@ import { LeadsV3Header, type LeadsV3Tab } from './components/LeadsV3Header'
 import { VariantA_Kanban } from './variants/VariantA_Kanban'
 import { useLeadsV3SiteWeb } from './hooks/useLeadsV3SiteWeb'
 import { useLeadsV3Erp } from './hooks/useLeadsV3Erp'
+import { useLeadsV3Qualification, type QualificationLead } from './hooks/useLeadsV3Qualification'
 import { useConvertLeadToProject } from './hooks/useConvertLeadToProject'
-import { siteWebToCard, erpToCard, matchesQuery, sortSiteWebLeads, sortErpLeads } from './utils/leadAdapters'
+import { useLeadsV3Cards } from './hooks/useLeadsV3Cards'
 import type { LeadCardData } from './components/LeadCardV3'
-import {
-  SITE_WEB_STATUS_ORDER,
-  SITE_WEB_STATUS_LABELS,
-  SITE_WEB_STATUS_COLORS,
-  ERP_STATUS_ORDER,
-  ERP_STATUS_LABELS,
-  ERP_STATUS_COLORS,
-  isSiteWebStatus,
-  isErpStatus,
-  normalizeErpStatus,
-  type SiteWebStatus,
-  type ErpStatus,
-} from './utils/leadStatusMapping'
+import { QualificationLeadDetailsSheet } from './components/QualificationLeadDetailsSheet'
 
 const TAB_KEY = 'propulseo:leads-v3:tab'
 
@@ -54,8 +43,10 @@ export function LeadsV3Page() {
 
   const sw = useLeadsV3SiteWeb()
   const erp = useLeadsV3Erp()
+  const qualif = useLeadsV3Qualification(tab === 'site_web' ? 'site' : 'erp')
   const { convert } = useConvertLeadToProject()
   const [convertingId, setConvertingId] = useState<string | null>(null)
+  const [selectedQualif, setSelectedQualif] = useState<QualificationLead | null>(null)
 
   useEffect(() => {
     supabase.from('users').select('id, name').eq('is_active', true).order('name').then(({ data, error }) => {
@@ -64,40 +55,18 @@ export function LeadsV3Page() {
     })
   }, [])
 
-  const loading = tab === 'site_web' ? sw.loading : erp.loading
+  const loading = (tab === 'site_web' ? sw.loading : erp.loading) || qualif.loading
   const error = tab === 'site_web' ? sw.error : erp.error
 
-  // Construction des cards + statusMap selon l'onglet
-  const { cards, leadStatus, columns, onStatusChange } = useMemo(() => {
-    if (tab === 'site_web') {
-      const filtered = sortSiteWebLeads(sw.leads.filter(l => !filterUserId || l.assigned_to === filterUserId))
-      const allCards = filtered.map(siteWebToCard).filter(c => matchesQuery(c, debouncedSearch))
-      const statusMap: Record<string, string> = {}
-      for (const l of filtered) statusMap[l.id] = l.normalized_status
-      const cols = SITE_WEB_STATUS_ORDER.map(s => ({
-        id: s, label: SITE_WEB_STATUS_LABELS[s], color: SITE_WEB_STATUS_COLORS[s],
-      }))
-      const updater = async (id: string, newStatus: string) => {
-        if (!isSiteWebStatus(newStatus)) return
-        await sw.updateStatus(id, newStatus as SiteWebStatus)
-      }
-      return { cards: allCards, leadStatus: statusMap, columns: cols, onStatusChange: updater }
-    }
-    const filtered = sortErpLeads(erp.leads.filter(l => !filterUserId || l.assignee_id === filterUserId))
-    const allCards = filtered.map(erpToCard).filter(c => matchesQuery(c, debouncedSearch))
-    const statusMap: Record<string, string> = {}
-    for (const l of filtered) statusMap[l.id] = normalizeErpStatus(l.status)
-    const cols = ERP_STATUS_ORDER.map(s => ({
-      id: s, label: ERP_STATUS_LABELS[s], color: ERP_STATUS_COLORS[s],
-    }))
-    const updater = async (id: string, newStatus: string) => {
-      if (!isErpStatus(newStatus)) return
-      await erp.updateStatus(id, newStatus as ErpStatus)
-    }
-    return { cards: allCards, leadStatus: statusMap, columns: cols, onStatusChange: updater }
-  }, [tab, sw, erp, filterUserId, debouncedSearch])
+  const qualifIdSet = useMemo(() => new Set(qualif.leads.map(l => l.id)), [qualif.leads])
+
+  const { cards, leadStatus, columns, onStatusChange } = useLeadsV3Cards({
+    tab, sw, erp, qualifLeads: qualif.leads, qualifIdSet, filterUserId, debouncedSearch,
+  })
 
   const handleLeadClick = (id: string) => {
+    const qualifLead = qualif.leads.find(l => l.id === id)
+    if (qualifLead) { setSelectedQualif(qualifLead); return }
     if (tab === 'site_web') navigate(routes.clientDetail(id))
     else navigate(routes.crmErpLead(id))
   }
@@ -155,6 +124,7 @@ export function LeadsV3Page() {
   }
 
   const isLeadSigned = (leadId: string): boolean => {
+    if (qualifIdSet.has(leadId)) return false
     const status = leadStatus[leadId]
     return status === 'signe' || status === 'signes'
   }
@@ -202,6 +172,13 @@ export function LeadsV3Page() {
           convertingId={convertingId}
         />
       )}
+
+      <QualificationLeadDetailsSheet
+        lead={selectedQualif}
+        open={selectedQualif !== null}
+        onOpenChange={(open) => { if (!open) setSelectedQualif(null) }}
+        onActionComplete={() => qualif.refetch()}
+      />
     </div>
   )
 }

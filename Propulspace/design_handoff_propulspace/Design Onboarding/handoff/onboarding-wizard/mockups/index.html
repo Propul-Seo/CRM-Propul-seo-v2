@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>OnboardingWizard — variantes validées · Propul'Space</title>
+  <link rel="stylesheet" href="../tokens/colors_and_type.css">
+  <link rel="stylesheet" href="portal.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    html, body { margin: 0; min-height: 100vh; height: 100vh; background: #ece7dc; }
+    body { font-family: var(--ps-font-sans); overflow: hidden; }
+    .dc-artboard .ps-card-hover:hover { transform: none; }
+  </style>
+</head>
+<body>
+  <div id="root" data-screen-label="OnboardingWizard — variantes validées"></div>
+
+  <script type="text/babel" src="primitives.jsx"></script>
+  <script type="text/babel" src="shell.jsx"></script>
+  <script type="text/babel" src="desktop-shell.jsx"></script>
+  <script type="text/babel" src="ios-frame.jsx"></script>
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="screens/onboarding.jsx"></script>
+  <script type="text/babel" src="screens/onboarding-tab-previews.jsx"></script>
+  <script type="text/babel" src="screens/onboarding-steps.jsx"></script>
+  <script type="text/babel" src="screens/onboarding-mobile.jsx"></script>
+
+  <script type="text/babel">
+    function StageBox({ children, url = "espace.propulseo-site.com / onboarding" }) {
+      return (
+        <div style={{
+          width: "100%", height: "100%",
+          borderRadius: 14, overflow: "hidden",
+          background: "#fff",
+          boxShadow: "0 30px 60px -20px rgba(24,24,27,0.18), 0 0 0 1px rgba(0,0,0,0.05)",
+          position: "relative",
+        }}>
+          <div style={{
+            height: 32, background: "#f7f4ef",
+            borderBottom: "1px solid rgba(0,0,0,0.06)",
+            display: "flex", alignItems: "center", padding: "0 12px", gap: 7,
+            position: "relative", zIndex: 10,
+          }}>
+            <span style={{ width: 10, height: 10, borderRadius: 9999, background: "#FF5F57" }} />
+            <span style={{ width: 10, height: 10, borderRadius: 9999, background: "#FEBC2E" }} />
+            <span style={{ width: 10, height: 10, borderRadius: 9999, background: "#28C840" }} />
+            <span style={{ flex: 1, textAlign: "center", fontSize: 11, color: "#8a8478" }}>
+              {url}
+            </span>
+            <span style={{ width: 36 }} />
+          </div>
+          <div style={{ position: "absolute", top: 32, left: 0, right: 0, bottom: 0 }}>
+            {children}
+          </div>
+        </div>
+      );
+    }
+
+    function MobileStage({ step, total, primaryLabel, showBack, children }) {
+      return (
+        <IOSDevice width={376} height={780}>
+          <OnbMobileShell step={step} total={total} primaryLabel={primaryLabel} showBack={showBack}>
+            {children}
+          </OnbMobileShell>
+        </IOSDevice>
+      );
+    }
+
+    /* ============================== Post-it intro ============================== */
+    function IntroNote() {
+      return (
+        <div style={{
+          position: "absolute", top: 56, left: 56, zIndex: 5,
+          maxWidth: 540,
+          padding: "20px 22px",
+          background: "#fff",
+          border: "1px solid rgba(0,0,0,0.06)",
+          borderRadius: 14,
+          boxShadow: "0 20px 40px -12px rgba(0,0,0,0.18), 0 4px 12px -2px rgba(0,0,0,0.06)",
+          fontFamily: "var(--ps-font-sans)",
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--ps-success)", marginBottom: 6, display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <span style={{ width: 6, height: 6, borderRadius: 9999, background: "var(--ps-success)" }} />
+            Variantes validées · prêt pour intégration
+          </div>
+          <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.025em", margin: "0 0 10px", color: "#2a2418" }}>
+            OnboardingWizard — référence design
+          </h1>
+          <p style={{ fontSize: 13, lineHeight: 1.55, color: "#6b6357", margin: "0 0 10px" }}>
+            Chrome : <strong>full-screen Dialog</strong>, backdrop <strong>light</strong>, dashboard légèrement flouté derrière. CTA <strong>"Configurer mon espace"</strong> + mention <strong>~ 2 min</strong>.
+          </p>
+          <ul style={{ margin: 0, padding: "0 0 0 18px", fontSize: 12.5, lineHeight: 1.7, color: "#3a3328" }}>
+            <li><strong>Étape 1</strong> — Split chaleureux, hero card + 4 minis 2×2 + carte modules</li>
+            <li><strong>Étape 2</strong> — Carte d'identité éditable inline (email locked)</li>
+            <li><strong>Étape 3</strong> — Dense 2-cols (label gauche, controls droite)</li>
+            <li><strong>Étape 4</strong> — Carrousel spotlight avec mini-mocks réels des 7 sections</li>
+            <li><strong>Étape 5</strong> — Halo lumineux pulsant + typo display 44px</li>
+          </ul>
+          <p style={{ fontSize: 12, lineHeight: 1.55, color: "#8a8478", margin: "10px 0 0" }}>
+            Double-clic sur un artboard pour le voir en plein écran (← → pour naviguer, Esc pour sortir).
+          </p>
+        </div>
+      );
+    }
+
+    function App() {
+      const CTA = {
+        backdrop: "light",
+        primaryLabel: "Configurer mon espace",
+        primaryHint: "~ 2 min · 5 étapes",
+        secondaryLabel: "Terminer plus tard",
+        width: 940,
+      };
+      const CTA_back = { ...CTA, showBack: true };
+
+      return (
+        <DesignCanvas storageKey="propulspace-onboarding-handoff-v1" initialZoom={0.5}>
+
+          <DCSection id="step1" title="01 · Bienvenue" subtitle="Première impression. Split chaleureux 2-cols.">
+            <DCArtboard id="s1-desk" label="Desktop" width={1280} height={820}>
+              <StageBox>
+                <OnbDialog step={1} total={5} {...CTA} primaryLabel="Commencer">
+                  <OnbStep1_VarB_v2 moduleStyle="card" />
+                </OnbDialog>
+              </StageBox>
+            </DCArtboard>
+            <DCArtboard id="s1-mobile" label="iPhone · plein écran" width={376} height={780}>
+              <MobileStage step={1} total={5} primaryLabel="Commencer">
+                <OnbMobileStep1 />
+              </MobileStage>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="step2" title="02 · Vos coordonnées" subtitle="Carte d'identité, lignes cliquables pour édition inline.">
+            <DCArtboard id="s2-desk" label="Desktop" width={1280} height={820}>
+              <StageBox>
+                <OnbDialog step={2} total={5} {...CTA_back} primaryLabel="Suivant">
+                  <OnbStep2_VarB />
+                </OnbDialog>
+              </StageBox>
+            </DCArtboard>
+            <DCArtboard id="s2-mobile" label="iPhone" width={376} height={780}>
+              <MobileStage step={2} total={5} primaryLabel="Suivant" showBack>
+                <OnbMobileStep2 />
+              </MobileStage>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="step3" title="03 · Préférences de communication" subtitle="Dense 2-cols. Canal · Plages · Notifications.">
+            <DCArtboard id="s3-desk" label="Desktop" width={1280} height={820}>
+              <StageBox>
+                <OnbDialog step={3} total={5} {...CTA_back} primaryLabel="Suivant">
+                  <OnbStep3_VarB />
+                </OnbDialog>
+              </StageBox>
+            </DCArtboard>
+            <DCArtboard id="s3-mobile" label="iPhone" width={376} height={780}>
+              <MobileStage step={3} total={5} primaryLabel="Suivant" showBack>
+                <OnbMobileStep3 />
+              </MobileStage>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="step4" title="04 · Tour du propriétaire" subtitle="Carrousel spotlight · les 7 sections, chacune avec son mini-mock réel.">
+            <DCArtboard id="s4-desk" label="Desktop · carrousel + previews" width={1280} height={860}>
+              <StageBox>
+                <OnbDialog step={4} total={5} {...CTA_back} primaryLabel="J'ai compris">
+                  <OnbStep4_VarB />
+                </OnbDialog>
+              </StageBox>
+            </DCArtboard>
+            <DCArtboard id="s4-mobile" label="iPhone · grille 2-cols" width={376} height={780}>
+              <MobileStage step={4} total={5} primaryLabel="J'ai compris" showBack>
+                <OnbMobileStep4 />
+              </MobileStage>
+            </DCArtboard>
+          </DCSection>
+
+          <DCSection id="step5" title="05 · Tout est prêt" subtitle="Halo lumineux pulsant + typo display. Premium sans Disney.">
+            <DCArtboard id="s5-desk" label="Desktop" width={1280} height={820}>
+              <StageBox>
+                <OnbDialog step={5} total={5} {...CTA_back} primaryLabel="Accéder à mon espace">
+                  <OnbStep5_VarB />
+                </OnbDialog>
+              </StageBox>
+            </DCArtboard>
+            <DCArtboard id="s5-mobile" label="iPhone" width={376} height={780}>
+              <MobileStage step={5} total={5} primaryLabel="Accéder" showBack>
+                <OnbMobileStep5 />
+              </MobileStage>
+            </DCArtboard>
+          </DCSection>
+
+        </DesignCanvas>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(
+      <>
+        <IntroNote />
+        <App />
+      </>
+    );
+  </script>
+</body>
+</html>

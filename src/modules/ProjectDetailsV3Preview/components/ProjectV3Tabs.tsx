@@ -1,24 +1,26 @@
 import { useSearchParams } from 'react-router-dom'
-import { BarChart3, Hammer, ClipboardList, Folder, KeyRound } from 'lucide-react'
+import { BarChart3, Hammer, ClipboardList, Folder, KeyRound, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SyntheseTabV3 } from '../tabs/SyntheseTabV3'
 import { ProductionTabV3 } from '../tabs/ProductionTabV3'
 import { AccessTabV3 } from '../tabs/AccessTabV3'
 import { BriefTabV3 } from '../tabs/BriefTabV3'
+import { QuestionnaireTabV3 } from '../tabs/QuestionnaireTabV3'
 import { DocumentsTabV3 } from '../tabs/DocumentsTabV3'
 import { useProjectTabCounts } from '../hooks/useProjectTabCounts'
 import { useV3Keyboard } from '../hooks/useV3Keyboard'
 import type { useChecklistV3 } from '../hooks/useChecklistV3'
 import type { ProjectV2 } from '@/types/project-v2'
 
-type TabId = 'synthese' | 'production' | 'access' | 'brief' | 'documents'
+type TabId = 'synthese' | 'production' | 'access' | 'brief' | 'questionnaire' | 'documents'
 
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
-  { id: 'synthese',   label: 'Synthèse',   icon: BarChart3 },
-  { id: 'production', label: 'Production', icon: Hammer },
-  { id: 'access',     label: 'Accès',      icon: KeyRound },
-  { id: 'brief',      label: 'Brief',      icon: ClipboardList },
-  { id: 'documents',  label: 'Documents',  icon: Folder },
+  { id: 'synthese',      label: 'Synthèse',      icon: BarChart3 },
+  { id: 'production',    label: 'Production',    icon: Hammer },
+  { id: 'access',        label: 'Accès',         icon: KeyRound },
+  { id: 'brief',         label: 'Brief',         icon: ClipboardList },
+  { id: 'questionnaire', label: 'Questionnaire', icon: Sparkles },
+  { id: 'documents',     label: 'Documents',     icon: Folder },
 ]
 
 interface Props {
@@ -103,6 +105,7 @@ export function ProjectV3Tabs({ project, checklist, onEdit, onRefresh }: Props) 
         )}
         {activeTab === 'access' && <AccessTabV3 project={project} />}
         {activeTab === 'brief' && <BriefTabV3 project={project} />}
+        {activeTab === 'questionnaire' && <QuestionnaireTabV3 project={project} />}
         {activeTab === 'documents' && <DocumentsTabV3 project={project} />}
       </div>
     </div>

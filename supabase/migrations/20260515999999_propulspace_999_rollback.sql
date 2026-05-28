@@ -1,0 +1,71 @@
+-- ============================================================================
+-- EMERGENCY ROLLBACK — Propul'Space Phase 1
+-- ============================================================================
+-- ⚠️ ALL LINES COMMENTED BY DEFAULT — Uncomment only if rollback is needed.
+-- ⚠️ NEVER run this without explicit Lyes "go for rollback".
+-- ⚠️ This destroys all Propul'Space data permanently.
+--
+-- How to use:
+--   1. Confirm with Lyes that rollback is necessary
+--   2. Uncomment the BEGIN/COMMIT and the relevant blocks
+--   3. Run via Supabase MCP apply_migration or SQL Editor
+--   4. Verify CRM still works
+-- ============================================================================
+
+-- BEGIN;
+
+-- ----------------------------------------------------------------------------
+-- Step 1: Remove storage policies and buckets
+-- ----------------------------------------------------------------------------
+-- DROP POLICY IF EXISTS "ps_uploads_public_insert" ON storage.objects;
+-- DROP POLICY IF EXISTS "ps_uploads_admin_select" ON storage.objects;
+-- DROP POLICY IF EXISTS "ps_uploads_admin_delete" ON storage.objects;
+-- DROP POLICY IF EXISTS "ps_docs_storage_admin_all" ON storage.objects;
+-- DROP POLICY IF EXISTS "ps_docs_storage_client_read" ON storage.objects;
+-- DELETE FROM storage.objects WHERE bucket_id IN ('propulspace-uploads', 'propulspace-documents');
+-- DELETE FROM storage.buckets WHERE id IN ('propulspace-uploads', 'propulspace-documents');
+
+-- ----------------------------------------------------------------------------
+-- Step 2: Drop entire propulspace schema (CASCADE removes tables, triggers,
+-- policies, functions, sequences inside it)
+-- ----------------------------------------------------------------------------
+-- DROP SCHEMA propulspace CASCADE;
+
+-- ----------------------------------------------------------------------------
+-- Step 3: Remove portal_* columns from public.users
+-- ----------------------------------------------------------------------------
+-- ALTER TABLE public.users
+--   DROP COLUMN IF EXISTS portal_enabled,
+--   DROP COLUMN IF EXISTS portal_linked_project_id,
+--   DROP COLUMN IF EXISTS portal_last_login_at;
+
+-- ----------------------------------------------------------------------------
+-- Step 4: Remove portal_* and client_* columns from public.projects_v2
+-- (Only the columns added by migration 020 — DO NOT drop legacy ClientBrief
+-- columns like portal_token, portal_enabled, portal_short_code, brief_*)
+-- ----------------------------------------------------------------------------
+-- ALTER TABLE public.projects_v2
+--   DROP COLUMN IF EXISTS portal_visible,
+--   DROP COLUMN IF EXISTS portal_phase,
+--   DROP COLUMN IF EXISTS portal_url_slug,
+--   DROP COLUMN IF EXISTS portal_activated_at,
+--   DROP COLUMN IF EXISTS portal_deactivated_at,
+--   DROP COLUMN IF EXISTS portal_deactivation_reason,
+--   DROP COLUMN IF EXISTS portal_next_milestone_label,
+--   DROP COLUMN IF EXISTS portal_next_milestone_date,
+--   DROP COLUMN IF EXISTS portal_published_hours_worked,
+--   DROP COLUMN IF EXISTS portal_progress_percent,
+--   DROP COLUMN IF EXISTS portal_brand_logo_url,
+--   DROP COLUMN IF EXISTS portal_brand_primary_color,
+--   DROP COLUMN IF EXISTS client_address,
+--   DROP COLUMN IF EXISTS client_vat_number,
+--   DROP COLUMN IF EXISTS client_represented_by;
+
+-- COMMIT;
+
+-- ============================================================================
+-- AFTER ROLLBACK CHECKS:
+--   SELECT count(*) FROM information_schema.schemata WHERE schema_name = 'propulspace';  -- 0
+--   SELECT count(*) FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'projects_v2' AND column_name LIKE 'portal_%';  -- 4 legacy (portal_token, portal_enabled, portal_short_code, portal_expires_at)
+--   SELECT count(*) FROM storage.buckets WHERE id LIKE 'propulspace-%';  -- 0
+-- ============================================================================

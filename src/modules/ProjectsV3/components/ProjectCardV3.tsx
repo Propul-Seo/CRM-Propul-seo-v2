@@ -1,14 +1,17 @@
 import type { ProjectV2 } from '@/types/project-v2'
 import { useActiveUserIds } from '@/hooks/useActiveUserIds'
 import { getActivePoles, V3_POLE_LABELS, V3_POLE_COLORS, type V3Pole } from '../utils/poleMapping'
+import { PortalHealthBadges } from './PortalHealthBadges'
+import type { PortalHealth } from '../hooks/usePortalHealth'
 
 interface Props {
   project: ProjectV2
   index: number
   onClick?: () => void
+  portalHealth?: PortalHealth
 }
 
-export function ProjectCardV3({ project, index, onClick }: Props) {
+export function ProjectCardV3({ project, index, onClick, portalHealth }: Props) {
   const activeIds = useActiveUserIds()
   const poles = getActivePoles(project.presta_type)
   const progress = Math.max(0, Math.min(100, Math.round(project.progress ?? 0)))
@@ -63,6 +66,8 @@ export function ProjectCardV3({ project, index, onClick }: Props) {
         ) : (
           <div className="text-[10px] text-[#6b7280] italic">Aucun pôle actif</div>
         )}
+
+        <PortalHealthBadges health={portalHealth} />
       </div>
     </article>
   )

@@ -49,11 +49,20 @@ export interface ProjectV2 {
   // === RÉSUMÉ IA ===
   ai_summary: { situation: string; action: string; milestone: string } | null
   ai_summary_generated_at: string | null
-  // === PORTAIL CLIENT ===
+  // === PORTAIL CLIENT (legacy ClientBrief) ===
   portal_token: string | null
   portal_enabled: boolean
   portal_short_code?: string | null
   portal_expires_at?: string | null
+  // === PORTAIL PROPUL'SPACE ===
+  client_first_name?: string | null
+  portal_client_email?: string | null
+  portal_previous_client_email?: string | null
+  portal_activated_at?: string | null
+  portal_activated_by?: string | null
+  portal_last_invite_sent_at?: string | null
+  portal_deactivated_at?: string | null
+  portal_deactivation_reason?: string | null
   // === BRIEF TOKEN ===
   brief_token: string | null
   brief_token_enabled: boolean

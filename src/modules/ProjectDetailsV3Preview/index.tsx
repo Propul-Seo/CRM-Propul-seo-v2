@@ -183,6 +183,7 @@ export function ProjectDetailsV3Preview() {
           users={teamUsers}
           onSave={handleSaveProject}
           onClose={() => setEditOpen(false)}
+          onDeleted={() => navigate(routes.projectsV3)}
         />
       )}
     </div>

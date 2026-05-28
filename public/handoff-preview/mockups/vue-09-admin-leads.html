@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"><title>Vue 9 — Admin leads qualifiés</title>
+  <link rel="stylesheet" href="../tokens/colors_and_type.css">
+  <link rel="stylesheet" href="../tokens/portal.css">
+  <link rel="stylesheet" href="../tokens/admin.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+    body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+    .container { max-width: 1340px; margin: 0 auto; }
+    .note { max-width: 1340px; margin: 14px auto 0; padding: 10px 14px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 0 8px 8px 0; font-size: 12.5px; color: #78350f; }
+  </style>
+</head>
+<body>
+  <div id="head"></div>
+  <div class="note">⚠️ Visuellement <strong>distinct du portail client</strong> : sidebar sombre violet, fond #070512, neon #8B5CF6. C'est le CRM admin pour Lyes &amp; Etienne.</div>
+  <div class="container" style="margin-top:24px"><div id="state-default"></div></div>
+
+  <script type="text/babel" src="_lib/primitives.jsx"></script>
+  <script type="text/babel" src="_lib/desktop-shell.jsx"></script>
+  <script type="text/babel" src="_lib/admin-shell.jsx"></script>
+
+  <script type="text/babel">
+    const LEADS = [
+      { date: "15 mai", nom: "Eméline Le Ray", soc: "Précieuse Joaillerie", sect: "Joaillerie",  budget: "5-10k€",  score: 65, status: "qualified", initials: "EL", color: "#d4a574" },
+      { date: "12 mai", nom: "Thomas Dupont",  soc: "Dupont Immo",          sect: "Immobilier",  budget: "10-20k€", score: 70, status: "contacted", initials: "TD", color: "#5a7ec9" },
+      { date: "11 mai", nom: "Sophie Martin",  soc: "Le Petit Bistrot",     sect: "Restaurant",  budget: "2-5k€",   score: 35, status: "submitted", initials: "SM", color: "#16a34a" },
+      { date: "9 mai",  nom: "Marc Lefèvre",   soc: "Lefèvre Conseil",      sect: "Conseil",     budget: "5-10k€",  score: 55, status: "submitted", initials: "ML", color: "#f59e0b" },
+      { date: "8 mai",  nom: "Julie Chen",     soc: "Tech Innov",           sect: "Startup",     budget: "> 20k€",  score: 70, status: "converted", initials: "JC", color: "#7c3aed" },
+    ];
+    const STATUS = {
+      submitted: { label: "Soumis",    tone: "gray" },
+      contacted: { label: "Contacté",  tone: "amber" },
+      qualified: { label: "Qualifié",  tone: "violet" },
+      converted: { label: "Converti",  tone: "green" },
+    };
+
+    function ScoreBar({ score }) {
+      const max = 70;
+      const pct = Math.round((score / max) * 100);
+      const tone = score >= 60 ? "#34D399" : score >= 40 ? "#FCD34D" : "#F87171";
+      return (
+        <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 110 }}>
+          <span className="ps-num" style={{ fontSize: 12, fontWeight: 700, color: tone, width: 38 }}>{score}/{max}</span>
+          <div style={{ flex: 1, height: 5, background: "rgba(255,255,255,0.06)", borderRadius: 9999, overflow: "hidden" }}>
+            <div style={{ width: `${pct}%`, height: "100%", background: tone, borderRadius: 9999 }} />
+          </div>
+        </div>
+      );
+    }
+
+    function LeadsPage() {
+      return (
+        <AdminShell
+          activeKey="leads"
+          title="Leads qualifiés"
+          breadcrumb="CRM › Acquisition"
+          headerActions={
+            <div style={{ display: "flex", gap: 8 }}>
+              <button className="a-btn a-btn-ghost"><Icon name="download" size={13} stroke={2} />Exporter CSV</button>
+              <button className="a-btn a-btn-primary"><Icon name="plus" size={13} stroke={2.4} />Créer un lead</button>
+            </div>
+          }
+        >
+          {/* KPI */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+            <AdminKpi label="Total leads" value="47" sub="Toutes périodes" icon="users" tone="violet" />
+            <AdminKpi label="Ce mois" value="12" sub="+ 8 vs. avril" icon="trending-up" tone="green" />
+            <AdminKpi label="En attente callback" value="3" sub="Action requise" icon="alert-triangle" tone="amber" />
+            <AdminKpi label="Score moyen" value="62/70" sub="Cohorte mai" icon="target" tone="violet" />
+          </div>
+
+          {/* Filters */}
+          <div className="a-card" style={{ padding: 12, marginBottom: 12, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--a-fg-muted)", fontSize: 12 }}>
+              <Icon name="filter" size={13} stroke={2} /> Filtres
+            </span>
+            <div style={{ position: "relative" }}>
+              <input className="a-input" placeholder="Rechercher" style={{ paddingLeft: 30, width: 220 }} />
+              <span style={{ position: "absolute", left: 10, top: 9, color: "var(--a-fg-muted)" }}><Icon name="search" size={13} stroke={2} /></span>
+            </div>
+            <select className="a-input" style={{ width: 140 }}>
+              <option>Statut : Tous</option><option>Soumis</option><option>Contacté</option><option>Qualifié</option><option>Converti</option>
+            </select>
+            <select className="a-input" style={{ width: 160 }}>
+              <option>Secteur : Tous</option><option>Joaillerie</option><option>Immobilier</option><option>Restaurant</option>
+            </select>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 10px", height: 34, borderRadius: 7, border: "1px solid var(--a-border)", background: "var(--a-bg-3)" }}>
+              <span style={{ fontSize: 11.5, color: "var(--a-fg-muted)" }}>Score min</span>
+              <input type="range" min="0" max="70" defaultValue="40" style={{ width: 80, accentColor: "var(--a-neon)" }} />
+              <span className="ps-num" style={{ fontSize: 11.5, color: "var(--a-fg)", fontWeight: 600 }}>40</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "0 10px", height: 34, borderRadius: 7, border: "1px solid var(--a-border)", background: "var(--a-bg-3)" }}>
+              <Icon name="calendar" size={12} stroke={2} style={{ color: "var(--a-fg-muted)" }} />
+              <span style={{ fontSize: 11.5, color: "var(--a-fg-2)" }}>1 mai → 15 mai 2026</span>
+            </div>
+            <button className="a-btn a-btn-ghost" style={{ marginLeft: "auto" }}>Réinitialiser</button>
+          </div>
+
+          {/* Table */}
+          <div className="a-card" style={{ padding: 0, overflow: "hidden" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
+              <thead>
+                <tr style={{ background: "var(--a-bg-2)" }}>
+                  {["Date", "Nom", "Société", "Secteur", "Budget", "Score qualité", "Statut", ""].map((h, i) => (
+                    <th key={i} style={{ padding: "10px 16px", textAlign: i === 7 ? "right" : "left", fontSize: 10.5, fontWeight: 600, color: "var(--a-fg-muted)", textTransform: "uppercase", letterSpacing: "0.07em" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {LEADS.map((l, i) => (
+                  <tr key={i} style={{ borderTop: "1px solid var(--a-border)", cursor: "pointer" }}
+                    onMouseOver={e => e.currentTarget.style.background = "rgba(139,92,246,0.05)"}
+                    onMouseOut={e => e.currentTarget.style.background = "transparent"}>
+                    <td style={{ padding: "13px 16px", color: "var(--a-fg-2)" }} className="ps-num">{l.date}</td>
+                    <td style={{ padding: "13px 16px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                        <span style={{ width: 28, height: 28, borderRadius: 9999, background: l.color, color: "#fff", fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{l.initials}</span>
+                        <span style={{ color: "var(--a-fg)", fontWeight: 500 }}>{l.nom}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: "13px 16px", color: "var(--a-fg-2)" }}>{l.soc}</td>
+                    <td style={{ padding: "13px 16px", color: "var(--a-fg-2)" }}>{l.sect}</td>
+                    <td style={{ padding: "13px 16px", color: "var(--a-fg)", fontWeight: 500 }} className="ps-num">{l.budget}</td>
+                    <td style={{ padding: "13px 16px" }}><ScoreBar score={l.score} /></td>
+                    <td style={{ padding: "13px 16px" }}>
+                      <span className={`a-badge a-badge-${STATUS[l.status].tone}`}>{STATUS[l.status].label}</span>
+                    </td>
+                    <td style={{ padding: "13px 16px", textAlign: "right" }}>
+                      <Icon name="chevron-right" size={14} stroke={2} style={{ color: "var(--a-fg-muted)" }} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 14, fontSize: 12, color: "var(--a-fg-muted)" }}>
+            <div>5 sur 47 leads · trié par date desc</div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button className="a-btn a-btn-outline" style={{ padding: "0 10px" }}><Icon name="chevron-left" size={14} stroke={2} /></button>
+              <button className="a-btn a-btn-outline" style={{ padding: "0 10px" }}>1</button>
+              <button className="a-btn a-btn-primary" style={{ padding: "0 10px" }}>2</button>
+              <button className="a-btn a-btn-outline" style={{ padding: "0 10px" }}>3</button>
+              <button className="a-btn a-btn-outline" style={{ padding: "0 10px" }}><Icon name="chevron-right" size={14} stroke={2} /></button>
+            </div>
+          </div>
+        </AdminShell>
+      );
+    }
+
+    function Head() {
+      return <PageHead num="9" title="Admin — Leads qualifiés" subtitle="CRM admin (dark violet, distinct du portail). KPI + filtres + table triable. Visualisation du score qualité avec barre colorée." />;
+    }
+
+    ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+    ReactDOM.createRoot(document.getElementById("state-default")).render(<AdminWindow><LeadsPage /></AdminWindow>);
+  </script>
+</body>
+</html>
