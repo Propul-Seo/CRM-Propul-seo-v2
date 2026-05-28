@@ -3,11 +3,19 @@ import { CATEGORIES, type Doc } from './constants'
 import type { FilterValue } from './DocumentFilters'
 import type { DocumentCategory } from '@/types/project-v2'
 
+interface ProjectMeta {
+  name: string
+  portal_client_email: string | null
+  client_first_name?: string | null
+}
+
 interface Props {
   filter: FilterValue
   visible: Doc[]
   search: string
   canDelete: boolean
+  isAdmin: boolean
+  project: ProjectMeta
   confirmDeleteId: string | null
   onPreview: (doc: Doc) => void
   onDownload: (doc: Doc) => void
@@ -18,7 +26,7 @@ interface Props {
 
 export function DocumentList(props: Props) {
   const {
-    filter, visible, search, canDelete, confirmDeleteId,
+    filter, visible, search, canDelete, isAdmin, project, confirmDeleteId,
     onPreview, onDownload, onAskDelete, onCancelDelete, onDelete,
   } = props
 
@@ -46,6 +54,8 @@ export function DocumentList(props: Props) {
               key={doc.id}
               doc={doc}
               canDelete={canDelete}
+              isAdmin={isAdmin}
+              project={project}
               isConfirmingDelete={confirmDeleteId === doc.id}
               onPreview={onPreview}
               onDownload={onDownload}

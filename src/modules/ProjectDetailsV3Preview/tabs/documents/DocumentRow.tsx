@@ -3,10 +3,19 @@ import { Eye, Download, Trash2, MoreVertical } from 'lucide-react'
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { CATEGORIES, formatSize, type Doc } from './constants'
+import { DocumentNotifyButton } from '@/components/propulspace/DocumentNotifyButton'
+
+interface ProjectMeta {
+  name: string
+  portal_client_email: string | null
+  client_first_name?: string | null
+}
 
 interface Props {
   doc: Doc
   canDelete: boolean
+  isAdmin: boolean
+  project: ProjectMeta
   isConfirmingDelete: boolean
   onPreview: (doc: Doc) => void
   onDownload: (doc: Doc) => void
@@ -16,7 +25,7 @@ interface Props {
 }
 
 export function DocumentRow({
-  doc, canDelete, isConfirmingDelete,
+  doc, canDelete, isAdmin, project, isConfirmingDelete,
   onPreview, onDownload, onAskDelete, onCancelDelete, onDelete,
 }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -62,6 +71,18 @@ export function DocumentRow({
         >
           <Eye className="h-3.5 w-3.5" />
         </button>
+        {isAdmin && doc.category === 'deliverable' && (
+          <DocumentNotifyButton
+            document={{
+              id: doc.id,
+              name: doc.name,
+              document_type: doc.document_type,
+              file_path: doc.file_path,
+              bucket: doc.bucket,
+              project,
+            }}
+          />
+        )}
         {canDelete && (
           <div className="relative">
             <button

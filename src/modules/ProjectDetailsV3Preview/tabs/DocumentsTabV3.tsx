@@ -180,6 +180,12 @@ export function DocumentsTabV3({ project }: Props) {
           visible={visible}
           search={search}
           canDelete={isAdmin}
+          isAdmin={isAdmin}
+          project={{
+            name: project.name,
+            portal_client_email: project.portal_client_email ?? null,
+            client_first_name: project.client_first_name,
+          }}
           confirmDeleteId={confirmDeleteId}
           onPreview={openPreview}
           onDownload={handleDownload}
