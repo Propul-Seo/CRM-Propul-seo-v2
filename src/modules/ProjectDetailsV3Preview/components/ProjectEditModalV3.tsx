@@ -194,6 +194,7 @@ export function ProjectEditModalV3({ project, users, onSave, onClose, onDeleted 
                 <option value="maintenance">Maintenance</option>
                 <option value="on_hold">En pause</option>
                 <option value="closed">Clôturé</option>
+                <option value="propulseo_internal">Projet Propulseo</option>
               </select>
             </Field>
             <Field label="Priorité">

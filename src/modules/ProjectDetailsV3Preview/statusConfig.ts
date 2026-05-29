@@ -11,6 +11,7 @@ export const PROJECT_STATUS_ORDER: ProjectStatusV2[] = [
   'maintenance',
   'on_hold',
   'closed',
+  'propulseo_internal',
 ]
 
 export const PROJECT_STATUS_LABELS: Record<ProjectStatusV2, string> = {
@@ -23,6 +24,7 @@ export const PROJECT_STATUS_LABELS: Record<ProjectStatusV2, string> = {
   maintenance: 'Maintenance',
   on_hold: 'En pause',
   closed: 'Clôturé',
+  propulseo_internal: 'Projet Propulseo',
 }
 
 export const PROJECT_STATUS_COLORS: Record<ProjectStatusV2, { badge: string }> = {
@@ -35,6 +37,7 @@ export const PROJECT_STATUS_COLORS: Record<ProjectStatusV2, { badge: string }> =
   maintenance:    { badge: 'bg-teal-500/15 text-teal-400' },
   on_hold:        { badge: 'bg-slate-500/15 text-slate-400' },
   closed:         { badge: 'bg-zinc-500/15 text-zinc-400' },
+  propulseo_internal: { badge: 'bg-pink-500/15 text-pink-400' },
 }
 
 // Statuts spécifiques par module (sw_status / erp_status / comm_status).

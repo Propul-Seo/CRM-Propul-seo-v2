@@ -20,6 +20,10 @@ describe('statusToColumn', () => {
   it.each<ProjectStatusV2>(['on_hold', 'closed'])('mappe %s → en_pause', (status) => {
     expect(statusToColumn(status)).toBe('en_pause')
   })
+
+  it('mappe propulseo_internal → propulseo', () => {
+    expect(statusToColumn('propulseo_internal')).toBe('propulseo')
+  })
 })
 
 describe('columnToDefaultStatus', () => {
@@ -31,6 +35,9 @@ describe('columnToDefaultStatus', () => {
   })
   it('en_pause → on_hold', () => {
     expect(columnToDefaultStatus('en_pause')).toBe('on_hold')
+  })
+  it('propulseo → propulseo_internal', () => {
+    expect(columnToDefaultStatus('propulseo')).toBe('propulseo_internal')
   })
 })
 

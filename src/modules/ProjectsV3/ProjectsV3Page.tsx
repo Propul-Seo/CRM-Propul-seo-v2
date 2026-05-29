@@ -111,6 +111,7 @@ export function ProjectsV3Page() {
       planification: [],
       en_cours: [],
       en_pause: [],
+      propulseo: [],
     }
     for (const p of filteredProjects) {
       acc[statusToColumn(p.status)].push(p)
@@ -172,7 +173,7 @@ export function ProjectsV3Page() {
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <div className="grid grid-cols-3 gap-5">
+        <div className="grid grid-cols-4 gap-5">
           {V3_COLUMN_ORDER.map(column => {
             const items = byColumn[column]
             const itemIds = items.map(p => p.id)

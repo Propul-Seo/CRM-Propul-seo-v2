@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import type { ProjectV2, PrestaType, ProjectStatusV2 } from '@/types/project-v2'
@@ -119,6 +118,7 @@ export function NewProjectFormV3({ form, onChange, users, saving, onSubmit, onCa
             <option value="in_progress">En cours</option>
             <option value="review">Recette</option>
             <option value="on_hold">En pause</option>
+            <option value="propulseo_internal">Projet Propulseo</option>
           </select>
         </Field>
         <Field label="Priorité">

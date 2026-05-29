@@ -3,14 +3,15 @@ import type { ProjectStatusV2 } from '@/types/project-v2'
 /**
  * Colonnes V3 : 3 statuts agrégés simplifiés.
  */
-export type V3Column = 'planification' | 'en_cours' | 'en_pause'
+export type V3Column = 'planification' | 'en_cours' | 'en_pause' | 'propulseo'
 
-export const V3_COLUMN_ORDER: V3Column[] = ['planification', 'en_cours', 'en_pause']
+export const V3_COLUMN_ORDER: V3Column[] = ['planification', 'en_cours', 'en_pause', 'propulseo']
 
 export const V3_COLUMN_LABELS: Record<V3Column, string> = {
   planification: 'Planification',
   en_cours: 'En cours',
   en_pause: 'En pause',
+  propulseo: 'Projets Propulseo',
 }
 
 /**
@@ -35,6 +36,8 @@ export function statusToColumn(status: ProjectStatusV2): V3Column {
     case 'on_hold':
     case 'closed':
       return 'en_pause'
+    case 'propulseo_internal':
+      return 'propulseo'
     default:
       return 'en_cours'
   }
@@ -49,5 +52,6 @@ export function columnToDefaultStatus(column: V3Column): ProjectStatusV2 {
     case 'planification': return 'brief_received'
     case 'en_cours':      return 'in_progress'
     case 'en_pause':      return 'on_hold'
+    case 'propulseo':     return 'propulseo_internal'
   }
 }

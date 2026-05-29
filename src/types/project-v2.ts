@@ -15,6 +15,7 @@ export type ProjectStatusV2 =
   | 'maintenance'
   | 'on_hold'
   | 'closed'
+  | 'propulseo_internal'
 
 export type PrestaType = 'web' | 'seo' | 'erp' | 'saas' | 'site_web' | 'erp_v2' | 'communication'
 
