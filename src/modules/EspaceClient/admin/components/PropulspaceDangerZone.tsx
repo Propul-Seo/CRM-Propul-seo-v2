@@ -111,7 +111,7 @@ export function PropulspaceDangerZone(props: DangerZoneProps) {
 
   return (
     <>
-      <Button variant="destructive" size="sm" onClick={trigger} disabled={busy}>
+      <Button type="button" variant="destructive" size="sm" onClick={trigger} disabled={busy}>
         <Trash2 className="mr-2 h-4 w-4" />
         Supprimer
       </Button>
