@@ -11,6 +11,28 @@ function getMonthKey(date: Date) {
   return date.toISOString().slice(0, 7);
 }
 
+function dedupeTransactions(entries: AccountingEntry[]) {
+  const seen = new Set<string>();
+  return entries.filter((entry) => {
+    if (seen.has(entry.id)) return false;
+    seen.add(entry.id);
+    return true;
+  });
+}
+
+function isSameTransactionDraft(a: AccountingEntry, b: AccountingEntry) {
+  return (
+    a.type === b.type &&
+    Number(a.amount) === Number(b.amount) &&
+    a.description === b.description &&
+    a.entry_date === b.entry_date &&
+    (a.category ?? '') === (b.category ?? '') &&
+    (a.month_key ?? a.entry_date.slice(0, 7)) === (b.month_key ?? b.entry_date.slice(0, 7)) &&
+    (a.revenue_category ?? '') === (b.revenue_category ?? '') &&
+    (a.revenue_sous_categorie ?? '') === (b.revenue_sous_categorie ?? '')
+  );
+}
+
 export interface RealtimeStats {
   totalRevenues: number;
   totalExpenses: number;
@@ -40,6 +62,15 @@ export const useRealtimeAccounting = (selectedMonth: Date) => {
   
   const monthKey = getMonthKey(selectedMonth);
   const subscriptionRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const optimisticUpdatesRef = useRef<Set<string>>(new Set());
+
+  const updateOptimisticUpdates = useCallback((updater: (prev: Set<string>) => Set<string>) => {
+    setOptimisticUpdates((prev) => {
+      const next = updater(prev);
+      optimisticUpdatesRef.current = next;
+      return next;
+    });
+  }, []);
 
   // Charger données initiales
   const fetchData = useCallback(async () => {
@@ -67,9 +98,10 @@ export const useRealtimeAccounting = (selectedMonth: Date) => {
         throw new Error(metricsError.message);
       }
 
-      setTransactions(txData || []);
+      const cleanTransactions = dedupeTransactions(txData || []);
+      setTransactions(cleanTransactions);
       setMetrics(metricsData || null);
-      calculateStats(txData || []);
+      calculateStats(cleanTransactions);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erreur inconnue';
       setError(msg);
@@ -128,18 +160,19 @@ export const useRealtimeAccounting = (selectedMonth: Date) => {
       updated_at: new Date().toISOString()
     };
 
-    setTransactions(prev => [optimisticTransaction, ...prev]);
-    setOptimisticUpdates(prev => new Set(prev).add(optimisticId));
-    
-    // Recalculer stats immédiatement
     setTransactions(current => {
-      const updated = [optimisticTransaction, ...current];
+      const updated = dedupeTransactions([optimisticTransaction, ...current]);
       calculateStats(updated);
       return updated;
     });
+    updateOptimisticUpdates((prev) => {
+      const next = new Set(prev);
+      next.add(optimisticId);
+      return next;
+    });
 
     return optimisticId;
-  }, [calculateStats]);
+  }, [calculateStats, updateOptimisticUpdates]);
 
   const updateOptimisticTransaction = useCallback((id: string, updates: Partial<AccountingEntry>) => {
     setTransactions(prev => {
@@ -157,12 +190,12 @@ export const useRealtimeAccounting = (selectedMonth: Date) => {
       calculateStats(updated);
       return updated;
     });
-    setOptimisticUpdates(prev => {
+    updateOptimisticUpdates(prev => {
       const newSet = new Set(prev);
       newSet.delete(id);
       return newSet;
     });
-  }, [calculateStats]);
+  }, [calculateStats, updateOptimisticUpdates]);
 
   // CRUD Operations avec Optimistic Updates
   const addTransaction = useCallback(async (entry: Omit<AccountingEntry, 'id' | 'created_at' | 'updated_at'>) => {
@@ -179,14 +212,15 @@ export const useRealtimeAccounting = (selectedMonth: Date) => {
 
       // Remplacer l'optimistic update par la vraie donnée
       setTransactions(prev => {
-        const updated = prev.map(t => 
-          t.id === optimisticId ? data : t
+        const replaced = prev.map(t => t.id === optimisticId ? data : t);
+        const updated = dedupeTransactions(
+          replaced.some(t => t.id === data.id) ? replaced : [data, ...replaced]
         );
         calculateStats(updated);
         return updated;
       });
 
-      setOptimisticUpdates(prev => {
+      updateOptimisticUpdates(prev => {
         const newSet = new Set(prev);
         newSet.delete(optimisticId);
         return newSet;
@@ -201,7 +235,7 @@ export const useRealtimeAccounting = (selectedMonth: Date) => {
       toast.error('Erreur: ' + msg);
       return { success: false, error: msg };
     }
-  }, [addOptimisticTransaction, removeOptimisticTransaction, calculateStats]);
+  }, [addOptimisticTransaction, removeOptimisticTransaction, calculateStats, updateOptimisticUpdates]);
 
   const updateTransaction = useCallback(async (id: string, updates: Partial<AccountingEntry>) => {
     const originalTransaction = accounting_entries.find(t => t.id === id);
@@ -288,34 +322,42 @@ export const useRealtimeAccounting = (selectedMonth: Date) => {
           const newRecord = payload.new as AccountingEntry | null;
           const oldRecord = payload.old as Partial<AccountingEntry> & { id?: string };
 
-          // Ignorer les optimistic updates
-          if (optimisticUpdates.has(newRecord?.id || oldRecord?.id || '')) {
-            return;
-          }
-
           if (payload.eventType === 'INSERT' && newRecord) {
             setTransactions(prev => {
-              const updated = [newRecord, ...prev];
+              const existingIndex = prev.findIndex(t => t.id === newRecord.id);
+              const optimisticIndex = prev.findIndex(t =>
+                optimisticUpdatesRef.current.has(t.id) &&
+                t.id.startsWith('optimistic_') &&
+                isSameTransactionDraft(t, newRecord)
+              );
+
+              let updated: AccountingEntry[];
+              if (existingIndex >= 0) {
+                updated = prev.map(t => t.id === newRecord.id ? newRecord : t);
+              } else if (optimisticIndex >= 0) {
+                updated = prev.map((t, index) => index === optimisticIndex ? newRecord : t);
+              } else {
+                updated = [newRecord, ...prev];
+              }
+
+              updated = dedupeTransactions(updated);
               calculateStats(updated);
               return updated;
             });
-            toast.success('Nouvelle transaction reçue');
           } else if (payload.eventType === 'UPDATE' && newRecord) {
             setTransactions(prev => {
-              const updated = prev.map(t =>
+              const updated = dedupeTransactions(prev.map(t =>
                 t.id === newRecord.id ? newRecord : t
-              );
+              ));
               calculateStats(updated);
               return updated;
             });
-            toast.success('Transaction mise à jour');
           } else if (payload.eventType === 'DELETE' && oldRecord?.id) {
             setTransactions(prev => {
               const updated = prev.filter(t => t.id !== oldRecord.id);
               calculateStats(updated);
               return updated;
             });
-            toast.success('Transaction supprimée');
           }
         }
       )
@@ -340,7 +382,7 @@ export const useRealtimeAccounting = (selectedMonth: Date) => {
         subscriptionRef.current.unsubscribe();
       }
     };
-  }, [monthKey, fetchData, calculateStats, optimisticUpdates]);
+  }, [monthKey, fetchData, calculateStats]);
 
   return {
     accounting_entries,

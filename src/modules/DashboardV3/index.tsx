@@ -11,10 +11,9 @@ import { DashboardHeader } from './components/DashboardHeader';
 import { RevenueCard } from './components/RevenueCard';
 import { ContactsCard } from './components/ContactsCard';
 import { ProjectsCard } from './components/ProjectsCard';
-import { QuickStatsCard } from './components/QuickStatsCard';
 import { RevenueChartSection } from './components/RevenueChartSection';
-import { ObjectivesSection } from './components/ObjectivesSection'
-import { UpcomingMeetingsCard } from './components/UpcomingMeetingsCard';
+import { ObjectivesSection } from './components/ObjectivesSection';
+import { PipelineBoardSection } from './components/PipelineBoardSection';
 
 export function DashboardV3() {
   const [isPrivacyMode, setIsPrivacyMode] = useState(false);
@@ -56,7 +55,7 @@ export function DashboardV3() {
         )}
       </div>
 
-      <div className={cn("relative z-10 max-w-[1600px] mx-auto", isMobile ? "p-4" : "p-6 lg:p-8")}>
+      <div className={cn("relative z-10 max-w-[1600px] mx-auto", isMobile ? "p-4" : "p-4 lg:p-5")}>
         {!isMobile && (
           <DashboardHeader
             mounted={data.mounted}
@@ -67,7 +66,7 @@ export function DashboardV3() {
         )}
 
         <motion.div
-          className={cn("grid gap-3 md:gap-4 lg:gap-6", isMobile ? "grid-cols-2" : "grid-cols-12")}
+          className={cn("grid gap-3 md:gap-4", isMobile ? "grid-cols-2" : "grid-cols-12")}
           variants={containerVariants}
           initial="hidden"
           animate={data.mounted ? "visible" : "hidden"}
@@ -94,8 +93,17 @@ export function DashboardV3() {
             isMobile={isMobile}
             onClick={data.handleNavigateToProjects}
           />
-          <QuickStatsCard isPrivacyMode={isPrivacyMode} isMobile={isMobile} />
-          <UpcomingMeetingsCard isMobile={isMobile} />
+          <PipelineBoardSection
+            leads={data.leads}
+            projects={data.projects}
+            leadsCount={data.leadsCount}
+            activeProjectsCount={data.activeProjectsCount}
+            isPrivacyMode={isPrivacyMode}
+            isMobile={isMobile}
+            onNavigateToCRM={data.handleNavigateToCRM}
+            onNavigateToProjects={data.handleNavigateToProjects}
+            onNavigateToProject={data.handleNavigateToProject}
+          />
           <RevenueChartSection
             isPrivacyMode={isPrivacyMode}
             isMobile={isMobile}

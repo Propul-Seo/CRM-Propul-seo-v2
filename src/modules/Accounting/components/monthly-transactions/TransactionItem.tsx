@@ -110,7 +110,7 @@ export function TransactionItem({
                   <option value="">-- Sélectionner --</option>
                   <option value="site_internet">Site Internet</option>
                   <option value="erp">ERP</option>
-                  <option value="communication">Communication</option>
+                  <option value="communication">Autres sources</option>
                 </select>
               </div>
             )}

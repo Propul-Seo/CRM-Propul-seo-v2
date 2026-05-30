@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
-import { Briefcase, Activity, ChevronRight } from 'lucide-react';
-import { Badge } from '../../../components/ui/badge';
+import { Briefcase, ChevronRight } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { AnimatedNumber } from './AnimatedNumber';
 import { itemVariants } from '../lib/animations';
@@ -15,44 +14,38 @@ interface ProjectsCardProps {
 
 export function ProjectsCard({ projectsCount, activeProjectsCount, isPrivacyMode, isMobile, onClick }: ProjectsCardProps) {
   return (
-    <motion.div variants={itemVariants} className={cn(isMobile ? "col-span-1" : "col-span-6 lg:col-span-4")}>
+    <motion.div variants={itemVariants} className={cn(isMobile ? "col-span-1" : "col-span-12 md:col-span-6 lg:col-span-3")}>
       <div
         onClick={onClick}
         className={cn(
-          "group relative h-full rounded-3xl bg-gradient-to-br from-surface-2 to-surface-2/50 border border-border/50 cursor-pointer overflow-hidden transition-all duration-300 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/5",
-          isMobile ? "min-h-[140px] p-4" : "min-h-[200px] p-6"
+          "group relative h-full cursor-pointer overflow-hidden rounded-2xl border border-violet-400/20 bg-[linear-gradient(180deg,rgba(22,18,34,0.82),rgba(7,7,13,0.86))] p-4 shadow-[0_18px_60px_rgba(0,0,0,0.18)] backdrop-blur-xl transition-all duration-300 hover:border-violet-300/35 hover:bg-white/[0.04]",
+          isMobile ? "min-h-[150px]" : "min-h-[260px]"
         )}
       >
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-amber-500/10 to-transparent rounded-full blur-2xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_0%,rgba(168,85,247,0.13),transparent_34%)]" />
 
         <div className="relative z-10 h-full flex flex-col">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                <Briefcase className="h-5 w-5 text-amber-400" />
-              </div>
-              <h3 className="font-semibold text-white">Projets</h3>
+          <div className="mb-5 flex items-center justify-between gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-xl border border-violet-400/20 bg-violet-400/10">
+              <Briefcase className="h-5 w-5 text-violet-200" />
             </div>
-            <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20">
-              {activeProjectsCount} actifs
-            </Badge>
+            <ChevronRight className="h-4 w-4 text-violet-100/35 transition-all group-hover:translate-x-1 group-hover:text-violet-200" />
           </div>
 
-          <div className="flex-1 flex items-center">
+          <div className="mt-auto">
+            <p className="text-sm font-semibold text-violet-100/62">Projets</p>
             {isPrivacyMode ? (
-              <div className="text-3xl font-bold text-muted-foreground font-mono">{'\u2022\u2022\u2022'}</div>
+              <div className="mt-3 font-mono text-4xl font-bold text-violet-100/38">***</div>
             ) : (
-              <div className="text-3xl font-bold text-white">
+              <div className="mt-3 text-4xl font-black tracking-tight text-violet-200">
                 <AnimatedNumber value={projectsCount || 0} />
-                <span className="text-lg text-muted-foreground font-normal ml-2">total</span>
               </div>
             )}
-          </div>
-
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Activity className="h-3.5 w-3.5" />
-            <span>Voir tous les projets</span>
-            <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+            <div className="mt-3 border-t border-white/[0.08] pt-3">
+              <p className="text-xs text-violet-100/46">
+                {isPrivacyMode ? '**' : activeProjectsCount} actifs - a piloter
+              </p>
+            </div>
           </div>
         </div>
       </div>

@@ -2,16 +2,25 @@ import { motion } from 'framer-motion';
 import { PieChart } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { useRevenueBreakdown } from '../hooks/useRevenueBreakdown';
-import { RevenueCategoryCards } from './RevenueCategoryCards';
+import { RevenueEvolutionChart } from './RevenueEvolutionChart';
 import { RevenueDistributionChart } from './RevenueDistributionChart';
 import { RevenueFiltersBar } from './RevenueFiltersBar';
 import { RevenueDetailTable } from './RevenueDetailTable';
+import type { AnnualStats } from '../../../hooks/useAnnualAccounting';
 
 interface RevenueBreakdownSectionProps {
+  annualStats: AnnualStats;
+  currentYear: number;
+  selectedMonth: Date;
   isMobile: boolean;
 }
 
-export function RevenueBreakdownSection({ isMobile }: RevenueBreakdownSectionProps) {
+export function RevenueBreakdownSection({
+  annualStats,
+  currentYear,
+  selectedMonth,
+  isMobile
+}: RevenueBreakdownSectionProps) {
   const {
     filteredRows,
     loading,
@@ -37,44 +46,62 @@ export function RevenueBreakdownSection({ isMobile }: RevenueBreakdownSectionPro
 
   return (
     <motion.div
+      id="accounting-revenue-breakdown"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="space-y-4"
     >
-      <div className="flex items-center gap-2 mb-1">
-        <PieChart className={cn('text-muted-foreground', isMobile ? 'h-4 w-4' : 'h-5 w-5')} />
-        <h2 className={cn('font-semibold text-white', isMobile ? 'text-base' : 'text-lg')}>
-          Répartition du Chiffre d'Affaires
-        </h2>
-      </div>
-
-      <RevenueFiltersBar
-        period={period}
-        categoryFilter={categoryFilter}
-        clientSearch={clientSearch}
-        onPeriodChange={setPeriod}
-        onCategoryFilterChange={setCategoryFilter}
-        onClientSearchChange={setClientSearch}
-      />
-
-      <RevenueCategoryCards
+      <RevenueEvolutionChart
+        annualStats={annualStats}
+        currentYear={currentYear}
+        selectedMonth={selectedMonth}
         categoryTotals={categoryTotals}
         categoryPercentages={categoryPercentages}
         isMobile={isMobile}
       />
 
-      <div className={cn('grid gap-4', isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2')}>
-        <RevenueDistributionChart
-          chartData={chartData}
-          communicationChartData={communicationChartData}
+      <section className="space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.045] text-muted-foreground">
+              <PieChart className={cn(isMobile ? 'h-4 w-4' : 'h-5 w-5')} />
+            </div>
+            <div>
+              <h2 className={cn('font-semibold text-white', isMobile ? 'text-base' : 'text-lg')}>
+                Répartition du chiffre d'affaires
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Analyse des revenus par offre, catégorie et client.
+              </p>
+            </div>
+          </div>
+          <span className="w-fit rounded-full border border-white/10 bg-white/[0.045] px-3 py-1 text-xs font-medium text-muted-foreground">
+            {filteredRows.length} ligne{filteredRows.length > 1 ? 's' : ''}
+          </span>
+        </div>
+
+        <RevenueFiltersBar
+          period={period}
           categoryFilter={categoryFilter}
+          clientSearch={clientSearch}
+          onPeriodChange={setPeriod}
+          onCategoryFilterChange={setCategoryFilter}
+          onClientSearchChange={setClientSearch}
         />
-        <RevenueDetailTable
-          rows={filteredRows}
-          categoryFilter={categoryFilter}
-        />
-      </div>
+
+        <div className={cn('grid gap-4', isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2')}>
+          <RevenueDistributionChart
+            chartData={chartData}
+            communicationChartData={communicationChartData}
+            categoryFilter={categoryFilter}
+          />
+          <RevenueDetailTable
+            rows={filteredRows}
+            categoryFilter={categoryFilter}
+          />
+        </div>
+      </section>
     </motion.div>
   );
 }

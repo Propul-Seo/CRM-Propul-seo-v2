@@ -8,14 +8,9 @@ import {
   PanelLeft,
   ChevronRight,
   Shield,
-  BarChart3,
-  Archive,
   UserCheck,
-  Megaphone,
   LayoutDashboard,
   BookOpen,
-  Vault,
-  ListTodo,
   type LucideIcon
 } from 'lucide-react';
 import { useStore } from '@/store';
@@ -33,7 +28,7 @@ interface NavItem {
 
 interface NavSection {
   section: string;
-  title: string;
+  title?: string;
   items: NavItem[];
 }
 
@@ -44,7 +39,7 @@ export function Sidebar() {
   const { getUserByAuthId } = useUsers();
   const [currentUserData, setCurrentUserData] = useState<User | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(['admin', 'perso', 'v3'])
+    new Set(['settings', 'v3'])
   );
 
   const isCollapsed = sidebarCollapsed;
@@ -77,36 +72,22 @@ export function Sidebar() {
     setExpandedSections(next);
   };
 
-  const persoSection: NavSection[] = isAdmin ? [{
-    section: 'perso',
-    title: 'Admin',
-    items: [
-      { to: routes.personalTasks, label: 'Mes Tâches',   icon: ListTodo,   permission: 'can_view_dashboard' },
-      { to: routes.agencyVault,   label: 'Coffre-fort',  icon: Vault,      permission: 'can_view_dashboard' },
-      { to: routes.accounting,    label: 'Comptabilité', icon: Calculator, permission: 'can_view_finance' },
-    ]
-  }] : [];
-
   const v3Section: NavSection = {
     section: 'v3',
     title: 'CRM Propulseo',
     items: [
       { to: routes.dashboard,             label: 'Dashboard',           icon: LayoutDashboard, permission: 'can_view_dashboard' },
       { to: routes.projectsV3,            label: 'Projets actifs',      icon: Briefcase,       permission: 'can_view_projects' },
-      { to: routes.leadsV3,               label: 'Leads',               icon: UserCheck,       permission: 'can_view_leads' },
-      { to: routes.communicationV3Production, label: 'Communication',   icon: Megaphone,       permission: 'can_view_communication' },
-      { to: routes.communicationV3Kpi,    label: 'KPI',                 icon: BarChart3,       permission: 'can_view_communication' },
+      { to: routes.leadsV3,               label: 'CRM',                 icon: UserCheck,       permission: 'can_view_leads' },
       { to: routes.procedures,            label: 'Procédures',          icon: BookOpen,        permission: 'can_view_procedures' },
-      { to: routes.projectsV3Completed,   label: 'Projets terminés',    icon: Archive,         permission: 'can_view_projects' },
+      { to: routes.accounting,            label: 'Comptabilité',        icon: Calculator,      permission: 'can_view_finance' },
     ]
   };
 
   const navigationItems: NavSection[] = [
-    ...persoSection,
     v3Section,
     {
-      section: 'admin',
-      title: 'Système',
+      section: 'settings',
       items: [
         { to: routes.settings, label: 'Paramètres', icon: Settings, permission: 'can_view_settings' }
       ]
@@ -170,11 +151,12 @@ export function Sidebar() {
           const hasAccessibleItems = section.items.some(item => canAccessPage(item.permission));
           if (!hasAccessibleItems) return null;
 
-          const isExpanded = expandedSections.has(section.section);
+          const hasTitle = Boolean(section.title);
+          const isExpanded = !hasTitle || expandedSections.has(section.section);
 
           return (
             <div key={section.section} className={cn(sectionIndex > 0 && "mt-3")}>
-              {!isCollapsed && (
+              {!isCollapsed && hasTitle && (
                 <button
                   onClick={() => toggleSection(section.section)}
                   className="flex items-center justify-between w-full px-2 py-1 mb-0.5 group"

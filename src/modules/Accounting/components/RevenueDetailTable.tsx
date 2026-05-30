@@ -124,7 +124,7 @@ export function RevenueDetailTable({ rows, categoryFilter }: RevenueDetailTableP
               ERP ({byCat.erp.length})
             </TabsTrigger>
             <TabsTrigger value="communication">
-              Communication ({byCat.communication.length})
+              Autres sources ({byCat.communication.length})
             </TabsTrigger>
           </TabsList>
           <TabsContent value="site_internet">

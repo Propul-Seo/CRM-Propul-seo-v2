@@ -119,11 +119,7 @@ export function Layout() {
       routes.dashboard,
       routes.projectsV3,
       routes.leadsV3,
-      routes.communicationV3Production,
-      routes.communicationV3Kpi,
       routes.procedures,
-      routes.projectsV3Completed,
-      routes.personalTasks,
       routes.accounting,
       routes.settings,
     ];

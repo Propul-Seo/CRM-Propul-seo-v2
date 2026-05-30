@@ -11,7 +11,7 @@ export type RevenuePeriodFilter = 'month' | 'quarter' | 'year';
 export const REVENUE_CATEGORIES = [
   { value: 'site_internet' as const, label: 'Site Internet', color: '#06b6d4', icon: Globe },
   { value: 'erp' as const, label: 'ERP', color: '#8b5cf6', icon: Server },
-  { value: 'communication' as const, label: 'Communication', color: '#f59e0b', icon: Megaphone },
+  { value: 'communication' as const, label: 'Autres sources', color: '#f59e0b', icon: Megaphone },
 ] as const;
 
 export const REVENUE_SOUS_CATEGORIES = [

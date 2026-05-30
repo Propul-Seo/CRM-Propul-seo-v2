@@ -13,6 +13,7 @@ export function useMonthlyTransactions({ month, onAdd, onUpdate, onDelete }: Use
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     type: 'revenue' as 'revenue' | 'expense',
     amount: '',
@@ -38,27 +39,34 @@ export function useMonthlyTransactions({ month, onAdd, onUpdate, onDelete }: Use
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     if (!formData.amount || !formData.description) {
       toast.error('Veuillez remplir tous les champs obligatoires');
       return;
     }
 
-    const result = await onAdd({
-      type: formData.type,
-      amount: parseFloat(formData.amount),
-      description: formData.description,
-      category: formData.category,
-      entry_date: formData.entry_date,
-      month_key: formData.entry_date.slice(0, 7),
-      responsible_user_id: null,
-      responsible_user_name: null,
-      revenue_category: formData.revenue_category || null,
-      revenue_sous_categorie: formData.revenue_sous_categorie || null
-    });
+    setIsSubmitting(true);
+    try {
+      const result = await onAdd({
+        type: formData.type,
+        amount: parseFloat(formData.amount),
+        description: formData.description,
+        category: formData.category,
+        entry_date: formData.entry_date,
+        month_key: formData.entry_date.slice(0, 7),
+        responsible_user_id: null,
+        responsible_user_name: null,
+        revenue_category: formData.revenue_category || null,
+        revenue_sous_categorie: formData.revenue_sous_categorie || null
+      });
 
-    if (result.success) {
-      setShowAddForm(false);
-      resetForm();
+      if (result.success) {
+        setShowAddForm(false);
+        resetForm();
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -119,6 +127,7 @@ export function useMonthlyTransactions({ month, onAdd, onUpdate, onDelete }: Use
     setFormData,
     editData,
     setEditData,
+    isSubmitting,
     resetForm,
     handleAdd,
     handleEdit,

@@ -1,12 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Badge } from '../../components/ui/badge';
+import { Plus, ReceiptText } from 'lucide-react';
 import { MobileHeader } from '../../components/mobile/MobileHeader';
 import { cn } from '../../lib/utils';
 import { useAccountingData } from './hooks/useAccountingData';
-import { StatusDot } from './components/StatusDot';
-import { MonthSelector } from './components/MonthSelector';
-import { AnnualStatsSection } from './components/AnnualStatsSection';
 import { RevenueBreakdownSection } from './components/RevenueBreakdownSection';
 import { MonthlySummarySection } from './components/MonthlySummarySection';
 import { MonthlyTransactionsModal } from './MonthlyTransactionsModal';
@@ -21,10 +18,6 @@ export function Accounting() {
     annualStats,
     accounting_entries,
     currentMonthStats,
-    navigateMonth,
-    canGoPrev,
-    canGoNext,
-    generateSparklineData,
     loading,
     containerVariants,
     refreshAnnualData,
@@ -61,86 +54,33 @@ export function Accounting() {
 
   return (
     <div className={cn(
-      "min-h-screen text-white relative overflow-hidden",
+      "min-h-screen bg-[#020205] text-[#ede9fe] relative overflow-hidden",
       isMobile && "pb-20"
     )}>
       {isMobile && <MobileHeader title="Comptabilité" />}
 
       {/* Background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-emerald-900/20 via-surface-1 to-surface-1" />
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.08),transparent_50%)]" />
         <div
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0 opacity-20"
           style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.1) 1px, transparent 0)`,
+            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(139,92,246,0.15) 1px, transparent 0)`,
             backgroundSize: '40px 40px',
           }}
         />
         {!isMobile && (
           <>
-            <div className="absolute top-20 left-1/4 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-3xl" />
-            <div className="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-rose-500/5 rounded-full blur-3xl" />
+            <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-[#8B5CF6]/5 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-[#A78BFA]/5 rounded-full blur-3xl" />
           </>
         )}
       </div>
 
       <div className={cn(
         "relative z-10 max-w-[1600px] mx-auto",
-        isMobile ? "p-4" : "p-6 lg:p-8"
+        isMobile ? "p-4" : "p-4 lg:p-5"
       )}>
-        {isMobile && (
-          <div className="mb-4">
-            <MonthSelector
-              selectedMonth={selectedMonth}
-              onMonthChange={navigateMonth}
-              canGoPrev={canGoPrev}
-              canGoNext={canGoNext}
-            />
-          </div>
-        )}
-
-        {!isMobile && (
-          <motion.header
-            className="mb-8"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : -20 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                    <StatusDot color="emerald" />
-                    <span className="text-xs font-medium text-emerald-400">Temps réel</span>
-                  </div>
-                  <Badge className="bg-surface-2 text-foreground border-border">
-                    {currentYear}
-                  </Badge>
-                </div>
-                <h1
-                  className="text-3xl lg:text-4xl font-bold tracking-tight"
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                >
-                  <span className="text-white">Comptabilité</span>
-                  <span className="ml-3 bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                    Financière
-                  </span>
-                </h1>
-                <p className="mt-2 text-muted-foreground text-sm lg:text-base">
-                  Suivi en temps réel de vos revenus et dépenses
-                </p>
-              </div>
-
-              <MonthSelector
-                selectedMonth={selectedMonth}
-                onMonthChange={navigateMonth}
-                canGoPrev={canGoPrev}
-                canGoNext={canGoNext}
-              />
-            </div>
-          </motion.header>
-        )}
-
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
@@ -153,22 +93,34 @@ export function Accounting() {
             variants={containerVariants}
             initial="hidden"
             animate={mounted ? "visible" : "hidden"}
-            className="space-y-8"
+            className="space-y-4"
           >
-            <AnnualStatsSection
+            <div className={cn("flex", isMobile ? "justify-stretch" : "justify-end")}>
+              <button
+                type="button"
+                onClick={() => setShowTransactionsModal(true)}
+                className={cn(
+                  "inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-300/25 bg-gradient-to-r from-emerald-300 to-cyan-300 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-[0_18px_48px_rgba(34,211,238,0.18)] transition hover:scale-[1.01] hover:shadow-[0_20px_60px_rgba(34,211,238,0.25)]",
+                  isMobile && "w-full"
+                )}
+              >
+                <Plus className="h-4 w-4" />
+                <span>Ajouter une transaction</span>
+                <ReceiptText className="h-4 w-4 opacity-70" />
+              </button>
+            </div>
+
+            <RevenueBreakdownSection
               annualStats={annualStats}
-              generateSparklineData={generateSparklineData}
               currentYear={currentYear}
+              selectedMonth={selectedMonth}
               isMobile={isMobile}
             />
-
-            <RevenueBreakdownSection isMobile={isMobile} />
 
             <MonthlySummarySection
               selectedMonth={selectedMonth}
               currentMonthStats={currentMonthStats}
               isMobile={isMobile}
-              onManageTransactions={() => setShowTransactionsModal(true)}
             />
           </motion.div>
         )}

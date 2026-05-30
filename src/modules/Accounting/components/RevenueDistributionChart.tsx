@@ -34,7 +34,7 @@ export function RevenueDistributionChart({ chartData, communicationChartData, ca
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-surface-2 to-surface-2/50 border border-border/50 p-5">
       <h3 className="text-sm font-medium text-muted-foreground mb-3">
-        {categoryFilter === 'communication' ? 'Répartition Communication' : 'Répartition par catégorie'}
+        {categoryFilter === 'communication' ? 'Répartition autres sources' : 'Répartition par catégorie'}
       </h3>
       <ResponsiveContainer width="100%" height={280}>
         <PieChart>

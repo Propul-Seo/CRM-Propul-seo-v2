@@ -170,7 +170,7 @@ export function useRevenueBreakdown() {
     return [
       { name: 'Site Internet', value: categoryTotals.site_internet, color: '#06b6d4' },
       { name: 'ERP', value: categoryTotals.erp, color: '#8b5cf6' },
-      { name: 'Communication', value: categoryTotals.communication, color: '#f59e0b' },
+      { name: 'Autres sources', value: categoryTotals.communication, color: '#f59e0b' },
     ].filter((d) => d.value > 0);
   }, [categoryTotals]);
 

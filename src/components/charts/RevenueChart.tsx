@@ -30,8 +30,6 @@ export function RevenueChart({ isPrivacyMode = false }: RevenueChartProps) {
       fullMonth: string;
     }> = [];
 
-    console.log('RevenueChart - Données comptables:', accountingEntries);
-
     // Initialiser tous les mois de l'année en cours (janvier à décembre)
     for (let month = 1; month <= 12; month++) {
       const monthKey = `${currentYear}-${month.toString().padStart(2, '0')}`;
@@ -43,9 +41,7 @@ export function RevenueChart({ isPrivacyMode = false }: RevenueChartProps) {
       });
 
       // Calculer le CA total du mois
-      const totalRevenue = monthEntries.reduce((sum, entry) => sum + parseFloat(entry.amount || 0), 0);
-
-      console.log(`CA total pour ${format(monthDate, 'MMMM yyyy', { locale: fr })} (${monthKey}):`, totalRevenue);
+      const totalRevenue = monthEntries.reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
 
       months.push({
         month: isPrivacyMode ? '*****' : format(monthDate, 'MMM', { locale: fr }),
@@ -54,16 +50,15 @@ export function RevenueChart({ isPrivacyMode = false }: RevenueChartProps) {
       });
     }
 
-    console.log('RevenueChart - Données du graphique:', months);
     return months;
   }, [accountingEntries, isPrivacyMode]);
 
   if (loading) {
     return (
-      <div className="h-64 flex items-center justify-center">
+      <div className="flex h-full min-h-64 items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-sm text-muted-foreground">Chargement des données...</p>
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-violet-400"></div>
+          <p className="text-sm text-violet-100/52">Chargement des données...</p>
         </div>
       </div>
     );
@@ -71,39 +66,42 @@ export function RevenueChart({ isPrivacyMode = false }: RevenueChartProps) {
 
   if (chartData.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center">
+      <div className="flex h-full min-h-64 items-center justify-center">
         <div className="text-center">
-          <p className="text-sm text-muted-foreground">Aucune donnée disponible</p>
+          <p className="text-sm text-violet-100/52">Aucune donnée disponible</p>
         </div>
       </div>
     );
   }
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={chartData}>
-        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart data={chartData} margin={{ top: 28, right: 22, left: 8, bottom: 18 }}>
+        <CartesianGrid stroke="rgba(255,255,255,0.12)" strokeDasharray="4 5" vertical horizontal />
         <XAxis 
           dataKey="month" 
-          tick={{ fontSize: 12 }}
-          className="text-muted-foreground"
-          axisLine={true}
-          tickLine={true}
+          tick={{ fill: 'rgba(255,255,255,0.48)', fontSize: 12 }}
+          axisLine={false}
+          tickLine={false}
+          dy={8}
         />
         <YAxis 
-          tick={{ fontSize: 12 }}
-          className="text-muted-foreground"
-          axisLine={true}
-          tickLine={true}
+          tick={{ fill: 'rgba(255,255,255,0.48)', fontSize: 12 }}
+          axisLine={false}
+          tickLine={false}
+          width={58}
           tickFormatter={(value) => isPrivacyMode ? '*****' : `${value}€`}
         />
         <Tooltip
+          cursor={{ stroke: 'rgba(255,255,255,0.72)', strokeWidth: 1.5 }}
           contentStyle={{
-            backgroundColor: 'white',
-            border: '1px solid #e5e7eb',
+            backgroundColor: '#fff',
+            border: '1px solid rgba(255,255,255,0.22)',
             borderRadius: '8px',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.32)',
           }}
+          labelStyle={{ color: '#ddd6fe', fontWeight: 700 }}
+          itemStyle={{ color: '#a855f7', fontWeight: 800 }}
           formatter={(value: number) => isPrivacyMode ? ['*****', 'Chiffre d\'affaires'] : [`${value.toLocaleString()}€`, 'Chiffre d\'affaires']}
           labelFormatter={(label, payload) => {
             if (payload && payload[0]) {
@@ -115,10 +113,10 @@ export function RevenueChart({ isPrivacyMode = false }: RevenueChartProps) {
         <Line
           type="monotone"
           dataKey="revenue"
-          stroke="#9334e9"
-          strokeWidth={3}
-          dot={{ fill: '#9334e9', strokeWidth: 2, r: 4 }}
-          activeDot={{ r: 6, stroke: '#9334e9', strokeWidth: 2, fill: 'white' }}
+          stroke="#9b35ff"
+          strokeWidth={4}
+          dot={{ fill: '#9b35ff', stroke: '#130d23', strokeWidth: 3, r: 5 }}
+          activeDot={{ r: 8, stroke: '#a855f7', strokeWidth: 4, fill: 'white' }}
         />
       </LineChart>
     </ResponsiveContainer>

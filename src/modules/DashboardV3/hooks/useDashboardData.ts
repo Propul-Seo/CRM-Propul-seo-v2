@@ -35,7 +35,7 @@ export function useDashboardData() {
   const { data: projects, count: projectsCount } = useSupabaseProjects();
   const { data: tasks } = useSupabaseTasks();
   const { data: accountingEntries, loading: accountingLoading } = useSupabaseAccountingEntries();
-  const { count: leadsCount } = useSupabaseLeads();
+  const { data: leads, count: leadsCount } = useSupabaseLeads();
 
   const currentYear = new Date().getFullYear();
   let currentYearRevenue = 0;
@@ -98,6 +98,7 @@ export function useDashboardData() {
   return {
     mounted,
     projects,
+    leads,
     currentYear,
     currentYearRevenue,
     contactsCount,
