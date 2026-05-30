@@ -13,6 +13,7 @@ import { useConvertLeadToProject } from './hooks/useConvertLeadToProject'
 import { useLeadsV3Cards } from './hooks/useLeadsV3Cards'
 import type { LeadCardData } from './components/LeadCardV3'
 import { QualificationLeadDetailsSheet } from './components/QualificationLeadDetailsSheet'
+import { getProjectAssignees } from '@/modules/ProjectsV3/utils/projectAssignees'
 
 const TAB_KEY = 'propulseo:leads-v3:tab'
 
@@ -37,7 +38,7 @@ export function LeadsV3Page() {
   const [filterUserId, setFilterUserId] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const debouncedSearch = useDebounced(searchQuery, 300)
-  const [users, setUsers] = useState<{ id: string; name: string }[]>([])
+  const [users, setUsers] = useState<{ id: string; name: string; email: string | null }[]>([])
 
   const setTab = (t: LeadsV3Tab) => { setTabRaw(t); window.localStorage.setItem(TAB_KEY, t) }
 
@@ -49,11 +50,13 @@ export function LeadsV3Page() {
   const [selectedQualif, setSelectedQualif] = useState<QualificationLead | null>(null)
 
   useEffect(() => {
-    supabase.from('users').select('id, name').eq('is_active', true).order('name').then(({ data, error }) => {
+    supabase.from('users').select('id, name, email').eq('is_active', true).order('name').then(({ data, error }) => {
       if (error) { console.error('[LeadsV3] users fetch failed:', error); return }
-      if (data) setUsers(data as { id: string; name: string }[])
+      if (data) setUsers(data as { id: string; name: string; email: string | null }[])
     })
   }, [])
+
+  const leadAssignees = useMemo(() => getProjectAssignees(users), [users])
 
   const loading = (tab === 'site_web' ? sw.loading : erp.loading) || qualif.loading
   const error = tab === 'site_web' ? sw.error : erp.error
@@ -139,7 +142,7 @@ export function LeadsV3Page() {
         onTabChange={setTab}
         filterUserId={filterUserId}
         onFilterUserChange={setFilterUserId}
-        users={users}
+        users={leadAssignees}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onNewLead={() => toast.info('Création de lead : à venir en V3')}
