@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MobileHeader } from '../../components/mobile/MobileHeader';
 import { cn } from '../../lib/utils';
@@ -11,6 +11,7 @@ import type { AccountingEntry } from '../../hooks/useMonthlyAccounting';
 export function Accounting() {
   const {
     selectedMonth,
+    setSelectedMonth,
     mounted,
     currentYear,
     isMobile,
@@ -68,6 +69,13 @@ export function Accounting() {
     return result;
   };
 
+  const previousMonthStats = useMemo(() => {
+    const prev = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1, 1);
+    const prevKey = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}`;
+    const stats = annualStats.monthlyStats[prevKey];
+    return stats ? { revenue: stats.revenues, expenses: stats.expenses, result: stats.result } : null;
+  }, [annualStats.monthlyStats, selectedMonth]);
+
   return (
     <div className={cn(
       "min-h-screen bg-[#020205] text-[#ede9fe] relative overflow-hidden",
@@ -118,10 +126,13 @@ export function Accounting() {
                 selectedMonth={selectedMonth}
                 isMobile={isMobile}
                 onAddTransaction={() => setShowTransactionsModal(true)}
+                currentMonthStats={currentMonthStats}
+                onSelectMonth={setSelectedMonth}
                 monthlySummary={
                   <MonthlySummarySection
                     selectedMonth={selectedMonth}
                     currentMonthStats={currentMonthStats}
+                    previousMonthStats={previousMonthStats}
                     isMobile={isMobile}
                   />
                 }

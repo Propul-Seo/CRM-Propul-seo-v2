@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowUpRight, ArrowDownRight, Receipt, PieChart, Activity, Settings } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { AnimatedCounter } from './AnimatedCounter';
+import { DeltaBadge } from './DeltaBadge';
 import { cn } from '../../../lib/utils';
 
 interface SummaryCard {
@@ -10,6 +11,7 @@ interface SummaryCard {
   value: number;
   suffix?: string;
   icon: LucideIcon;
+  comparison?: { previous: number; lowerIsBetter?: boolean };
   tone: {
     icon: string;
     value: string;
@@ -21,6 +23,7 @@ interface SummaryCard {
 export function MonthlySummarySection({
   selectedMonth,
   currentMonthStats,
+  previousMonthStats,
   isMobile,
   onManageTransactions
 }: {
@@ -31,11 +34,13 @@ export function MonthlySummarySection({
     result: number;
     transactionCount: number;
   };
+  previousMonthStats?: { revenue: number; expenses: number; result: number } | null;
   isMobile: boolean;
   onManageTransactions?: () => void;
 }) {
   const monthLabel = selectedMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
   const resultIsPositive = currentMonthStats.result >= 0;
+  const prev = previousMonthStats ?? null;
 
   const cards: SummaryCard[] = [
     {
@@ -44,6 +49,7 @@ export function MonthlySummarySection({
       value: currentMonthStats.revenue,
       suffix: '€',
       icon: ArrowUpRight,
+      comparison: prev ? { previous: prev.revenue } : undefined,
       tone: {
         icon: 'bg-emerald-400/12 text-emerald-300 ring-emerald-300/18',
         value: 'text-emerald-300',
@@ -57,6 +63,7 @@ export function MonthlySummarySection({
       value: currentMonthStats.expenses,
       suffix: '€',
       icon: ArrowDownRight,
+      comparison: prev ? { previous: prev.expenses, lowerIsBetter: true } : undefined,
       tone: {
         icon: 'bg-rose-400/12 text-rose-300 ring-rose-300/18',
         value: 'text-rose-300',
@@ -70,6 +77,7 @@ export function MonthlySummarySection({
       value: currentMonthStats.result,
       suffix: '€',
       icon: PieChart,
+      comparison: prev ? { previous: prev.result } : undefined,
       tone: {
         icon: resultIsPositive
           ? 'bg-cyan-300/12 text-cyan-300 ring-cyan-300/18'
@@ -130,7 +138,7 @@ export function MonthlySummarySection({
       </div>
 
       <div className={cn('grid gap-3', isMobile ? 'grid-cols-1' : 'grid-cols-2 xl:grid-cols-4')}>
-        {cards.map(({ label, caption, value, suffix, icon: Icon, tone }) => (
+        {cards.map(({ label, caption, value, suffix, icon: Icon, tone, comparison }) => (
           <div
             key={label}
             className={cn(
@@ -151,6 +159,9 @@ export function MonthlySummarySection({
             <p className={cn('relative mt-4 text-2xl font-black leading-none tracking-tight sm:text-3xl', tone.value)}>
               <AnimatedCounter value={value} suffix={suffix} />
             </p>
+            {comparison && (
+              <DeltaBadge current={value} previous={comparison.previous} lowerIsBetter={comparison.lowerIsBetter} />
+            )}
           </div>
         ))}
       </div>

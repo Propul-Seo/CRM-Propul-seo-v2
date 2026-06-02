@@ -1,4 +1,5 @@
 import { Filter, Search } from 'lucide-react';
+import type { ReactNode } from 'react';
 import type { RevenueCategory, RevenuePeriodFilter } from '../constants';
 
 interface RevenueFiltersBarProps {
@@ -8,6 +9,7 @@ interface RevenueFiltersBarProps {
   onPeriodChange: (v: RevenuePeriodFilter) => void;
   onCategoryFilterChange: (v: 'all' | RevenueCategory) => void;
   onClientSearchChange: (v: string) => void;
+  exportSlot?: ReactNode;
 }
 
 export function RevenueFiltersBar({
@@ -17,6 +19,7 @@ export function RevenueFiltersBar({
   onPeriodChange,
   onCategoryFilterChange,
   onClientSearchChange,
+  exportSlot,
 }: RevenueFiltersBarProps) {
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-3">
@@ -56,6 +59,8 @@ export function RevenueFiltersBar({
           className="h-10 w-full rounded-xl border border-white/10 bg-surface-2/80 pl-9 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground hover:border-white/20 focus:border-primary/60 sm:w-[230px]"
         />
       </div>
+
+      {exportSlot}
     </div>
   );
 }

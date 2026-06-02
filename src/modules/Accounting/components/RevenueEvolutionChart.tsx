@@ -13,22 +13,7 @@ import {
 import { formatCurrency } from '../../../utils';
 import { cn } from '../../../lib/utils';
 import type { AnnualStats } from '../../../hooks/useAnnualAccounting';
-
-const MONTH_LABELS = ['janv.', 'fevr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'aout', 'sept.', 'oct.', 'nov.', 'dec.'];
-const MONTH_FULL_LABELS = [
-  'janvier',
-  'fevrier',
-  'mars',
-  'avril',
-  'mai',
-  'juin',
-  'juillet',
-  'aout',
-  'septembre',
-  'octobre',
-  'novembre',
-  'decembre',
-];
+import { MONTH_LABELS, MONTH_FULL_LABELS } from '../constants';
 
 interface RevenueEvolutionChartProps {
   annualStats: AnnualStats;

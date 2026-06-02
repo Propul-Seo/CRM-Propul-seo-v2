@@ -1,4 +1,5 @@
-import { Globe, Server, Megaphone, Bot, Users, Mail, MoreHorizontal } from 'lucide-react';
+import { Globe, Server, Megaphone, Bot, Users, Mail, MoreHorizontal, CreditCard, Wrench, Building2, Plane } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 // =====================================================
 // CONSTANTES - CATÉGORIES DE REVENUS
@@ -48,3 +49,61 @@ export function getSousCategorieLabel(sc: string | null | undefined): string {
   const found = REVENUE_SOUS_CATEGORIES.find(c => c.value === sc);
   return found?.label ?? '';
 }
+
+// =====================================================
+// CONSTANTES - CATÉGORIES DE DÉPENSES
+// (valeurs alignées sur le formulaire d'ajout : accounting_entries.category)
+// =====================================================
+
+export type ExpenseCategory = 'subscription' | 'services' | 'office' | 'marketing' | 'travel' | 'other';
+
+export const EXPENSE_CATEGORIES: ReadonlyArray<{ value: ExpenseCategory; label: string; color: string; icon: LucideIcon }> = [
+  { value: 'subscription', label: 'Abonnement', color: '#ef4444', icon: CreditCard },
+  { value: 'services', label: 'Frais de services', color: '#f97316', icon: Wrench },
+  { value: 'office', label: 'Frais bureau', color: '#f59e0b', icon: Building2 },
+  { value: 'marketing', label: 'Marketing', color: '#ec4899', icon: Megaphone },
+  { value: 'travel', label: 'Voyages', color: '#a855f7', icon: Plane },
+  { value: 'other', label: 'Autre', color: '#94a3b8', icon: MoreHorizontal },
+];
+
+export function getExpenseCategoryLabel(category: string | null | undefined): string {
+  const found = EXPENSE_CATEGORIES.find(c => c.value === category);
+  return found?.label ?? 'Autre';
+}
+
+export function getExpenseCategoryColorClasses(category: string | null | undefined): string {
+  switch (category) {
+    case 'subscription':
+      return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+    case 'services':
+      return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
+    case 'office':
+      return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+    case 'marketing':
+      return 'bg-pink-500/10 text-pink-400 border-pink-500/20';
+    case 'travel':
+      return 'bg-violet-500/10 text-violet-400 border-violet-500/20';
+    default:
+      return 'bg-surface-2 text-muted-foreground border-border';
+  }
+}
+
+// =====================================================
+// LABELS DES MOIS (partagés évolution / vue annuelle)
+// =====================================================
+
+export const MONTH_LABELS = ['janv.', 'fevr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'aout', 'sept.', 'oct.', 'nov.', 'dec.'];
+export const MONTH_FULL_LABELS = [
+  'janvier',
+  'fevrier',
+  'mars',
+  'avril',
+  'mai',
+  'juin',
+  'juillet',
+  'aout',
+  'septembre',
+  'octobre',
+  'novembre',
+  'decembre',
+];

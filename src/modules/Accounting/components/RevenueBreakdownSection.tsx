@@ -3,11 +3,17 @@ import { PieChart } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '../../../lib/utils';
 import { useRevenueBreakdown } from '../hooks/useRevenueBreakdown';
+import { getCategoryLabel, getSousCategorieLabel } from '../constants';
+import type { AnnualStats } from '../../../hooks/useAnnualAccounting';
+import type { AccountingExportRow } from '../lib/exportCsv';
 import { RevenueEvolutionChart } from './RevenueEvolutionChart';
 import { RevenueDistributionChart } from './RevenueDistributionChart';
 import { RevenueFiltersBar } from './RevenueFiltersBar';
 import { RevenueDetailTable } from './RevenueDetailTable';
-import type { AnnualStats } from '../../../hooks/useAnnualAccounting';
+import { MarginRatiosSection } from './MarginRatiosSection';
+import { AnnualTableSection } from './AnnualTableSection';
+import { ExpensesBreakdownSection } from './ExpensesBreakdownSection';
+import { AccountingExportButton } from './AccountingExportButton';
 
 interface RevenueBreakdownSectionProps {
   annualStats: AnnualStats;
@@ -16,6 +22,8 @@ interface RevenueBreakdownSectionProps {
   isMobile: boolean;
   onAddTransaction: () => void;
   monthlySummary?: ReactNode;
+  currentMonthStats: { revenue: number; expenses: number; result: number; transactionCount: number };
+  onSelectMonth?: (date: Date) => void;
 }
 
 export function RevenueBreakdownSection({
@@ -25,6 +33,8 @@ export function RevenueBreakdownSection({
   isMobile,
   onAddTransaction,
   monthlySummary,
+  currentMonthStats,
+  onSelectMonth,
 }: RevenueBreakdownSectionProps) {
   const {
     filteredRows,
@@ -49,6 +59,15 @@ export function RevenueBreakdownSection({
     );
   }
 
+  const exportRows: AccountingExportRow[] = filteredRows.map((row) => ({
+    date: row.entry_date,
+    type: 'Revenu',
+    category: getCategoryLabel(row.alloc_category),
+    sousCategorie: getSousCategorieLabel(row.alloc_sous_categorie),
+    description: row.description,
+    amount: row.alloc_amount,
+  }));
+
   return (
     <motion.div
       id="accounting-revenue-breakdown"
@@ -68,6 +87,24 @@ export function RevenueBreakdownSection({
       />
 
       {monthlySummary}
+
+      <MarginRatiosSection
+        resultMonth={currentMonthStats.result}
+        revenueMonth={currentMonthStats.revenue}
+        resultYear={annualStats.totalResult}
+        revenueYear={annualStats.totalRevenues}
+        selectedMonth={selectedMonth}
+        currentYear={currentYear}
+        isMobile={isMobile}
+      />
+
+      <AnnualTableSection
+        annualStats={annualStats}
+        currentYear={currentYear}
+        selectedMonth={selectedMonth}
+        isMobile={isMobile}
+        onSelectMonth={onSelectMonth}
+      />
 
       <section className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -96,6 +133,7 @@ export function RevenueBreakdownSection({
           onPeriodChange={setPeriod}
           onCategoryFilterChange={setCategoryFilter}
           onClientSearchChange={setClientSearch}
+          exportSlot={<AccountingExportButton rows={exportRows} filenameBase={`revenus_${period}`} />}
         />
 
         <div className={cn('grid gap-4', isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2')}>
@@ -110,6 +148,8 @@ export function RevenueBreakdownSection({
           />
         </div>
       </section>
+
+      <ExpensesBreakdownSection isMobile={isMobile} />
     </motion.div>
   );
 }
