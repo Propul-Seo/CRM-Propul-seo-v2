@@ -1,6 +1,7 @@
+import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { PieChart } from 'lucide-react';
-import type { ReactNode } from 'react';
 import { cn } from '../../../lib/utils';
 import { useRevenueBreakdown } from '../hooks/useRevenueBreakdown';
 import { getCategoryLabel, getSousCategorieLabel } from '../constants';
@@ -14,6 +15,7 @@ import { MarginRatiosSection } from './MarginRatiosSection';
 import { AnnualTableSection } from './AnnualTableSection';
 import { ExpensesBreakdownSection } from './ExpensesBreakdownSection';
 import { AccountingExportButton } from './AccountingExportButton';
+import { MonthRevenueDrawer } from './MonthRevenueDrawer';
 
 interface RevenueBreakdownSectionProps {
   annualStats: AnnualStats;
@@ -50,6 +52,12 @@ export function RevenueBreakdownSection({
     chartData,
     communicationChartData,
   } = useRevenueBreakdown();
+
+  const [detailMonth, setDetailMonth] = useState<Date | null>(null);
+  const handleMonthClick = (date: Date) => {
+    onSelectMonth?.(date);
+    setDetailMonth(date);
+  };
 
   if (loading) {
     return (
@@ -103,7 +111,7 @@ export function RevenueBreakdownSection({
         currentYear={currentYear}
         selectedMonth={selectedMonth}
         isMobile={isMobile}
-        onSelectMonth={onSelectMonth}
+        onSelectMonth={handleMonthClick}
       />
 
       <section className="space-y-4">
@@ -150,6 +158,8 @@ export function RevenueBreakdownSection({
       </section>
 
       <ExpensesBreakdownSection isMobile={isMobile} />
+
+      <MonthRevenueDrawer month={detailMonth} onClose={() => setDetailMonth(null)} />
     </motion.div>
   );
 }
