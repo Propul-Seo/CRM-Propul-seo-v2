@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, ReceiptText } from 'lucide-react';
 import { MobileHeader } from '../../components/mobile/MobileHeader';
 import { cn } from '../../lib/utils';
 import { useAccountingData } from './hooks/useAccountingData';
@@ -27,6 +26,23 @@ export function Accounting() {
   } = useAccountingData();
 
   const [showTransactionsModal, setShowTransactionsModal] = useState(false);
+  const revenueOverviewRef = useRef<HTMLDivElement | null>(null);
+
+  useLayoutEffect(() => {
+    if (loading) return;
+
+    let frameId = 0;
+    const timeoutId = window.setTimeout(() => alignAccountingOverview(revenueOverviewRef.current), 120);
+
+    frameId = window.requestAnimationFrame(() => {
+      alignAccountingOverview(revenueOverviewRef.current);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(timeoutId);
+    };
+  }, [loading]);
 
   const handleAdd = async (entry: Omit<AccountingEntry, 'id' | 'created_at' | 'updated_at'>) => {
     const result = await addTransaction(entry);
@@ -93,35 +109,24 @@ export function Accounting() {
             variants={containerVariants}
             initial="hidden"
             animate={mounted ? "visible" : "hidden"}
-            className="space-y-4"
+            className="space-y-3"
           >
-            <div className={cn("flex", isMobile ? "justify-stretch" : "justify-end")}>
-              <button
-                type="button"
-                onClick={() => setShowTransactionsModal(true)}
-                className={cn(
-                  "inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-300/25 bg-gradient-to-r from-emerald-300 to-cyan-300 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-[0_18px_48px_rgba(34,211,238,0.18)] transition hover:scale-[1.01] hover:shadow-[0_20px_60px_rgba(34,211,238,0.25)]",
-                  isMobile && "w-full"
-                )}
-              >
-                <Plus className="h-4 w-4" />
-                <span>Ajouter une transaction</span>
-                <ReceiptText className="h-4 w-4 opacity-70" />
-              </button>
+            <div ref={revenueOverviewRef} className="scroll-mt-3">
+              <RevenueBreakdownSection
+                annualStats={annualStats}
+                currentYear={currentYear}
+                selectedMonth={selectedMonth}
+                isMobile={isMobile}
+                onAddTransaction={() => setShowTransactionsModal(true)}
+                monthlySummary={
+                  <MonthlySummarySection
+                    selectedMonth={selectedMonth}
+                    currentMonthStats={currentMonthStats}
+                    isMobile={isMobile}
+                  />
+                }
+              />
             </div>
-
-            <RevenueBreakdownSection
-              annualStats={annualStats}
-              currentYear={currentYear}
-              selectedMonth={selectedMonth}
-              isMobile={isMobile}
-            />
-
-            <MonthlySummarySection
-              selectedMonth={selectedMonth}
-              currentMonthStats={currentMonthStats}
-              isMobile={isMobile}
-            />
           </motion.div>
         )}
       </div>
@@ -138,4 +143,41 @@ export function Accounting() {
       />
     </div>
   );
+}
+
+function alignAccountingOverview(target: HTMLDivElement | null) {
+  if (!target) return;
+
+  const scrollParent = findScrollParent(target);
+  const offset = 12;
+
+  if (scrollParent === window) {
+    window.scrollTo({
+      top: Math.max(0, target.getBoundingClientRect().top + window.scrollY - offset),
+      behavior: 'auto',
+    });
+    return;
+  }
+
+  const parentRect = scrollParent.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+
+  scrollParent.scrollTo({
+    top: Math.max(0, scrollParent.scrollTop + targetRect.top - parentRect.top - offset),
+    behavior: 'auto',
+  });
+}
+
+function findScrollParent(node: HTMLElement): HTMLElement | Window {
+  let parent = node.parentElement;
+
+  while (parent) {
+    const overflowY = window.getComputedStyle(parent).overflowY;
+    if (/(auto|scroll|overlay)/.test(overflowY) && parent.scrollHeight > parent.clientHeight) {
+      return parent;
+    }
+    parent = parent.parentElement;
+  }
+
+  return window;
 }

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { PieChart } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { cn } from '../../../lib/utils';
 import { useRevenueBreakdown } from '../hooks/useRevenueBreakdown';
 import { RevenueEvolutionChart } from './RevenueEvolutionChart';
@@ -13,13 +14,17 @@ interface RevenueBreakdownSectionProps {
   currentYear: number;
   selectedMonth: Date;
   isMobile: boolean;
+  onAddTransaction: () => void;
+  monthlySummary?: ReactNode;
 }
 
 export function RevenueBreakdownSection({
   annualStats,
   currentYear,
   selectedMonth,
-  isMobile
+  isMobile,
+  onAddTransaction,
+  monthlySummary,
 }: RevenueBreakdownSectionProps) {
   const {
     filteredRows,
@@ -59,7 +64,10 @@ export function RevenueBreakdownSection({
         categoryTotals={categoryTotals}
         categoryPercentages={categoryPercentages}
         isMobile={isMobile}
+        onAddTransaction={onAddTransaction}
       />
+
+      {monthlySummary}
 
       <section className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

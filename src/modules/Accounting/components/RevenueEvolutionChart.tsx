@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, Plus, ReceiptText } from 'lucide-react';
 import {
   CartesianGrid,
   Line,
@@ -37,6 +37,7 @@ interface RevenueEvolutionChartProps {
   categoryTotals: { site_internet: number; erp: number; communication: number };
   categoryPercentages: { site_internet: number; erp: number; communication: number };
   isMobile: boolean;
+  onAddTransaction: () => void;
 }
 
 interface ChartPoint {
@@ -76,6 +77,7 @@ export function RevenueEvolutionChart({
   categoryTotals,
   categoryPercentages,
   isMobile,
+  onAddTransaction,
 }: RevenueEvolutionChartProps) {
   const selectedMonthKey = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`;
 
@@ -121,12 +123,12 @@ export function RevenueEvolutionChart({
 
   return (
     <section
-      className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-[radial-gradient(circle_at_18%_10%,rgba(147,51,234,0.16),transparent_32%),linear-gradient(180deg,rgba(19,13,35,0.98),rgba(8,7,14,0.99))] p-4 shadow-[0_18px_60px_rgba(0,0,0,0.24)] sm:p-5"
+      className="relative overflow-hidden rounded-2xl border border-violet-500/25 bg-[radial-gradient(circle_at_18%_10%,rgba(147,51,234,0.16),transparent_32%),linear-gradient(180deg,rgba(19,13,35,0.98),rgba(8,7,14,0.99))] p-3 shadow-[0_18px_60px_rgba(0,0,0,0.24)] sm:p-4"
       aria-label="Evolution du chiffre d'affaires"
     >
-      <div className="mb-3 flex items-start justify-between gap-4">
+      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-violet-500/20 text-violet-200">
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-violet-500/20 text-violet-200">
             <BarChart3 className="h-5 w-5" />
           </div>
           <div>
@@ -136,34 +138,47 @@ export function RevenueEvolutionChart({
             <p className="text-sm text-violet-100/70">Reporting mensuel</p>
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={onAddTransaction}
+          className={cn(
+            "inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-300/25 bg-gradient-to-r from-emerald-300 to-cyan-300 px-4 py-2.5 text-sm font-bold text-slate-950 shadow-[0_18px_48px_rgba(34,211,238,0.18)] transition hover:scale-[1.01] hover:shadow-[0_20px_60px_rgba(34,211,238,0.25)]",
+            isMobile && "w-full"
+          )}
+        >
+          <Plus className="h-4 w-4" />
+          <span>Ajouter une transaction</span>
+          <ReceiptText className="h-4 w-4 opacity-70" />
+        </button>
       </div>
 
       <div className="grid gap-3 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <aside className="min-w-0">
           <div className="grid gap-2 sm:grid-cols-2">
-            <div className="min-h-[150px] rounded-xl border border-white/10 bg-white/[0.045] p-4 sm:col-span-2">
+            <div className="min-h-[124px] rounded-xl border border-white/10 bg-white/[0.045] p-4 sm:col-span-2">
               <p className="text-xs font-semibold text-violet-100/62">CA annuel</p>
-              <p className="mt-3 text-4xl font-black leading-none tracking-tight text-emerald-300 sm:text-5xl">
+              <p className="mt-2 text-4xl font-black leading-none tracking-tight text-emerald-300 sm:text-[44px]">
                 {formatCurrency(annualStats.totalRevenues)}
               </p>
-              <p className="mt-3 text-xs text-violet-100/48">
+              <p className="mt-2 text-xs text-violet-100/48">
                 {currentYear} · {annualStats.activeMonths} mois actifs
               </p>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-white/[0.035] p-3">
+            <div className="rounded-xl border border-white/10 bg-white/[0.035] p-3 sm:min-h-[104px]">
               <p className="text-xs font-semibold capitalize text-violet-100/62">
                 {selectedPoint?.fullLabel ?? 'Mois sélectionné'}
               </p>
-              <p className="mt-3 text-2xl font-bold tracking-tight text-cyan-300">
+              <p className="mt-2 text-2xl font-bold tracking-tight text-cyan-300">
                 {formatCurrency(selectedPoint?.revenue ?? 0)}
               </p>
               <p className="mt-2 text-xs text-violet-100/45">mois sélectionné</p>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-white/[0.035] p-3">
+            <div className="rounded-xl border border-white/10 bg-white/[0.035] p-3 sm:min-h-[104px]">
               <p className="text-xs font-semibold text-violet-100/62">Meilleur mois</p>
-              <p className="mt-3 text-2xl font-bold tracking-tight text-violet-200">
+              <p className="mt-2 text-2xl font-bold tracking-tight text-violet-200">
                 {formatCurrency(bestPoint.revenue)}
               </p>
               <p className="mt-2 text-xs capitalize text-violet-100/45">{bestPoint.fullLabel}</p>
@@ -172,7 +187,7 @@ export function RevenueEvolutionChart({
 
           <div className="mt-3 divide-y divide-white/[0.08] border-t border-white/[0.09]">
             {sourceRows.map(({ label, value, percent, valueClass }) => (
-              <div key={label} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-3">
+              <div key={label} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-2.5">
                 <span className="min-w-0 text-sm font-semibold text-violet-100/70">{label}</span>
                 <strong className={cn('whitespace-nowrap text-right text-base font-bold', valueClass)}>
                   {value} · {percent}%
@@ -184,11 +199,11 @@ export function RevenueEvolutionChart({
 
         <div className={cn(
           'min-w-0 rounded-xl border border-white/[0.09] bg-black/[0.12]',
-          isMobile ? 'h-[300px] overflow-x-auto overflow-y-hidden' : 'h-[410px]',
+          isMobile ? 'h-[280px] overflow-x-auto overflow-y-hidden' : 'h-[350px]',
         )}>
           <div className={cn('h-full', isMobile ? 'min-w-[760px]' : 'w-full')}>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data} margin={{ top: 56, right: 20, left: 12, bottom: 24 }}>
+              <LineChart data={data} margin={{ top: 34, right: 20, left: 12, bottom: 18 }}>
                 <CartesianGrid stroke="rgba(255,255,255,0.14)" strokeDasharray="4 5" vertical horizontal />
                 <XAxis
                   dataKey="label"
