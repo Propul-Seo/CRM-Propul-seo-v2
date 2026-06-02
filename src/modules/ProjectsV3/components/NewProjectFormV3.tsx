@@ -1,6 +1,8 @@
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import type { ProjectV2, PrestaType, ProjectStatusV2 } from '@/types/project-v2'
+import { getProjectAssigneeLabel } from '../utils/projectAssignees'
+import { ProjectAssigneeButtons } from './ProjectAssigneeButtons'
 
 export interface NewProjectFormState {
   name: string
@@ -40,7 +42,7 @@ const PRESTA_OPTIONS: { value: PrestaType; label: string }[] = [
 interface Props {
   form: NewProjectFormState
   onChange: (next: NewProjectFormState) => void
-  users: { id: string; name: string }[]
+  users: { id: string; name: string; email?: string | null }[]
   saving: boolean
   onSubmit: () => void
   onCancel: () => void
@@ -134,11 +136,11 @@ export function NewProjectFormV3({ form, onChange, users, saving, onSubmit, onCa
 
       <div className="grid grid-cols-2 gap-3">
         <Field label="Responsable">
-          <select value={form.assigned_to} className={inputCls}
-            onChange={e => onChange({ ...form, assigned_to: e.target.value })}>
-            <option value="">Non assigné</option>
-            {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-          </select>
+          <ProjectAssigneeButtons
+            users={users}
+            value={form.assigned_to}
+            onChange={(assigned_to) => onChange({ ...form, assigned_to })}
+          />
         </Field>
         <Field label="Budget (€)">
           <input type="number" value={form.budget} placeholder="0" className={inputCls}
@@ -184,7 +186,7 @@ export function NewProjectFormV3({ form, onChange, users, saving, onSubmit, onCa
 
 export function toProjectPayload(
   form: NewProjectFormState,
-  users: { id: string; name: string }[],
+  users: { id: string; name: string; email?: string | null }[],
 ): Omit<ProjectV2, 'id' | 'created_at' | 'updated_at'> {
   const assignedUser = users.find(u => u.id === form.assigned_to)
   // La colonne v2.projects.client_name est NOT NULL en BDD : si l'utilisateur
@@ -200,7 +202,7 @@ export function toProjectPayload(
     presta_type: form.presta_type,
     category: form.presta_type[0],
     assigned_to: form.assigned_to || null,
-    assigned_name: assignedUser?.name ?? null,
+    assigned_name: getProjectAssigneeLabel(assignedUser),
     budget: form.budget ? parseFloat(form.budget) : null,
     start_date: form.start_date || null,
     end_date: form.end_date || null,

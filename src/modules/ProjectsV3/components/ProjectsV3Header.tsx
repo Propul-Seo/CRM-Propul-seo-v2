@@ -1,5 +1,6 @@
 import { Plus, Search, LayoutGrid, Rows3 } from 'lucide-react'
 import { V3_POLE_ORDER, V3_POLE_LABELS, V3_POLE_COLORS, type V3Pole } from '../utils/poleMapping'
+import { ProjectAssigneeButtons } from './ProjectAssigneeButtons'
 
 interface UserOption {
   id: string
@@ -36,52 +37,49 @@ export function ProjectsV3Header({
   onViewModeChange,
 }: Props) {
   return (
-    <header className="mb-6">
+    <>
       {/* Row 1 : titre + count + bouton */}
-      <div className="flex items-end justify-between gap-6 mb-5">
-        <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#A78BFA] mb-1.5">
-            ✦ V2 Beta
+      <header className="mb-5">
+        <div className="flex items-end justify-between gap-6">
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#A78BFA] mb-1.5">
+              ✦ V2 Beta
+            </div>
+            <h1 className="text-[28px] font-bold tracking-[-0.02em] text-[#ede9fe] leading-none mb-1.5">
+              Projets en cours
+            </h1>
+            <div className="flex items-center gap-3 text-[13px] text-[#9ca3af]">
+              <strong className="font-semibold text-[#ede9fe]">
+                {projectCount} projet{projectCount !== 1 ? 's' : ''}
+              </strong>
+              <span className="text-[#6b7280]">·</span>
+              <span>Glissez-déposez pour changer le statut</span>
+            </div>
           </div>
-          <h1 className="text-[28px] font-bold tracking-[-0.02em] text-[#ede9fe] leading-none mb-1.5">
-            Projets en cours
-          </h1>
-          <div className="flex items-center gap-3 text-[13px] text-[#9ca3af]">
-            <strong className="font-semibold text-[#ede9fe]">
-              {projectCount} projet{projectCount !== 1 ? 's' : ''}
-            </strong>
-            <span className="text-[#6b7280]">·</span>
-            <span>Glissez-déposez pour changer le statut</span>
-          </div>
+          <button
+            onClick={onNewProject}
+            className="inline-flex items-center gap-2 h-[38px] px-4 bg-[#8B5CF6] hover:bg-[#7c3aed] text-white rounded-lg text-[13px] font-semibold transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Nouveau projet
+          </button>
         </div>
-        <button
-          onClick={onNewProject}
-          className="inline-flex items-center gap-2 h-[38px] px-4 bg-[#8B5CF6] hover:bg-[#7c3aed] text-white rounded-lg text-[13px] font-semibold transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-          Nouveau projet
-        </button>
-      </div>
+      </header>
 
       {/* Row 2 : filtres */}
-      <div className="flex items-center gap-3 px-4 py-3 bg-[#0f0b1e] border border-[rgba(139,92,246,0.18)] rounded-[10px]">
-        <span className="text-[11px] uppercase tracking-[0.08em] text-[#6b7280] font-semibold">
-          Responsable
-        </span>
-        <select
-          value={filterUserId}
-          onChange={e => onFilterUserChange(e.target.value)}
-          className="h-8 pl-3 pr-8 bg-[#070512] border border-[rgba(139,92,246,0.18)] rounded-md text-[#ede9fe] text-[12px] font-medium cursor-pointer appearance-none bg-no-repeat hover:border-[rgba(139,92,246,0.35)] focus:outline-none focus:border-[#8B5CF6]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%239ca3af' d='M2 4l4 4 4-4z'/></svg>")`,
-            backgroundPosition: 'right 10px center',
-          }}
-        >
-          <option value="">Tous</option>
-          {users.map(u => (
-            <option key={u.id} value={u.id}>{u.name}</option>
-          ))}
-        </select>
+      <div className="sticky top-0 z-40 -mx-8 mb-6 border-y border-[rgba(139,92,246,0.16)] bg-[#0a0814]/88 px-8 py-3 backdrop-blur-xl">
+        <div className="flex items-center gap-3 rounded-[10px] border border-[rgba(139,92,246,0.18)] bg-[#0f0b1e]/92 px-4 py-3 shadow-[0_18px_45px_rgba(3,0,12,0.28)]">
+          <span className="text-[11px] uppercase tracking-[0.08em] text-[#6b7280] font-semibold">
+            Responsable
+          </span>
+          <ProjectAssigneeButtons
+            users={users}
+            value={filterUserId}
+            onChange={onFilterUserChange}
+            allowToggleOff
+            layout="segmented"
+            size="sm"
+          />
 
         <div className="w-px h-5 bg-[rgba(139,92,246,0.18)]" />
 
@@ -159,6 +157,7 @@ export function ProjectsV3Header({
           />
         </div>
       </div>
-    </header>
+      </div>
+    </>
   )
 }

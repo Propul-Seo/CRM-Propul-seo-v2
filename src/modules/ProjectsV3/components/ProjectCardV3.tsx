@@ -9,9 +9,18 @@ interface Props {
   index: number
   onClick?: () => void
   portalHealth?: PortalHealth
+  allowedAssigneeIds?: Set<string>
+  assigneeLabelsById?: Map<string, string>
 }
 
-export function ProjectCardV3({ project, index, onClick, portalHealth }: Props) {
+export function ProjectCardV3({
+  project,
+  index,
+  onClick,
+  portalHealth,
+  allowedAssigneeIds,
+  assigneeLabelsById,
+}: Props) {
   const activeIds = useActiveUserIds()
   const poles = getActivePoles(project.presta_type)
   const progress = Math.max(0, Math.min(100, Math.round(project.progress ?? 0)))
@@ -20,7 +29,10 @@ export function ProjectCardV3({ project, index, onClick, portalHealth }: Props) 
   // activeIds peut être vide au premier render → on n'applique le masque qu'une fois chargé.
   const assignedActive =
     !project.assigned_to || activeIds.size === 0 || activeIds.has(project.assigned_to)
-  const assignedLabel = assignedActive ? project.assigned_name : null
+  const assignedAllowed = !project.assigned_to || !allowedAssigneeIds || allowedAssigneeIds.has(project.assigned_to)
+  const assignedLabel = assignedActive && assignedAllowed
+    ? (project.assigned_to ? assigneeLabelsById?.get(project.assigned_to) ?? project.assigned_name : project.assigned_name)
+    : null
   const clientLine = [project.client_name, assignedLabel].filter(Boolean).join(' · ')
 
   return (

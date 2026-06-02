@@ -6,7 +6,7 @@ import { NewProjectFormV3, EMPTY_FORM, toProjectPayload, type NewProjectFormStat
 
 interface Props {
   open: boolean
-  users: { id: string; name: string }[]
+  users: { id: string; name: string; email?: string | null }[]
   onClose: () => void
   onCreate: (
     data: Omit<ProjectV2, 'id' | 'created_at' | 'updated_at'>,

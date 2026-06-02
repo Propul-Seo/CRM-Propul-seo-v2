@@ -9,6 +9,8 @@ interface Props {
   index: number
   onClick?: () => void
   portalHealth?: PortalHealth
+  allowedAssigneeIds?: Set<string>
+  assigneeLabelsById?: Map<string, string>
 }
 
 /**
@@ -16,7 +18,14 @@ interface Props {
  * - Pendant le drag, la carte source devient semi-transparente.
  * - Le clic ne déclenche que si le drag n'a pas eu lieu (handled by @dnd-kit activationConstraint).
  */
-export function SortableProjectCardV3({ project, index, onClick, portalHealth }: Props) {
+export function SortableProjectCardV3({
+  project,
+  index,
+  onClick,
+  portalHealth,
+  allowedAssigneeIds,
+  assigneeLabelsById,
+}: Props) {
   const {
     attributes,
     listeners,
@@ -34,7 +43,14 @@ export function SortableProjectCardV3({ project, index, onClick, portalHealth }:
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <ProjectCardV3 project={project} index={index} onClick={onClick} portalHealth={portalHealth} />
+      <ProjectCardV3
+        project={project}
+        index={index}
+        onClick={onClick}
+        portalHealth={portalHealth}
+        allowedAssigneeIds={allowedAssigneeIds}
+        assigneeLabelsById={assigneeLabelsById}
+      />
     </div>
   )
 }

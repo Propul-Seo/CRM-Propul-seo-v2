@@ -28,6 +28,7 @@ import { getActivePoles, type V3Pole } from './utils/poleMapping'
 import { useProjectDragDropV3 } from './hooks/useProjectDragDropV3'
 import { usePortalHealth } from './hooks/usePortalHealth'
 import type { ProjectV2 } from '@/types/project-v2'
+import { getProjectAssigneeIds, getProjectAssignees } from './utils/projectAssignees'
 
 const VIEW_MODE_STORAGE_KEY = 'propulseo:projects-v3:view-mode'
 
@@ -56,7 +57,7 @@ export function ProjectsV3Page() {
   const [activePoles, setActivePoles] = useState<Set<V3Pole>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
   const debouncedSearch = useDebounced(searchQuery, 300)
-  const [users, setUsers] = useState<{ id: string; name: string }[]>([])
+  const [users, setUsers] = useState<{ id: string; name: string; email: string }[]>([])
   const [viewMode, setViewMode] = useState<V3ViewMode>(loadViewMode)
 
   const handleViewModeChange = (mode: V3ViewMode) => {
@@ -67,14 +68,21 @@ export function ProjectsV3Page() {
   }
 
   useEffect(() => {
-    supabase.from('users').select('id, name').eq('is_active', true).order('name').then(({ data, error }) => {
+    supabase.from('users').select('id, name, email').eq('is_active', true).order('name').then(({ data, error }) => {
       if (error) {
         console.error('[ProjectsV3] users fetch failed:', error)
         return
       }
-      if (data) setUsers(data as { id: string; name: string }[])
+      if (data) setUsers(data as { id: string; name: string; email: string }[])
     })
   }, [])
+
+  const projectAssignees = useMemo(() => getProjectAssignees(users), [users])
+  const allowedAssigneeIds = useMemo(() => getProjectAssigneeIds(users), [users])
+  const assigneeLabelsById = useMemo(
+    () => new Map(projectAssignees.map((user) => [user.id, user.name])),
+    [projectAssignees],
+  )
 
   const togglePole = (pole: V3Pole) => {
     setActivePoles(prev => {
@@ -154,7 +162,7 @@ export function ProjectsV3Page() {
         projectCount={filteredProjects.length}
         filterUserId={filterUserId}
         onFilterUserChange={setFilterUserId}
-        users={users}
+        users={projectAssignees}
         activePoles={activePoles}
         onTogglePole={togglePole}
         searchQuery={searchQuery}
@@ -205,6 +213,8 @@ export function ProjectsV3Page() {
                       project={project}
                       index={index}
                       onClick={() => navigate(`/projets-v3-preview/${project.id}`)}
+                      allowedAssigneeIds={allowedAssigneeIds}
+                      assigneeLabelsById={assigneeLabelsById}
                       portalHealth={portalHealthByProjectId.get(project.id)}
                     />
                   )
@@ -220,7 +230,12 @@ export function ProjectsV3Page() {
               {viewMode === 'compact' ? (
                 <ProjectCardV3Compact project={activeProject} index={0} />
               ) : (
-                <ProjectCardV3 project={activeProject} index={0} />
+                <ProjectCardV3
+                  project={activeProject}
+                  index={0}
+                  allowedAssigneeIds={allowedAssigneeIds}
+                  assigneeLabelsById={assigneeLabelsById}
+                />
               )}
             </div>
           ) : null}
@@ -229,7 +244,7 @@ export function ProjectsV3Page() {
 
       <NewProjectModalV3
         open={newOpen}
-        users={users}
+        users={projectAssignees}
         onClose={() => setNewOpen(false)}
         onCreate={addProject}
       />
