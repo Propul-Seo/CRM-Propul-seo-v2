@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { TrendingUp, X } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { TrendingUp, X, FolderKanban } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { formatCurrency } from '@/utils';
@@ -8,6 +9,7 @@ import type { AccountingEntry } from '@/hooks/useMonthlyAccounting';
 import { getCategoryLabel, getCategoryColorClasses } from '../constants';
 import { PaymentStatusControl } from './PaymentStatusControl';
 import { getEffectivePaymentStatus, paymentStatusUpdates } from '../lib/paymentStatus';
+import { useAccountingProjects } from '../hooks/useAccountingProjects';
 
 interface MonthRevenueDrawerProps {
   month: Date | null;
@@ -23,6 +25,8 @@ export function MonthRevenueDrawer({ month, onClose }: MonthRevenueDrawerProps) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const reqIdRef = useRef(0);
+  const { projects } = useAccountingProjects();
+  const projectNameById = useMemo(() => new Map(projects.map((p) => [p.id, p.name])), [projects]);
 
   const monthKey = month ? monthKeyOf(month) : null;
 
@@ -70,7 +74,9 @@ export function MonthRevenueDrawer({ month, onClose }: MonthRevenueDrawerProps) 
     .reduce((sum, e) => sum + Number(e.amount), 0);
   const pending = totalCA - collected;
 
-  return (
+  // Rendu via portal sur <body> : sinon le `position: fixed` est piégé par le
+  // transform du conteneur animé (framer-motion) et l'overlay ne couvre pas le haut de page.
+  return createPortal(
     <div className="fixed inset-0 z-50 bg-black/45 backdrop-blur-md">
       <button
         type="button"
@@ -146,7 +152,7 @@ export function MonthRevenueDrawer({ month, onClose }: MonthRevenueDrawerProps) 
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-white">{e.description}</p>
-                    <div className="mt-1 flex items-center gap-2">
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
                       <span className="text-xs text-violet-100/50">
                         {new Date(e.entry_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                       </span>
@@ -157,6 +163,12 @@ export function MonthRevenueDrawer({ month, onClose }: MonthRevenueDrawerProps) 
                         entry={e}
                         onChange={(status, dueDate) => handleSetStatus(e.id, status, dueDate)}
                       />
+                      {e.project_id && projectNameById.get(e.project_id) && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-violet-100/70">
+                          <FolderKanban className="h-3 w-3" />
+                          {projectNameById.get(e.project_id)}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <span className="shrink-0 text-sm font-bold text-cyan-300">{formatCurrency(Number(e.amount))}</span>
@@ -166,6 +178,7 @@ export function MonthRevenueDrawer({ month, onClose }: MonthRevenueDrawerProps) 
           )}
         </div>
       </aside>
-    </div>
+    </div>,
+    document.body,
   );
 }

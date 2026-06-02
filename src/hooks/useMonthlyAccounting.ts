@@ -37,6 +37,7 @@ export interface AccountingEntry {
   payment_status?: 'paid' | 'pending' | 'overdue';
   due_date?: string | null;
   payment_date?: string | null;
+  project_id?: string | null;
   created_by?: string;
   created_at: string;
   updated_at: string;

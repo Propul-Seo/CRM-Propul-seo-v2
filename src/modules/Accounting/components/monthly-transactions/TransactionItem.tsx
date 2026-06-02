@@ -11,6 +11,7 @@ import { RevenueAllocationEditor } from '../RevenueAllocationEditor';
 import { PaymentStatusControl } from '../PaymentStatusControl';
 import { getEffectivePaymentStatus } from '../../lib/paymentStatus';
 import type { AccountingEntry } from '../../../../hooks/useMonthlyAccounting';
+import type { AccountingProject } from '../../hooks/useAccountingProjects';
 
 interface TransactionItemProps {
   entry: AccountingEntry;
@@ -23,6 +24,7 @@ interface TransactionItemProps {
   onDelete: (id: string) => void;
   onSetStatus: (entry: AccountingEntry, status: 'paid' | 'pending', dueDate?: string | null) => void;
   loading: boolean;
+  projects: AccountingProject[];
 }
 
 export function TransactionItem({
@@ -35,7 +37,8 @@ export function TransactionItem({
   onCancelEdit,
   onDelete,
   onSetStatus,
-  loading
+  loading,
+  projects
 }: TransactionItemProps) {
   const isUnpaidRevenue = entry.type === 'revenue' && getEffectivePaymentStatus(entry) !== 'paid';
   return (
@@ -133,6 +136,22 @@ export function TransactionItem({
                   <option value="cm">Community Management</option>
                   <option value="newsletter">Newsletter</option>
                   <option value="autre">Autre</option>
+                </select>
+              </div>
+            )}
+
+            {editData.type === 'revenue' && (
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Projet</label>
+                <select
+                  value={editData.project_id || ''}
+                  onChange={(e) => setEditData({ ...editData, project_id: e.target.value || null })}
+                  className="w-full p-2 border border-border rounded-md bg-surface-2 text-foreground"
+                >
+                  <option value="">— Aucun —</option>
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
                 </select>
               </div>
             )}

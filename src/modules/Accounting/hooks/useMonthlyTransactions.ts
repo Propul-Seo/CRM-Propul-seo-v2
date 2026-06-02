@@ -24,7 +24,8 @@ export function useMonthlyTransactions({ month, onAdd, onUpdate, onDelete }: Use
     revenue_category: '',
     revenue_sous_categorie: '',
     payment_status: 'paid' as 'paid' | 'pending',
-    due_date: ''
+    due_date: '',
+    project_id: ''
   });
   const [editData, setEditData] = useState<Partial<AccountingEntry & { amount: string }>>({});
 
@@ -38,7 +39,8 @@ export function useMonthlyTransactions({ month, onAdd, onUpdate, onDelete }: Use
       revenue_category: '',
       revenue_sous_categorie: '',
       payment_status: 'paid',
-      due_date: ''
+      due_date: '',
+      project_id: ''
     });
   };
 
@@ -71,7 +73,8 @@ export function useMonthlyTransactions({ month, onAdd, onUpdate, onDelete }: Use
         revenue_sous_categorie: formData.revenue_sous_categorie || null,
         payment_status: paymentStatus,
         due_date: dueDate,
-        payment_date: paymentDate
+        payment_date: paymentDate,
+        project_id: formData.type === 'revenue' ? (formData.project_id || null) : null
       });
 
       if (result.success) {
@@ -92,7 +95,8 @@ export function useMonthlyTransactions({ month, onAdd, onUpdate, onDelete }: Use
       category: transaction.category || 'services',
       entry_date: transaction.entry_date,
       revenue_category: transaction.revenue_category ?? undefined,
-      revenue_sous_categorie: transaction.revenue_sous_categorie ?? undefined
+      revenue_sous_categorie: transaction.revenue_sous_categorie ?? undefined,
+      project_id: transaction.project_id ?? null
     });
   };
 
@@ -109,7 +113,8 @@ export function useMonthlyTransactions({ month, onAdd, onUpdate, onDelete }: Use
       category: editData.category,
       entry_date: editData.entry_date,
       revenue_category: editData.revenue_category || null,
-      revenue_sous_categorie: editData.revenue_sous_categorie || null
+      revenue_sous_categorie: editData.revenue_sous_categorie || null,
+      project_id: editData.type === 'revenue' ? (editData.project_id || null) : null
     });
 
     if (result.success) {

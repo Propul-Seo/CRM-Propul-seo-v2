@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowDownRight, ArrowUpRight, Save } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
+import type { AccountingProject } from '../../hooks/useAccountingProjects';
 
 interface TransactionAddFormProps {
   formData: {
@@ -13,11 +14,13 @@ interface TransactionAddFormProps {
     revenue_sous_categorie: string;
     payment_status: 'paid' | 'pending';
     due_date: string;
+    project_id: string;
   };
   setFormData: (data: TransactionAddFormProps['formData']) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
   loading: boolean;
+  projects: AccountingProject[];
 }
 
 const REVENUE_OPTIONS = [
@@ -56,7 +59,7 @@ const EXPENSE_OPTIONS = [
   { label: 'Autre', category: 'other' },
 ] as const;
 
-export function TransactionAddForm({ formData, setFormData, onSubmit, onCancel, loading }: TransactionAddFormProps) {
+export function TransactionAddForm({ formData, setFormData, onSubmit, onCancel, loading, projects }: TransactionAddFormProps) {
   const setType = (type: 'revenue' | 'expense') => {
     setFormData({
       ...formData,
@@ -211,6 +214,24 @@ export function TransactionAddForm({ formData, setFormData, onSubmit, onCancel, 
               placeholder="Description de la transaction"
             />
           </div>
+
+          {formData.type === 'revenue' && (
+            <div>
+              <label className="mb-2 block text-xs font-semibold text-violet-100/65">
+                Projet (optionnel)
+              </label>
+              <select
+                value={formData.project_id}
+                onChange={(e) => setFormData({ ...formData, project_id: e.target.value })}
+                className="min-h-[42px] w-full rounded-xl border border-white/10 bg-white/[0.045] px-3 text-sm text-white outline-none transition focus:border-violet-300/35 focus:bg-white/[0.065]"
+              >
+                <option value="">— Aucun —</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {formData.type === 'revenue' && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

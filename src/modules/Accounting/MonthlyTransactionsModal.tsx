@@ -3,6 +3,7 @@ import { ArrowDownRight, ArrowUpRight, DollarSign, Plus, ReceiptText, X } from '
 import type { AccountingEntry } from '../../hooks/useMonthlyAccounting';
 import { useMonthlyTransactions } from './hooks/useMonthlyTransactions';
 import { useReceivables } from './hooks/useReceivables';
+import { useAccountingProjects } from './hooks/useAccountingProjects';
 import { TransactionAddForm } from './components/monthly-transactions/TransactionAddForm';
 import { TransactionItem } from './components/monthly-transactions/TransactionItem';
 import { UnpaidSummary } from './components/UnpaidSummary';
@@ -32,6 +33,7 @@ export function MonthlyTransactionsModal({
 }: MonthlyTransactionsModalProps) {
   const tx = useMonthlyTransactions({ month, onAdd, onUpdate, onDelete });
   const receivables = useReceivables();
+  const { projects } = useAccountingProjects();
 
   useEffect(() => {
     if (open) {
@@ -114,6 +116,7 @@ export function MonthlyTransactionsModal({
               onSubmit={tx.handleAdd}
               onCancel={() => { tx.setShowAddForm(false); tx.resetForm(); }}
               loading={loading || tx.isSubmitting}
+              projects={projects}
             />
           )}
 
@@ -158,6 +161,7 @@ export function MonthlyTransactionsModal({
                   onDelete={(id) => tx.setDeleteConfirmId(id)}
                   onSetStatus={tx.handleSetStatus}
                   loading={loading}
+                  projects={projects}
                 />
               ))
             )}
