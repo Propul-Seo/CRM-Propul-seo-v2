@@ -74,3 +74,7 @@ scripts/create-demo-admin.mjs
 playwright-report/
 test-results/
 .mockups/
+.planning/
+
+# Previews / sorties générées
+output/
