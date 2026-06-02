@@ -18,21 +18,25 @@ function monthKeyOf(d: Date): string {
 export function MonthRevenueDrawer({ month, onClose }: MonthRevenueDrawerProps) {
   const [entries, setEntries] = useState<AccountingEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (!month) return;
     let active = true;
     setLoading(true);
+    setError(false);
+    setEntries([]); // évite d'afficher le total du mois précédent pendant le fetch
     const key = monthKeyOf(month);
     (async () => {
-      const { data, error } = await supabase
+      const { data, error: err } = await supabase
         .from('accounting_entries')
         .select('*')
         .eq('type', 'revenue')
         .eq('month_key', key)
         .order('entry_date', { ascending: true });
       if (!active) return;
-      if (!error) setEntries((data as AccountingEntry[]) || []);
+      if (err) setError(true);
+      else setEntries((data as AccountingEntry[]) || []);
       setLoading(false);
     })();
     return () => {
@@ -91,6 +95,10 @@ export function MonthRevenueDrawer({ month, onClose }: MonthRevenueDrawerProps) 
           {loading ? (
             <div className="flex h-32 items-center justify-center">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-cyan-400" />
+            </div>
+          ) : error ? (
+            <div className="rounded-2xl border border-dashed border-rose-500/25 bg-rose-500/[0.06] px-4 py-8 text-center text-rose-200/80">
+              <p className="text-sm font-medium">Erreur lors du chargement des revenus</p>
             </div>
           ) : entries.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-white/12 bg-white/[0.03] px-4 py-8 text-center text-violet-100/55">
