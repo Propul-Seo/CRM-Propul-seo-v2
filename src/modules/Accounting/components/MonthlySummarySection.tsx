@@ -106,14 +106,14 @@ export function MonthlySummarySection({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
-      className="relative overflow-hidden rounded-2xl border border-violet-500/22 bg-[radial-gradient(circle_at_16%_0%,rgba(45,212,191,0.08),transparent_28%),radial-gradient(circle_at_90%_20%,rgba(168,85,247,0.14),transparent_32%),linear-gradient(180deg,rgba(18,13,31,0.96),rgba(9,8,15,0.98))] p-4 shadow-[0_18px_60px_rgba(0,0,0,0.22)]"
+      className="relative overflow-hidden rounded-2xl border border-violet-500/22 bg-[radial-gradient(circle_at_16%_0%,rgba(45,212,191,0.08),transparent_28%),radial-gradient(circle_at_90%_20%,rgba(168,85,247,0.14),transparent_32%),linear-gradient(180deg,rgba(18,13,31,0.96),rgba(9,8,15,0.98))] p-3 shadow-[0_18px_60px_rgba(0,0,0,0.22)]"
       aria-label={`Synthèse mensuelle ${monthLabel}`}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/45 to-transparent" />
 
-      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.055] text-violet-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+          <div className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/[0.055] text-violet-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
             <Receipt className={cn(isMobile ? 'h-4 w-4' : 'h-5 w-5')} />
           </div>
           <div>
@@ -142,7 +142,7 @@ export function MonthlySummarySection({
           <div
             key={label}
             className={cn(
-              'group relative min-h-[116px] overflow-hidden rounded-xl border border-white/[0.09] bg-white/[0.035] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.055)] transition duration-200 hover:-translate-y-0.5 hover:bg-white/[0.055]',
+              'group relative min-h-[70px] overflow-hidden rounded-xl border border-white/[0.09] bg-white/[0.035] p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.055)] transition duration-200 hover:-translate-y-0.5 hover:bg-white/[0.055]',
               tone.border
             )}
           >
@@ -156,7 +156,7 @@ export function MonthlySummarySection({
                 <Icon className="h-4 w-4" />
               </div>
             </div>
-            <p className={cn('relative mt-4 text-2xl font-black leading-none tracking-tight sm:text-3xl', tone.value)}>
+            <p className={cn('relative mt-1.5 text-lg font-black leading-none tracking-tight sm:text-xl', tone.value)}>
               <AnimatedCounter value={value} suffix={suffix} />
             </p>
             {comparison && (
