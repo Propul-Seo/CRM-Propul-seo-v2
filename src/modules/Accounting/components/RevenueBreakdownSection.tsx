@@ -67,7 +67,7 @@ export function RevenueBreakdownSection({
     category: getCategoryLabel(row.alloc_category),
     sousCategorie: getSousCategorieLabel(row.alloc_sous_categorie),
     description: row.description,
-    amount: row.alloc_amount,
+    amount: Number(row.alloc_amount), // Number() car le fallback sans allocation renvoie un string Supabase
   }));
 
   return (

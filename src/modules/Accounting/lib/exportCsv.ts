@@ -7,7 +7,7 @@ export interface AccountingExportRow {
   category: string; // libellé FR
   sousCategorie: string; // libellé FR ou ''
   description: string;
-  amount: number; // montant brut (formaté FR à l'écriture)
+  amount: number | string; // Supabase renvoie les DECIMAL en string → coercé à l'écriture
 }
 
 const HEADER = ['Date', 'Type', 'Catégorie', 'Sous-catégorie', 'Description', 'Montant'];
@@ -20,15 +20,15 @@ function escapeCsv(value: string): string {
 }
 
 function formatDateFr(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  return `${day}/${month}/${d.getFullYear()}`;
+  // Parse manuel YYYY-MM-DD (new Date(iso) interpréterait en UTC → décalage d'un jour selon le fuseau)
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+  return iso;
 }
 
-function formatAmountFr(amount: number): string {
-  return amount.toFixed(2).replace('.', ',');
+function formatAmountFr(amount: number | string): string {
+  // Number() car Supabase sérialise les colonnes DECIMAL en string
+  return Number(amount).toFixed(2).replace('.', ',');
 }
 
 export function buildCsvContent(rows: AccountingExportRow[]): string {

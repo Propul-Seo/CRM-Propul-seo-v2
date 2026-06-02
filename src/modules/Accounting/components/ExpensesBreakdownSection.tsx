@@ -30,7 +30,7 @@ export function ExpensesBreakdownSection({ isMobile }: ExpensesBreakdownSectionP
     category: getExpenseCategoryLabel(e.category),
     sousCategorie: '',
     description: e.description,
-    amount: e.amount,
+    amount: -Number(e.amount), // négatif comme à l'affichage; Number() car Supabase renvoie un string
   }));
 
   return (
