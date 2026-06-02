@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import type { AccountingEntry } from '../../../hooks/useMonthlyAccounting';
+import { paymentStatusUpdates } from '../lib/paymentStatus';
 
 interface UseMonthlyTransactionsParams {
   month: Date;
@@ -21,7 +22,9 @@ export function useMonthlyTransactions({ month, onAdd, onUpdate, onDelete }: Use
     category: 'services',
     entry_date: month.toISOString().split('T')[0],
     revenue_category: '',
-    revenue_sous_categorie: ''
+    revenue_sous_categorie: '',
+    payment_status: 'paid' as 'paid' | 'pending',
+    due_date: ''
   });
   const [editData, setEditData] = useState<Partial<AccountingEntry & { amount: string }>>({});
 
@@ -33,7 +36,9 @@ export function useMonthlyTransactions({ month, onAdd, onUpdate, onDelete }: Use
       category: 'services',
       entry_date: month.toISOString().split('T')[0],
       revenue_category: '',
-      revenue_sous_categorie: ''
+      revenue_sous_categorie: '',
+      payment_status: 'paid',
+      due_date: ''
     });
   };
 
@@ -45,6 +50,11 @@ export function useMonthlyTransactions({ month, onAdd, onUpdate, onDelete }: Use
       toast.error('Veuillez remplir tous les champs obligatoires');
       return;
     }
+
+    // Le statut de paiement ne concerne que les revenus ; une dépense est toujours « payée ».
+    const paymentStatus: 'paid' | 'pending' = formData.type === 'revenue' ? formData.payment_status : 'paid';
+    const dueDate = paymentStatus === 'pending' ? (formData.due_date || null) : null;
+    const paymentDate = paymentStatus === 'paid' ? formData.entry_date : null;
 
     setIsSubmitting(true);
     try {
@@ -58,7 +68,10 @@ export function useMonthlyTransactions({ month, onAdd, onUpdate, onDelete }: Use
         responsible_user_id: null,
         responsible_user_name: null,
         revenue_category: formData.revenue_category || null,
-        revenue_sous_categorie: formData.revenue_sous_categorie || null
+        revenue_sous_categorie: formData.revenue_sous_categorie || null,
+        payment_status: paymentStatus,
+        due_date: dueDate,
+        payment_date: paymentDate
       });
 
       if (result.success) {
@@ -117,6 +130,14 @@ export function useMonthlyTransactions({ month, onAdd, onUpdate, onDelete }: Use
     setEditData({});
   };
 
+  const handleSetStatus = async (
+    entry: AccountingEntry,
+    status: 'paid' | 'pending',
+    dueDate?: string | null,
+  ) => {
+    await onUpdate(entry.id, paymentStatusUpdates(status, dueDate));
+  };
+
   return {
     showAddForm,
     setShowAddForm,
@@ -133,6 +154,7 @@ export function useMonthlyTransactions({ month, onAdd, onUpdate, onDelete }: Use
     handleEdit,
     handleSaveEdit,
     handleDelete,
-    handleCancelEdit
+    handleCancelEdit,
+    handleSetStatus
   };
 }

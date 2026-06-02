@@ -11,6 +11,8 @@ interface TransactionAddFormProps {
     entry_date: string;
     revenue_category: string;
     revenue_sous_categorie: string;
+    payment_status: 'paid' | 'pending';
+    due_date: string;
   };
   setFormData: (data: TransactionAddFormProps['formData']) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -209,6 +211,46 @@ export function TransactionAddForm({ formData, setFormData, onSubmit, onCancel, 
               placeholder="Description de la transaction"
             />
           </div>
+
+          {formData.type === 'revenue' && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-xs font-semibold text-violet-100/65">
+                  Statut de paiement
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, payment_status: 'paid', due_date: '' })}
+                    className={choiceButtonClass(formData.payment_status === 'paid')}
+                  >
+                    Payé
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, payment_status: 'pending' })}
+                    className={choiceButtonClass(formData.payment_status === 'pending')}
+                  >
+                    En attente
+                  </button>
+                </div>
+              </div>
+
+              {formData.payment_status === 'pending' && (
+                <div>
+                  <label className="mb-2 block text-xs font-semibold text-violet-100/65">
+                    Échéance
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.due_date}
+                    onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                    className="min-h-[42px] w-full rounded-xl border border-white/10 bg-white/[0.045] px-3 text-sm text-white outline-none transition focus:border-violet-300/35 focus:bg-white/[0.065]"
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-2 border-t border-white/[0.08] pt-4 sm:flex-row sm:items-center sm:justify-between">

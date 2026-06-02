@@ -2,8 +2,10 @@ import { useEffect } from 'react';
 import { ArrowDownRight, ArrowUpRight, DollarSign, Plus, ReceiptText, X } from 'lucide-react';
 import type { AccountingEntry } from '../../hooks/useMonthlyAccounting';
 import { useMonthlyTransactions } from './hooks/useMonthlyTransactions';
+import { useReceivables } from './hooks/useReceivables';
 import { TransactionAddForm } from './components/monthly-transactions/TransactionAddForm';
 import { TransactionItem } from './components/monthly-transactions/TransactionItem';
+import { UnpaidSummary } from './components/UnpaidSummary';
 import { DeleteConfirmDialog } from './components/monthly-transactions/DeleteConfirmDialog';
 import { cn } from '../../lib/utils';
 
@@ -29,6 +31,7 @@ export function MonthlyTransactionsModal({
   loading = false
 }: MonthlyTransactionsModalProps) {
   const tx = useMonthlyTransactions({ month, onAdd, onUpdate, onDelete });
+  const receivables = useReceivables();
 
   useEffect(() => {
     if (open) {
@@ -102,6 +105,8 @@ export function MonthlyTransactionsModal({
         </div>
 
         <div className="flex-1 overflow-y-auto p-5">
+          <UnpaidSummary data={receivables} />
+
           {tx.showAddForm && (
             <TransactionAddForm
               formData={tx.formData}
@@ -151,6 +156,7 @@ export function MonthlyTransactionsModal({
                   onSaveEdit={tx.handleSaveEdit}
                   onCancelEdit={tx.handleCancelEdit}
                   onDelete={(id) => tx.setDeleteConfirmId(id)}
+                  onSetStatus={tx.handleSetStatus}
                   loading={loading}
                 />
               ))

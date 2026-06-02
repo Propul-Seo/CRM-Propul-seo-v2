@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../../../utils';
 import { RevenueAllocationEditor } from '../RevenueAllocationEditor';
+import { PaymentStatusControl } from '../PaymentStatusControl';
+import { getEffectivePaymentStatus } from '../../lib/paymentStatus';
 import type { AccountingEntry } from '../../../../hooks/useMonthlyAccounting';
 
 interface TransactionItemProps {
@@ -19,6 +21,7 @@ interface TransactionItemProps {
   onSaveEdit: () => void;
   onCancelEdit: () => void;
   onDelete: (id: string) => void;
+  onSetStatus: (entry: AccountingEntry, status: 'paid' | 'pending', dueDate?: string | null) => void;
   loading: boolean;
 }
 
@@ -31,8 +34,10 @@ export function TransactionItem({
   onSaveEdit,
   onCancelEdit,
   onDelete,
+  onSetStatus,
   loading
 }: TransactionItemProps) {
+  const isUnpaidRevenue = entry.type === 'revenue' && getEffectivePaymentStatus(entry) !== 'paid';
   return (
     <div
       className={`p-4 border rounded-lg ${
@@ -160,6 +165,12 @@ export function TransactionItem({
                 </span>
               </div>
               <span className="text-sm text-muted-foreground">{entry.category}</span>
+              {entry.type === 'revenue' && (
+                <PaymentStatusControl
+                  entry={entry}
+                  onChange={(status, dueDate) => onSetStatus(entry, status, dueDate)}
+                />
+              )}
             </div>
             <p className="text-foreground font-medium mt-1">{entry.description}</p>
             <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
@@ -167,6 +178,12 @@ export function TransactionItem({
                 <Calendar className="h-3 w-3" />
                 <span>{formatDate(entry.entry_date)}</span>
               </span>
+              {isUnpaidRevenue && entry.due_date && (
+                <span className="flex items-center space-x-1 text-amber-300/80">
+                  <Calendar className="h-3 w-3" />
+                  <span>Échéance {formatDate(entry.due_date)}</span>
+                </span>
+              )}
             </div>
             {entry.type === 'revenue' && (
               <RevenueAllocationEditor
@@ -175,7 +192,7 @@ export function TransactionItem({
               />
             )}
           </div>
-          <div className="flex space-x-2">
+          <div className="flex items-center space-x-2">
             <button
               onClick={() => onEdit(entry)}
               className="text-primary hover:text-primary/80"
