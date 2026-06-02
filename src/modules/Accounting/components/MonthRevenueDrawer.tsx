@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { TrendingUp, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { formatCurrency } from '@/utils';
 import { Badge } from '@/components/ui/badge';
 import type { AccountingEntry } from '@/hooks/useMonthlyAccounting';
 import { getCategoryLabel, getCategoryColorClasses } from '../constants';
+import { PaymentStatusControl } from './PaymentStatusControl';
+import { getEffectivePaymentStatus, paymentStatusUpdates } from '../lib/paymentStatus';
 
 interface MonthRevenueDrawerProps {
   month: Date | null;
@@ -19,35 +22,53 @@ export function MonthRevenueDrawer({ month, onClose }: MonthRevenueDrawerProps) 
   const [entries, setEntries] = useState<AccountingEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const reqIdRef = useRef(0);
 
-  useEffect(() => {
-    if (!month) return;
-    let active = true;
+  const monthKey = month ? monthKeyOf(month) : null;
+
+  const load = useCallback(async () => {
+    if (!monthKey) return;
+    const reqId = ++reqIdRef.current;
     setLoading(true);
     setError(false);
+    const { data, error: err } = await supabase
+      .from('accounting_entries')
+      .select('*')
+      .eq('type', 'revenue')
+      .eq('month_key', monthKey)
+      .order('entry_date', { ascending: true });
+    if (reqId !== reqIdRef.current) return; // une requête plus récente a pris la main
+    if (err) setError(true);
+    else setEntries((data as AccountingEntry[]) || []);
+    setLoading(false);
+  }, [monthKey]);
+
+  useEffect(() => {
+    if (!monthKey) return;
     setEntries([]); // évite d'afficher le total du mois précédent pendant le fetch
-    const key = monthKeyOf(month);
-    (async () => {
-      const { data, error: err } = await supabase
-        .from('accounting_entries')
-        .select('*')
-        .eq('type', 'revenue')
-        .eq('month_key', key)
-        .order('entry_date', { ascending: true });
-      if (!active) return;
-      if (err) setError(true);
-      else setEntries((data as AccountingEntry[]) || []);
-      setLoading(false);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [month]);
+    load();
+  }, [monthKey, load]);
+
+  const handleSetStatus = async (id: string, status: 'paid' | 'pending', dueDate?: string | null) => {
+    const { error: err } = await supabase
+      .from('accounting_entries')
+      .update(paymentStatusUpdates(status, dueDate))
+      .eq('id', id);
+    if (err) {
+      toast.error('Erreur: ' + err.message);
+      return;
+    }
+    await load();
+  };
 
   if (!month) return null;
 
   const monthLabel = month.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
   const totalCA = entries.reduce((sum, e) => sum + Number(e.amount), 0);
+  const collected = entries
+    .filter((e) => getEffectivePaymentStatus(e) === 'paid')
+    .reduce((sum, e) => sum + Number(e.amount), 0);
+  const pending = totalCA - collected;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/45 backdrop-blur-md">
@@ -79,8 +100,20 @@ export function MonthRevenueDrawer({ month, onClose }: MonthRevenueDrawerProps) 
           </div>
 
           <div className="mt-5 rounded-xl border border-cyan-400/15 bg-cyan-400/[0.07] p-3">
-            <p className="text-xs text-cyan-100/55">CA du mois</p>
+            <p className="text-xs text-cyan-100/55">CA du mois (facturé)</p>
             <p className="mt-1 text-2xl font-black tracking-tight text-cyan-300">{formatCurrency(totalCA)}</p>
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 border-t border-cyan-400/10 pt-2 text-xs">
+              <span className="flex items-center gap-1 text-emerald-300/85">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                Encaissé : <span className="font-semibold">{formatCurrency(collected)}</span>
+              </span>
+              {pending > 0 && (
+                <span className="flex items-center gap-1 text-amber-300/85">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                  En attente : <span className="font-semibold">{formatCurrency(pending)}</span>
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -120,6 +153,10 @@ export function MonthRevenueDrawer({ month, onClose }: MonthRevenueDrawerProps) 
                       {e.revenue_category && (
                         <Badge className={getCategoryColorClasses(e.revenue_category)}>{getCategoryLabel(e.revenue_category)}</Badge>
                       )}
+                      <PaymentStatusControl
+                        entry={e}
+                        onChange={(status, dueDate) => handleSetStatus(e.id, status, dueDate)}
+                      />
                     </div>
                   </div>
                   <span className="shrink-0 text-sm font-bold text-cyan-300">{formatCurrency(Number(e.amount))}</span>

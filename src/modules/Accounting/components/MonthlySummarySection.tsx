@@ -45,7 +45,7 @@ export function MonthlySummarySection({
   const cards: SummaryCard[] = [
     {
       label: 'Revenus',
-      caption: 'Encaissements du mois',
+      caption: 'Facturé du mois',
       value: currentMonthStats.revenue,
       suffix: '€',
       icon: ArrowUpRight,

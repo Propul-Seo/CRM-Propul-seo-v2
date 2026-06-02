@@ -2,10 +2,12 @@ import { useEffect, useState, useCallback } from 'react';
 import { logger } from '@/lib/logger';
 import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
+import { getEffectivePaymentStatus } from '@/modules/Accounting/lib/paymentStatus';
 import type { AccountingEntry, MonthlyMetrics } from './useMonthlyAccounting';
 
 export interface AnnualStats {
   totalRevenues: number;
+  totalCollected: number; // revenus encaissés (statut payé) ; le reste = en attente
   totalExpenses: number;
   totalResult: number;
   averageRevenue: number;
@@ -15,6 +17,7 @@ export interface AnnualStats {
   monthlyStats: {
     [month: string]: {
       revenues: number;
+      collected: number;
       expenses: number;
       result: number;
       count: number;
@@ -25,6 +28,7 @@ export interface AnnualStats {
 export const useAnnualAccounting = () => {
   const [annualStats, setAnnualStats] = useState<AnnualStats>({
     totalRevenues: 0,
+    totalCollected: 0,
     totalExpenses: 0,
     totalResult: 0,
     averageRevenue: 0,
@@ -57,13 +61,14 @@ export const useAnnualAccounting = () => {
       if (txError) throw new Error(txError.message);
 
       // Calculer les statistiques annuelles depuis les vraies données
-      const monthlyStats: { [month: string]: { revenues: number; expenses: number; result: number; count: number } } = {};
+      const monthlyStats: { [month: string]: { revenues: number; collected: number; expenses: number; result: number; count: number } } = {};
 
       // Initialiser tous les mois de l'année en cours
       for (let month = 1; month <= 12; month++) {
         const monthKey = `${currentYear}-${month.toString().padStart(2, '0')}`;
         monthlyStats[monthKey] = {
           revenues: 0,
+          collected: 0,
           expenses: 0,
           result: 0,
           count: 0
@@ -83,6 +88,9 @@ export const useAnnualAccounting = () => {
           if (monthlyStats[monthKey]) {
             if (entry.type === 'revenue') {
               monthlyStats[monthKey].revenues += amount;
+              if (getEffectivePaymentStatus(entry) === 'paid') {
+                monthlyStats[monthKey].collected += amount;
+              }
               console.log(`💰 Revenu ajouté pour ${monthKey}: ${amount}€ (Total: ${monthlyStats[monthKey].revenues}€)`);
             } else if (entry.type === 'expense') {
               monthlyStats[monthKey].expenses += amount;
@@ -103,6 +111,7 @@ export const useAnnualAccounting = () => {
 
       // Calculer les totaux annuels
       const totalRevenues = Object.values(monthlyStats).reduce((sum, month) => sum + month.revenues, 0);
+      const totalCollected = Object.values(monthlyStats).reduce((sum, month) => sum + month.collected, 0);
       const totalExpenses = Object.values(monthlyStats).reduce((sum, month) => sum + month.expenses, 0);
       const totalResult = totalRevenues - totalExpenses;
 
@@ -133,6 +142,7 @@ export const useAnnualAccounting = () => {
 
       setAnnualStats({
         totalRevenues,
+        totalCollected,
         totalExpenses,
         totalResult,
         averageRevenue,

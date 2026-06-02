@@ -4,6 +4,8 @@ import { Badge } from '../../../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs';
 import { formatCurrency } from '../../../utils';
 import { getCategoryLabel, getCategoryColorClasses, getSousCategorieLabel } from '../constants';
+import { PaymentStatusBadge } from './PaymentStatusBadge';
+import { getEffectivePaymentStatus } from '../lib/paymentStatus';
 import type { AccountingEntry } from '../../../hooks/useMonthlyAccounting';
 import type { RevenueCategory } from '../constants';
 
@@ -90,6 +92,7 @@ function SortableTable({ rows }: { rows: ExpandedRow[] }) {
                       {getSousCategorieLabel(row.alloc_sous_categorie)}
                     </span>
                   )}
+                  {getEffectivePaymentStatus(row) !== 'paid' && <PaymentStatusBadge entry={row} />}
                 </div>
               </td>
               <td className="py-2.5 px-3 text-right text-emerald-400 font-semibold whitespace-nowrap">

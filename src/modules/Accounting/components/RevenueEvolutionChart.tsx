@@ -85,6 +85,14 @@ export function RevenueEvolutionChart({
   const selectedPoint = data.find(point => point.isSelected);
   const bestPoint = data.reduce((best, point) => (point.revenue > best.revenue ? point : best), data[0]);
 
+  // La carte « mois en cours » est épinglée au mois actuel (jamais modifiée par le clic sur un mois du tableau).
+  const now = new Date();
+  const currentMonthKey = `${currentYear}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const currentPoint = data.find(point => point.monthKey === currentMonthKey) ?? selectedPoint;
+  const currentCollected = annualStats.monthlyStats[currentMonthKey]?.collected ?? 0;
+  const currentPending = Math.max(0, (currentPoint?.revenue ?? 0) - currentCollected);
+  const annualPending = Math.max(0, annualStats.totalRevenues - annualStats.totalCollected);
+
   const sourceRows = [
     {
       label: 'Site Internet',
@@ -149,16 +157,28 @@ export function RevenueEvolutionChart({
               <p className="mt-2 text-xs text-violet-100/48">
                 {currentYear} · {annualStats.activeMonths} mois actifs
               </p>
+              <p className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
+                <span className="text-emerald-300/85">Encaissé {formatCurrency(annualStats.totalCollected)}</span>
+                {annualPending > 0 && (
+                  <span className="text-amber-300/85">En attente {formatCurrency(annualPending)}</span>
+                )}
+              </p>
             </div>
 
             <div className="rounded-xl border border-white/10 bg-white/[0.035] p-3 sm:min-h-[104px]">
               <p className="text-xs font-semibold capitalize text-violet-100/62">
-                {selectedPoint?.fullLabel ?? 'Mois sélectionné'}
+                {currentPoint?.fullLabel ?? 'Mois en cours'}
               </p>
               <p className="mt-2 text-2xl font-bold tracking-tight text-cyan-300">
-                {formatCurrency(selectedPoint?.revenue ?? 0)}
+                {formatCurrency(currentPoint?.revenue ?? 0)}
               </p>
-              <p className="mt-2 text-xs text-violet-100/45">mois sélectionné</p>
+              <p className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px]">
+                <span className="text-emerald-300/85">Encaissé {formatCurrency(currentCollected)}</span>
+                {currentPending > 0 && (
+                  <span className="text-amber-300/85">En attente {formatCurrency(currentPending)}</span>
+                )}
+              </p>
+              <p className="mt-1 text-xs text-violet-100/45">mois en cours</p>
             </div>
 
             <div className="rounded-xl border border-white/10 bg-white/[0.035] p-3 sm:min-h-[104px]">
