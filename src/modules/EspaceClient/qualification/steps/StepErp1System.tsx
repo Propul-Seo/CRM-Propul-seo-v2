@@ -26,12 +26,12 @@ export function StepErp1System({ draft, setField, errors }: Props) {
   return (
     <StepShell
       title="Votre système actuel"
-      subtitle="Ce qu'on remplace ou complète. On évalue le travail de migration."
+      subtitle="Ces informations permettent d’évaluer le périmètre de reprise ou de migration."
     >
       <FieldGroup
         label="Qu'utilisez-vous aujourd'hui ?"
         required
-        hint="Cochez tous les outils que vous utilisez actuellement."
+        hint="Sélectionnez les outils actuellement utilisés."
         error={errors.erp_current_system}
       >
         <div className="grid gap-2.5 sm:grid-cols-2">
@@ -57,7 +57,7 @@ export function StepErp1System({ draft, setField, errors }: Props) {
           error={errors.erp_current_system_other}
         >
           <Input
-            placeholder="Ex. Cegid, Dolibarr, Quickbooks, solution maison…"
+            placeholder="Par exemple : Cegid, Dolibarr, Quickbooks, solution interne"
             value={draft.erp_current_system_other ?? ''}
             onChange={e => setField('erp_current_system_other', e.target.value)}
             className="h-11"
@@ -69,7 +69,7 @@ export function StepErp1System({ draft, setField, errors }: Props) {
       <FieldGroup
         label="Volume de données à migrer"
         required
-        hint="Approximatif. On affinera ensemble."
+        hint="Une estimation suffit à ce stade."
         error={errors.erp_data_volume}
       >
         <div className="grid gap-2.5 sm:grid-cols-2">

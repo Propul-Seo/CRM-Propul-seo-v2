@@ -29,7 +29,7 @@ export function Step4Features({ draft, setField, errors }: Step4Props) {
   const ecommerceRevealed = useProgressiveReveal([platformFilled]);
 
   return (
-    <StepShell title="Fonctionnalités souhaitées" subtitle="Cochez tout ce qui vous intéresse — on affinera ensemble.">
+    <StepShell title="Fonctionnalités souhaitées" subtitle="Sélectionnez les fonctionnalités envisagées pour cadrer le périmètre fonctionnel.">
       <FieldGroup label="Fonctionnalités envisagées" required error={errors.desired_features}>
         <div className="grid gap-2.5 sm:grid-cols-2">
           {DESIRED_FEATURES.map(o => (
@@ -49,11 +49,11 @@ export function Step4Features({ draft, setField, errors }: Step4Props) {
         <FieldGroup
           label="Précisez la fonctionnalité"
           required
-          hint="Décrivez en quelques mots ce que vous voudriez."
+          hint="Décrivez brièvement la fonctionnalité attendue."
           error={errors.desired_features_other}
         >
           <Textarea
-            placeholder="Ex. comparateur de produits, configurateur 3D, espace partenaire avec API…"
+            placeholder="Par exemple : comparateur de produits, configurateur 3D, espace partenaire avec API"
             rows={2}
             value={draft.desired_features_other ?? ''}
             onChange={e => setField('desired_features_other', e.target.value)}
@@ -63,8 +63,8 @@ export function Step4Features({ draft, setField, errors }: Step4Props) {
       </ConditionalBranch>
 
       <ConditionalBranch show={showEcommerce}>
-        <div className="space-y-5 border-l-2 border-violet-200 pl-4">
-          <FieldGroup label="Plateforme e-commerce" required error={errors.ecommerce_platform}>
+        <div className="ps-branch-panel space-y-5 p-4 md:p-5">
+          <FieldGroup label="Plateforme de commerce en ligne actuelle" required error={errors.ecommerce_platform}>
             <div className="grid gap-2.5 sm:grid-cols-3">
               {ECOMMERCE_PLATFORMS.map(o => (
                 <RadioCard
@@ -87,10 +87,10 @@ export function Step4Features({ draft, setField, errors }: Step4Props) {
               error={errors.ecommerce_platform_other}
             >
               <Input
-                placeholder="Ex. Magento, BigCommerce, Wix Stores…"
+                placeholder="Par exemple : Magento, BigCommerce, Wix Stores"
                 value={draft.ecommerce_platform_other ?? ''}
                 onChange={e => setField('ecommerce_platform_other', e.target.value)}
-                className="h-11"
+                className="h-11 bg-white"
                 maxLength={500}
               />
             </FieldGroup>
@@ -116,7 +116,7 @@ export function Step4Features({ draft, setField, errors }: Step4Props) {
       </ConditionalBranch>
 
       <ConditionalBranch show={showReservation}>
-        <div className="space-y-5 border-l-2 border-violet-200 pl-4">
+        <div className="ps-branch-panel space-y-5 p-4 md:p-5">
           <FieldGroup label="Type de réservation" required error={errors.reservation_type}>
             <div className="grid gap-2.5 sm:grid-cols-2">
               {RESERVATION_TYPES.map(o => (

@@ -9,21 +9,20 @@ export const QUALIF_TOTAL_STEPS_SITE_ERP = 12;   // Step0 + 7 site + 4 ERP - bud
 export const QUALIF_TOTAL_STEPS = QUALIF_TOTAL_STEPS_SITE; // legacy fallback
 
 export const PROJECT_TYPES = [
-  { value: 'site',     label: 'Site web',          hint: 'Vitrine, e-commerce, réservation, blog…' },
-  { value: 'site_erp', label: 'Site web + ERP',    hint: 'J\'ai besoin des deux à la fois' },
+  { value: 'site',     label: 'Site web',          hint: 'Site vitrine, vente en ligne, réservation ou contenu éditorial' },
+  { value: 'site_erp', label: 'Site web + ERP',    hint: 'Besoin combiné : présence en ligne et outil métier' },
   { value: 'erp',      label: 'ERP / Outil métier', hint: 'Gestion interne : clients, stock, facturation, planning…' },
 ] as const;
 
 export const SECTORS = [
-  { value: 'ecommerce',                label: 'E-commerce' },
+  { value: 'ecommerce',                label: 'E-commerce / Boutique en ligne' },
   { value: 'restaurant_hotellerie',    label: 'Restaurant / Hôtellerie' },
-  { value: 'joaillerie_artisanat',     label: 'Joaillerie / Artisanat haut de gamme' },
-  { value: 'diagnostic_audit',         label: 'Diagnostic / Audit' },
+  { value: 'joaillerie_artisanat',     label: 'Artisanat & métiers d\'art' },
   { value: 'immobilier_syndic',        label: 'Immobilier / Syndic' },
-  { value: 'sante_bienetre',           label: 'Santé / Bien-être' },
-  { value: 'profession_liberale',      label: 'Profession libérale' },
-  { value: 'startup_tech',             label: 'Startup Tech / SaaS' },
-  { value: 'artisan_commerce_local',   label: 'Artisan / Commerce local' },
+  { value: 'sante_bienetre',           label: 'Santé / Bien etre' },
+  { value: 'profession_liberale',      label: 'Profession libérale / Conseil' },
+  { value: 'startup_tech',             label: 'Startup / SaaS' },
+  { value: 'artisan_commerce_local',   label: 'Commerce & artisanat local' },
   { value: 'autre',                    label: 'Autre' },
 ] as const;
 
@@ -34,8 +33,8 @@ export const EXISTING_SITE_OPTIONS = [
 ] as const;
 
 export const MONTHLY_TRAFFIC = [
-  { value: '<500',          label: '< 500 visiteurs / mois' },
-  { value: '500-2000',      label: '500 – 2 000' },
+  { value: '<500',          label: 'Moins de 500 visiteurs par mois' },
+  { value: '500-2000',      label: '500 à 2 000' },
   { value: '>2000',         label: '> 2 000' },
   { value: 'je_ne_sais_pas',label: 'Je ne sais pas' },
 ] as const;
@@ -64,11 +63,11 @@ export const TARGET_AUDIENCES = [
 
 export const DESIRED_FEATURES = [
   { value: 'blog',           label: 'Blog / Actualités' },
-  { value: 'ecommerce',      label: 'E-commerce (vente en ligne)' },
+  { value: 'ecommerce',      label: 'Commerce en ligne' },
   { value: 'reservation',    label: 'Réservation en ligne' },
   { value: 'espace_membre',  label: 'Espace membre / client' },
   { value: 'chat',           label: 'Chat en ligne' },
-  { value: 'multi_langue',   label: 'Multi-langue' },
+  { value: 'multi_langue',   label: 'Multilingue' },
   { value: 'seo_avance',     label: 'SEO avancé' },
   { value: 'dashboard',      label: 'Dashboard' },
   { value: 'autre',          label: 'Autre' },
@@ -91,30 +90,30 @@ export const ECOMMERCE_PLATFORMS = [
 ] as const;
 
 export const PRODUCT_COUNT_RANGES = [
-  { value: '<50',     label: '< 50' },
-  { value: '50-500',  label: '50 – 500' },
+  { value: '<50',     label: 'Moins de 50' },
+  { value: '50-500',  label: '50 à 500' },
   { value: '>500',    label: '> 500' },
 ] as const;
 
 export const BRAND_STATUS = [
-  { value: 'charte_complete', label: 'Charte complète', hint: 'Logo + couleurs + typo' },
+  { value: 'charte_complete', label: 'Charte complète', hint: 'Logo, couleurs et typographies' },
   { value: 'juste_logo',      label: 'Juste un logo',   hint: 'Pas de charte complète' },
-  { value: 'rien_du_tout',    label: 'Rien du tout',    hint: 'On part de zéro' },
+  { value: 'rien_du_tout',    label: 'Rien du tout',    hint: 'Création complète de l’identité visuelle' },
 ] as const;
 
 export const BUDGET_RANGES = [
-  { value: '<2000',         label: '< 2 000 €',          emoji: '💡' },
-  { value: '2000-5000',     label: '2 000 – 5 000 €',    emoji: '🚀' },
-  { value: '5000-10000',    label: '5 000 – 10 000 €',   emoji: '⭐' },
-  { value: '10000-20000',   label: '10 000 – 20 000 €',  emoji: '💎' },
+  { value: '<2000',         label: 'Moins de 2 000 €',   emoji: '💡' },
+  { value: '2000-5000',     label: '2 000 à 5 000 €',    emoji: '🚀' },
+  { value: '5000-10000',    label: '5 000 à 10 000 €',   emoji: '⭐' },
+  { value: '10000-20000',   label: '10 000 à 20 000 €',  emoji: '💎' },
   { value: '>20000',        label: '> 20 000 €',         emoji: '🏆' },
 ] as const;
 
 export const DEADLINES = [
-  { value: '<1mois',        label: '< 1 mois' },
-  { value: '1-3mois',       label: '1 – 3 mois' },
-  { value: '3-6mois',       label: '3 – 6 mois' },
-  { value: 'pas_de_deadline', label: 'Pas de deadline' },
+  { value: '<1mois',        label: 'Moins d’un mois' },
+  { value: '1-3mois',       label: '1 à 3 mois' },
+  { value: '3-6mois',       label: '3 à 6 mois' },
+  { value: 'pas_de_deadline', label: 'Aucune date cible' },
 ] as const;
 
 export const DECISION_MAKERS = [

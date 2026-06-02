@@ -25,11 +25,11 @@ export function StepErp4Integrations({ draft, setField, errors }: Props) {
   return (
     <StepShell
       title="Intégrations souhaitées"
-      subtitle="Avec quels outils l'ERP doit se connecter. Optionnel — on peut commencer simple."
+      subtitle="Indiquez les outils à connecter à l’ERP. Cette étape reste optionnelle."
     >
       <FieldGroup
         label="Intégrations possibles"
-        hint="Sélectionnez ce qui vous intéresse. Vide = on regardera plus tard."
+        hint="Laissez vide si les intégrations seront définies ultérieurement."
         error={errors.erp_integrations}
       >
         <div className="grid gap-2.5 sm:grid-cols-2">
@@ -55,7 +55,7 @@ export function StepErp4Integrations({ draft, setField, errors }: Props) {
           error={errors.erp_integrations_other}
         >
           <Input
-            placeholder="Ex. Salesforce, HubSpot, ZohoCRM, ERP existant…"
+            placeholder="Par exemple : Salesforce, HubSpot, ZohoCRM, ERP existant"
             value={draft.erp_integrations_other ?? ''}
             onChange={e => setField('erp_integrations_other', e.target.value)}
             className="h-11"

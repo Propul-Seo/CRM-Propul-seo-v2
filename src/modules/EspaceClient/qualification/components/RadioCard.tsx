@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Check } from 'lucide-react';
 
 interface RadioCardProps {
   name: string;
@@ -18,10 +19,10 @@ export function RadioCard({ name, value, checked, onChange, label, hint, emoji, 
   return (
     <label
       htmlFor={id}
-      className={`relative flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-all duration-200 ease-out ${
+      className={`ps-choice-card relative flex min-h-[58px] cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-all duration-200 ease-out ${
         checked
-          ? 'border-violet-400 bg-gradient-to-br from-sky-50 via-violet-50 to-pink-50 shadow-[0_4px_16px_-4px_rgba(139,92,246,0.25)] ring-1 ring-violet-300'
-          : 'border-stone-200 bg-white hover:border-violet-300 hover:bg-stone-50'
+          ? 'ps-choice-card-active border-violet-400 bg-white shadow-[0_10px_28px_-18px_rgba(88,28,135,0.48)] ring-1 ring-violet-200'
+          : 'border-stone-200 bg-white shadow-sm hover:border-violet-300 hover:shadow-[0_10px_24px_-22px_rgba(88,28,135,0.45)]'
       } ${disabled ? 'cursor-not-allowed opacity-60' : ''}`}
     >
       <input
@@ -36,19 +37,19 @@ export function RadioCard({ name, value, checked, onChange, label, hint, emoji, 
       />
       <span
         aria-hidden
-        className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-          checked ? 'border-violet-600' : 'border-stone-300'
+        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
+          checked ? 'border-violet-600 bg-gradient-to-br from-sky-500 to-violet-600 text-white' : 'border-stone-200 bg-white'
         }`}
       >
-        {checked && <span className="h-2 w-2 rounded-full bg-gradient-to-br from-sky-500 to-violet-600" />}
+        {checked && <Check className="h-3 w-3" strokeWidth={3} />}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-1.5 text-[13.5px] font-semibold text-stone-900">
+        <span className="flex items-center gap-2 text-[13.5px] font-semibold leading-5 text-stone-950">
           {emoji && <span className="text-base leading-none">{emoji}</span>}
           {label}
         </span>
         {hint && (
-          <span className="mt-0.5 block text-[12px] text-stone-500">{hint}</span>
+          <span className="mt-1 block text-[12px] leading-4 text-stone-500">{hint}</span>
         )}
       </span>
     </label>

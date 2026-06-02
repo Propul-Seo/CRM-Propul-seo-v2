@@ -17,7 +17,7 @@ export function Step6Budget({ draft, setField, errors }: Step6Props) {
   const revealed = useProgressiveReveal([budgetFilled]);
 
   return (
-    <StepShell title="Budget et délais" subtitle="Soyez honnête — on adapte la proposition à votre réalité.">
+    <StepShell title="Budget et délais" subtitle="Ces éléments permettent de proposer une approche cohérente avec vos contraintes.">
       <FieldGroup label="Fourchette de budget" required error={errors.budget_range}>
         <div className="grid gap-2.5 sm:grid-cols-2">
           {BUDGET_RANGES.map(o => (
@@ -35,20 +35,22 @@ export function Step6Budget({ draft, setField, errors }: Step6Props) {
       </FieldGroup>
 
       <ConditionalBranch show={revealed >= 2}>
-        <FieldGroup label="Délai souhaité" required error={errors.desired_timeline}>
-          <div className="grid gap-2.5 sm:grid-cols-2">
-            {DEADLINES.map(o => (
-              <RadioCard
-                key={o.value}
-                name="desired_timeline"
-                value={o.value}
-                checked={draft.desired_timeline === o.value}
-                onChange={v => setField('desired_timeline', v as QualificationDraft['desired_timeline'])}
-                label={o.label}
-              />
-            ))}
-          </div>
-        </FieldGroup>
+        <div className="ps-question-panel p-4 md:p-5">
+          <FieldGroup label="Délai souhaité" required error={errors.desired_timeline}>
+            <div className="grid gap-2.5 sm:grid-cols-2">
+              {DEADLINES.map(o => (
+                <RadioCard
+                  key={o.value}
+                  name="desired_timeline"
+                  value={o.value}
+                  checked={draft.desired_timeline === o.value}
+                  onChange={v => setField('desired_timeline', v as QualificationDraft['desired_timeline'])}
+                  label={o.label}
+                />
+              ))}
+            </div>
+          </FieldGroup>
+        </div>
       </ConditionalBranch>
     </StepShell>
   );

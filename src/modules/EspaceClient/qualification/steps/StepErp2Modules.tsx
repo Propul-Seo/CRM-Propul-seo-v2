@@ -25,12 +25,12 @@ export function StepErp2Modules({ draft, setField, errors }: Props) {
   return (
     <StepShell
       title="Quels modules métier ?"
-      subtitle="Cochez tout ce qui s'applique. On peut en discuter ensuite."
+      subtitle="Sélectionnez les modules nécessaires au fonctionnement de votre activité."
     >
       <FieldGroup
         label="Modules nécessaires"
         required
-        hint="Au moins un. On définira les priorités en RDV."
+        hint="Sélectionnez au moins un module. Les priorités seront précisées lors de l’échange."
         error={errors.erp_modules}
       >
         <div className="grid gap-2.5 sm:grid-cols-2">
@@ -56,7 +56,7 @@ export function StepErp2Modules({ draft, setField, errors }: Props) {
           error={errors.erp_modules_other}
         >
           <Input
-            placeholder="Ex. gestion de production, service après-vente, ticketing…"
+            placeholder="Par exemple : gestion de production, service après vente, ticketing"
             value={draft.erp_modules_other ?? ''}
             onChange={e => setField('erp_modules_other', e.target.value)}
             className="h-11"

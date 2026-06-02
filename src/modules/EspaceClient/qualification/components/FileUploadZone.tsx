@@ -101,8 +101,8 @@ export function FileUploadZone({
         <Upload className="mx-auto h-5 w-5 text-[var(--ps-fg-muted)]" />
         <p className="mt-2 text-[12.5px] text-[var(--ps-fg-secondary)]">
           {blockedNoLead
-            ? 'Renseignez d\'abord l\'étape 1 — l\'upload sera disponible ensuite.'
-            : (hint ?? `Glissez vos fichiers · max ${maxFiles} · ${maxSizeMb} MB chacun`)}
+            ? 'Renseignez d’abord l’étape 1. Le dépôt de fichiers sera ensuite disponible.'
+            : (hint ?? `Glissez vos fichiers. Maximum ${maxFiles} fichier(s), ${maxSizeMb} MB chacun`)}
         </p>
         <button
           type="button"

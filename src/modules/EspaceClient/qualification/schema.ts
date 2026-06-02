@@ -18,8 +18,8 @@ const values = <T extends ReadonlyArray<{ value: string }>>(arr: T): [string, ..
   return [vals[0], ...vals.slice(1)];
 };
 
-// Validation téléphone : 10+ chiffres, accepte espaces/points/tirets/+
-const phoneRe = /^[+\d][\d\s.\-()]{8,}$/;
+// Validation téléphone : chiffres uniquement avec + international optionnel en tête.
+const phoneRe = /^\+?\d{10,}$/;
 
 // Step0 — Type de besoin (routage Site / Site+ERP / ERP)
 export const step0Schema = z.object({
@@ -53,9 +53,6 @@ export const step2Schema = z
   })
   .superRefine((data, ctx) => {
     if (data.has_existing_site === 'oui' || data.has_existing_site === 'oui_obsolete') {
-      if (!data.existing_site_url) {
-        ctx.addIssue({ code: 'custom', path: ['existing_site_url'], message: 'URL du site requise' });
-      }
       if (!data.monthly_traffic) {
         ctx.addIssue({ code: 'custom', path: ['monthly_traffic'], message: 'Trafic estimé requis' });
       }
@@ -110,27 +107,12 @@ export const step4Schema = z
     }
   });
 
-export const step5Schema = z
-  .object({
-    has_visual_identity:        z.enum(values(BRAND_STATUS), { errorMap: () => ({ message: 'Indiquez votre situation' }) }),
-    logo_file_url:              z.string().optional().nullable(),
-    brand_guide_url:            z.string().optional().nullable(),
-    brand_guide_external_link:  z.string().url('Lien invalide').optional().nullable().or(z.literal('')),
-  })
-  .superRefine((data, ctx) => {
-    if (data.has_visual_identity === 'charte_complete') {
-      if (!data.logo_file_url) {
-        ctx.addIssue({ code: 'custom', path: ['logo_file_url'], message: 'Logo requis' });
-      }
-      // Charte : upload fichier OU lien externe (WeTransfer, Notion, Drive…)
-      if (!data.brand_guide_url && !data.brand_guide_external_link?.trim()) {
-        ctx.addIssue({ code: 'custom', path: ['brand_guide_url'], message: 'Charte requise (upload ou lien externe)' });
-      }
-    }
-    if (data.has_visual_identity === 'juste_logo' && !data.logo_file_url) {
-      ctx.addIssue({ code: 'custom', path: ['logo_file_url'], message: 'Logo requis' });
-    }
-  });
+export const step5Schema = z.object({
+  has_visual_identity:        z.enum(values(BRAND_STATUS), { errorMap: () => ({ message: 'Indiquez votre situation' }) }),
+  logo_file_url:              z.string().optional().nullable(),
+  brand_guide_url:            z.string().optional().nullable(),
+  brand_guide_external_link:  z.string().url('Lien invalide').optional().nullable().or(z.literal('')),
+});
 
 export const step6Schema = z.object({
   budget_range:     z.enum(values(BUDGET_RANGES), { errorMap: () => ({ message: 'Sélectionnez un budget' }) }),

@@ -19,61 +19,68 @@ export function Step1Identity({ draft, setField, errors }: Step1Props) {
   return (
     <StepShell
       title="Qui êtes-vous ?"
-      subtitle="Quelques informations pour personnaliser notre proposition."
+      subtitle="Ces informations permettent de qualifier votre demande et de préparer un retour adapté."
     >
-      <FieldGroup label="Nom complet" required error={errors.full_name}>
-        <Input
-          placeholder="Prénom Nom"
-          value={draft.full_name ?? ''}
-          onChange={e => setField('full_name', e.target.value)}
-          className="h-11"
-          autoComplete="name"
-        />
-      </FieldGroup>
+      <section className="ps-question-panel grid gap-4 p-4 md:grid-cols-2 md:p-5">
+        <FieldGroup label="Nom complet" required error={errors.full_name}>
+          <Input
+            placeholder="Prénom Nom"
+            value={draft.full_name ?? ''}
+            onChange={e => setField('full_name', e.target.value)}
+            className="h-11 bg-white"
+            autoComplete="name"
+          />
+        </FieldGroup>
 
-      <FieldGroup label="Email professionnel" required error={errors.email}>
-        <Input
-          type="email"
-          placeholder="vous@votre-entreprise.fr"
-          value={draft.email ?? ''}
-          onChange={e => setField('email', e.target.value)}
-          className="h-11"
-          autoComplete="email"
-        />
-      </FieldGroup>
+        <FieldGroup label="Email professionnel" required error={errors.email}>
+          <Input
+            type="email"
+            placeholder="vous@votre-entreprise.fr"
+            value={draft.email ?? ''}
+            onChange={e => setField('email', e.target.value)}
+            className="h-11 bg-white"
+            autoComplete="email"
+          />
+        </FieldGroup>
 
-      <FieldGroup
-        label={
-          <span className="inline-flex items-center gap-1.5">
-            Téléphone
-            <span title="Pour vous rappeler sous 24h. Jamais partagé avec des tiers." className="text-stone-400">
-              <Lock className="h-3 w-3" />
+        <FieldGroup
+          label={
+            <span className="inline-flex items-center gap-1.5">
+              Téléphone
+              <span title="Pour vous rappeler sous 24h. Jamais partagé avec des tiers." className="text-stone-400">
+                <Lock className="h-3 w-3" />
+              </span>
             </span>
-          </span>
-        }
-        required
-        hint="Pour vous rappeler sous 24h. Jamais partagé avec des tiers."
-        error={errors.phone}
-      >
-        <Input
-          type="tel"
-          placeholder="06 12 34 56 78"
-          value={draft.phone ?? ''}
-          onChange={e => setField('phone', e.target.value)}
-          className="h-11"
-          autoComplete="tel"
-        />
-      </FieldGroup>
+          }
+          required
+          error={errors.phone}
+        >
+          <Input
+            type="tel"
+            inputMode="numeric"
+            pattern="\\+?[0-9]*"
+            placeholder="06 12 34 56 78"
+            value={draft.phone ?? ''}
+            onChange={e => {
+              const raw = e.target.value;
+              const digits = raw.replace(/\D/g, '');
+              setField('phone', `${raw.trim().startsWith('+') ? '+' : ''}${digits}`);
+            }}
+            className="h-11 bg-white"
+            autoComplete="tel"
+          />
+        </FieldGroup>
 
-      <FieldGroup label="Nom de l'entreprise" required error={errors.company_name}>
-        <Input
-          placeholder="Nom de votre entreprise"
-          value={draft.company_name ?? ''}
-          onChange={e => setField('company_name', e.target.value)}
-          className="h-11"
-          autoComplete="organization"
-        />
-      </FieldGroup>
+        <FieldGroup label="Nom de l'entreprise" required error={errors.company_name}>
+          <Input
+            placeholder="Nom de votre entreprise"
+            value={draft.company_name ?? ''}
+            onChange={e => setField('company_name', e.target.value)}
+            className="h-11 bg-white"
+            autoComplete="organization"
+          />
+        </FieldGroup>
+      </section>
 
       <FieldGroup label="Votre secteur d'activité" required error={errors.business_sector}>
         <div className="grid gap-2.5 sm:grid-cols-2">
@@ -94,14 +101,14 @@ export function Step1Identity({ draft, setField, errors }: Step1Props) {
         <FieldGroup
           label="Précisez votre secteur"
           required
-          hint="Décrivez en quelques mots votre activité."
+          hint="Indiquez votre secteur d’activité en quelques mots."
           error={errors.business_sector_custom}
         >
           <Input
-            placeholder="Ex. coaching sportif, conseil RH, photographie événementielle…"
+            placeholder="Par exemple : formation, industrie, association"
             value={draft.business_sector_custom ?? ''}
             onChange={e => setField('business_sector_custom', e.target.value)}
-            className="h-11"
+            className="h-11 bg-white"
             maxLength={160}
           />
         </FieldGroup>

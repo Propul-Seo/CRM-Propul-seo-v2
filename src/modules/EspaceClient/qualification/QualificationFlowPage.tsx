@@ -28,6 +28,10 @@ export function QualificationFlowPage() {
   const flow = useMemo(() => getStepFlow(draft.project_type), [draft.project_type]);
   const totalSteps = flow.length;
   const currentDef = flow[Math.min(currentStep, totalSteps - 1)];
+  const completedSteps = useMemo(
+    () => flow.reduce((count, step) => count + (step.schema.safeParse(draft).success ? 1 : 0), 0),
+    [draft, flow],
+  );
 
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [currentStep]);
 
@@ -107,34 +111,21 @@ export function QualificationFlowPage() {
 
   return (
     <div
-      className="propulspace-portal relative min-h-screen"
-      style={{
-        background: 'linear-gradient(135deg, #f0f9ff 0%, #faf5ff 50%, #fff7ed 100%)',
-        backgroundAttachment: 'fixed',
-      }}
+      className="propulspace-portal ps-qualification-page relative min-h-screen"
     >
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -left-[10%] top-[5%] h-[500px] w-[700px] -rotate-12 rounded-full opacity-40 blur-3xl"
-          style={{ background: 'radial-gradient(ellipse, #7dd3fc 0%, transparent 60%)' }} />
-        <div className="absolute right-[5%] top-[20%] h-[500px] w-[600px] rotate-12 rounded-full opacity-35 blur-3xl"
-          style={{ background: 'radial-gradient(ellipse, #c4b5fd 0%, transparent 60%)' }} />
-        <div className="absolute left-[30%] bottom-[0%] h-[400px] w-[600px] rounded-full opacity-40 blur-3xl"
-          style={{ background: 'radial-gradient(ellipse, #fed7aa 0%, transparent 60%)' }} />
-      </div>
-
-      <header className="sticky top-0 z-10 border-b border-white/40 bg-white/60 backdrop-blur-md">
+      <header className="sticky top-0 z-20 border-b border-white/55 bg-white/72 shadow-[0_10px_40px_-34px_rgba(24,24,27,0.45)] backdrop-blur-xl">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-4 md:px-6">
-          <div className="inline-flex h-8 items-center gap-1.5 rounded-full bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 px-3 text-[11px] font-bold text-white shadow-sm">
+          <div className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 px-4 text-[11px] font-bold text-white shadow-lg shadow-violet-500/20">
             ✨ Propul'SEO
           </div>
           <SaveIndicator saving={saving} savedJustNow={savedJustNow} currentStep={currentStep + 1} totalSteps={totalSteps} />
         </div>
         <div className="mx-auto max-w-3xl px-4 pb-4 md:px-6">
-          <ProgressBar currentStep={currentStep + 1} totalSteps={totalSteps} />
+          <ProgressBar currentStep={currentStep + 1} completedSteps={completedSteps} totalSteps={totalSteps} />
         </div>
       </header>
 
-      <main className="relative mx-auto max-w-3xl px-4 py-8 pb-32 md:px-6 md:py-10 md:pb-32">
+      <main className="relative mx-auto w-full max-w-3xl px-4 py-8 pb-32 md:px-6 md:py-10 md:pb-36">
         {errors._global && (
           <div role="alert"
             className="mb-5 rounded-xl border border-red-200 bg-red-50/90 px-4 py-3 text-[13px] text-red-800 shadow-sm backdrop-blur-sm">
@@ -152,21 +143,21 @@ export function QualificationFlowPage() {
         </label>
       </main>
 
-      <footer className="sticky bottom-0 z-10 border-t border-white/40 bg-white/70 backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3 md:px-6">
+      <footer className="sticky bottom-0 z-20 border-t border-white/60 bg-white/78 shadow-[0_-18px_44px_-34px_rgba(24,24,27,0.55)] backdrop-blur-xl">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-4 md:px-6">
           <Button variant="outline" onClick={goPrev} disabled={currentStep === 0 || submitting}
-            className="h-11 border-stone-300 bg-white text-stone-700 hover:bg-stone-50">
+            className="h-11 rounded-full border-white/80 bg-white/90 px-5 text-stone-700 shadow-sm hover:bg-white">
             <ArrowLeft className="mr-1.5 h-4 w-4" />Précédent
           </Button>
 
           {!isLastStep ? (
             <Button onClick={goNext}
-              className="h-11 gap-1.5 rounded-full bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 px-6 font-semibold text-white shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50">
+              className="h-12 gap-1.5 rounded-full bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 px-8 font-semibold text-white shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50">
               Suivant<ArrowRight className="ml-0.5 h-4 w-4" />
             </Button>
           ) : (
             <Button onClick={handleSubmit} disabled={submitting}
-              className="h-11 gap-1.5 rounded-full bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 px-6 font-semibold text-white shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 disabled:opacity-60">
+              className="h-12 gap-1.5 rounded-full bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 px-8 font-semibold text-white shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 disabled:opacity-60">
               {submitting
                 ? <><Loader2 className="mr-1.5 h-4 w-4 animate-spin" />Envoi…</>
                 : <><Send className="mr-1.5 h-4 w-4" />Envoyer mon diagnostic</>}

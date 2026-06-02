@@ -17,7 +17,7 @@ interface Step5Props {
 
 export function Step5Brand({ draft, leadId, setField, errors }: Step5Props) {
   return (
-    <StepShell title="Votre identité visuelle" subtitle="Logo, charte, ou point de départ vierge ?">
+    <StepShell title="Votre identité visuelle" subtitle="Indiquez les éléments graphiques déjà disponibles pour le projet.">
       <FieldGroup label="Où en êtes-vous ?" required error={errors.has_visual_identity}>
         <div className="grid gap-2.5 md:grid-cols-3">
           {BRAND_STATUS.map(o => (
@@ -35,8 +35,8 @@ export function Step5Brand({ draft, leadId, setField, errors }: Step5Props) {
       </FieldGroup>
 
       <ConditionalBranch show={conditionalRules.showLogoUpload(draft)}>
-        <div className="space-y-5 border-l-2 border-violet-200 pl-4">
-          <FieldGroup label="Logo" required error={errors.logo_file_url}>
+        <div className="ps-branch-panel space-y-5 p-4 md:p-5">
+          <FieldGroup label="Logo (optionnel)" error={errors.logo_file_url}>
             <FileUploadZone
               kind="logo"
               leadId={leadId}
@@ -45,15 +45,14 @@ export function Step5Brand({ draft, leadId, setField, errors }: Step5Props) {
               maxFiles={FILE_UPLOAD_LIMITS.logo.maxFiles}
               maxSizeMb={FILE_UPLOAD_LIMITS.logo.maxSizeMb}
               accept={FILE_UPLOAD_LIMITS.logo.accept}
-              hint="SVG, PNG, JPG ou AI · max 10 MB"
+              hint="SVG, PNG, JPG ou AI. Taille maximale : 10 MB"
             />
           </FieldGroup>
 
           <ConditionalBranch show={conditionalRules.showBrandGuideUpload(draft)}>
             <FieldGroup
-              label="Charte graphique"
-              required
-              hint="PDF, image, ou archive ZIP · max 25 MB. Sinon, collez un lien ci-dessous."
+              label="Charte graphique (optionnel)"
+              hint="PDF, image ou archive ZIP. Taille maximale : 25 MB. Vous pouvez aussi fournir un lien externe plus tard."
               error={errors.brand_guide_url}
             >
               <FileUploadZone
@@ -83,7 +82,7 @@ export function Step5Brand({ draft, leadId, setField, errors }: Step5Props) {
                 placeholder="https://wetransfer.com/downloads/..."
                 value={draft.brand_guide_external_link ?? ''}
                 onChange={e => setField('brand_guide_external_link', e.target.value)}
-                className="h-11"
+                className="h-11 bg-white"
               />
             </FieldGroup>
           </ConditionalBranch>

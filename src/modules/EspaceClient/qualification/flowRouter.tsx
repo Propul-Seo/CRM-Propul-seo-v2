@@ -43,7 +43,7 @@ const STEP_DEFS = {
   step1: { key: 'identity', schema: step1Schema, render: (p: BaseStepProps) =>
     <Step1Identity draft={p.draft} setField={p.setField} errors={p.errors} /> },
   step2: { key: 'situation', schema: step2Schema, render: (p: BaseStepProps) =>
-    <Step2Situation draft={p.draft} leadId={p.leadId} setField={p.setField} errors={p.errors} /> },
+    <Step2Situation draft={p.draft} setField={p.setField} errors={p.errors} /> },
   step3: { key: 'objectives', schema: step3Schema, render: (p: BaseStepProps) =>
     <Step3Objectives draft={p.draft} setField={p.setField} errors={p.errors} /> },
   step4: { key: 'features', schema: step4Schema, render: (p: BaseStepProps) =>

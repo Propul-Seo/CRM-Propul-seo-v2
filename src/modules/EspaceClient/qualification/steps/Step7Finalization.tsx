@@ -19,7 +19,7 @@ export function Step7Finalization({ draft, setField, errors }: Step7Props) {
   const revealed = useProgressiveReveal([decisionFilled, contactFilled]);
 
   return (
-    <StepShell title="Pour finaliser" subtitle="Dernière ligne droite. Vérifiez votre récap ci-dessous.">
+    <StepShell title="Finalisation" subtitle="Vérifiez les informations principales avant l’envoi du diagnostic.">
       <FieldGroup label="Qui prend la décision ?" required error={errors.is_decision_maker}>
         <div className="grid gap-2.5 sm:grid-cols-3">
           {DECISION_MAKERS.map(o => (
@@ -53,7 +53,7 @@ export function Step7Finalization({ draft, setField, errors }: Step7Props) {
       </ConditionalBranch>
 
       <ConditionalBranch show={revealed >= 3}>
-        <div>
+        <div className="ps-question-panel p-4 md:p-5">
           <p className="mb-2 text-[11.5px] font-semibold uppercase tracking-wider text-stone-500">Récapitulatif</p>
           <RecapAccordion draft={draft} />
         </div>

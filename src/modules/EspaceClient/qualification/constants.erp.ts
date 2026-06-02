@@ -8,13 +8,13 @@ export const ERP_CURRENT_SYSTEMS = [
   { value: 'pennylane',  label: 'Pennylane',             hint: 'Comptabilité en ligne' },
   { value: 'notion',     label: 'Notion',                hint: 'Workspace collaboratif' },
   { value: 'papier',     label: 'Papier / classeurs',    hint: 'Tout en physique' },
-  { value: 'aucun',      label: 'Rien pour l\'instant',  hint: 'On part de zéro' },
+  { value: 'aucun',      label: 'Aucun outil actuellement', hint: 'Création d’une base de travail structurée' },
   { value: 'autre',      label: 'Autre',                 hint: 'Précisez' },
 ] as const;
 
 export const ERP_DATA_VOLUMES = [
-  { value: '<1000',        label: '< 1 000 lignes',        hint: 'Petite base à migrer' },
-  { value: '1000_10000',   label: '1 000 – 10 000 lignes', hint: 'Volume intermédiaire' },
+  { value: '<1000',        label: 'Moins de 1 000 lignes', hint: 'Petite base à migrer' },
+  { value: '1000_10000',   label: '1 000 à 10 000 lignes', hint: 'Volume intermédiaire' },
   { value: '>10000',       label: '> 10 000 lignes',       hint: 'Grosse migration' },
   { value: 'je_sais_pas',  label: 'Je ne sais pas',        hint: 'À évaluer ensemble' },
 ] as const;
@@ -32,9 +32,9 @@ export const ERP_MODULES = [
 ] as const;
 
 export const ERP_USERS_COUNT = [
-  { value: '<5',     label: '< 5 utilisateurs',     hint: 'Petite équipe' },
-  { value: '5_20',   label: '5 – 20 utilisateurs',  hint: 'PME' },
-  { value: '20_50',  label: '20 – 50 utilisateurs', hint: 'Équipe moyenne' },
+  { value: '<5',     label: 'Moins de 5 utilisateurs', hint: 'Petite équipe' },
+  { value: '5_20',   label: '5 à 20 utilisateurs',     hint: 'PME' },
+  { value: '20_50',  label: '20 à 50 utilisateurs',    hint: 'Équipe moyenne' },
   { value: '>50',    label: '> 50 utilisateurs',    hint: 'Grosse structure' },
 ] as const;
 

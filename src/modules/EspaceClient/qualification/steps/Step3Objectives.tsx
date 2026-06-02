@@ -19,7 +19,7 @@ export function Step3Objectives({ draft, setField, errors }: Step3Props) {
   const revealed = useProgressiveReveal([goalFilled, audienceFilled]);
 
   return (
-    <StepShell title="Vos objectifs" subtitle="Pour cibler la proposition sur ce qui compte vraiment.">
+    <StepShell title="Vos objectifs" subtitle="Ces réponses permettent de prioriser les enjeux du projet.">
       <FieldGroup label="Objectif principal" required error={errors.main_goal}>
         <div className="grid gap-2.5 sm:grid-cols-2">
           {MAIN_GOALS.map(o => (
@@ -43,7 +43,7 @@ export function Step3Objectives({ draft, setField, errors }: Step3Props) {
           error={errors.main_goal_other}
         >
           <Textarea
-            placeholder="Ex. fidéliser ma clientèle existante, valoriser mon savoir-faire artisanal…"
+            placeholder="Par exemple : fidéliser une clientèle existante, valoriser un savoir faire, développer les demandes entrantes"
             rows={2}
             value={draft.main_goal_other ?? ''}
             onChange={e => setField('main_goal_other', e.target.value)}
@@ -70,18 +70,21 @@ export function Step3Objectives({ draft, setField, errors }: Step3Props) {
       </ConditionalBranch>
 
       <ConditionalBranch show={revealed >= 3}>
-        <FieldGroup
-          label="2-3 concurrents ou sites que vous aimez · optionnel"
-          hint="Donnez-nous des exemples pour comprendre votre positionnement."
-          error={errors.competitors}
-        >
-          <Textarea
-            placeholder="apple.com, stripe.com, airbnb.com"
-            rows={3}
-            value={draft.competitors ?? ''}
-            onChange={e => setField('competitors', e.target.value)}
-          />
-        </FieldGroup>
+        <div className="ps-question-panel p-4 md:p-5">
+          <FieldGroup
+            label="Concurrents ou références appréciées (optionnel)"
+            hint="Indiquez deux ou trois références utiles pour comprendre votre positionnement."
+            error={errors.competitors}
+          >
+            <Textarea
+              placeholder="apple.com, stripe.com, airbnb.com"
+              rows={3}
+              value={draft.competitors ?? ''}
+              onChange={e => setField('competitors', e.target.value)}
+              className="bg-white"
+            />
+          </FieldGroup>
+        </div>
       </ConditionalBranch>
     </StepShell>
   );

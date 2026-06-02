@@ -1,4 +1,3 @@
-import { Globe, Layers, Settings2 } from 'lucide-react';
 import { RadioCard } from '../components/RadioCard';
 import { PROJECT_TYPES } from '../constants';
 import type { QualificationDraft } from '../schema';
@@ -21,15 +20,15 @@ export function Step0ProjectType({ draft, setField, errors }: Step0Props) {
   return (
     <StepShell
       title="Quel est votre besoin ?"
-      subtitle="On adapte les questions suivantes selon votre projet."
+      subtitle="Les questions suivantes s’adaptent à la nature de votre projet."
     >
       <FieldGroup
         label="Type de projet"
         required
-        hint="Site web vitrine, outil métier interne (ERP), ou les deux à la fois."
+        hint="Site web, outil métier interne ou besoin combiné."
         error={errors.project_type}
       >
-        <div className="grid gap-2.5">
+        <div className="grid gap-3 md:grid-cols-3">
           {PROJECT_TYPES.map(opt => (
             <RadioCard
               key={opt.value}

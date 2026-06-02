@@ -22,12 +22,12 @@ export function StepErp3Users({ draft, setField, errors }: Props) {
   return (
     <StepShell
       title="Utilisateurs et accès"
-      subtitle="Qui va utiliser l'outil et comment ils s'y connectent."
+      subtitle="Précisez les profils utilisateurs et les modalités d’accès attendues."
     >
       <FieldGroup
         label="Nombre d'utilisateurs internes"
         required
-        hint="Combien de personnes vont utiliser l'outil au quotidien."
+        hint="Nombre de personnes amenées à utiliser l’outil au quotidien."
         error={errors.erp_users_count}
       >
         <div className="grid gap-2.5 sm:grid-cols-2">
@@ -69,7 +69,7 @@ export function StepErp3Users({ draft, setField, errors }: Props) {
       <FieldGroup
         label="Mode de connexion préféré"
         required
-        hint="Comment les utilisateurs se connectent."
+        hint="Méthode d’authentification souhaitée pour les utilisateurs."
         error={errors.erp_sso_type}
       >
         <div className="grid gap-2.5 sm:grid-cols-2">
