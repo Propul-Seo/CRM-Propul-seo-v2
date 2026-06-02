@@ -3,10 +3,10 @@ import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-
 import { useAuth } from '../../hooks/useAuth';
 import { useUsers } from '../../hooks/useUsers';
 import { useIsMobile } from '../../hooks/useMediaQuery';
-import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from '../mobile/BottomNav';
 import { MobileNavFAB } from '../mobile/MobileNavFAB';
+import { ToastNotifications } from '../notifications/ToastNotifications';
 import { Lock, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { routes, getPermissionForPath, isAdminOnlyPath } from '../../lib/routes';
@@ -168,7 +168,7 @@ export function Layout() {
         "flex-1 flex flex-col min-w-0 transition-all duration-300",
         isMobile && "h-full"
       )}>
-        {!isMobile && <Header />}
+        <ToastNotifications />
 
         <main
           className={cn(

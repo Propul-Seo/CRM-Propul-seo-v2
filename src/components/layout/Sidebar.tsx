@@ -8,6 +8,7 @@ import {
   PanelLeft,
   ChevronRight,
   Shield,
+  LogOut,
   UserCheck,
   LayoutDashboard,
   BookOpen,
@@ -18,6 +19,15 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useUsers, type User } from '@/hooks/useUsers';
 import { routes } from '@/lib/routes';
+import { supabase } from '@/lib/supabase';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface NavItem {
   to: string;
@@ -70,6 +80,17 @@ export function Sidebar() {
     if (next.has(section)) next.delete(section);
     else next.add(section);
     setExpandedSections(next);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Erreur lors de la deconnexion:', error);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la deconnexion:', error);
+    }
   };
 
   const v3Section: NavSection = {
@@ -228,34 +249,67 @@ export function Sidebar() {
         "border-t border-border/40 flex-shrink-0",
         isCollapsed ? "p-2" : "px-3 py-3"
       )}>
-        {!isCollapsed ? (
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
-              <span className="text-xs font-semibold text-primary">{userInitial}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate leading-tight">{userName}</p>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] text-muted-foreground">{roleLabel}</span>
-                {isAdmin && (
-                  <Shield className="h-3 w-3 text-amber-500" />
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex justify-center">
-            <div className="relative group">
-              <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            {!isCollapsed ? (
+              <button
+                type="button"
+                className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-surface-2 focus:outline-none focus:ring-2 focus:ring-primary/35"
+                aria-label="Ouvrir le menu utilisateur"
+              >
+                <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0 ring-1 ring-primary/20">
+                  <span className="text-xs font-semibold text-primary">{userInitial}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate leading-tight">{userName}</p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] text-muted-foreground">{roleLabel}</span>
+                    {isAdmin && (
+                      <Shield className="h-3 w-3 text-amber-500" />
+                    )}
+                  </div>
+                </div>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/20 transition-colors hover:bg-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/35"
+                aria-label="Ouvrir le menu utilisateur"
+              >
                 <span className="text-xs font-semibold text-primary">{userInitial}</span>
+              </button>
+            )}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            side="right"
+            align="end"
+            sideOffset={10}
+            className="w-60 border-border/60 bg-surface-2 text-foreground shadow-xl shadow-black/30"
+          >
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-full bg-primary/15 flex items-center justify-center ring-1 ring-primary/20">
+                  <span className="text-xs font-semibold text-primary">{userInitial}</span>
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-foreground">{userName}</p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-muted-foreground">{roleLabel}</span>
+                    {isAdmin && <Shield className="h-3 w-3 text-amber-500" />}
+                  </div>
+                </div>
               </div>
-              <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-surface-3 text-foreground text-xs px-2.5 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50 whitespace-nowrap shadow-md border border-border/50">
-                <div className="font-medium">{userName}</div>
-                <div className="text-muted-foreground">{roleLabel}</div>
-              </div>
-            </div>
-          </div>
-        )}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-border/70" />
+            <DropdownMenuItem
+              onClick={handleSignOut}
+              className="cursor-pointer text-muted-foreground focus:bg-surface-3 focus:text-foreground"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Deconnexion</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
