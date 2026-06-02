@@ -94,13 +94,12 @@ export function DashboardV3() {
             onClick={data.handleNavigateToProjects}
           />
           <PipelineBoardSection
-            leads={data.leads}
+            crmOfferLeads={data.crmOfferLeads}
             projects={data.projects}
-            leadsCount={data.leadsCount}
-            activeProjectsCount={data.activeProjectsCount}
             isPrivacyMode={isPrivacyMode}
             isMobile={isMobile}
             onNavigateToCRM={data.handleNavigateToCRM}
+            onNavigateToLead={data.handleNavigateToLead}
             onNavigateToProjects={data.handleNavigateToProjects}
             onNavigateToProject={data.handleNavigateToProject}
           />

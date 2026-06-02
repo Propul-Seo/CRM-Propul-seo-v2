@@ -4,11 +4,13 @@ import { useStore } from '@/store/useStore';
 import { routes } from '@/lib/routes';
 import {
   useSupabaseContacts,
-  useSupabaseProjects,
   useSupabaseTasks,
   useSupabaseAccountingEntries,
   useSupabaseLeads,
 } from '@/hooks/useSupabaseData';
+import { useProjectsV3 } from '@/modules/ProjectsV3/hooks/useProjectsV3';
+import { useLeadsV3SiteWeb } from '@/modules/LeadsV3/hooks/useLeadsV3SiteWeb';
+import { statusToColumn } from '@/modules/ProjectsV3/utils/statusMapping';
 
 interface AccountingEntryShape {
   month_key?: string;
@@ -32,10 +34,12 @@ export function useDashboardData() {
   }, []);
 
   const { count: contactsCount } = useSupabaseContacts();
-  const { data: projects, count: projectsCount } = useSupabaseProjects();
+  const { projects } = useProjectsV3();
+  const siteWebCrm = useLeadsV3SiteWeb();
   const { data: tasks } = useSupabaseTasks();
   const { data: accountingEntries, loading: accountingLoading } = useSupabaseAccountingEntries();
   const { data: leads, count: leadsCount } = useSupabaseLeads();
+  const projectsCount = projects.length;
 
   const currentYear = new Date().getFullYear();
   let currentYearRevenue = 0;
@@ -52,12 +56,8 @@ export function useDashboardData() {
     currentYearRevenue = 0;
   }
 
-  const activeProjectsCount = projects?.filter(p =>
-    p.status === 'active' ||
-    p.status === 'in_progress' ||
-    p.status === 'ongoing' ||
-    p.status === 'started'
-  )?.length || 0;
+  const activeProjectsCount = projects.filter(p => statusToColumn(p.status) !== 'en_pause').length;
+  const crmOfferLeads = siteWebCrm.leads.filter(lead => lead.normalized_status === 'offre_envoyee');
 
   const urgentTasks = (tasks as unknown as TaskShape[] | undefined)?.filter(
     t => t.priority === 'urgent' && t.status !== 'completed'
@@ -84,6 +84,7 @@ export function useDashboardData() {
 
   const handleNavigateToAccounting = () => navigate(routes.accounting);
   const handleNavigateToCRM = () => navigate(routes.leadsV3);
+  const handleNavigateToLead = (id: string) => navigate(routes.clientDetail(id));
   const handleNavigateToProjects = () => navigate(routes.projectsV3);
   const handleNavigateToTasks = () => navigate(routes.personalTasks);
   const handleNavigateToProject = (id: string) => navigate(routes.projectV3Preview(id));
@@ -99,6 +100,7 @@ export function useDashboardData() {
     mounted,
     projects,
     leads,
+    crmOfferLeads,
     currentYear,
     currentYearRevenue,
     contactsCount,
@@ -113,6 +115,7 @@ export function useDashboardData() {
     formattedDate,
     handleNavigateToAccounting,
     handleNavigateToCRM,
+    handleNavigateToLead,
     handleNavigateToProjects,
     handleNavigateToTasks,
     handleNavigateToProject,

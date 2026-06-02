@@ -1,15 +1,18 @@
 import { motion } from 'framer-motion';
-import { BriefcaseBusiness, FileText, PackageCheck, Sparkles, UsersRound } from 'lucide-react';
+import { Clock, Pause, Play, Sparkles, UsersRound, type LucideIcon } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { itemVariants } from '../lib/animations';
-import type { LeadRow, ProjectRow } from '../../../types/supabase-types';
+import { statusToColumn, V3_COLUMN_LABELS, V3_COLUMN_ORDER, type V3Column } from '../../ProjectsV3/utils/statusMapping';
+import type { ProjectV2 } from '../../../types/project-v2';
+import type { SiteWebLead } from '../../LeadsV3/hooks/useLeadsV3SiteWeb';
 
 type PipelineItem =
   | {
       id: string;
       title: string;
       meta: string;
-      value?: number | null;
+      activityAt: string | null | undefined;
+      activityLabel: string;
       kind: 'lead';
     }
   | {
@@ -21,152 +24,153 @@ type PipelineItem =
     };
 
 interface PipelineBoardSectionProps {
-  leads: LeadRow[] | null | undefined;
-  projects: ProjectRow[] | null | undefined;
-  leadsCount: number | undefined;
-  activeProjectsCount: number;
+  crmOfferLeads: SiteWebLead[] | null | undefined;
+  projects: ProjectV2[] | null | undefined;
   isPrivacyMode: boolean;
   isMobile: boolean;
   onNavigateToCRM: () => void;
+  onNavigateToLead: (id: string) => void;
   onNavigateToProjects: () => void;
   onNavigateToProject: (id: string) => void;
 }
 
-const LEAD_QUOTE_STAGES = ['devis', 'proposal', 'quote', 'negotiation', 'negociation', 'qualified'];
-const CLOSED_LEAD_STAGES = ['won', 'lost', 'perdu', 'signe', 'signed'];
-const PRODUCTION_PROJECT_STATUSES = ['active', 'in_progress', 'ongoing', 'started', 'planning'];
-const DELIVERY_PROJECT_STATUSES = ['review', 'delivery', 'to_deliver', 'ready', 'completed'];
+const PROJECT_COLUMN_ICONS: Record<V3Column, LucideIcon> = {
+  planification: Clock,
+  en_cours: Play,
+  en_pause: Pause,
+  propulseo: Sparkles,
+};
 
-function normalise(value: string | null | undefined) {
-  return (value ?? '').toLowerCase().trim();
-}
+const PROJECT_COLUMN_STYLES: Record<V3Column, { accent: string; border: string; glow: string }> = {
+  planification: {
+    accent: 'text-violet-200',
+    border: 'border-violet-400/20',
+    glow: 'from-violet-400/12',
+  },
+  en_cours: {
+    accent: 'text-emerald-300',
+    border: 'border-emerald-400/20',
+    glow: 'from-emerald-400/10',
+  },
+  en_pause: {
+    accent: 'text-amber-300',
+    border: 'border-amber-400/20',
+    glow: 'from-amber-400/10',
+  },
+  propulseo: {
+    accent: 'text-pink-300',
+    border: 'border-pink-400/20',
+    glow: 'from-pink-400/10',
+  },
+};
 
-function formatPotential(value: number | null | undefined) {
-  if (!value) return 'potentiel a definir';
-  return `${value.toLocaleString('fr-FR')} EUR`;
-}
-
-function leadStage(lead: LeadRow) {
-  return normalise(lead.pipeline_stage || lead.status);
-}
-
-function projectStage(project: ProjectRow) {
-  return normalise(project.status);
-}
-
-function toLeadItem(lead: LeadRow): PipelineItem {
+function toLeadItem(lead: SiteWebLead): PipelineItem {
   return {
     id: lead.id,
-    title: lead.company_name || lead.contact_name || 'Lead sans nom',
-    meta: lead.contact_name || lead.source || 'Lead CRM',
-    value: lead.value,
+    title: lead.company || lead.name || 'Lead sans nom',
+    meta: lead.name || lead.source || 'CRM',
+    activityAt: getLeadActivityDate(lead),
+    activityLabel: getLeadActivityLabel(lead),
     kind: 'lead',
   };
 }
 
-function toProjectItem(project: ProjectRow): PipelineItem {
+function toProjectItem(project: ProjectV2): PipelineItem {
   return {
     id: project.id,
     title: project.name,
-    meta: project.status || 'Projet',
+    meta: project.client_name || V3_COLUMN_LABELS[statusToColumn(project.status)],
     progress: project.progress,
     kind: 'project',
   };
 }
 
-function isQuoteLead(lead: LeadRow) {
-  const stage = leadStage(lead);
-  return LEAD_QUOTE_STAGES.some(item => stage.includes(item));
+function getLeadActivityDate(lead: SiteWebLead) {
+  return lead.last_activity_at ?? lead.next_activity_date ?? lead.updated_at ?? lead.created_at;
 }
 
-function isOpenLead(lead: LeadRow) {
-  const stage = leadStage(lead);
-  return !isQuoteLead(lead) && !CLOSED_LEAD_STAGES.some(item => stage.includes(item));
+function getLeadActivityLabel(lead: SiteWebLead) {
+  if (lead.last_activity_type === 'follow_up') return 'Dernière relance';
+  if (lead.last_activity_at) return 'Dernière activité';
+  if (lead.next_activity_date) return 'Relance prévue';
+  return 'Mis à jour';
 }
 
-function isDeliveryProject(project: ProjectRow) {
-  const stage = projectStage(project);
-  return (
-    DELIVERY_PROJECT_STATUSES.some(item => stage.includes(item)) ||
-    ((project.progress ?? 0) >= 80 && !stage.includes('archived'))
-  );
+function getLeadActivityTimestamp(lead: SiteWebLead) {
+  const timestamp = new Date(getLeadActivityDate(lead) ?? 0).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
 }
 
-function isProductionProject(project: ProjectRow) {
-  const stage = projectStage(project);
-  return (
-    !isDeliveryProject(project) &&
-    PRODUCTION_PROJECT_STATUSES.some(item => stage.includes(item))
-  );
+function formatActivityDate(value: string | null | undefined) {
+  if (!value) return 'date inconnue';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'date inconnue';
+
+  return date.toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 export function PipelineBoardSection({
-  leads,
+  crmOfferLeads,
   projects,
-  leadsCount,
-  activeProjectsCount,
   isPrivacyMode,
   isMobile,
   onNavigateToCRM,
+  onNavigateToLead,
   onNavigateToProjects,
   onNavigateToProject,
 }: PipelineBoardSectionProps) {
-  const leadRows = leads ?? [];
+  const leadRows = crmOfferLeads ?? [];
   const projectRows = projects ?? [];
 
-  const openLeads = leadRows.filter(isOpenLead);
-  const quoteLeads = leadRows.filter(isQuoteLead);
-  const productionProjects = projectRows.filter(isProductionProject);
-  const deliveryProjects = projectRows.filter(isDeliveryProject);
+  const latestOfferLeads = [...leadRows].sort((a, b) => getLeadActivityTimestamp(b) - getLeadActivityTimestamp(a));
+  const projectsByColumn = V3_COLUMN_ORDER.reduce<Record<V3Column, ProjectV2[]>>((acc, column) => {
+    acc[column] = [];
+    return acc;
+  }, {} as Record<V3Column, ProjectV2[]>);
+
+  projectRows.forEach(project => {
+    projectsByColumn[statusToColumn(project.status)].push(project);
+  });
 
   const columns = [
     {
-      title: 'Leads',
-      count: openLeads.length || leadsCount || 0,
+      title: 'CRM',
+      subtitle: 'Offres envoyées',
+      count: latestOfferLeads.length,
       icon: UsersRound,
       accent: 'text-cyan-300',
       border: 'border-cyan-400/20',
       glow: 'from-cyan-400/10',
-      items: openLeads.slice(0, 3).map(toLeadItem),
+      items: latestOfferLeads.slice(0, 3).map(toLeadItem),
       onClick: onNavigateToCRM,
     },
-    {
-      title: 'Devis',
-      count: quoteLeads.length,
-      icon: FileText,
-      accent: 'text-violet-200',
-      border: 'border-violet-400/20',
-      glow: 'from-violet-400/12',
-      items: quoteLeads.slice(0, 3).map(toLeadItem),
-      onClick: onNavigateToCRM,
-    },
-    {
-      title: 'Production',
-      count: productionProjects.length || activeProjectsCount,
-      icon: BriefcaseBusiness,
-      accent: 'text-emerald-300',
-      border: 'border-emerald-400/20',
-      glow: 'from-emerald-400/10',
-      items: productionProjects.slice(0, 3).map(toProjectItem),
-      onClick: onNavigateToProjects,
-    },
-    {
-      title: 'A livrer',
-      count: deliveryProjects.length,
-      icon: PackageCheck,
-      accent: 'text-amber-300',
-      border: 'border-amber-400/20',
-      glow: 'from-amber-400/10',
-      items: deliveryProjects.slice(0, 3).map(toProjectItem),
-      onClick: onNavigateToProjects,
-    },
+    ...V3_COLUMN_ORDER.map((column) => {
+      const style = PROJECT_COLUMN_STYLES[column];
+      const items = projectsByColumn[column];
+
+      return {
+        title: V3_COLUMN_LABELS[column],
+        subtitle: 'Projets actifs',
+        count: items.length,
+        icon: PROJECT_COLUMN_ICONS[column],
+        accent: style.accent,
+        border: style.border,
+        glow: style.glow,
+        items: items.slice(0, 3).map(toProjectItem),
+        onClick: onNavigateToProjects,
+      };
+    }),
   ];
 
   return (
     <motion.section variants={itemVariants} className="col-span-2 lg:col-span-12">
       <div className="rounded-2xl border border-white/[0.08] bg-[linear-gradient(180deg,rgba(17,14,26,0.78),rgba(7,7,13,0.86))] p-3 shadow-[0_18px_60px_rgba(0,0,0,0.22)] backdrop-blur-xl sm:p-4">
-        <div className={cn('grid gap-3', isMobile ? 'grid-cols-1' : 'md:grid-cols-2 xl:grid-cols-4')}>
-          {columns.map(({ title, count, icon: Icon, accent, border, glow, items, onClick }) => (
+        <div className={cn('grid gap-3', isMobile ? 'grid-cols-1' : 'md:grid-cols-2 xl:grid-cols-5')}>
+          {columns.map(({ title, subtitle, count, icon: Icon, accent, border, glow, items, onClick }) => (
             <article
               key={title}
               className={cn(
@@ -183,7 +187,7 @@ export function PipelineBoardSection({
                   </span>
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-semibold text-white">{title}</span>
-                    <span className="block text-xs text-violet-100/45">Vue rapide</span>
+                    <span className="block text-xs text-violet-100/45">{subtitle}</span>
                   </span>
                 </button>
                 <span className="rounded-full border border-white/[0.08] bg-black/20 px-2 py-1 text-xs font-bold tabular-nums text-violet-100/70">
@@ -197,7 +201,7 @@ export function PipelineBoardSection({
                     <button
                       key={item.id}
                       type="button"
-                      onClick={() => (item.kind === 'project' ? onNavigateToProject(item.id) : onNavigateToCRM())}
+                      onClick={() => (item.kind === 'project' ? onNavigateToProject(item.id) : onNavigateToLead(item.id))}
                       className="group flex w-full items-center justify-between gap-3 rounded-lg border border-white/[0.07] bg-white/[0.035] px-3 py-2 text-left transition hover:border-white/[0.14] hover:bg-white/[0.06]"
                     >
                       <span className="min-w-0">
@@ -208,7 +212,7 @@ export function PipelineBoardSection({
                           {isPrivacyMode
                             ? 'donnees masquees'
                             : item.kind === 'lead'
-                              ? formatPotential(item.value)
+                              ? `${item.activityLabel} · ${formatActivityDate(item.activityAt)}`
                               : `${item.progress ?? 0}% · ${item.meta}`}
                         </span>
                       </span>
