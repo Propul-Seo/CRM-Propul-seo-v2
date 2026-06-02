@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { User, Plus, Pencil, Receipt } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { ProjectV2, ProjectStatusV2, ProjectContactRole } from '@/types/project-v2'
+import type { ProjectV2, ProjectStatusV2 } from '@/types/project-v2'
 import {
   PROJECT_STATUS_ORDER,
   PROJECT_STATUS_LABELS,
@@ -17,6 +16,7 @@ import { PortalStatusSection } from '@/modules/EspaceClient/admin/components/Por
 import { usePropulspaceAdmin } from '@/modules/EspaceClient/admin/hooks/usePropulspaceAdmin'
 import { InvoiceActions } from '@/components/propulspace/InvoiceActions'
 import { supabase } from '@/lib/supabase'
+import { ProjectAssigneeButtons } from '@/modules/ProjectsV3/components/ProjectAssigneeButtons'
 
 interface AdminInvoiceRow {
   id: string
@@ -247,23 +247,15 @@ export function ProjectV3RightSidebar({ project, users, onContactSaved, onAssign
         }
       >
         {showAssignSelect && onAssign ? (
-          <Select
-            value={project.assigned_to ?? '__none__'}
-            onValueChange={async (v) => {
-              await onAssign(v === '__none__' ? null : v)
+          <ProjectAssigneeButtons
+            users={users}
+            value={project.assigned_to ?? ''}
+            onChange={async (id) => {
+              await onAssign(id)
               setShowAssignSelect(false)
             }}
-          >
-            <SelectTrigger className="h-8 text-xs bg-[#0f0b1e] border-[rgba(139,92,246,0.25)]">
-              <SelectValue placeholder="Choisir un responsable" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="__none__">— Non assigné</SelectItem>
-              {users.map((u) => (
-                <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            size="sm"
+          />
         ) : assignee ? (
           <div className="flex items-center gap-2">
             <div className="h-7 w-7 rounded-full bg-[#171030] border border-[rgba(139,92,246,0.2)] flex items-center justify-center shrink-0">

@@ -4,8 +4,10 @@ import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import type { ProjectV2, ProjectStatusV2, PrestaType } from '@/types/project-v2'
+import { getProjectAssigneeLabel } from '@/modules/ProjectsV3/utils/projectAssignees'
+import { ProjectAssigneeButtons } from '@/modules/ProjectsV3/components/ProjectAssigneeButtons'
 
-interface TeamUser { id: string; name: string }
+interface TeamUser { id: string; name: string; email?: string | null }
 
 import { PropulspaceDangerZone } from '@/modules/EspaceClient/admin/components/PropulspaceDangerZone'
 
@@ -89,7 +91,7 @@ export function ProjectEditModalV3({ project, users, onSave, onClose, onDeleted 
         priority:      form.priority as ProjectV2['priority'],
         presta_type:   form.presta_type,
         assigned_to:   form.assigned_to || null,
-        assigned_name: assignedUser?.name ?? null,
+        assigned_name: getProjectAssigneeLabel(assignedUser),
         budget:        form.budget ? parseFloat(form.budget) : null,
         start_date:    form.start_date || null,
         end_date:      form.end_date || null,
@@ -213,16 +215,11 @@ export function ProjectEditModalV3({ project, users, onSave, onClose, onDeleted 
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="Responsable">
-              <select
+              <ProjectAssigneeButtons
+                users={users}
                 value={form.assigned_to}
-                onChange={(e) => setForm({ ...form, assigned_to: e.target.value })}
-                className={inputCls}
-              >
-                <option value="">Non assigné</option>
-                {users.map((u) => (
-                  <option key={u.id} value={u.id}>{u.name}</option>
-                ))}
-              </select>
+                onChange={(assigned_to) => setForm({ ...form, assigned_to })}
+              />
             </Field>
             <Field label="Budget (€)">
               <input

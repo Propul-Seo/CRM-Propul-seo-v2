@@ -12,12 +12,13 @@ import { ProjectV3LeftSidebar } from './components/ProjectV3LeftSidebar'
 import { ProjectV3RightSidebar } from './components/ProjectV3RightSidebar'
 import { ProjectV3Tabs } from './components/ProjectV3Tabs'
 import { ProjectEditModalV3 } from './components/ProjectEditModalV3'
+import { getProjectAssigneeLabel, getProjectAssignees } from '@/modules/ProjectsV3/utils/projectAssignees'
 
 export function ProjectDetailsV3Preview() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { project, loading: loadingProject, error, refetch } = useProjectV3(id ?? '')
-  const { users, activeUsers, loading: loadingUsers } = useUsers()
+  const { activeUsers, loading: loadingUsers } = useUsers()
   const { updateProject } = useProjectUpdateV3()
   // Source de vérité unique pour la progression : hissé ici pour que sidebar et tabs
   // partagent la même instance (un seul SELECT, un seul state, pas de drift possible).
@@ -35,10 +36,10 @@ export function ProjectDetailsV3Preview() {
 
   const handleAssign = async (userId: string | null) => {
     if (!project) return
-    const assignedUser = userId ? users.find((u) => u.id === userId) : null
+    const assignedUser = userId ? projectAssignees.find((u) => u.id === userId) : null
     const res = await updateProject(project.id, {
       assigned_to: userId,
-      assigned_name: assignedUser?.name ?? null,
+      assigned_name: getProjectAssigneeLabel(assignedUser),
     })
     if (res.success) await refetch()
   }
@@ -82,6 +83,7 @@ export function ProjectDetailsV3Preview() {
   }, [])
 
   const teamUsers = activeUsers.map((u) => ({ id: u.id, name: u.name, email: u.email }))
+  const projectAssignees = getProjectAssignees(teamUsers)
 
   if (loading) {
     return (
@@ -167,7 +169,7 @@ export function ProjectDetailsV3Preview() {
           <div className="w-[280px] shrink-0 border-l border-[rgba(139,92,246,0.18)] overflow-hidden bg-[#070512]">
             <ProjectV3RightSidebar
               project={project}
-              users={teamUsers}
+              users={projectAssignees}
               onContactSaved={refetch}
               onAssign={handleAssign}
               onStatusChange={handleStatusChange}
@@ -180,7 +182,7 @@ export function ProjectDetailsV3Preview() {
       {editOpen && (
         <ProjectEditModalV3
           project={project}
-          users={teamUsers}
+          users={projectAssignees}
           onSave={handleSaveProject}
           onClose={() => setEditOpen(false)}
           onDeleted={() => navigate(routes.projectsV3)}
