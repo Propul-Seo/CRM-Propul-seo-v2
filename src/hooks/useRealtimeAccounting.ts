@@ -8,7 +8,8 @@ import type { AccountingEntry, MonthlyMetrics } from './useMonthlyAccounting';
 const START_MONTH = `${new Date().getFullYear()}-01`;
 
 function getMonthKey(date: Date) {
-  return date.toISOString().slice(0, 7);
+  // Clé en heure LOCALE (toISOString décalerait d'un mois pour les fuseaux à l'est d'UTC, ex. Paris)
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
 
 function dedupeTransactions(entries: AccountingEntry[]) {
