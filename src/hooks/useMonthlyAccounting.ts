@@ -34,6 +34,9 @@ export interface AccountingEntry {
   responsible_user_name?: string | null;
   revenue_category?: 'site_internet' | 'erp' | 'communication' | null;
   revenue_sous_categorie?: 'chatbot' | 'cm' | 'newsletter' | 'autre' | null;
+  payment_status?: 'paid' | 'pending' | 'overdue';
+  due_date?: string | null;
+  payment_date?: string | null;
   created_by?: string;
   created_at: string;
   updated_at: string;
