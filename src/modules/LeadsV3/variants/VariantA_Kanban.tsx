@@ -176,14 +176,14 @@ function KanbanColumnView({
         boxShadow: isOver ? `inset 0 0 0 1px ${column.color}33` : 'none',
       }}
     >
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-[rgba(139,92,246,0.18)]">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full" style={{ background: column.color, boxShadow: `0 0 8px ${column.color}` }} />
-          <span className="text-[12px] font-semibold uppercase tracking-[0.06em] text-[#ede9fe]">
+      <div className="mb-4 flex h-[52px] items-start justify-between gap-3 border-b border-[rgba(139,92,246,0.18)] pb-3">
+        <div className="flex min-w-0 items-start gap-2">
+          <span className="mt-[5px] h-2 w-2 shrink-0 rounded-full" style={{ background: column.color, boxShadow: `0 0 8px ${column.color}` }} />
+          <span className="min-w-0 text-[12px] font-semibold uppercase leading-[1.35] tracking-[0.06em] text-[#ede9fe]">
             {column.label}
           </span>
         </div>
-        <span className="text-[11px] font-semibold text-[#9ca3af] bg-[#070512] px-[7px] py-0.5 rounded-[10px] tabular-nums">
+        <span className="shrink-0 rounded-[10px] bg-[#070512] px-[7px] py-0.5 text-[11px] font-semibold tabular-nums text-[#9ca3af]">
           {items.length}
         </span>
       </div>

@@ -13,6 +13,8 @@ const baseCard: LeadCardData = {
   assignee: 'Etienne',
   source: 'Linkedin',
   createdAt: '2026-05-01T10:00:00Z',
+  lastActivityAt: '2026-05-02T10:00:00Z',
+  lastActivityLabel: 'Dernière activité',
   amount: 1500,
 }
 

@@ -1,4 +1,4 @@
-import { Building2, Mail, Phone, User, ArrowUpRight } from 'lucide-react'
+import { Building2, Mail, Phone, User, ArrowUpRight, Clock3 } from 'lucide-react'
 
 export interface LeadCardData {
   id: string
@@ -18,6 +18,10 @@ export interface LeadCardData {
   source: string | null
   /** Date d'entrée du lead dans le pipeline. */
   createdAt: string
+  /** Date affichée comme dernier signal d'activité / relance. */
+  lastActivityAt: string | null
+  /** Libellé associé à la date d'activité affichée. */
+  lastActivityLabel: string
   /** Montant estimé (€) si dispo. */
   amount: number | null
 }
@@ -39,6 +43,7 @@ interface Props {
  */
 export function LeadCardV3({ data, onClick, showStatusBadge = false, onConvert, converting = false }: Props) {
   const title = data.company || data.contact || 'Lead sans nom'
+  const activityDate = data.lastActivityAt ?? data.createdAt
 
   const handleConvertClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -86,16 +91,29 @@ export function LeadCardV3({ data, onClick, showStatusBadge = false, onConvert, 
         )}
 
         {/* Footer meta */}
-        <div className="pt-1.5 mt-1.5 border-t border-[rgba(139,92,246,0.12)] flex items-center justify-between gap-2">
-          <span className="text-[10px] text-[#6b7280] truncate">
-            {data.assignee ?? 'Non assigné'}
-            {data.source ? ` · ${data.source}` : ''}
-          </span>
-          {data.amount !== null && data.amount > 0 && (
-            <span className="text-[11px] font-semibold text-[#10b981] tabular-nums shrink-0">
-              {formatEuro(data.amount)}
+        <div className="pt-1.5 mt-1.5 border-t border-[rgba(139,92,246,0.12)] space-y-2">
+          <div className="rounded-md border border-[rgba(139,92,246,0.16)] bg-[rgba(139,92,246,0.07)] px-2.5 py-1.5">
+            <div className="flex items-center justify-between gap-2 text-[10px]">
+              <span className="flex items-center gap-1.5 min-w-0 text-[#a78bfa]">
+                <Clock3 className="h-3 w-3 shrink-0" />
+                <span className="truncate">{data.lastActivityLabel}</span>
+              </span>
+              <span className="shrink-0 font-semibold text-[#ede9fe] tabular-nums">
+                {formatActivityDate(activityDate)}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[10px] text-[#6b7280] truncate">
+              {data.assignee ?? 'Non assigné'}
+              {data.source ? ` · ${data.source}` : ''}
             </span>
-          )}
+            {data.amount !== null && data.amount > 0 && (
+              <span className="text-[11px] font-semibold text-[#10b981] tabular-nums shrink-0">
+                {formatEuro(data.amount)}
+              </span>
+            )}
+          </div>
         </div>
 
         {onConvert && (
@@ -126,4 +144,17 @@ function Row({ icon, text }: { icon: React.ReactNode; text: string }) {
 
 function formatEuro(amount: number): string {
   return `${amount.toLocaleString('fr-FR')} €`
+}
+
+function formatActivityDate(value: string | null | undefined): string {
+  if (!value) return 'Aucune date'
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return 'Date inconnue'
+
+  return date.toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
 }
