@@ -25,7 +25,6 @@ interface RevenueBreakdownSectionProps {
   onAddTransaction: () => void;
   monthlySummary?: ReactNode;
   currentMonthStats: { revenue: number; expenses: number; result: number; transactionCount: number };
-  onSelectMonth?: (date: Date) => void;
 }
 
 export function RevenueBreakdownSection({
@@ -36,7 +35,6 @@ export function RevenueBreakdownSection({
   onAddTransaction,
   monthlySummary,
   currentMonthStats,
-  onSelectMonth,
 }: RevenueBreakdownSectionProps) {
   const {
     filteredRows,
@@ -54,10 +52,6 @@ export function RevenueBreakdownSection({
   } = useRevenueBreakdown();
 
   const [detailMonth, setDetailMonth] = useState<Date | null>(null);
-  const handleMonthClick = (date: Date) => {
-    onSelectMonth?.(date);
-    setDetailMonth(date);
-  };
 
   if (loading) {
     return (
@@ -111,7 +105,7 @@ export function RevenueBreakdownSection({
         currentYear={currentYear}
         selectedMonth={selectedMonth}
         isMobile={isMobile}
-        onSelectMonth={handleMonthClick}
+        onSelectMonth={setDetailMonth}
       />
 
       <section className="space-y-4">

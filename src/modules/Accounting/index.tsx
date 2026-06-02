@@ -11,7 +11,6 @@ import type { AccountingEntry } from '../../hooks/useMonthlyAccounting';
 export function Accounting() {
   const {
     selectedMonth,
-    setSelectedMonth,
     mounted,
     currentYear,
     isMobile,
@@ -127,7 +126,6 @@ export function Accounting() {
                 isMobile={isMobile}
                 onAddTransaction={() => setShowTransactionsModal(true)}
                 currentMonthStats={currentMonthStats}
-                onSelectMonth={setSelectedMonth}
                 monthlySummary={
                   <MonthlySummarySection
                     selectedMonth={selectedMonth}
