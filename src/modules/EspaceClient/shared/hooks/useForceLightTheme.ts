@@ -9,7 +9,12 @@ export function useForceLightTheme() {
     const html = document.documentElement;
     const hadDark = html.classList.contains('dark');
     html.classList.remove('dark');
+    // Le CRM définit son fond sombre dans :root (toujours actif), donc retirer
+    // `dark` ne suffit pas : on pose une classe qui force html/body/#root en clair
+    // (cf. portal-theme.css) le temps que le contexte Propul'Space est monté.
+    html.classList.add('ps-light-surface');
     return () => {
+      html.classList.remove('ps-light-surface');
       if (hadDark) html.classList.add('dark');
     };
   }, []);

@@ -10,6 +10,16 @@
  * be migrated when each component is touched again.
  */
 
+/* Force le chrome de page (html/body/#root) en clair tant qu'un contexte
+   Propul'Space est monté. Le CRM définit son fond sombre dans :root, qui
+   transparaît autour du contenu admin sinon. La classe est posée/retirée par
+   useForceLightTheme au montage/démontage. */
+html.ps-light-surface,
+html.ps-light-surface body,
+html.ps-light-surface #root {
+  background: #FAFAFA !important;
+}
+
 .propulspace-portal {
   /* ─── SURFACES ─────────────────────────────────────────── */
   --ps-bg: #FAFAFA;
