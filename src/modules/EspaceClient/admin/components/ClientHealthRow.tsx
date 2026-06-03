@@ -3,7 +3,7 @@ import { Badge, type BadgeTone } from '@/modules/EspaceClient/shared/components'
 import type { AdminClientHealth } from '../hooks/useAdminClients';
 
 function deriveStatus(c: AdminClientHealth): { label: string; tone: BadgeTone } {
-  if (!c.portal_activated_at) return { label: 'Inactif', tone: 'gray' };
+  if (!c.portal_activated_at) return { label: 'Pas de portail', tone: 'gray' };
   if (c.invoices_overdue > 0) return { label: 'Impayé', tone: 'red' };
   if (c.signatures_pending > 0) return { label: 'Signature en attente', tone: 'amber' };
   if (c.invoices_pending > 0) return { label: 'Paiement en attente', tone: 'blue' };
@@ -20,7 +20,7 @@ export function ClientHealthRow({ client }: { client: AdminClientHealth }) {
     >
       <div className="min-w-0">
         <div className="font-medium text-gray-900 truncate">{client.project_name}</div>
-        <div className="text-sm text-gray-500 truncate">{client.portal_client_email ?? '— pas d\'email portail —'}</div>
+        <div className="text-sm text-gray-500 truncate">{client.client_company ?? client.portal_client_email ?? '—'}</div>
       </div>
       <div className="flex items-center gap-3 shrink-0">
         {client.invoices_overdue > 0 && <Badge tone="red">{client.invoices_overdue} en retard</Badge>}

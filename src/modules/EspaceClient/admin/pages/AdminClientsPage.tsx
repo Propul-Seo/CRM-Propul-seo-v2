@@ -11,7 +11,8 @@ export function AdminClientsPage() {
   const filtered = useMemo(
     () => clients.filter(c =>
       c.project_name.toLowerCase().includes(q.toLowerCase()) ||
-      (c.portal_client_email ?? '').toLowerCase().includes(q.toLowerCase())),
+      (c.portal_client_email ?? '').toLowerCase().includes(q.toLowerCase()) ||
+      (c.client_company ?? '').toLowerCase().includes(q.toLowerCase())),
     [clients, q],
   );
 
@@ -19,7 +20,7 @@ export function AdminClientsPage() {
     <>
       <AdminTopNav />
       <div className="mx-auto max-w-4xl px-4 py-8 space-y-6">
-        <Hero eyebrow="Propul'Space" title="Clients & portails" subtitle="Pilotez chaque client de bout en bout." />
+        <Hero eyebrow="Propul'Space" title="Clients & portails" subtitle="Tous les projets actifs : ouvrez le Propul'Space de n'importe quel client." />
       <input
         value={q} onChange={e => setQ(e.target.value)} placeholder="Rechercher un client…"
         aria-label="Rechercher un client"
@@ -28,7 +29,7 @@ export function AdminClientsPage() {
       {loading && <div className="text-sm text-gray-500">Chargement…</div>}
       {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
       {!loading && !error && filtered.length === 0 && (
-        <EmptyState icon={Users} title="Aucun client" body="Les portails activés apparaîtront ici." />
+        <EmptyState icon={Users} title="Aucun client" body="Les projets actifs apparaîtront ici." />
       )}
         <div className="space-y-2">
           {filtered.map(c => <ClientHealthRow key={c.project_id} client={c} />)}
