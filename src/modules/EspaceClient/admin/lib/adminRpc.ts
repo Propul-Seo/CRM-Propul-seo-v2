@@ -3,6 +3,17 @@ import { supabase } from '@/lib/supabase';
 // Les RPC admin_* sont ajoutées par les migrations 270+ et peuvent ne pas encore
 // figurer dans les types générés (src/types/database.ts). Ce module isole l'unique
 // cast nécessaire, au lieu d'un `as any` dispersé. Étendre AdminRpcMap au fil des phases.
+
+export interface AuditLogRow {
+  id: string;
+  created_at: string;
+  action: 'insert' | 'update' | 'delete';
+  resource_type: string;
+  resource_id: string | null;
+  actor_label: string;
+  diff: { before?: Record<string, unknown>; after?: Record<string, unknown> } | null;
+}
+
 export interface AdminRpcMap {
   admin_create_invoice: {
     args: {
@@ -96,6 +107,15 @@ export interface AdminRpcMap {
   admin_delete_document: {
     args: { p_document_id: string };
     returns: null;
+  };
+  admin_get_audit_log: {
+    args: {
+      p_project_id: string;
+      p_limit?: number;
+      p_offset?: number;
+      p_resource_type?: string | null;
+    };
+    returns: AuditLogRow[];
   };
 }
 
