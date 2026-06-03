@@ -42,5 +42,8 @@ export function PropulspaceAdminGuard({ children }: PropulspaceAdminGuardProps) 
     );
   }
 
-  return <div className="propulspace-portal min-h-screen">{children}</div>;
+  // !bg : le CRM définit un thème sombre dans :root (pas seulement .dark), donc
+  // retirer la classe `dark` ne suffit pas — on force un fond clair opaque sur
+  // tout le back-office pour qu'il ne soit pas posé sur le fond sombre global.
+  return <div className="propulspace-portal min-h-screen !bg-[#FAFAFA] text-[#18181b]">{children}</div>;
 }
