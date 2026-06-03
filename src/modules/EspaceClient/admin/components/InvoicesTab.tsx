@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Plus, Send, Bell, Loader2, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { StatusBadge, EmptyState, SectionHead } from '@/modules/EspaceClient/shared/components';
+import { StatusBadge, EmptyState } from '@/modules/EspaceClient/shared/components';
 import { useAdminInvoices } from '../hooks/useAdminInvoices';
 import { AdminInvoiceForm } from './AdminInvoiceForm';
-import { getSignedStorageUrl } from '@/modules/EspaceClient/client/hooks/usePortalData';
+import { getAdminSignedUrl } from '../lib/adminStorage';
 import type { PortalInvoice } from '@/modules/EspaceClient/client/hooks/usePortalData';
 
 const BUCKET = 'propulspace-documents';
@@ -15,23 +15,35 @@ export function InvoicesTab({ projectId, clientEmail }: { projectId: string; cli
   const { invoices, loading, error, createInvoice, sendInvoice, remindInvoice } = useAdminInvoices(projectId);
   const [formOpen, setFormOpen] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  async function onSend(inv: PortalInvoice) { setBusyId(inv.id); await sendInvoice(inv, clientEmail); setBusyId(null); }
-  async function onRemind(inv: PortalInvoice) { setBusyId(inv.id); await remindInvoice(inv, clientEmail); setBusyId(null); }
+  async function onSend(inv: PortalInvoice) {
+    setBusyId(inv.id); setActionError(null);
+    const { error } = await sendInvoice(inv, clientEmail);
+    if (error) setActionError(error);
+    setBusyId(null);
+  }
+  async function onRemind(inv: PortalInvoice) {
+    setBusyId(inv.id); setActionError(null);
+    const { error } = await remindInvoice(inv, clientEmail);
+    if (error) setActionError(error);
+    setBusyId(null);
+  }
   async function onPdf(inv: PortalInvoice) {
     if (!inv.pdf_url) return;
-    const url = await getSignedStorageUrl(BUCKET, inv.pdf_url);
+    const url = await getAdminSignedUrl(BUCKET, inv.pdf_url);
     if (url) window.open(url, '_blank', 'noopener,noreferrer');
   }
 
   return (
     <div className="space-y-4 py-2">
       <div className="flex items-center justify-between">
-        <SectionHead title={`${invoices.length} facture${invoices.length > 1 ? 's' : ''}`} />
+        <h2 className="text-sm font-semibold text-gray-700">{`${invoices.length} facture${invoices.length > 1 ? 's' : ''}`}</h2>
         <Button size="sm" onClick={() => setFormOpen(true)}><Plus className="mr-1 h-4 w-4" /> Nouvelle facture</Button>
       </div>
       {loading && <div className="py-6 text-sm text-gray-500"><Loader2 className="inline h-4 w-4 animate-spin" /> Chargement…</div>}
       {error && <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+      {actionError && <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{actionError}</p>}
       {!loading && invoices.length === 0 && <EmptyState icon={FileText} title="Aucune facture" body="Créez la première facture de ce client." />}
       <ul className="divide-y divide-gray-100">
         {invoices.map(inv => (

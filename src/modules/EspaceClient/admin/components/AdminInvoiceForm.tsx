@@ -116,7 +116,7 @@ export function AdminInvoiceForm({ open, onOpenChange, onSubmit }: Props) {
           {formError && <p className="text-sm text-red-600">{formError}</p>}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
+          <Button variant="outline" onClick={() => { reset(); onOpenChange(false); }}>Annuler</Button>
           <Button onClick={handleSubmit} disabled={submitting}>
             {submitting && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />} Créer (brouillon)
           </Button>

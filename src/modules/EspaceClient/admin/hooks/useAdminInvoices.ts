@@ -33,21 +33,20 @@ export function useAdminInvoices(projectId: string): UseAdminInvoicesResult {
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const [inv, inst] = await Promise.all([
-      v2.from('propulspace_invoices').select('*').eq('project_id', projectId).order('issue_date', { ascending: false }),
-      v2.from('propulspace_invoice_installments').select('*').order('due_date', { ascending: true }),
-    ]);
-    if (inv.error) { setError(inv.error.message); setInvoices([]); setLoading(false); return; }
+    const inv = await v2.from('propulspace_invoices').select('*').eq('project_id', projectId).order('issue_date', { ascending: false });
+    if (inv.error) { setError(inv.error.message); setInvoices([]); setMap(new Map()); setLoading(false); return; }
     setError(null);
     const rows = (inv.data ?? []) as unknown as PortalInvoice[];
     setInvoices(rows);
-    const ids = new Set(rows.map(r => r.id));
+    const ids = rows.map(r => r.id);
     const map = new Map<string, PortalInstallment[]>();
-    ((inst.data ?? []) as unknown as PortalInstallment[]).forEach(i => {
-      if (!ids.has(i.invoice_id)) return;
-      const arr = map.get(i.invoice_id) ?? [];
-      arr.push(i); map.set(i.invoice_id, arr);
-    });
+    if (ids.length > 0) {
+      const inst = await v2.from('propulspace_invoice_installments').select('*').in('invoice_id', ids).order('due_date', { ascending: true });
+      ((inst.data ?? []) as unknown as PortalInstallment[]).forEach(i => {
+        const arr = map.get(i.invoice_id) ?? [];
+        arr.push(i); map.set(i.invoice_id, arr);
+      });
+    }
     setMap(map);
     setLoading(false);
   }, [projectId]);
