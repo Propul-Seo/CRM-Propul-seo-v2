@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Phone, Mail, Building2, ExternalLink, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
@@ -20,6 +21,7 @@ interface LeadDetailSheetProps {
 
 export function LeadDetailSheet({ lead, open, onOpenChange, onAction }: LeadDetailSheetProps) {
   const [disqOpen, setDisqOpen] = useState(false);
+  const navigate = useNavigate();
   if (!lead) return null;
 
   async function markAsContacted() {
@@ -88,6 +90,15 @@ export function LeadDetailSheet({ lead, open, onOpenChange, onAction }: LeadDeta
           )}
 
           <section className="flex flex-wrap gap-2 border-t border-[var(--ps-border-soft)] pt-4">
+            {lead.converted_to_project_id && (
+              <button
+                type="button"
+                onClick={() => navigate(`/admin/propulspace/clients/${lead.converted_to_project_id}`)}
+                className="rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white hover:bg-violet-700"
+              >
+                Ouvrir le portail client →
+              </button>
+            )}
             {lead.status === 'submitted' && (
               <Button onClick={markAsContacted} className="ps-brand-gradient text-white">
                 <ArrowRight className="mr-1.5 h-4 w-4" />

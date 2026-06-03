@@ -3,6 +3,7 @@ import { Inbox, PhoneCall, CheckCircle2, XCircle, Briefcase, Filter } from 'luci
 import { Hero, KpiTile, EmptyState } from '@/modules/EspaceClient/shared/components';
 import { LeadCard } from './components/LeadCard';
 import { LeadDetailSheet } from './components/LeadDetailSheet';
+import { AdminTopNav } from './components/AdminTopNav';
 import { useQualificationLeads, type LeadStatusFilter, type QualificationLeadRow } from './hooks/useQualificationLeads';
 
 const FILTERS: Array<{ value: LeadStatusFilter; label: string }> = [
@@ -25,7 +26,9 @@ export function LeadsQualifiesPage() {
   }, [leads]);
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-10">
+    <>
+      <AdminTopNav />
+      <main className="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-10">
       <Hero
         eyebrow="Admin Propul'Space"
         title="Leads qualifiés"
@@ -86,6 +89,7 @@ export function LeadsQualifiesPage() {
         onOpenChange={open => { if (!open) setSelected(null); }}
         onAction={updateStatus}
       />
-    </main>
+      </main>
+    </>
   );
 }

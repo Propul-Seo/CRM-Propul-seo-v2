@@ -3,6 +3,7 @@ import { Users } from 'lucide-react';
 import { Hero, EmptyState } from '@/modules/EspaceClient/shared/components';
 import { useAdminClients } from '../hooks/useAdminClients';
 import { ClientHealthRow } from '../components/ClientHealthRow';
+import { AdminTopNav } from '../components/AdminTopNav';
 
 export function AdminClientsPage() {
   const { clients, loading, error } = useAdminClients();
@@ -15,8 +16,10 @@ export function AdminClientsPage() {
   );
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 space-y-6">
-      <Hero eyebrow="Propul'Space" title="Clients & portails" subtitle="Pilotez chaque client de bout en bout." />
+    <>
+      <AdminTopNav />
+      <div className="mx-auto max-w-4xl px-4 py-8 space-y-6">
+        <Hero eyebrow="Propul'Space" title="Clients & portails" subtitle="Pilotez chaque client de bout en bout." />
       <input
         value={q} onChange={e => setQ(e.target.value)} placeholder="Rechercher un client…"
         aria-label="Rechercher un client"
@@ -27,9 +30,10 @@ export function AdminClientsPage() {
       {!loading && !error && filtered.length === 0 && (
         <EmptyState icon={Users} title="Aucun client" body="Les portails activés apparaîtront ici." />
       )}
-      <div className="space-y-2">
-        {filtered.map(c => <ClientHealthRow key={c.project_id} client={c} />)}
+        <div className="space-y-2">
+          {filtered.map(c => <ClientHealthRow key={c.project_id} client={c} />)}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
