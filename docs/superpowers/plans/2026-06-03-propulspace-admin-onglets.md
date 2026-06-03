@@ -781,10 +781,12 @@ begin
   if not exists (select 1 from propulspace.documents where id = p_document_id and deleted_at is null) then
     raise exception 'document % not found', p_document_id using errcode='P0002';
   end if;
+  -- (a) édition métadonnée (p_name présent) → pose category/description tels quels (permet de vider) ;
+  -- (b) toggle visibilité (p_name null) → ne touche QUE visible_to_client.
   update propulspace.documents set
     name              = coalesce(p_name, name),
-    category          = coalesce(p_category, category),
-    description       = coalesce(p_description, description),
+    category          = case when p_name is null then category    else p_category    end,
+    description       = case when p_name is null then description else p_description end,
     visible_to_client = coalesce(p_visible_to_client, visible_to_client),
     updated_at        = now()
   where id = p_document_id;
