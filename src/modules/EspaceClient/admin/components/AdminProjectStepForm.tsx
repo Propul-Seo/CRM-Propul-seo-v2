@@ -6,13 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { ProjectStepInput } from '../hooks/useAdminProjectSteps';
 import type { PortalProjectStep } from '@/modules/EspaceClient/client/hooks/usePortalData';
-
-export const STEP_STATUSES: Array<{ value: string; label: string }> = [
-  { value: 'upcoming', label: 'À venir' },
-  { value: 'in_progress', label: 'En cours' },
-  { value: 'completed', label: 'Terminé' },
-  { value: 'blocked', label: 'Bloqué' },
-];
+import { STEP_STATUSES } from './tabConstants';
 
 const SELECT_CLASS = 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm';
 const todayISO = () => new Date().toISOString().slice(0, 10);

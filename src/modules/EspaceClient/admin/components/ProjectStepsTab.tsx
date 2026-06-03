@@ -3,7 +3,8 @@ import { Plus, ArrowUp, ArrowDown, Pencil, Trash2, ListChecks } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/modules/EspaceClient/shared/components';
 import { AdminTabScaffold } from './AdminTabScaffold';
-import { AdminProjectStepForm, STEP_STATUSES } from './AdminProjectStepForm';
+import { AdminProjectStepForm } from './AdminProjectStepForm';
+import { STEP_STATUSES } from './tabConstants';
 import { useAdminProjectSteps } from '../hooks/useAdminProjectSteps';
 import type { PortalProjectStep } from '@/modules/EspaceClient/client/hooks/usePortalData';
 

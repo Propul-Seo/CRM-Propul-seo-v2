@@ -5,15 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { UploadDocumentInput } from '../hooks/useAdminDocuments';
-
-export const DOC_TYPES: Array<{ value: string; label: string }> = [
-  { value: 'quote', label: 'Devis' }, { value: 'contract', label: 'Contrat' },
-  { value: 'invoice', label: 'Facture' }, { value: 'deliverable', label: 'Livrable' },
-  { value: 'audit', label: 'Audit' }, { value: 'report', label: 'Rapport' },
-  { value: 'asset_logo', label: 'Logo' }, { value: 'asset_charter', label: 'Charte' },
-  { value: 'asset_content', label: 'Contenu' }, { value: 'asset_access', label: 'Accès' },
-  { value: 'legal', label: 'Légal' }, { value: 'other', label: 'Autre' },
-];
+import { DOC_TYPES } from './tabConstants';
 
 const SELECT_CLASS = 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm';
 
