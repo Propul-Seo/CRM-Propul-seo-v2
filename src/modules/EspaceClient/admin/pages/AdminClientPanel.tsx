@@ -3,6 +3,7 @@ import { AdminClientTabs } from '../components/AdminClientTabs';
 import { InvoicesTab } from '../components/InvoicesTab';
 import { ProjectStepsTab } from '../components/ProjectStepsTab';
 import { DocumentsTab } from '../components/DocumentsTab';
+import { ActivityTab } from '../components/ActivityTab';
 import { PortalStatusSection } from '../components/PortalStatusSection';
 import { useAdminClientEmail, useAdminProject } from '../hooks/useAdminClients';
 
@@ -60,6 +61,12 @@ function DocumentsRoute() {
   return <DocumentsTab projectId={projectId} />;
 }
 
+function ActiviteRoute() {
+  const { projectId } = useParams<{ projectId: string }>();
+  if (!projectId) return null;
+  return <ActivityTab projectId={projectId} />;
+}
+
 export function AdminClientPanel() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 space-y-6">
@@ -71,7 +78,7 @@ export function AdminClientPanel() {
         <Route path="signatures" element={<TabPlaceholder name="Signatures" />} />
         <Route path="documents" element={<DocumentsRoute />} />
         <Route path="jalons" element={<JalonsRoute />} />
-        <Route path="activite" element={<TabPlaceholder name="Activité" />} />
+        <Route path="activite" element={<ActiviteRoute />} />
       </Routes>
     </div>
   );
