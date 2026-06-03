@@ -20,8 +20,10 @@ const RESOURCE_META: Record<string, { icon: LucideIcon; tint: BadgeTone; noun: s
 const ACTION_VERB: Record<string, string> = { insert: 'ajouté', update: 'modifié', delete: 'supprimé' };
 
 function rowName(r: AuditLogRow): string {
-  const snap = r.diff?.after ?? r.diff?.before;
-  const value = snap ? (snap['name'] ?? snap['invoice_number']) : undefined;
+  const after = r.diff?.after;
+  const before = r.diff?.before;
+  // Un update qui ne touche pas le nom peut avoir after.name absent → retomber sur before.
+  const value = after?.['name'] ?? before?.['name'] ?? after?.['invoice_number'] ?? before?.['invoice_number'];
   return typeof value === 'string' ? value : '';
 }
 function formatDateTime(iso: string): string {
@@ -77,7 +79,7 @@ export function ActivityTab({ projectId }: { projectId: string }) {
             })}
           </ul>
         )}
-        {hasMore && (
+        {hasMore && !loading && (
           <button type="button" onClick={() => void loadMore()} className="mx-auto flex items-center gap-1 text-sm text-violet-700 hover:underline">
             <ChevronDown className="h-4 w-4" /> Charger plus
           </button>
