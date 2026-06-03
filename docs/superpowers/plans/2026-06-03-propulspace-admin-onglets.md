@@ -10,7 +10,9 @@
 
 **Ordre de livraison (tranches verticales, du moins au plus bloqué) :** Jalons → Documents → Activité → Signatures.
 
-**Convention de vérification (pas de Vitest dans le projet — R-007) :** chaque tâche front se valide par `npm run build` (tsc + build Vite, zéro erreur de type). Chaque migration se valide par un bloc d'assertions SQL joué via MCP Supabase sur le projet ERP `tbuqctfgjjxnevmsvucl`. Vérification runtime manuelle finale (Task 23) sur le client de test « Site vitrine Boulangerie Dupont ».
+**Convention de vérification (pas de Vitest dans le projet — R-007) :** chaque tâche front se valide par `npm run build` (tsc + build Vite, zéro erreur de type). Vérification runtime manuelle finale (Task 24) sur le client de test « Site vitrine Boulangerie Dupont ».
+
+> **⚠️ Application des migrations & edge fn — MANUELLE.** Le MCP Supabase de cette session est connecté à une autre organisation (CoProFlex) et ne voit PAS le projet ERP `tbuqctfgjjxnevmsvucl`. Toutes les étapes « appliquer/vérifier/déployer » se font **à la main** par l'utilisateur : SQL collé dans le **SQL Editor** du projet ERP (Dashboard Supabase), edge fn déployée via le Dashboard ou la CLI `supabase functions deploy`. Claude écrit les fichiers SQL + edge fn dans le repo et fournit le SQL à coller (bloc d'assertions inclus). C'est le workflow déjà utilisé pour les migrations 270/271/272.
 
 **Note de numérotation migrations :** on numérote `280..283` dans l'ordre de livraison (≠ ordre de la spec) pour aligner timestamp = numéro = ordre de build : 280 jalons, 281 documents, 282 audit, 283 signatures.
 
@@ -241,12 +243,12 @@ grant execute on function public.admin_delete_project_step(uuid) to authenticate
 grant execute on function public.admin_reorder_project_steps(uuid,uuid[]) to authenticated;
 ```
 
-- [ ] **Step 2 : Appliquer en prod via MCP Supabase**
+- [ ] **Step 2 : Appliquer à la main (SQL Editor du projet ERP)**
 
-Utiliser l'outil MCP `apply_migration` (project_id `tbuqctfgjjxnevmsvucl`, name `propulspace_280_admin_project_step_rpcs`) avec le SQL ci-dessus.
+Claude fournit le SQL ci-dessus à l'utilisateur, qui le colle dans le **SQL Editor** du projet `tbuqctfgjjxnevmsvucl` et l'exécute.
 Expected: succès sans erreur.
 
-- [ ] **Step 3 : Vérifier (assertion SQL via MCP `execute_sql`)**
+- [ ] **Step 3 : Vérifier (à coller dans le SQL Editor à la suite)**
 
 ```sql
 select count(*) as fns from pg_proc
@@ -808,8 +810,8 @@ grant execute on function public.admin_update_document(uuid,text,text,text,boole
 grant execute on function public.admin_delete_document(uuid) to authenticated;
 ```
 
-- [ ] **Step 2 : Appliquer via MCP** (`apply_migration`, name `propulspace_281_admin_document_rpcs`).
-- [ ] **Step 3 : Vérifier (MCP `execute_sql`)**
+- [ ] **Step 2 : Appliquer à la main** (SQL collé dans le SQL Editor du projet ERP).
+- [ ] **Step 3 : Vérifier (à coller à la suite dans le SQL Editor)**
 
 ```sql
 select
@@ -1390,8 +1392,8 @@ revoke all on function public.admin_get_audit_log(uuid,int,int,text) from public
 grant execute on function public.admin_get_audit_log(uuid,int,int,text) to authenticated;
 ```
 
-- [ ] **Step 2 : Appliquer via MCP** (`apply_migration`, name `propulspace_282_admin_get_audit_log`).
-- [ ] **Step 3 : Vérifier (MCP `execute_sql`)**
+- [ ] **Step 2 : Appliquer à la main** (SQL collé dans le SQL Editor du projet ERP).
+- [ ] **Step 3 : Vérifier (à coller à la suite dans le SQL Editor)**
 
 ```sql
 select count(*) as fn from pg_proc where proname = 'admin_get_audit_log';
@@ -1703,8 +1705,8 @@ revoke all on function public.admin_cancel_signature(uuid,text) from public, ano
 grant execute on function public.admin_cancel_signature(uuid,text) to authenticated;
 ```
 
-- [ ] **Step 2 : Appliquer via MCP** (`apply_migration`, name `propulspace_283_admin_signature_rpcs`).
-- [ ] **Step 3 : Vérifier (MCP `execute_sql`)**
+- [ ] **Step 2 : Appliquer à la main** (SQL collé dans le SQL Editor du projet ERP).
+- [ ] **Step 3 : Vérifier (à coller à la suite dans le SQL Editor)**
 
 ```sql
 select count(*) as fn from pg_proc where proname = 'admin_cancel_signature';
@@ -1775,9 +1777,9 @@ serve(async (req) => {
 
 > Note : la déclaration `const apiKey = ...` et le `if (!apiKey) return 500` qui figuraient AVANT `requireAdmin` dans la version actuelle sont supprimés (remplacés par le bloc ci-dessus). Le reste du handler (appel `createDocusealSubmission`, insert `signatures`, email Brevo, réponse finale) est inchangé.
 
-- [ ] **Step 3 : Déployer l'edge fn via MCP**
+- [ ] **Step 3 : Déployer l'edge fn (manuel)**
 
-Utiliser l'outil MCP `deploy_edge_function` (project_id `tbuqctfgjjxnevmsvucl`, name `admin-docuseal-create-submission`) avec le contenu complet mis à jour du fichier.
+L'utilisateur déploie `admin-docuseal-create-submission` sur le projet ERP, soit via le Dashboard Supabase (Edge Functions), soit via la CLI : `supabase functions deploy admin-docuseal-create-submission --project-ref tbuqctfgjjxnevmsvucl`.
 Expected: déploiement réussi. (Sans `DOCUSEAL_API_KEY` en prod, la fonction reste en mode dégradé — c'est voulu.)
 
 - [ ] **Step 4 : Commit**
@@ -2208,7 +2210,7 @@ begin
 end $$;
 ```
 
-- [ ] **Step 2 : Jouer le script via MCP `execute_sql`** (substituer `<PROJECT_ID>`).
+- [ ] **Step 2 : Jouer le script à la main** (SQL Editor du projet ERP, substituer `<PROJECT_ID>`).
 Expected: notices `JALONS OK`, `DOCUMENTS OK`, `AUDIT lignes renvoyées: N`, `SIGNATURE cancel correctement refusé`, `SIGNATURES OK`. Aucune assertion échouée.
 
 - [ ] **Step 3 : Vérification E2E manuelle** (dev server) sur « Site vitrine Boulangerie Dupont » :
