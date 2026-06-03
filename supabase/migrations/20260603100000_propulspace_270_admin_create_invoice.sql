@@ -35,7 +35,7 @@ begin
   end if;
 
   select jsonb_build_object(
-           'company',    coalesce(client_company, project_name),
+           'company',    coalesce(client_company, name),
            'first_name', client_first_name,
            'phone',      client_phone,
            'email',      portal_client_email
@@ -77,7 +77,7 @@ begin
       v_invoice_id, v_idx,
       coalesce(v_inst->>'label', 'Acompte ' || v_idx),
       (v_inst->>'amount')::numeric,
-      (v_inst->>'due_date')::date,
+      coalesce((v_inst->>'due_date')::date, p_issue_date + 30),
       'pending'
     );
   end loop;
