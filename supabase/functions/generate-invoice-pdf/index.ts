@@ -57,7 +57,13 @@ Deno.serve(async (req) => {
   const { data: isAdmin } = await userClient.rpc('is_admin');
   if (!isAdmin) return json({ error: 'Admin requis' }, 403);
 
-  const { invoice_id } = await req.json().catch(() => ({}));
+  let invoice_id: string | undefined;
+  try {
+    const body = await req.json();
+    invoice_id = body?.invoice_id;
+  } catch {
+    return json({ error: 'JSON invalide' }, 400);
+  }
   if (!invoice_id) return json({ error: 'invoice_id requis' }, 400);
 
   // Lecture via le JWT admin (le service_role ne traverse pas la vue _v2).

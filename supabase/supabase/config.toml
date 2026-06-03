@@ -315,13 +315,6 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
-# generate-invoice-pdf — edge admin : génère le PDF d'une facture (conforme FR),
-# l'upload dans le bucket propulspace-documents et stocke le chemin + le hash.
-# JWT vérifié : le body passe le JWT admin de l'appelant, que l'edge re-contrôle
-# via is_admin() pour lire la facture par la vue _v2.
-[functions.generate-invoice-pdf]
-verify_jwt = true
-
 [analytics]
 enabled = true
 port = 54327
