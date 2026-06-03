@@ -48,6 +48,7 @@ export function useAdminProjectSteps(projectId: string): UseAdminProjectStepsRes
       p_description: input.description ?? null,
       p_date_start: input.dateStart ?? null,
       p_date_planned_end: input.datePlannedEnd ?? null,
+      p_date_actual_end: input.dateActualEnd ?? null,
       p_visible_to_client: input.visibleToClient,
     });
     if (err) return { error: err.message };

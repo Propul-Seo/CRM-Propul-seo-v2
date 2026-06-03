@@ -55,6 +55,7 @@ export interface AdminRpcMap {
       p_description?: string | null;
       p_date_start?: string | null;
       p_date_planned_end?: string | null;
+      p_date_actual_end?: string | null;
       p_visible_to_client?: boolean;
     };
     returns: string;            // step id (uuid)

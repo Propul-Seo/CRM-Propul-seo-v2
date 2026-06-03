@@ -144,6 +144,7 @@ create or replace function public.admin_create_project_step(
   p_description       text    default null,
   p_date_start        date    default null,
   p_date_planned_end  date    default null,
+  p_date_actual_end   date    default null,
   p_visible_to_client boolean default true
 ) returns uuid
 language plpgsql security definer
@@ -164,10 +165,10 @@ begin
   );
   insert into propulspace.project_steps(
     project_id, step_order, label, description, status,
-    date_start, date_planned_end, visible_to_client
+    date_start, date_planned_end, date_actual_end, visible_to_client
   ) values (
     p_project_id, v_order, p_label, p_description, p_status,
-    p_date_start, p_date_planned_end, p_visible_to_client
+    p_date_start, p_date_planned_end, p_date_actual_end, p_visible_to_client
   ) returning id into v_id;
   return v_id;
 end; $$;
@@ -233,11 +234,11 @@ begin
   end loop;
 end; $$;
 
-revoke all on function public.admin_create_project_step(uuid,text,int,text,text,date,date,boolean) from public, anon;
+revoke all on function public.admin_create_project_step(uuid,text,int,text,text,date,date,date,boolean) from public, anon;
 revoke all on function public.admin_update_project_step(uuid,text,text,text,date,date,date,boolean) from public, anon;
 revoke all on function public.admin_delete_project_step(uuid) from public, anon;
 revoke all on function public.admin_reorder_project_steps(uuid,uuid[]) from public, anon;
-grant execute on function public.admin_create_project_step(uuid,text,int,text,text,date,date,boolean) to authenticated;
+grant execute on function public.admin_create_project_step(uuid,text,int,text,text,date,date,date,boolean) to authenticated;
 grant execute on function public.admin_update_project_step(uuid,text,text,text,date,date,date,boolean) to authenticated;
 grant execute on function public.admin_delete_project_step(uuid) to authenticated;
 grant execute on function public.admin_reorder_project_steps(uuid,uuid[]) to authenticated;
@@ -284,6 +285,7 @@ Insérer ces propriétés dans l'interface `AdminRpcMap`, juste après le bloc `
       p_description?: string | null;
       p_date_start?: string | null;
       p_date_planned_end?: string | null;
+      p_date_actual_end?: string | null;
       p_visible_to_client?: boolean;
     };
     returns: string;            // step id (uuid)
@@ -383,6 +385,7 @@ export function useAdminProjectSteps(projectId: string): UseAdminProjectStepsRes
       p_description: input.description ?? null,
       p_date_start: input.dateStart ?? null,
       p_date_planned_end: input.datePlannedEnd ?? null,
+      p_date_actual_end: input.dateActualEnd ?? null,
       p_visible_to_client: input.visibleToClient,
     });
     if (err) return { error: err.message };
