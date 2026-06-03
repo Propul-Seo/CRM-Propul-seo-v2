@@ -1,15 +1,20 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { PropulspaceAdminGuard } from './PropulspaceAdminGuard';
 import { LeadsQualifiesPage } from './LeadsQualifiesPage';
+import { AdminClientsPage } from './pages/AdminClientsPage';
+import { AdminClientPanel } from './pages/AdminClientPanel';
 
-// Sous-router /admin/*. V1 limité à /admin/leads (Vue 9). Les autres
-// pages admin (dashboard portails, panel client, etc.) viendront en
-// Sub-phase E du plan Phase 2.
+// Sous-router /admin/*. Back-office Propul'Space :
+//  - clients            : dashboard des portails (défaut)
+//  - clients/:projectId : panneau client à onglets
+//  - leads              : leads qualifiés (Vue 9, existant)
 export function PropulspaceAdminApp() {
   return (
     <PropulspaceAdminGuard>
       <Routes>
-        <Route index element={<Navigate to="leads" replace />} />
+        <Route index element={<Navigate to="clients" replace />} />
+        <Route path="clients" element={<AdminClientsPage />} />
+        <Route path="clients/:projectId/*" element={<AdminClientPanel />} />
         <Route path="leads" element={<LeadsQualifiesPage />} />
       </Routes>
     </PropulspaceAdminGuard>
