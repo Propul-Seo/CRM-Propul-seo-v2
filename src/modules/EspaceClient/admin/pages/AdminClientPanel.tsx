@@ -1,5 +1,7 @@
 import { Routes, Route, useParams, Link } from 'react-router-dom';
 import { AdminClientTabs } from '../components/AdminClientTabs';
+import { InvoicesTab } from '../components/InvoicesTab';
+import { useAdminClientEmail } from '../hooks/useAdminClients';
 
 function TabPlaceholder({ name }: { name: string }) {
   return <div className="py-10 text-center text-sm text-gray-400">Onglet « {name} » — à venir</div>;
@@ -12,6 +14,13 @@ function OverviewTab() {
   return <div className="py-6 text-sm text-gray-600">Aperçu du projet <code>{projectId}</code> — activation & infos client (Phase 4).</div>;
 }
 
+function InvoicesRoute() {
+  const { projectId } = useParams<{ projectId: string }>();
+  const email = useAdminClientEmail(projectId);
+  if (!projectId) return null;
+  return <InvoicesTab projectId={projectId} clientEmail={email} />;
+}
+
 export function AdminClientPanel() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 space-y-6">
@@ -19,7 +28,7 @@ export function AdminClientPanel() {
       <AdminClientTabs />
       <Routes>
         <Route index element={<OverviewTab />} />
-        <Route path="factures" element={<TabPlaceholder name="Factures" />} />
+        <Route path="factures" element={<InvoicesRoute />} />
         <Route path="signatures" element={<TabPlaceholder name="Signatures" />} />
         <Route path="documents" element={<TabPlaceholder name="Documents" />} />
         <Route path="jalons" element={<TabPlaceholder name="Jalons" />} />

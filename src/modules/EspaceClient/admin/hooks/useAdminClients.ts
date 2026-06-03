@@ -41,3 +41,9 @@ export function useAdminClients(): UseAdminClientsResult {
   useEffect(() => { void refresh(); }, [refresh]);
   return { clients, loading, error, refresh };
 }
+
+export function useAdminClientEmail(projectId: string | undefined): string | null {
+  const { clients } = useAdminClients();
+  if (!projectId) return null;
+  return clients.find(c => c.project_id === projectId)?.portal_client_email ?? null;
+}
