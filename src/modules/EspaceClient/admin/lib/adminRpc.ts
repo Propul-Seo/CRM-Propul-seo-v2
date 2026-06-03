@@ -117,6 +117,10 @@ export interface AdminRpcMap {
     };
     returns: AuditLogRow[];
   };
+  admin_cancel_signature: {
+    args: { p_signature_id: string; p_reason?: string | null };
+    returns: null;
+  };
 }
 
 export async function adminRpc<K extends keyof AdminRpcMap & string>(
