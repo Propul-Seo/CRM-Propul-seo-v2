@@ -1,6 +1,7 @@
 import { Routes, Route, useParams, Link } from 'react-router-dom';
 import { AdminClientTabs } from '../components/AdminClientTabs';
 import { InvoicesTab } from '../components/InvoicesTab';
+import { ProjectStepsTab } from '../components/ProjectStepsTab';
 import { PortalStatusSection } from '../components/PortalStatusSection';
 import { useAdminClientEmail, useAdminProject } from '../hooks/useAdminClients';
 
@@ -46,6 +47,12 @@ function InvoicesRoute() {
   return <InvoicesTab projectId={projectId} clientEmail={email} />;
 }
 
+function JalonsRoute() {
+  const { projectId } = useParams<{ projectId: string }>();
+  if (!projectId) return null;
+  return <ProjectStepsTab projectId={projectId} />;
+}
+
 export function AdminClientPanel() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 space-y-6">
@@ -56,7 +63,7 @@ export function AdminClientPanel() {
         <Route path="factures" element={<InvoicesRoute />} />
         <Route path="signatures" element={<TabPlaceholder name="Signatures" />} />
         <Route path="documents" element={<TabPlaceholder name="Documents" />} />
-        <Route path="jalons" element={<TabPlaceholder name="Jalons" />} />
+        <Route path="jalons" element={<JalonsRoute />} />
         <Route path="activite" element={<TabPlaceholder name="Activité" />} />
       </Routes>
     </div>
