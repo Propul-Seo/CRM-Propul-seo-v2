@@ -1,12 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeTone } from '@/modules/EspaceClient/shared/components';
 import type { AdminClientHealth } from '../hooks/useAdminClients';
 
-function deriveStatus(c: AdminClientHealth): { label: string; tone: string } {
-  if (!c.portal_activated_at) return { label: 'Inactif', tone: 'bg-gray-100 text-gray-700' };
-  if (c.signatures_pending > 0) return { label: 'Signature en attente', tone: 'bg-amber-100 text-amber-800' };
-  if (c.invoices_pending > 0) return { label: 'Paiement en attente', tone: 'bg-blue-100 text-blue-800' };
-  return { label: 'Actif', tone: 'bg-emerald-100 text-emerald-800' };
+function deriveStatus(c: AdminClientHealth): { label: string; tone: BadgeTone } {
+  if (!c.portal_activated_at) return { label: 'Inactif', tone: 'gray' };
+  if (c.invoices_overdue > 0) return { label: 'Impayé', tone: 'red' };
+  if (c.signatures_pending > 0) return { label: 'Signature en attente', tone: 'amber' };
+  if (c.invoices_pending > 0) return { label: 'Paiement en attente', tone: 'blue' };
+  return { label: 'Actif', tone: 'green' };
 }
 
 export function ClientHealthRow({ client }: { client: AdminClientHealth }) {
@@ -22,8 +23,8 @@ export function ClientHealthRow({ client }: { client: AdminClientHealth }) {
         <div className="text-sm text-gray-500 truncate">{client.portal_client_email ?? '— pas d\'email portail —'}</div>
       </div>
       <div className="flex items-center gap-3 shrink-0">
-        {client.invoices_overdue > 0 && <Badge className="bg-red-100 text-red-700">{client.invoices_overdue} en retard</Badge>}
-        <Badge className={status.tone}>{status.label}</Badge>
+        {client.invoices_overdue > 0 && <Badge tone="red">{client.invoices_overdue} en retard</Badge>}
+        <Badge tone={status.tone}>{status.label}</Badge>
       </div>
     </button>
   );

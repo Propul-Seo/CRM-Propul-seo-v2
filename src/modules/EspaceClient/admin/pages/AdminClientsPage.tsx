@@ -19,6 +19,7 @@ export function AdminClientsPage() {
       <Hero eyebrow="Propul'Space" title="Clients & portails" subtitle="Pilotez chaque client de bout en bout." />
       <input
         value={q} onChange={e => setQ(e.target.value)} placeholder="Rechercher un client…"
+        aria-label="Rechercher un client"
         className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-violet-400 focus:outline-none"
       />
       {loading && <div className="text-sm text-gray-500">Chargement…</div>}

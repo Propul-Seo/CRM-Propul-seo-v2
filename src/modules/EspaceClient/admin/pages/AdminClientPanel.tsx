@@ -6,7 +6,8 @@ function TabPlaceholder({ name }: { name: string }) {
 }
 
 function OverviewTab() {
-  const { projectId } = useParams();
+  const { projectId } = useParams<{ projectId: string }>();
+  if (!projectId) return null;
   // Phase 4 : infos client éditables + <PortalStatusSection projectId={projectId} />
   return <div className="py-6 text-sm text-gray-600">Aperçu du projet <code>{projectId}</code> — activation & infos client (Phase 4).</div>;
 }
