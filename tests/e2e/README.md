@@ -37,3 +37,4 @@ Le dev server démarre automatiquement si pas déjà actif (config `webServer.re
 ## Couverture actuelle
 
 - `agency-vault.spec.ts` — Coffre-fort agence : login → navigation → CRUD → recherche → suppression.
+- `propulspace-admin.spec.ts` — Back-office Propul'Space : redirection du dashboard `/admin/propulspace` → `/clients` et ouverture d'un client (onglets). Nécessite une session admin (fixture `adminPage`).
