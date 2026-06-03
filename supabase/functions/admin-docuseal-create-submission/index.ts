@@ -37,6 +37,7 @@ function jsonResponse(body: unknown, status: number) {
 }
 
 interface CreateSubmissionBody {
+  probe?: boolean                 // si true → renvoie juste { configured } sans rien créer
   project_id: string
   template_id: string
   name: string
@@ -126,15 +127,21 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   if (req.method !== 'POST') return jsonResponse({ error: 'Méthode non autorisée' }, 405)
 
-  const apiKey = Deno.env.get('DOCUSEAL_API_KEY')
-  if (!apiKey) return jsonResponse({ error: 'DOCUSEAL_API_KEY manquante' }, 500)
-
   const guard = await requireAdmin(req)
   if (guard instanceof Response) return guard
   const { admin, callerId } = guard
 
   let body: CreateSubmissionBody
   try { body = await req.json() } catch { return jsonResponse({ error: 'Body JSON invalide' }, 400) }
+
+  const apiKey = Deno.env.get('DOCUSEAL_API_KEY')
+
+  // Probe : l'UI admin demande si DocuSeal est configuré (grise le bouton sinon).
+  if (body?.probe === true) return jsonResponse({ configured: Boolean(apiKey) }, 200)
+
+  // Dégradation gracieuse : pas de clé → 200 structuré (au lieu d'un 500 opaque).
+  if (!apiKey) return jsonResponse({ ok: false, reason: 'not_configured' }, 200)
+
   if (!body?.project_id || !body.template_id || !body.name || !body.signer_email || !body.signature_type) {
     return jsonResponse({ error: 'Paramètres manquants' }, 400)
   }
