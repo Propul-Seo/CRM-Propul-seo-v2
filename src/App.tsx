@@ -141,7 +141,7 @@ function App() {
           }
         />
         <Route
-          path="/admin/*"
+          path="/admin/propulspace/*"
           element={
             <ErrorBoundary>
               <Suspense fallback={<div className="min-h-screen bg-white" />}>
