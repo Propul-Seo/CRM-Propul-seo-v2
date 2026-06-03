@@ -47,7 +47,7 @@ export function AdminTabScaffold({
       )}
       {error && <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
       {actionError && <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{actionError}</p>}
-      {!loading && isEmpty && <EmptyState icon={emptyIcon} title={emptyTitle} body={emptyBody} />}
+      {!loading && !error && isEmpty && <EmptyState icon={emptyIcon} title={emptyTitle} body={emptyBody} />}
       {!loading && !isEmpty && children}
     </div>
   );

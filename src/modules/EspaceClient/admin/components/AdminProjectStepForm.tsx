@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import type { ProjectStepInput } from '../hooks/useAdminProjectSteps';
 import type { PortalProjectStep } from '@/modules/EspaceClient/client/hooks/usePortalData';
 
-const STATUSES: Array<{ value: string; label: string }> = [
+export const STEP_STATUSES: Array<{ value: string; label: string }> = [
   { value: 'upcoming', label: 'À venir' },
   { value: 'in_progress', label: 'En cours' },
   { value: 'completed', label: 'Terminé' },
@@ -71,7 +71,7 @@ export function AdminProjectStepForm({ open, onOpenChange, initial, onSubmit }: 
           <div>
             <Label>Statut</Label>
             <select className={SELECT_CLASS} value={status} onChange={e => setStatus(e.target.value)}>
-              {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+              {STEP_STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
             </select>
           </div>
           <div><Label>Description</Label><Input value={description} onChange={e => setDescription(e.target.value)} /></div>

@@ -3,16 +3,9 @@ import { Plus, ArrowUp, ArrowDown, Pencil, Trash2, ListChecks } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/modules/EspaceClient/shared/components';
 import { AdminTabScaffold } from './AdminTabScaffold';
-import { AdminProjectStepForm } from './AdminProjectStepForm';
+import { AdminProjectStepForm, STEP_STATUSES } from './AdminProjectStepForm';
 import { useAdminProjectSteps } from '../hooks/useAdminProjectSteps';
 import type { PortalProjectStep } from '@/modules/EspaceClient/client/hooks/usePortalData';
-
-const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: 'upcoming', label: 'À venir' },
-  { value: 'in_progress', label: 'En cours' },
-  { value: 'completed', label: 'Terminé' },
-  { value: 'blocked', label: 'Bloqué' },
-];
 
 export function ProjectStepsTab({ projectId }: { projectId: string }) {
   const { steps, loading, error, createStep, updateStep, deleteStep, reorder } = useAdminProjectSteps(projectId);
@@ -20,6 +13,7 @@ export function ProjectStepsTab({ projectId }: { projectId: string }) {
   const [editing, setEditing] = useState<PortalProjectStep | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [reordering, setReordering] = useState(false);
 
   async function move(index: number, dir: -1 | 1) {
     const target = index + dir;
@@ -27,8 +21,13 @@ export function ProjectStepsTab({ projectId }: { projectId: string }) {
     const ids = steps.map(s => s.id);
     [ids[index], ids[target]] = [ids[target], ids[index]];
     setActionError(null);
-    const { error } = await reorder(ids);
-    if (error) setActionError(error);
+    setReordering(true);
+    try {
+      const { error } = await reorder(ids);
+      if (error) setActionError(error);
+    } finally {
+      setReordering(false);
+    }
   }
   async function onStatus(step: PortalProjectStep, status: string) {
     setBusyId(step.id); setActionError(null);
@@ -56,15 +55,15 @@ export function ProjectStepsTab({ projectId }: { projectId: string }) {
           {steps.map((step, i) => (
             <li key={step.id} className="flex items-center gap-3 py-3">
               <div className="flex flex-col">
-                <button type="button" className="text-gray-400 hover:text-gray-700 disabled:opacity-30" disabled={i === 0} onClick={() => move(i, -1)} title="Monter"><ArrowUp className="h-4 w-4" /></button>
-                <button type="button" className="text-gray-400 hover:text-gray-700 disabled:opacity-30" disabled={i === steps.length - 1} onClick={() => move(i, 1)} title="Descendre"><ArrowDown className="h-4 w-4" /></button>
+                <button type="button" className="text-gray-400 hover:text-gray-700 disabled:opacity-30" disabled={i === 0 || reordering} onClick={() => move(i, -1)} title="Monter"><ArrowUp className="h-4 w-4" /></button>
+                <button type="button" className="text-gray-400 hover:text-gray-700 disabled:opacity-30" disabled={i === steps.length - 1 || reordering} onClick={() => move(i, 1)} title="Descendre"><ArrowDown className="h-4 w-4" /></button>
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-gray-900">{step.label}{!step.visible_to_client && <span className="ml-2 text-xs text-gray-400">Masqué</span>}</p>
                 {step.description && <p className="truncate text-xs text-gray-500">{step.description}</p>}
               </div>
               <select className="rounded border border-gray-200 px-2 py-1 text-xs" value={step.status} disabled={busyId === step.id} onChange={e => onStatus(step, e.target.value)}>
-                {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                {STEP_STATUSES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
               <StatusBadge status={step.status} />
               <Button variant="ghost" size="icon" title="Modifier" onClick={() => { setEditing(step); setFormOpen(true); }}><Pencil className="h-4 w-4" /></Button>

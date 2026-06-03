@@ -64,6 +64,7 @@ export function useAdminProjectSteps(projectId: string): UseAdminProjectStepsRes
       p_date_start: input.dateStart ?? null,
       p_date_planned_end: input.datePlannedEnd ?? null,
       p_date_actual_end: input.dateActualEnd ?? null,
+      // undefined → null (COALESCE garde la valeur existante) ; false reste false (ne pas utiliser ||)
       p_visible_to_client: input.visibleToClient ?? null,
     });
     if (err) return { error: err.message };
