@@ -69,6 +69,34 @@ export interface AdminRpcMap {
     args: { p_project_id: string; p_ordered_ids: string[] };
     returns: null;
   };
+  admin_create_document: {
+    args: {
+      p_project_id: string;
+      p_document_type: string;
+      p_name: string;
+      p_file_url: string;
+      p_file_size_bytes?: number | null;
+      p_file_mime_type?: string | null;
+      p_category?: string | null;
+      p_description?: string | null;
+      p_visible_to_client?: boolean;
+    };
+    returns: string;            // document id (uuid)
+  };
+  admin_update_document: {
+    args: {
+      p_document_id: string;
+      p_name?: string | null;
+      p_category?: string | null;
+      p_description?: string | null;
+      p_visible_to_client?: boolean | null;
+    };
+    returns: null;
+  };
+  admin_delete_document: {
+    args: { p_document_id: string };
+    returns: null;
+  };
 }
 
 export async function adminRpc<K extends keyof AdminRpcMap & string>(
