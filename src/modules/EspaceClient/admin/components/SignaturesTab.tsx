@@ -57,7 +57,7 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
               )}
               {sig.status === 'pending' && (
                 <>
-                  <Button variant="outline" size="sm" disabled={busyId === sig.id || !clientEmail} onClick={() => onRemind(sig)}><Bell className="mr-1 h-4 w-4" />Relancer</Button>
+                  <Button variant="outline" size="sm" disabled={busyId === sig.id || !clientEmail || !sig.docuseal_signing_url} title={!sig.docuseal_signing_url ? 'Lien de signature indisponible' : undefined} onClick={() => onRemind(sig)}><Bell className="mr-1 h-4 w-4" />Relancer</Button>
                   <Button variant="ghost" size="icon" title="Annuler" disabled={busyId === sig.id} onClick={() => onCancel(sig)}><X className="h-4 w-4" /></Button>
                 </>
               )}

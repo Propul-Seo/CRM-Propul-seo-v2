@@ -1989,6 +1989,7 @@ export function AdminSignatureForm({ open, onOpenChange, defaultEmail, onSubmit 
     if (!name.trim()) { setFormError('Le nom du document est requis.'); return; }
     if (!signerEmail.trim()) { setFormError("L'email du signataire est requis."); return; }
     if (!templateId.trim()) { setFormError('Le template DocuSeal est requis.'); return; }
+    if (Number.isNaN(Number(templateId.trim()))) { setFormError('Le template DocuSeal doit être un identifiant numérique.'); return; }
     setSubmitting(true); setFormError(null);
     const { error } = await onSubmit({
       name: name.trim(), signatureType, signerEmail: signerEmail.trim(),
@@ -2090,7 +2091,7 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
               )}
               {sig.status === 'pending' && (
                 <>
-                  <Button variant="outline" size="sm" disabled={busyId === sig.id || !clientEmail} onClick={() => onRemind(sig)}><Bell className="mr-1 h-4 w-4" />Relancer</Button>
+                  <Button variant="outline" size="sm" disabled={busyId === sig.id || !clientEmail || !sig.docuseal_signing_url} title={!sig.docuseal_signing_url ? 'Lien de signature indisponible' : undefined} onClick={() => onRemind(sig)}><Bell className="mr-1 h-4 w-4" />Relancer</Button>
                   <Button variant="ghost" size="icon" title="Annuler" disabled={busyId === sig.id} onClick={() => onCancel(sig)}><X className="h-4 w-4" /></Button>
                 </>
               )}

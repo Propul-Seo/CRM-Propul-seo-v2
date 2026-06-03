@@ -41,6 +41,7 @@ export function AdminSignatureForm({ open, onOpenChange, defaultEmail, onSubmit 
     if (!name.trim()) { setFormError('Le nom du document est requis.'); return; }
     if (!signerEmail.trim()) { setFormError("L'email du signataire est requis."); return; }
     if (!templateId.trim()) { setFormError('Le template DocuSeal est requis.'); return; }
+    if (Number.isNaN(Number(templateId.trim()))) { setFormError('Le template DocuSeal doit être un identifiant numérique.'); return; }
     setSubmitting(true); setFormError(null);
     const { error } = await onSubmit({
       name: name.trim(), signatureType, signerEmail: signerEmail.trim(),
