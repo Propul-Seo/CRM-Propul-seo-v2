@@ -98,3 +98,28 @@ export function useAdminClientEmail(projectId: string | undefined): string | nul
   if (!projectId) return null;
   return clients.find(c => c.project_id === projectId)?.portal_client_email ?? null;
 }
+
+export interface AdminProjectRow {
+  id: string;
+  name: string;
+  portal_client_email: string | null;
+  portal_previous_client_email: string | null;
+  portal_activated_at: string | null;
+  client_company: string | null;
+}
+
+export function useAdminProject(projectId: string | undefined): { project: AdminProjectRow | null; loading: boolean; refresh: () => Promise<void> } {
+  const [project, setProject] = useState<AdminProjectRow | null>(null);
+  const [loading, setLoading] = useState(true);
+  const refresh = useCallback(async () => {
+    if (!projectId) { setProject(null); setLoading(false); return; }
+    setLoading(true);
+    const { data, error } = await v2.from('projects')
+      .select('id, name, portal_client_email, portal_previous_client_email, portal_activated_at, client_company')
+      .eq('id', projectId).maybeSingle();
+    if (error) { setProject(null); } else { setProject((data ?? null) as unknown as AdminProjectRow | null); }
+    setLoading(false);
+  }, [projectId]);
+  useEffect(() => { void refresh(); }, [refresh]);
+  return { project, loading, refresh };
+}
