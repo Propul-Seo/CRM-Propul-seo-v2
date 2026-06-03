@@ -4,12 +4,9 @@ import { InvoicesTab } from '../components/InvoicesTab';
 import { ProjectStepsTab } from '../components/ProjectStepsTab';
 import { DocumentsTab } from '../components/DocumentsTab';
 import { ActivityTab } from '../components/ActivityTab';
+import { SignaturesTab } from '../components/SignaturesTab';
 import { PortalStatusSection } from '../components/PortalStatusSection';
 import { useAdminClientEmail, useAdminProject } from '../hooks/useAdminClients';
-
-function TabPlaceholder({ name }: { name: string }) {
-  return <div className="py-10 text-center text-sm text-gray-400">Onglet « {name} » — à venir</div>;
-}
 
 function OverviewTab() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -67,6 +64,13 @@ function ActiviteRoute() {
   return <ActivityTab projectId={projectId} />;
 }
 
+function SignaturesRoute() {
+  const { projectId } = useParams<{ projectId: string }>();
+  const email = useAdminClientEmail(projectId);
+  if (!projectId) return null;
+  return <SignaturesTab projectId={projectId} clientEmail={email} />;
+}
+
 export function AdminClientPanel() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 space-y-6">
@@ -75,7 +79,7 @@ export function AdminClientPanel() {
       <Routes>
         <Route index element={<OverviewTab />} />
         <Route path="factures" element={<InvoicesRoute />} />
-        <Route path="signatures" element={<TabPlaceholder name="Signatures" />} />
+        <Route path="signatures" element={<SignaturesRoute />} />
         <Route path="documents" element={<DocumentsRoute />} />
         <Route path="jalons" element={<JalonsRoute />} />
         <Route path="activite" element={<ActiviteRoute />} />
