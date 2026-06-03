@@ -35,6 +35,40 @@ export interface AdminRpcMap {
     args: { p_invoice_id: string };
     returns: null;
   };
+  admin_create_project_step: {
+    args: {
+      p_project_id: string;
+      p_label: string;
+      p_step_order?: number | null;
+      p_status?: string;
+      p_description?: string | null;
+      p_date_start?: string | null;
+      p_date_planned_end?: string | null;
+      p_visible_to_client?: boolean;
+    };
+    returns: string;            // step id (uuid)
+  };
+  admin_update_project_step: {
+    args: {
+      p_step_id: string;
+      p_label?: string | null;
+      p_status?: string | null;
+      p_description?: string | null;
+      p_date_start?: string | null;
+      p_date_planned_end?: string | null;
+      p_date_actual_end?: string | null;
+      p_visible_to_client?: boolean | null;
+    };
+    returns: null;
+  };
+  admin_delete_project_step: {
+    args: { p_step_id: string };
+    returns: null;
+  };
+  admin_reorder_project_steps: {
+    args: { p_project_id: string; p_ordered_ids: string[] };
+    returns: null;
+  };
 }
 
 export async function adminRpc<K extends keyof AdminRpcMap & string>(
