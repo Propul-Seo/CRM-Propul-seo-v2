@@ -49,10 +49,11 @@ html.ps-light-surface #root {
   --ps-primary-subtle: #EDE9FE;
 
   /* ─── SEMANTIC ─────────────────────────────────────────── */
-  --ps-success: #16A34A;  --ps-success-subtle: #DCFCE7;
-  --ps-warning: #EA580C;  --ps-warning-subtle: #FFEDD5;
-  --ps-danger:  #DC2626;  --ps-danger-subtle:  #FEE2E2;
-  --ps-info:    #2563EB;  --ps-info-subtle:    #DBEAFE;
+  --ps-success: #16A34A;  --ps-success-subtle: #DCFCE7;  --ps-success-text: #15803D;
+  --ps-warning: #EA580C;  --ps-warning-subtle: #FFEDD5;  --ps-warning-text: #B45309;
+  --ps-danger:  #DC2626;  --ps-danger-subtle:  #FEE2E2;  --ps-danger-text:  #B91C1C;
+  --ps-info:    #2563EB;  --ps-info-subtle:    #DBEAFE;  --ps-info-text:    #1D4ED8;
+  --ps-success-gradient: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
 
   /* ─── BORDERS / SHADOWS ────────────────────────────────── */
   --ps-border: #E4E4E7;
