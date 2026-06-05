@@ -20,6 +20,12 @@ html.ps-light-surface #root {
   background: #FAFAFA !important;
 }
 
+html.ps-dark-surface,
+html.ps-dark-surface body,
+html.ps-dark-surface #root {
+  background: #0A0A0B !important;
+}
+
 .propulspace-portal {
   /* ─── SURFACES ─────────────────────────────────────────── */
   --ps-bg: #FAFAFA;
@@ -113,6 +119,52 @@ html.ps-light-surface #root {
     radial-gradient(ellipse 60% 40% at 100% 0%, rgba(99, 102, 241, 0.05), transparent 50%),
     var(--ps-bg);
   background-attachment: fixed;
+}
+
+/* ─── DARK THEME MODIFIER (back-office admin) ──────────────
+   Ne ré-override QUE les valeurs des variables --ps-*. Tous les
+   utilitaires .ps-* (définis sous .propulspace-portal) héritent
+   automatiquement via var(). Appliqué sur la racine admin :
+   <div class="propulspace-portal ps-theme-dark">. */
+.propulspace-portal.ps-theme-dark {
+  --ps-bg: #0A0A0B;
+  --ps-bg-elevated: #161618;
+  --ps-bg-subtle: #202023;
+  --ps-bg-frosted: rgba(22, 22, 24, 0.72);
+  --ps-background: var(--ps-bg);
+  --ps-background-elevated: var(--ps-bg-elevated);
+  --ps-background-subtle: var(--ps-bg-subtle);
+
+  --ps-fg: #FAFAFA;
+  --ps-fg-secondary: #A1A1AA;
+  --ps-fg-muted: #71717A;
+  --ps-text-primary: var(--ps-fg);
+  --ps-text-secondary: var(--ps-fg-secondary);
+  --ps-text-muted: var(--ps-fg-muted);
+
+  --ps-primary: #8B5CF6;
+  --ps-primary-hover: #A78BFA;
+  --ps-primary-deep: #6D28D9;
+  --ps-primary-text: #C4B5FD;
+  --ps-primary-subtle: rgba(139, 92, 246, 0.14);
+
+  --ps-success-subtle: rgba(22, 163, 74, 0.16);  --ps-success-text: #4ADE80;
+  --ps-warning-subtle: rgba(234, 88, 12, 0.16);  --ps-warning-text: #FB923C;
+  --ps-danger-subtle:  rgba(220, 38, 38, 0.16);  --ps-danger-text:  #F87171;
+  --ps-info-subtle:    rgba(37, 99, 235, 0.16);  --ps-info-text:    #60A5FA;
+
+  --ps-border: #27272A;
+  --ps-border-soft: #1F1F22;
+  --ps-border-strong: #3F3F46;
+  --ps-shadow-card:     0 1px 2px rgba(0,0,0,.40), 0 1px 3px rgba(0,0,0,.30);
+  --ps-shadow-raised:   0 6px 16px -4px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04);
+  --ps-shadow-floating: 0 18px 44px -12px rgba(0,0,0,.65);
+
+  color-scheme: dark;
+  color: var(--ps-fg);
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(139, 92, 246, 0.10), transparent 60%),
+    var(--ps-bg);
 }
 
 .propulspace-portal * { border-color: var(--ps-border-soft); }
