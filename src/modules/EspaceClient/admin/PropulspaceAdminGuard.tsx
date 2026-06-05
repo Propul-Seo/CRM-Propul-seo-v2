@@ -18,7 +18,7 @@ export function PropulspaceAdminGuard({ children }: PropulspaceAdminGuardProps) 
 
   if (state.status === 'loading') {
     return (
-      <div className="propulspace-portal flex min-h-screen items-center justify-center">
+      <div className="propulspace-portal ps-theme-dark flex min-h-screen items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-[var(--ps-primary)]" />
       </div>
     );
@@ -30,7 +30,7 @@ export function PropulspaceAdminGuard({ children }: PropulspaceAdminGuardProps) 
 
   if (state.status === 'forbidden') {
     return (
-      <div className="propulspace-portal min-h-screen">
+      <div className="propulspace-portal ps-theme-dark min-h-screen">
         <StatusPage
           icon={ShieldAlert}
           tone="red"
@@ -42,8 +42,7 @@ export function PropulspaceAdminGuard({ children }: PropulspaceAdminGuardProps) 
     );
   }
 
-  // !bg : le CRM définit un thème sombre dans :root (pas seulement .dark), donc
-  // retirer la classe `dark` ne suffit pas — on force un fond clair opaque sur
-  // tout le back-office pour qu'il ne soit pas posé sur le fond sombre global.
+  // Le CRM pose un thème sombre dans :root ; on scope le back-office en
+  // ps-theme-dark (valeurs de tokens sombres) + un fond opaque via les tokens.
   return <div className="propulspace-portal ps-theme-dark min-h-screen bg-[var(--ps-bg)] text-[var(--ps-fg)]">{children}</div>;
 }
