@@ -48,10 +48,10 @@ export function PortalContactFab({ projectName }: PortalContactFabProps) {
         className="propulspace-portal rounded-t-2xl border-t border-[var(--ps-border-soft)] bg-white"
       >
         <SheetHeader className="text-left">
-          <SheetTitle className="text-[var(--ps-text-primary)]">
+          <SheetTitle className="text-[var(--ps-fg)]">
             Contacter {AGENCY_NAME}
           </SheetTitle>
-          <SheetDescription className="text-[var(--ps-text-secondary)]">
+          <SheetDescription className="text-[var(--ps-fg-secondary)]">
             Une question ? Choisissez votre moyen préféré — on répond en moins d'une heure ouvrée.
           </SheetDescription>
         </SheetHeader>
@@ -78,8 +78,8 @@ export function PortalContactFab({ projectName }: PortalContactFabProps) {
             <a href={mailtoHref}>
               <Mail className="h-5 w-5 text-[var(--ps-primary)]" />
               <span className="flex flex-col items-start text-left">
-                <span className="font-semibold text-[var(--ps-text-primary)]">Email</span>
-                <span className="text-xs text-[var(--ps-text-secondary)]">{CONTACT_EMAIL}</span>
+                <span className="font-semibold text-[var(--ps-fg)]">Email</span>
+                <span className="text-xs text-[var(--ps-fg-secondary)]">{CONTACT_EMAIL}</span>
               </span>
             </a>
           </Button>

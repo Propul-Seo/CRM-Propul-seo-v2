@@ -52,7 +52,7 @@ export function PortalTabBar({ activeTab, onTabChange, variant }: PortalTabBarPr
               className={cn(
                 'group relative flex flex-1 flex-col items-center justify-center gap-1 py-2.5 transition-colors duration-200',
                 'min-h-[60px] touch-manipulation',
-                active ? 'text-[var(--ps-primary-text)]' : 'text-[var(--ps-text-muted)]',
+                active ? 'text-[var(--ps-primary-text)]' : 'text-[var(--ps-fg-muted)]',
               )}
             >
               <span
@@ -60,7 +60,7 @@ export function PortalTabBar({ activeTab, onTabChange, variant }: PortalTabBarPr
                   'flex h-7 w-12 items-center justify-center rounded-full transition-all duration-300 [transition-timing-function:var(--ps-ease-out)]',
                   active
                     ? 'bg-[var(--ps-primary-subtle)] scale-100'
-                    : 'bg-transparent scale-95 group-hover:bg-[var(--ps-background-subtle)]',
+                    : 'bg-transparent scale-95 group-hover:bg-[var(--ps-bg-subtle)]',
                 )}
               >
                 <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.4 : 1.8} />
@@ -94,7 +94,7 @@ export function PortalTabBar({ activeTab, onTabChange, variant }: PortalTabBarPr
               'my-1.5',
               active
                 ? 'bg-[var(--ps-primary-subtle)] text-[var(--ps-primary-text)] shadow-[inset_0_0_0_1px_rgba(124,58,237,0.12)]'
-                : 'text-[var(--ps-text-secondary)] hover:bg-[var(--ps-background-subtle)] hover:text-[var(--ps-text-primary)]',
+                : 'text-[var(--ps-fg-secondary)] hover:bg-[var(--ps-bg-subtle)] hover:text-[var(--ps-fg)]',
             )}
           >
             <Icon className="h-[15px] w-[15px]" strokeWidth={active ? 2.4 : 1.9} />

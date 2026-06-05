@@ -4,10 +4,7 @@
  * Source of truth: Propulspace/design_handoff_propulspace/tokens/*.css
  * (Phase 2 design handoff v1). When the handoff changes, mirror here.
  *
- * Naming: short form (--ps-bg, --ps-fg) follows the handoff. Long-form
- * aliases (--ps-background, --ps-text-primary) kept for backward
- * compatibility with components written before the handoff merge — will
- * be migrated when each component is touched again.
+ * Naming: short form (--ps-bg, --ps-fg) follows the handoff.
  */
 
 /* Force le chrome de page (html/body/#root) en clair tant qu'un contexte
@@ -33,19 +30,10 @@ html.ps-dark-surface #root {
   --ps-bg-subtle: #F4F4F5;
   --ps-bg-frosted: rgba(255, 255, 255, 0.82);
 
-  /* legacy aliases */
-  --ps-background: var(--ps-bg);
-  --ps-background-elevated: var(--ps-bg-elevated);
-  --ps-background-subtle: var(--ps-bg-subtle);
-
   /* ─── TEXT ─────────────────────────────────────────────── */
   --ps-fg: #18181B;
   --ps-fg-secondary: #52525B;
   --ps-fg-muted: #A1A1AA;
-
-  --ps-text-primary: var(--ps-fg);
-  --ps-text-secondary: var(--ps-fg-secondary);
-  --ps-text-muted: var(--ps-fg-muted);
 
   /* ─── BRAND ────────────────────────────────────────────── */
   --ps-primary: #7C3AED;
@@ -131,16 +119,10 @@ html.ps-dark-surface #root {
   --ps-bg-elevated: #161618;
   --ps-bg-subtle: #202023;
   --ps-bg-frosted: rgba(22, 22, 24, 0.72);
-  --ps-background: var(--ps-bg);
-  --ps-background-elevated: var(--ps-bg-elevated);
-  --ps-background-subtle: var(--ps-bg-subtle);
 
   --ps-fg: #FAFAFA;
   --ps-fg-secondary: #A1A1AA;
   --ps-fg-muted: #8D8D95;
-  --ps-text-primary: var(--ps-fg);
-  --ps-text-secondary: var(--ps-fg-secondary);
-  --ps-text-muted: var(--ps-fg-muted);
 
   --ps-primary: #8B5CF6;
   --ps-primary-hover: #A78BFA;

@@ -57,18 +57,18 @@ export function PortalLayout({
           <div className="flex items-center gap-3">
             <BrandPill />
             <span className="hidden h-5 w-px bg-[var(--ps-border)] sm:block" />
-            <span className="hidden text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--ps-text-muted)] sm:inline">
+            <span className="hidden text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--ps-fg-muted)] sm:inline">
               Espace client
             </span>
           </div>
 
           <div className="flex items-center gap-2.5">
             <div className="hidden text-right sm:block">
-              <p className="text-[13px] font-semibold leading-tight tracking-tight text-[var(--ps-text-primary)]">
+              <p className="text-[13px] font-semibold leading-tight tracking-tight text-[var(--ps-fg)]">
                 {clientName}
               </p>
               {projectName && (
-                <p className="text-[11px] leading-tight text-[var(--ps-text-muted)]">
+                <p className="text-[11px] leading-tight text-[var(--ps-fg-muted)]">
                   {projectName}
                 </p>
               )}
@@ -87,7 +87,7 @@ export function PortalLayout({
               size="sm"
               onClick={onLogout}
               aria-label="Se déconnecter"
-              className="h-9 w-9 rounded-full p-0 text-[var(--ps-text-muted)] hover:bg-[var(--ps-background-subtle)] hover:text-[var(--ps-text-primary)]"
+              className="h-9 w-9 rounded-full p-0 text-[var(--ps-fg-muted)] hover:bg-[var(--ps-bg-subtle)] hover:text-[var(--ps-fg)]"
             >
               <LogOut className="h-[15px] w-[15px]" />
             </Button>
@@ -100,7 +100,7 @@ export function PortalLayout({
         {children}
       </main>
 
-      <footer className="border-t border-[var(--ps-border-soft)] bg-white/40 py-5 text-center text-[11px] text-[var(--ps-text-muted)]">
+      <footer className="border-t border-[var(--ps-border-soft)] bg-white/40 py-5 text-center text-[11px] text-[var(--ps-fg-muted)]">
         <span className="font-medium tracking-tight">{AGENCY_NAME}</span>
         <span className="mx-2 opacity-40">·</span>
         <a href="#" className="hover:underline">Mentions légales</a>
