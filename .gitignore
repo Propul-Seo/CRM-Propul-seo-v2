@@ -68,6 +68,10 @@ coverage/
 
 # Demo admin script (mot de passe en clair — NE JAMAIS COMMIT)
 scripts/create-demo-admin.mjs
+scripts/setup-demo-portal.mjs
+
+# Playwright MCP artefacts
+.playwright-mcp/
 
 # E2E
 .env.test
