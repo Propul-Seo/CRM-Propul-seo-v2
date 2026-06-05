@@ -4,6 +4,7 @@ export { Badge, StatusBadge, type BadgeTone } from './Badge';
 export { Progress } from './Progress';
 export { SectionHead } from './SectionHead';
 export { EmptyState } from './EmptyState';
+export { Skeleton } from './Skeleton';
 export { ActivityRow } from './ActivityRow';
 export { TimelineStep } from './TimelineStep';
 export { StatusPage, type StatusTone } from './StatusPage';
