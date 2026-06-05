@@ -137,7 +137,7 @@ html.ps-dark-surface #root {
 
   --ps-fg: #FAFAFA;
   --ps-fg-secondary: #A1A1AA;
-  --ps-fg-muted: #71717A;
+  --ps-fg-muted: #8D8D95;
   --ps-text-primary: var(--ps-fg);
   --ps-text-secondary: var(--ps-fg-secondary);
   --ps-text-muted: var(--ps-fg-muted);
@@ -150,8 +150,8 @@ html.ps-dark-surface #root {
 
   --ps-success-subtle: rgba(22, 163, 74, 0.16);  --ps-success-text: #4ADE80;
   --ps-warning-subtle: rgba(234, 88, 12, 0.16);  --ps-warning-text: #FB923C;
-  --ps-danger-subtle:  rgba(220, 38, 38, 0.16);  --ps-danger-text:  #F87171;
-  --ps-info-subtle:    rgba(37, 99, 235, 0.16);  --ps-info-text:    #60A5FA;
+  --ps-danger-subtle:  rgba(220, 38, 38, 0.16);  --ps-danger-text:  #FCA5A5;
+  --ps-info-subtle:    rgba(37, 99, 235, 0.16);  --ps-info-text:    #93C5FD;
 
   --ps-border: #27272A;
   --ps-border-soft: #1F1F22;
