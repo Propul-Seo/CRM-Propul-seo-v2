@@ -6,6 +6,8 @@ export { SectionHead } from './SectionHead';
 export { EmptyState } from './EmptyState';
 export { Skeleton } from './Skeleton';
 export { Alert, type AlertVariant } from './Alert';
+export { Metric } from './Metric';
+export { KpiBlock, type KpiBlockItem } from './KpiBlock';
 export { ActivityRow } from './ActivityRow';
 export { TimelineStep } from './TimelineStep';
 export { StatusPage, type StatusTone } from './StatusPage';
