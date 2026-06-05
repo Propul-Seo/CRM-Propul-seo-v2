@@ -13,12 +13,16 @@ interface PropulspaceAdminGuardProps {
 // Gate d'accès aux pages /admin/* Propul'Space. Aligné sur la fonction SQL
 // `propulspace.is_admin()` : rôles 'admin' ou 'manager'.
 export function PropulspaceAdminGuard({ children }: PropulspaceAdminGuardProps) {
-  useForcePortalSurface('dark');
+  // V0 : l'admin reste en thème clair tant que son contenu n'est pas migré sur
+  // les tokens (V2). Les fondations sombres (.ps-theme-dark + useForcePortalSurface
+  // 'dark') sont prêtes ; le flip se fera en V2 avec la refonte du contenu admin
+  // pour éviter un état "à moitié sombre" (cards/texte clairs sur fond sombre).
+  useForcePortalSurface('light');
   const state = usePropulspaceAdmin();
 
   if (state.status === 'loading') {
     return (
-      <div className="propulspace-portal ps-theme-dark flex min-h-screen items-center justify-center">
+      <div className="propulspace-portal flex min-h-screen items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-[var(--ps-primary)]" />
       </div>
     );
@@ -30,7 +34,7 @@ export function PropulspaceAdminGuard({ children }: PropulspaceAdminGuardProps) 
 
   if (state.status === 'forbidden') {
     return (
-      <div className="propulspace-portal ps-theme-dark min-h-screen">
+      <div className="propulspace-portal min-h-screen">
         <StatusPage
           icon={ShieldAlert}
           tone="red"
@@ -42,7 +46,6 @@ export function PropulspaceAdminGuard({ children }: PropulspaceAdminGuardProps) 
     );
   }
 
-  // Le CRM pose un thème sombre dans :root ; on scope le back-office en
-  // ps-theme-dark (valeurs de tokens sombres) + un fond opaque via les tokens.
-  return <div className="propulspace-portal ps-theme-dark min-h-screen bg-[var(--ps-bg)] text-[var(--ps-fg)]">{children}</div>;
+  // Fond opaque via les tokens (clair en V0). Passera en ps-theme-dark en V2.
+  return <div className="propulspace-portal min-h-screen bg-[var(--ps-bg)] text-[var(--ps-fg)]">{children}</div>;
 }
