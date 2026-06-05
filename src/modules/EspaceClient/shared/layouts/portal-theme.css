@@ -93,6 +93,7 @@ html.ps-light-surface #root {
 
   /* ─── TYPE ─────────────────────────────────────────────── */
   --ps-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --ps-font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   --ps-font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
 
   /* ─── ROOT STYLES ──────────────────────────────────────── */
@@ -129,6 +130,16 @@ html.ps-light-surface #root {
 .propulspace-portal .ps-eyebrow { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ps-primary-text); }
 .propulspace-portal .ps-eyebrow-muted { color: var(--ps-fg-muted); }
 .propulspace-portal .ps-num     { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+.propulspace-portal .ps-display,
+.propulspace-portal .ps-h1,
+.propulspace-portal .ps-h2,
+.propulspace-portal .ps-h3 { font-family: var(--ps-font-display); }
+.propulspace-portal .ps-metric {
+  font-family: var(--ps-font-display);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  font-size: 26px; line-height: 1; font-weight: 600; letter-spacing: -0.02em;
+}
 
 /* ─── SURFACES & EFFECTS ───────────────────────────────── */
 .propulspace-portal .ps-surface {
