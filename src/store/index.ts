@@ -22,15 +22,25 @@ export const useStore = create<Store>()(
     }),
     {
       name: 'propulseo-store',
+      version: 1,
+      // SP0 : projects/accountingData ne sont plus persistés (source de vérité = Supabase).
+      // migrate purge l'ancien cache localStorage (version 0) pour éviter des données stale.
+      migrate: (persisted, version) => {
+        if (version < 1 && persisted && typeof persisted === 'object') {
+          const rest = { ...(persisted as Partial<Store>) };
+          delete rest.projects;
+          delete rest.accountingData;
+          return rest as Store;
+        }
+        return persisted as Store;
+      },
       partialize: (state) => ({
         // Don't persist Supabase data, it will be loaded fresh each time
         currentUser: state.currentUser,
         darkMode: state.darkMode,
         showCompletedTasks: state.showCompletedTasks,
         sidebarCollapsed: state.sidebarCollapsed,
-        // Keep accounting data as it's local
-        accountingData: state.accountingData,
-        projects: state.projects,
+        // projects + accountingData retirés en SP0 : rechargés depuis Supabase à chaque montage
         // Don't persist chat data - will come from Supabase
         // Keep calendar sync settings
         calendarSyncSettings: state.calendarSyncSettings,
