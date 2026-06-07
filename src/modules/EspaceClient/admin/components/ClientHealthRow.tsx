@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Badge, type BadgeTone } from '@/modules/EspaceClient/shared/components';
 import type { AdminClientHealth } from '../hooks/useAdminClients';
+import { useAdminBasePath } from '@/modules/EspaceClient/admin/AdminBasePathContext';
 
 function deriveStatus(c: AdminClientHealth): { label: string; tone: BadgeTone } {
   if (!c.portal_activated_at) return { label: 'Pas de portail', tone: 'gray' };
@@ -12,10 +13,11 @@ function deriveStatus(c: AdminClientHealth): { label: string; tone: BadgeTone } 
 
 export function ClientHealthRow({ client }: { client: AdminClientHealth }) {
   const navigate = useNavigate();
+  const { basePath } = useAdminBasePath();
   const status = deriveStatus(client);
   return (
     <button
-      onClick={() => navigate(`/admin/propulspace/clients/${client.project_id}`)}
+      onClick={() => navigate(`${basePath}/clients/${client.project_id}`)}
       className="w-full flex items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white px-4 py-3 text-left hover:border-violet-300 hover:bg-violet-50/40 transition"
     >
       <div className="min-w-0">

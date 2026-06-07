@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAdminBasePath } from '@/modules/EspaceClient/admin/AdminBasePathContext';
 import { Phone, Mail, Building2, ExternalLink, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
@@ -22,6 +23,7 @@ interface LeadDetailSheetProps {
 export function LeadDetailSheet({ lead, open, onOpenChange, onAction }: LeadDetailSheetProps) {
   const [disqOpen, setDisqOpen] = useState(false);
   const navigate = useNavigate();
+  const { basePath } = useAdminBasePath();
   if (!lead) return null;
 
   async function markAsContacted() {
@@ -93,7 +95,7 @@ export function LeadDetailSheet({ lead, open, onOpenChange, onAction }: LeadDeta
             {lead.converted_to_project_id && (
               <button
                 type="button"
-                onClick={() => navigate(`/admin/propulspace/clients/${lead.converted_to_project_id}`)}
+                onClick={() => navigate(`${basePath}/clients/${lead.converted_to_project_id}`)}
                 className="rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white hover:bg-violet-700"
               >
                 Ouvrir le portail client →

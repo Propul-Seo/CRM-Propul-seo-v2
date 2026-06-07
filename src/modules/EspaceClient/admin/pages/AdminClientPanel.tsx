@@ -1,4 +1,5 @@
 import { Routes, Route, useParams, Link } from 'react-router-dom';
+import { useAdminBasePath } from '@/modules/EspaceClient/admin/AdminBasePathContext';
 import { AdminClientTabs } from '../components/AdminClientTabs';
 import { InvoicesTab } from '../components/InvoicesTab';
 import { ProjectStepsTab } from '../components/ProjectStepsTab';
@@ -72,9 +73,10 @@ function SignaturesRoute() {
 }
 
 export function AdminClientPanel() {
+  const { basePath } = useAdminBasePath();
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 space-y-6">
-      <Link to="/admin/propulspace/clients" className="text-sm text-violet-700 hover:underline">← Tous les clients</Link>
+      <Link to={`${basePath}/clients`} className="text-sm text-violet-700 hover:underline">← Tous les clients</Link>
       <AdminClientTabs />
       <Routes>
         <Route index element={<OverviewTab />} />

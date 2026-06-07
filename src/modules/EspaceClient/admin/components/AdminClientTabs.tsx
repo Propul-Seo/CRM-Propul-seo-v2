@@ -1,4 +1,5 @@
 import { NavLink, useParams } from 'react-router-dom';
+import { useAdminBasePath } from '@/modules/EspaceClient/admin/AdminBasePathContext';
 
 const TABS = [
   { key: '', label: 'Aperçu' },
@@ -11,7 +12,8 @@ const TABS = [
 
 export function AdminClientTabs() {
   const { projectId } = useParams();
-  const base = `/admin/propulspace/clients/${projectId}`;
+  const { basePath } = useAdminBasePath();
+  const base = `${basePath}/clients/${projectId}`;
   return (
     <nav className="flex gap-1 border-b border-gray-200">
       {TABS.map(t => (
