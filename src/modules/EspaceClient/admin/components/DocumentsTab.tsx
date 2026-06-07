@@ -58,20 +58,20 @@ export function DocumentsTab({ projectId }: { projectId: string }) {
           <div className="flex gap-1.5">
             {FILTERS.map((f, i) => (
               <button key={f.label} type="button" onClick={() => setFilter(i)}
-                className={`rounded-full px-3 py-1 text-xs font-medium ${filter === i ? 'bg-violet-600 text-white' : 'bg-gray-100 text-gray-600'}`}>
+                className={`rounded-full px-3 py-1 text-xs font-medium ${filter === i ? 'bg-primary text-white' : 'bg-surface-2 text-foreground/80'}`}>
                 {f.label}
               </button>
             ))}
           </div>
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-border">
             {filtered.map(doc => (
               <li key={doc.id} className="flex items-center gap-3 py-3">
                 <FileIcon mime={doc.file_mime_type ?? undefined} className="h-9 w-9" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-gray-900">{doc.name}</p>
-                  <p className="text-xs text-gray-500">{formatSize(doc.file_size_bytes)}{doc.version > 1 ? ` · v${doc.version}` : ''}</p>
+                  <p className="truncate text-sm font-semibold text-foreground">{doc.name}</p>
+                  <p className="text-xs text-muted-foreground">{formatSize(doc.file_size_bytes)}{doc.version > 1 ? ` · v${doc.version}` : ''}</p>
                 </div>
-                <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${doc.visible_to_client ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-500'}`}>
+                <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${doc.visible_to_client ? 'bg-emerald-500/10 text-emerald-300' : 'bg-surface-2 text-muted-foreground'}`}>
                   {doc.visible_to_client ? 'Visible client' : 'Masqué'}
                 </span>
                 <Button variant="ghost" size="icon" title="Télécharger" onClick={() => void downloadDocument(doc)}><Download className="h-4 w-4" /></Button>

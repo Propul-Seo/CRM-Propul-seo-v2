@@ -52,18 +52,18 @@ export function ProjectStepsTab({ projectId }: { projectId: string }) {
         loading={loading} error={error} actionError={actionError}
         isEmpty={steps.length === 0} emptyIcon={ListChecks} emptyTitle="Aucun jalon" emptyBody="Ajoutez la première étape du projet."
       >
-        <ul className="divide-y divide-gray-100">
+        <ul className="divide-y divide-border">
           {steps.map((step, i) => (
             <li key={step.id} className="flex items-center gap-3 py-3">
               <div className="flex flex-col">
-                <button type="button" className="text-gray-400 hover:text-gray-700 disabled:opacity-30" disabled={i === 0 || reordering} onClick={() => move(i, -1)} title="Monter"><ArrowUp className="h-4 w-4" /></button>
-                <button type="button" className="text-gray-400 hover:text-gray-700 disabled:opacity-30" disabled={i === steps.length - 1 || reordering} onClick={() => move(i, 1)} title="Descendre"><ArrowDown className="h-4 w-4" /></button>
+                <button type="button" className="text-muted-foreground hover:text-foreground/80 disabled:opacity-30" disabled={i === 0 || reordering} onClick={() => move(i, -1)} title="Monter"><ArrowUp className="h-4 w-4" /></button>
+                <button type="button" className="text-muted-foreground hover:text-foreground/80 disabled:opacity-30" disabled={i === steps.length - 1 || reordering} onClick={() => move(i, 1)} title="Descendre"><ArrowDown className="h-4 w-4" /></button>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-gray-900">{step.label}{!step.visible_to_client && <span className="ml-2 text-xs text-gray-400">Masqué</span>}</p>
-                {step.description && <p className="truncate text-xs text-gray-500">{step.description}</p>}
+                <p className="text-sm font-semibold text-foreground">{step.label}{!step.visible_to_client && <span className="ml-2 text-xs text-muted-foreground">Masqué</span>}</p>
+                {step.description && <p className="truncate text-xs text-muted-foreground">{step.description}</p>}
               </div>
-              <select className="rounded border border-gray-200 px-2 py-1 text-xs" value={step.status} disabled={busyId === step.id} onChange={e => onStatus(step, e.target.value)}>
+              <select className="rounded border border-border px-2 py-1 text-xs" value={step.status} disabled={busyId === step.id} onChange={e => onStatus(step, e.target.value)}>
                 {STEP_STATUSES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
               <StatusBadge status={step.status} />

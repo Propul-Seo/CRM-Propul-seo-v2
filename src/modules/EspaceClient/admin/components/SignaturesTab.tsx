@@ -41,12 +41,12 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
         loading={loading} error={error} actionError={actionError}
         isEmpty={signatures.length === 0} emptyIcon={PenLine} emptyTitle="Aucune signature" emptyBody="Envoyez un document à signer au client."
       >
-        <ul className="divide-y divide-gray-100">
+        <ul className="divide-y divide-border">
           {signatures.map(sig => (
             <li key={sig.id} className="flex items-center gap-3 py-3">
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-gray-900">{sig.name}<span className="ml-2 text-xs text-gray-400">{TYPE_LABEL[sig.signature_type] ?? sig.signature_type}</span></p>
-                <p className="text-xs text-gray-500">
+                <p className="text-sm font-semibold text-foreground">{sig.name}<span className="ml-2 text-xs text-muted-foreground">{TYPE_LABEL[sig.signature_type] ?? sig.signature_type}</span></p>
+                <p className="text-xs text-muted-foreground">
                   {sig.sent_at ? `Envoyé le ${formatDate(sig.sent_at)}` : ''}
                   {sig.signed_at ? ` · Signé le ${formatDate(sig.signed_at)}` : ''}
                 </p>

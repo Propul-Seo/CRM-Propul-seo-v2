@@ -47,15 +47,15 @@ export function ActivityTab({ projectId }: { projectId: string }) {
         <div className="flex gap-1.5">
           {FILTERS.map(f => (
             <button key={f.label} type="button" onClick={() => setResourceType(f.value)}
-              className={`rounded-full px-3 py-1 text-xs font-medium ${resourceType === f.value ? 'bg-violet-600 text-white' : 'bg-gray-100 text-gray-600'}`}>
+              className={`rounded-full px-3 py-1 text-xs font-medium ${resourceType === f.value ? 'bg-primary text-white' : 'bg-surface-2 text-foreground/80'}`}>
               {f.label}
             </button>
           ))}
         </div>
         {!loading && rows.length === 0 ? (
-          <p className="py-8 text-center text-sm text-gray-400">Aucune activité pour ce filtre.</p>
+          <p className="py-8 text-center text-sm text-muted-foreground">Aucune activité pour ce filtre.</p>
         ) : (
-          <ul className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white">
+          <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface-2">
             {rows.map(r => {
               const meta = RESOURCE_META[r.resource_type] ?? { icon: Activity, tint: 'gray' as BadgeTone, noun: r.resource_type };
               const name = rowName(r);
@@ -70,7 +70,7 @@ export function ActivityTab({ projectId }: { projectId: string }) {
                     onClick={() => setExpanded(expanded === r.id ? null : r.id)}
                   />
                   {expanded === r.id && r.diff && (
-                    <pre className="overflow-x-auto bg-gray-50 px-6 py-3 text-[11px] leading-relaxed text-gray-600">
+                    <pre className="overflow-x-auto bg-surface-2 px-6 py-3 text-[11px] leading-relaxed text-foreground/80">
                       {JSON.stringify(r.diff, null, 2)}
                     </pre>
                   )}
@@ -80,7 +80,7 @@ export function ActivityTab({ projectId }: { projectId: string }) {
           </ul>
         )}
         {hasMore && !loading && (
-          <button type="button" onClick={() => void loadMore()} className="mx-auto flex items-center gap-1 text-sm text-violet-700 hover:underline">
+          <button type="button" onClick={() => void loadMore()} className="mx-auto flex items-center gap-1 text-sm text-primary hover:underline">
             <ChevronDown className="h-4 w-4" /> Charger plus
           </button>
         )}
