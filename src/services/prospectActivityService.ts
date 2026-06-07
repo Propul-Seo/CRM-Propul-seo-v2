@@ -163,37 +163,13 @@ export class ProspectActivityService {
   }
 
   /**
-   * Synchroniser avec le calendrier centralisé
+   * Synchroniser avec le calendrier centralisé.
+   *
+   * SP0 : no-op volontaire. La synchronisation des prospect_activities vers le
+   * calendrier relève de SP5 (scope activitySyncService). Ce stub élimine l'import
+   * dynamique mort de '@/services/activityService' (module inexistant).
    */
-  static async syncToCalendar(activity: ProspectActivity): Promise<void> {
-    logger.debug('🔄 Syncing activity to calendar:', activity.id);
-    
-    try {
-      // Import du service d'activité du calendrier
-      const { addActivity } = await import('@/services/activityService');
-      
-      // Mapper les types pour le calendrier
-      const priorityMap = {
-        'low': 'basse' as const,
-        'medium': 'moyenne' as const,
-        'high': 'haute' as const,
-      };
-      
-      await addActivity({
-        title: activity.title,
-        description: activity.description || '',
-        date_utc: activity.activity_date,
-        type: 'prospect',
-        priority: priorityMap[activity.priority],
-        status: activity.status === 'completed' ? 'termine' : 'a_faire',
-        related_id: activity.id,
-        related_module: 'crm',
-      });
-      
-      logger.debug('✅ Activity synced to calendar');
-    } catch (error) {
-      logger.error('❌ Error syncing to calendar:', error);
-      // Ne pas faire échouer la création de l'activité si la sync échoue
-    }
+  static async syncToCalendar(_activity: ProspectActivity): Promise<void> {
+    logger.debug('🔄 syncToCalendar(): no-op (SP0, synchronisation réelle prévue en SP5)');
   }
 } 
