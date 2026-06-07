@@ -47,6 +47,6 @@ export function PropulspaceAdminGuard({ children }: PropulspaceAdminGuardProps) 
 
   const surfaceClass = mountedInShell
     ? 'propulspace-portal ps-theme-dark min-h-full' // tokens --ps-* en version sombre, fond hérité du CRM
-    : 'propulspace-portal min-h-screen bg-[var(--ps-bg)] text-[var(--ps-fg)]';
+    : 'propulspace-portal min-h-screen bg-[var(--ps-bg)] text-[var(--ps-fg)]'; // hors shell : thème clair historique (V0)
   return <div className={surfaceClass}>{children}</div>;
 }
