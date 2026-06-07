@@ -67,7 +67,7 @@ export function AdminSignatureForm({ open, onOpenChange, defaultEmail, onSubmit 
           <div><Label>Email du signataire</Label><Input type="email" value={signerEmail} onChange={e => setSignerEmail(e.target.value)} /></div>
           <div><Label>Nom du signataire (optionnel)</Label><Input value={signerName} onChange={e => setSignerName(e.target.value)} /></div>
           <div><Label>Template DocuSeal (ID)</Label><Input value={templateId} onChange={e => setTemplateId(e.target.value)} placeholder="Ex. 12345" /></div>
-          {formError && <p className="text-sm text-red-600">{formError}</p>}
+          {formError && <p className="text-sm text-red-300">{formError}</p>}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>

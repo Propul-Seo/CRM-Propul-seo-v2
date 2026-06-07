@@ -96,7 +96,7 @@ export function LeadDetailSheet({ lead, open, onOpenChange, onAction }: LeadDeta
               <button
                 type="button"
                 onClick={() => navigate(`${basePath}/clients/${lead.converted_to_project_id}`)}
-                className="rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white hover:bg-violet-700"
+                className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary/90"
               >
                 Ouvrir le portail client →
               </button>
@@ -108,13 +108,13 @@ export function LeadDetailSheet({ lead, open, onOpenChange, onAction }: LeadDeta
               </Button>
             )}
             {(lead.status === 'submitted' || lead.status === 'contacted') && (
-              <Button onClick={markAsQualified} variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+              <Button onClick={markAsQualified} variant="outline" className="border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10">
                 <CheckCircle2 className="mr-1.5 h-4 w-4" />
                 Qualifier
               </Button>
             )}
             {lead.status !== 'unqualified' && lead.status !== 'converted' && (
-              <Button onClick={() => setDisqOpen(true)} variant="outline" className="border-red-200 text-red-700 hover:bg-red-50">
+              <Button onClick={() => setDisqOpen(true)} variant="outline" className="border-red-500/30 text-red-300 hover:bg-red-500/10">
                 <XCircle className="mr-1.5 h-4 w-4" />
                 Disqualifier
               </Button>

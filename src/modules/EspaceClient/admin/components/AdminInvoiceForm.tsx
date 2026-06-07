@@ -110,10 +110,10 @@ export function AdminInvoiceForm({ open, onOpenChange, onSubmit }: Props) {
               </div>
             ))}
           </div>
-          <div className="rounded-lg bg-gray-50 px-3 py-2 text-sm">
+          <div className="rounded-lg bg-surface-2 px-3 py-2 text-sm">
             Sous-total HT <strong>{subtotal.toFixed(2)} €</strong> · Total TTC <strong>{total.toFixed(2)} €</strong>
           </div>
-          {formError && <p className="text-sm text-red-600">{formError}</p>}
+          {formError && <p className="text-sm text-red-300">{formError}</p>}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => { reset(); onOpenChange(false); }}>Annuler</Button>

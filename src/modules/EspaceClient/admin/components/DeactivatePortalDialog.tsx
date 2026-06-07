@@ -60,7 +60,7 @@ export function DeactivatePortalDialog({
     <AlertDialog open={open} onOpenChange={(o) => !submitting && onOpenChange(o)}>
       <AlertDialogContent className="propulspace-portal max-w-md">
         <AlertDialogHeader>
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-700">
+          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-300">
             <AlertTriangle className="h-6 w-6" strokeWidth={2.2} />
           </div>
           <AlertDialogTitle className="text-center">
@@ -103,7 +103,7 @@ export function DeactivatePortalDialog({
           </div>
 
           {error && (
-            <div className="flex items-start gap-2 rounded-md bg-red-50 border border-red-200 px-3 py-2 text-[12px] text-red-800">
+            <div className="flex items-start gap-2 rounded-md bg-red-500/10 border border-red-500/30 px-3 py-2 text-[12px] text-red-300">
               <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>

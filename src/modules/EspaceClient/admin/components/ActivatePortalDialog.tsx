@@ -89,7 +89,7 @@ export function ActivatePortalDialog({
     <AlertDialog open={open} onOpenChange={(o) => !submitting && onOpenChange(o)}>
       <AlertDialogContent className="propulspace-portal max-w-md">
         <AlertDialogHeader>
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-violet-50 text-violet-700">
+          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Sparkles className="h-6 w-6" strokeWidth={2.2} />
           </div>
           <AlertDialogTitle className="text-center">
@@ -122,7 +122,7 @@ export function ActivatePortalDialog({
               </p>
             )}
             {email && !emailValid && (
-              <p className="text-[11px] text-red-600">Format email invalide.</p>
+              <p className="text-[11px] text-red-300">Format email invalide.</p>
             )}
           </div>
 
@@ -191,7 +191,7 @@ export function ActivatePortalDialog({
               checked={confirmed}
               onChange={(e) => setConfirmed(e.target.checked)}
               disabled={submitting}
-              className="mt-0.5 h-4 w-4 accent-violet-600"
+              className="mt-0.5 h-4 w-4 accent-[hsl(var(--primary))]"
             />
             <span className="text-[12px] text-[var(--ps-fg)]">
               J'ai vérifié cet email avec le client.
@@ -199,7 +199,7 @@ export function ActivatePortalDialog({
           </label>
 
           {error && (
-            <div className="flex items-start gap-2 rounded-md bg-red-50 border border-red-200 px-3 py-2 text-[12px] text-red-800">
+            <div className="flex items-start gap-2 rounded-md bg-red-500/10 border border-red-500/30 px-3 py-2 text-[12px] text-red-300">
               <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>

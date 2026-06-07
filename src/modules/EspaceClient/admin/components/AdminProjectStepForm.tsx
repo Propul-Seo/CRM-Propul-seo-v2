@@ -77,7 +77,7 @@ export function AdminProjectStepForm({ open, onOpenChange, initial, onSubmit }: 
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={visible} onChange={e => setVisible(e.target.checked)} /> Visible par le client
           </label>
-          {formError && <p className="text-sm text-red-600">{formError}</p>}
+          {formError && <p className="text-sm text-red-300">{formError}</p>}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>

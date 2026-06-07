@@ -35,7 +35,7 @@ export function DisqualifyLeadDialog({ open, onOpenChange, leadName, onConfirm }
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="propulspace-portal">
         <AlertDialogHeader>
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-700">
+          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-300">
             <AlertTriangle className="h-6 w-6" strokeWidth={2.2} />
           </div>
           <AlertDialogTitle className="text-center">

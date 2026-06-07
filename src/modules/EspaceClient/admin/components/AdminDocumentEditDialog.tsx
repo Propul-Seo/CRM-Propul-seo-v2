@@ -50,7 +50,7 @@ export function AdminDocumentEditDialog({ open, onOpenChange, doc, onSubmit }: P
           <div><Label>Nom</Label><Input value={name} onChange={e => setName(e.target.value)} /></div>
           <div><Label>Catégorie (optionnel)</Label><Input value={category} onChange={e => setCategory(e.target.value)} /></div>
           <div><Label>Description (optionnel)</Label><Input value={description} onChange={e => setDescription(e.target.value)} /></div>
-          {formError && <p className="text-sm text-red-600">{formError}</p>}
+          {formError && <p className="text-sm text-red-300">{formError}</p>}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
