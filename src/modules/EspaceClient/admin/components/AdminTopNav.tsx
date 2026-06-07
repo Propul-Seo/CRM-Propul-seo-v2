@@ -1,14 +1,18 @@
 import { NavLink } from 'react-router-dom';
-
-const LINKS = [
-  { to: '/admin/propulspace/clients', label: 'Clients' },
-  { to: '/admin/propulspace/leads', label: 'Leads' },
-];
+import { useAdminBasePath } from '@/modules/EspaceClient/admin/AdminBasePathContext';
 
 export function AdminTopNav() {
+  const { basePath, mountedInShell } = useAdminBasePath();
+  if (mountedInShell) return null; // la sidebar CRM remplace cette barre
+
+  const links = [
+    { to: `${basePath}/clients`, label: 'Clients' },
+    { to: `${basePath}/leads`, label: 'Leads' },
+  ];
+
   return (
     <nav className="mx-auto max-w-4xl px-4 pt-6 flex gap-2">
-      {LINKS.map(l => (
+      {links.map(l => (
         <NavLink
           key={l.to} to={l.to}
           className={({ isActive }) =>
