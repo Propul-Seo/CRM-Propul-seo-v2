@@ -33,10 +33,15 @@ async function loadAuthState(session: Session | null): Promise<PortalAuthState> 
   const email = session.user.email;
   if (!email) return { status: 'no-project', session, email: '' };
 
+  // R-009 — collision d'email (ADR-004/005 : pas de UNIQUE sur portal_client_email).
+  // `.limit(1).maybeSingle()` ne plante JAMAIS : il borne à 1 ligne avant le
+  // singularize, donc aucun PGRST116 « multiple rows ». Surtout PAS `.single()`,
+  // qui throw sur 0 résultat (cas client sans projet). Multi-projets = SP2.
   const { data, error } = await supabase
     .from('projects_v2')
     .select('id, name, client_name, status, portal_client_email')
     .eq('portal_client_email', email)
+    .limit(1)
     .maybeSingle();
 
   if (error || !data) return { status: 'no-project', session, email };
