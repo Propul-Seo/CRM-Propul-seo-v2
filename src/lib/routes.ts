@@ -16,6 +16,9 @@ export const routes = {
   communicationV3Production: '/communication-v3/production',
   communicationV3Kpi: '/communication-v3/kpi',
 
+  // Portails clients (back-office Propul'Space monté dans le shell)
+  portails: '/portails',
+
   // Procédures (wiki interne)
   procedures: '/procedures',
   procedureNew: '/procedures/new',

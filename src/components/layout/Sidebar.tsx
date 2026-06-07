@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Briefcase,
+  Building2,
   Calculator,
   Settings,
   PanelLeftClose,
@@ -33,7 +34,8 @@ interface NavItem {
   to: string;
   label: string;
   icon: LucideIcon;
-  permission: string;
+  permission?: string;
+  roles?: Array<User['role']>;
 }
 
 interface NavSection {
@@ -69,10 +71,12 @@ export function Sidebar() {
 
   const isAdmin = currentUserData?.role === 'admin';
 
-  const canAccessPage = (pagePermission: string) => {
+  const canAccessPage = (item: NavItem) => {
     if (!currentUserData) return true;
     if (isAdmin) return true;
-    return currentUserData[pagePermission] === true;
+    if (item.roles) return item.roles.includes(currentUserData.role);
+    if (item.permission) return currentUserData[item.permission] === true;
+    return true;
   };
 
   const toggleSection = (section: string) => {
@@ -100,6 +104,7 @@ export function Sidebar() {
       { to: routes.dashboard,             label: 'Dashboard',           icon: LayoutDashboard, permission: 'can_view_dashboard' },
       { to: routes.projectsV3,            label: 'Projets actifs',      icon: Briefcase,       permission: 'can_view_projects' },
       { to: routes.leadsV3,               label: 'CRM',                 icon: UserCheck,       permission: 'can_view_leads' },
+      { to: routes.portails,              label: 'Portails clients',    icon: Building2,       roles: ['admin', 'manager'] },
       { to: routes.procedures,            label: 'Procédures',          icon: BookOpen,        permission: 'can_view_procedures' },
       { to: routes.accounting,            label: 'Comptabilité',        icon: Calculator,      permission: 'can_view_finance' },
     ]
@@ -169,7 +174,7 @@ export function Sidebar() {
         isCollapsed ? "px-1.5" : "px-2.5"
       )}>
         {navigationItems.map((section, sectionIndex) => {
-          const hasAccessibleItems = section.items.some(item => canAccessPage(item.permission));
+          const hasAccessibleItems = section.items.some(item => canAccessPage(item));
           if (!hasAccessibleItems) return null;
 
           const hasTitle = Boolean(section.title);
@@ -195,7 +200,7 @@ export function Sidebar() {
               {(isExpanded || isCollapsed) && (
                 <div className="space-y-0.5">
                   {section.items.map((item) => {
-                    if (!canAccessPage(item.permission)) return null;
+                    if (!canAccessPage(item)) return null;
                     const Icon = item.icon;
 
                     return (

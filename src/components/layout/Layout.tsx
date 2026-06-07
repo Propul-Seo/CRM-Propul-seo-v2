@@ -26,6 +26,7 @@ const ProjectsV3Page = lazy(() => import('../../modules/ProjectsV3').then(m => (
 const LeadsV3Page = lazy(() => import('../../modules/LeadsV3').then(m => ({ default: m.LeadsV3Page })))
 const ProjectsV3CompletedPage = lazy(() => import('../../modules/ProjectsV3Completed').then(m => ({ default: m.ProjectsV3CompletedPage })))
 const DashboardV3 = lazy(() => import('../../modules/DashboardV3').then(m => ({ default: m.DashboardV3 })))
+const PortailsModule = lazy(() => import('../../modules/EspaceClient/admin/PortailsModule').then(m => ({ default: m.PortailsModule })))
 
 const ModuleLoader = () => (
   <div className="flex items-center justify-center h-64">
@@ -200,6 +201,9 @@ export function Layout() {
 
               {/* Procédures (wiki interne) */}
               <Route path="/procedures/*" element={wrap(ProceduresManager)} />
+
+              {/* Portails clients (back-office Propul'Space monté dans le shell) */}
+              <Route path="/portails/*" element={wrap(PortailsModule)} />
 
               {/* Fiches détail leads (fonctions mère utilisées par Leads V3) */}
               <Route path="/clients/:id" element={wrap(ClientDetailsRoute)} />
