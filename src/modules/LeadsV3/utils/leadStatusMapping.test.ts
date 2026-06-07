@@ -74,13 +74,13 @@ describe('Cohérence des mappings de statuts', () => {
     }
   })
 
-  it('SITE_WEB_STATUS_ORDER contient 6 statuts uniques', () => {
-    expect(SITE_WEB_STATUS_ORDER).toHaveLength(6)
-    expect(new Set(SITE_WEB_STATUS_ORDER).size).toBe(6)
+  it('SITE_WEB_STATUS_ORDER contient 7 statuts uniques', () => {
+    expect(SITE_WEB_STATUS_ORDER).toHaveLength(7)
+    expect(new Set(SITE_WEB_STATUS_ORDER).size).toBe(7)
   })
 
-  it('ERP_STATUS_ORDER contient 4 statuts uniques', () => {
-    expect(ERP_STATUS_ORDER).toHaveLength(4)
-    expect(new Set(ERP_STATUS_ORDER).size).toBe(4)
+  it('ERP_STATUS_ORDER contient 5 statuts uniques', () => {
+    expect(ERP_STATUS_ORDER).toHaveLength(5)
+    expect(new Set(ERP_STATUS_ORDER).size).toBe(5)
   })
 })
