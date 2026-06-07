@@ -7,6 +7,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { cn } from '@/lib/utils'
+import { useAdminPortalScope } from '@/modules/EspaceClient/admin/AdminBasePathContext'
 
 interface Props {
   open: boolean
@@ -26,6 +28,7 @@ export function DeactivatePortalDialog({
   clientEmail,
   onConfirm,
 }: Props) {
+  const portalScope = useAdminPortalScope()
   const [typedName, setTypedName] = useState('')
   const [reason, setReason] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -58,7 +61,7 @@ export function DeactivatePortalDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={(o) => !submitting && onOpenChange(o)}>
-      <AlertDialogContent className="propulspace-portal max-w-md">
+      <AlertDialogContent className={cn(portalScope, 'max-w-md')}>
         <AlertDialogHeader>
           <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-300">
             <AlertTriangle className="h-6 w-6" strokeWidth={2.2} />

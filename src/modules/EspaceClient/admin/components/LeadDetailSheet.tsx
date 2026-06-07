@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAdminBasePath } from '@/modules/EspaceClient/admin/AdminBasePathContext';
+import { useAdminBasePath, useAdminPortalScope } from '@/modules/EspaceClient/admin/AdminBasePathContext';
+import { cn } from '@/lib/utils';
 import { Phone, Mail, Building2, ExternalLink, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
@@ -24,6 +25,7 @@ export function LeadDetailSheet({ lead, open, onOpenChange, onAction }: LeadDeta
   const [disqOpen, setDisqOpen] = useState(false);
   const navigate = useNavigate();
   const { basePath } = useAdminBasePath();
+  const portalScope = useAdminPortalScope();
   if (!lead) return null;
 
   async function markAsContacted() {
@@ -50,7 +52,7 @@ export function LeadDetailSheet({ lead, open, onOpenChange, onAction }: LeadDeta
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="propulspace-portal w-full overflow-y-auto sm:max-w-2xl">
+      <SheetContent side="right" className={cn(portalScope, 'w-full overflow-y-auto sm:max-w-2xl')}>
         <SheetHeader>
           <div className="flex items-center gap-2">
             <SheetTitle className="flex-1">{lead.full_name}</SheetTitle>

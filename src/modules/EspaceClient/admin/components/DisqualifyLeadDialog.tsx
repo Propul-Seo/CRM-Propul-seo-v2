@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { useAdminPortalScope } from '@/modules/EspaceClient/admin/AdminBasePathContext';
 
 interface DisqualifyLeadDialogProps {
   open: boolean;
@@ -17,6 +18,7 @@ interface DisqualifyLeadDialogProps {
 // Vue 28 v2 — disqualifier un lead avec raison obligatoire (min 10 car.).
 // La raison est sauvegardée dans la colonne `notes` du lead.
 export function DisqualifyLeadDialog({ open, onOpenChange, leadName, onConfirm }: DisqualifyLeadDialogProps) {
+  const portalScope = useAdminPortalScope();
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -33,7 +35,7 @@ export function DisqualifyLeadDialog({ open, onOpenChange, leadName, onConfirm }
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="propulspace-portal">
+      <AlertDialogContent className={portalScope}>
         <AlertDialogHeader>
           <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-300">
             <AlertTriangle className="h-6 w-6" strokeWidth={2.2} />

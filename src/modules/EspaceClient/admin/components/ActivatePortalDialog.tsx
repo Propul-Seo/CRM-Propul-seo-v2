@@ -6,6 +6,8 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
+import { useAdminPortalScope } from '@/modules/EspaceClient/admin/AdminBasePathContext'
 
 export interface ActivatePortalPayload {
   email: string
@@ -40,6 +42,7 @@ export function ActivatePortalDialog({
   primaryContactName,
   onConfirm,
 }: Props) {
+  const portalScope = useAdminPortalScope()
   const hasPrimary = !!primaryContactName
   const [email, setEmail] = useState('')
   const [firstName, setFirstName] = useState('')
@@ -87,7 +90,7 @@ export function ActivatePortalDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={(o) => !submitting && onOpenChange(o)}>
-      <AlertDialogContent className="propulspace-portal max-w-md">
+      <AlertDialogContent className={cn(portalScope, 'max-w-md')}>
         <AlertDialogHeader>
           <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
             <Sparkles className="h-6 w-6" strokeWidth={2.2} />

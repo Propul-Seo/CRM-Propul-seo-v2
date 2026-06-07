@@ -29,3 +29,14 @@ export function AdminBasePathProvider({
 export function useAdminBasePath(): AdminBasePathValue {
   return useContext(AdminBasePathContext);
 }
+
+/**
+ * Classe de scope à poser sur la racine d'un dialog/sheet admin portalisé
+ * (Radix monte au niveau <body>, hors du conteneur de page). En shell CRM,
+ * ajoute `ps-theme-dark` pour que les tokens --ps-* passent en sombre et
+ * restent lisibles sur le fond sombre du CRM.
+ */
+export function useAdminPortalScope(): string {
+  const { mountedInShell } = useAdminBasePath();
+  return mountedInShell ? 'propulspace-portal ps-theme-dark' : 'propulspace-portal';
+}
