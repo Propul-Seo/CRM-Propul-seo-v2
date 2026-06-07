@@ -37,10 +37,6 @@ export { usePostsCRUD } from './usePostsCRUD';
 export { useSupabasePostMetrics, useKPIMonthlyOverview, useKPIDailyMetrics, useKPITopPosts } from './usePostMetricsQuery';
 export { usePostMetricsCRUD } from './usePostMetricsCRUD';
 
-// Client Communication hooks
-export { useSupabaseClientPosts, useSupabaseClientPostAssets, useSupabaseClientPostComments } from './useClientPostsQuery';
-export { useClientPostsCRUD } from './useClientPostsCRUD';
-
 // Personal Tasks hooks
 export { usePersonalTasks } from './usePersonalTasksQuery';
 export { usePersonalTasksCRUD } from './usePersonalTasksCRUD';
