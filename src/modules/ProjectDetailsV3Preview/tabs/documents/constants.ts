@@ -3,7 +3,7 @@ import {
 } from 'lucide-react'
 import type { DocumentCategory } from '@/types/project-v2'
 
-export const BUCKET = 'project-documents'
+export const BUCKET = 'propulspace-documents'
 
 export const CATEGORIES: Record<DocumentCategory, {
   label: string
@@ -50,9 +50,25 @@ export function formatSize(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} Mo`
 }
 
+// Déduit le bucket Storage à partir du file_url, en répliquant le CASE de la
+// vue 254 (l.70-74). Utilisé côté portail (DocumentsPage) pour signer la bonne
+// URL : les docs qualif vivent dans propulspace-uploads, les liens externes ne
+// sont pas dans Storage, le reste dans propulspace-documents.
+export function inferBucket(
+  file_url: string,
+): 'propulspace-documents' | 'propulspace-uploads' | 'external' {
+  if (file_url.startsWith('qualification/')) return 'propulspace-uploads'
+  if (file_url.startsWith('http')) return 'external'
+  return 'propulspace-documents'
+}
+
 export type DocSource = 'crm' | 'portal'
 export type DocBucket = 'project-documents' | 'propulspace-documents' | 'propulspace-uploads' | 'external'
 
+// Doc = forme normalisée consommée par toute l'UI (DocumentRow, aperçu, tri…).
+// Depuis SP4, la source est la vue admin propulspace_documents_admin_v2 ; ses
+// rows (file_url / file_size_bytes / version int…) sont mappées vers cette forme
+// dans DocumentsTabV3.fetchDocs. `bucket` vient désormais de la vue (colonne 288).
 export interface Doc {
   id: string
   project_id: string
@@ -68,4 +84,7 @@ export interface Doc {
   bucket: DocBucket
   description: string | null
   document_type: string | null
+  // SP4 : visibilité portail (toggle inline) + origine client (guard delete).
+  visible_to_client: boolean
+  uploaded_by_client: boolean
 }

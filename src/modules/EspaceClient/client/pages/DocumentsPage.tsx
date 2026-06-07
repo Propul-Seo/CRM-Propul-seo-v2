@@ -4,8 +4,7 @@ import { Hero, EmptyState, FileIcon, SectionHead } from '@/modules/EspaceClient/
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { usePortalDocuments, getSignedStorageUrl, type PortalDocument } from '../hooks/usePortalData'
-
-const STORAGE_BUCKET = 'propulspace-documents'
+import { inferBucket } from '@/modules/ProjectDetailsV3Preview/tabs/documents/constants'
 
 function formatSize(bytes: number | null): string {
   if (!bytes) return ''
@@ -14,7 +13,7 @@ function formatSize(bytes: number | null): string {
 }
 
 async function downloadDocument(doc: PortalDocument) {
-  const url = await getSignedStorageUrl(STORAGE_BUCKET, doc.file_url)
+  const url = await getSignedStorageUrl(inferBucket(doc.file_url), doc.file_url)
   if (!url) {
     alert('Impossible de générer le lien de téléchargement. Réessayez plus tard.')
     return
