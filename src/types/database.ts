@@ -3080,6 +3080,7 @@ export type Database = {
           id: string
           is_archived: boolean
           last_activity_at: string | null
+          legacy_project_id: string | null
           name: string
           next_action_due: string | null
           next_action_label: string | null
@@ -3142,6 +3143,7 @@ export type Database = {
           id?: string
           is_archived?: boolean
           last_activity_at?: string | null
+          legacy_project_id?: string | null
           name: string
           next_action_due?: string | null
           next_action_label?: string | null
@@ -3204,6 +3206,7 @@ export type Database = {
           id?: string
           is_archived?: boolean
           last_activity_at?: string | null
+          legacy_project_id?: string | null
           name?: string
           next_action_due?: string | null
           next_action_label?: string | null
