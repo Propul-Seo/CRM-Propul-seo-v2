@@ -4,6 +4,7 @@ import { formatDistanceToNow, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { CATEGORIES, formatSize, type Doc } from './constants'
 import { DocumentNotifyButton } from '@/components/propulspace/DocumentNotifyButton'
+import { Switch } from '@/components/ui/switch'
 
 interface ProjectMeta {
   name: string
@@ -22,11 +23,12 @@ interface Props {
   onAskDelete: (id: string) => void
   onCancelDelete: () => void
   onDelete: (doc: Doc) => void
+  onToggleVisibility: (doc: Doc, next: boolean) => void
 }
 
 export function DocumentRow({
   doc, canDelete, isAdmin, project, isConfirmingDelete,
-  onPreview, onDownload, onAskDelete, onCancelDelete, onDelete,
+  onPreview, onDownload, onAskDelete, onCancelDelete, onDelete, onToggleVisibility,
 }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
   const cat = CATEGORIES[doc.category] ?? CATEGORIES.other
@@ -57,6 +59,19 @@ export function DocumentRow({
       </span>
 
       <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+        {isAdmin && !doc.uploaded_by_client && (
+          <label
+            className="flex items-center gap-1.5 mr-1 cursor-pointer select-none"
+            title={doc.visible_to_client ? 'Visible par le client' : 'Masqué côté portail'}
+          >
+            <span className="text-[11px] text-[#9ca3af]">Portail</span>
+            <Switch
+              checked={doc.visible_to_client}
+              onCheckedChange={(next) => onToggleVisibility(doc, next)}
+              className="scale-75"
+            />
+          </label>
+        )}
         <button
           onClick={() => onDownload(doc)}
           title="Télécharger"

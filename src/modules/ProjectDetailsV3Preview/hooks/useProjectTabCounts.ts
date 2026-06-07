@@ -33,7 +33,7 @@ export function useProjectTabCounts(projectId: string): TabCounts {
         .select('id', { count: 'exact', head: true })
         .eq('project_id', projectId)
         .neq('status', 'done'),
-      v2.from('project_documents').select('id', { count: 'exact', head: true }).eq('project_id', projectId),
+      v2.from('propulspace_documents_admin').select('id', { count: 'exact', head: true }).eq('project_id', projectId),
       v2.from('project_briefs').select('id', { count: 'exact', head: true }).eq('project_id', projectId),
     ])
       .then(([acts, tasks, docs, brief]) => {

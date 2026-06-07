@@ -22,12 +22,13 @@ interface Props {
   onAskDelete: (id: string) => void
   onCancelDelete: () => void
   onDelete: (doc: Doc) => void
+  onToggleVisibility: (doc: Doc, next: boolean) => void
 }
 
 export function DocumentList(props: Props) {
   const {
     filter, visible, search, canDelete, isAdmin, project, confirmDeleteId,
-    onPreview, onDownload, onAskDelete, onCancelDelete, onDelete,
+    onPreview, onDownload, onAskDelete, onCancelDelete, onDelete, onToggleVisibility,
   } = props
 
   const label = filter === 'all'
@@ -62,6 +63,7 @@ export function DocumentList(props: Props) {
               onAskDelete={onAskDelete}
               onCancelDelete={onCancelDelete}
               onDelete={onDelete}
+              onToggleVisibility={onToggleVisibility}
             />
           ))}
         </div>
