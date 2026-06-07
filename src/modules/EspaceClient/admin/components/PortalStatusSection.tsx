@@ -147,7 +147,7 @@ export function PortalStatusSection({ project, isAdmin, suggestedEmail, primaryC
               )}
               <DropdownMenuItem
                 onClick={() => setDeactivateOpen(true)}
-                className="text-red-600 focus:text-red-700 focus:bg-red-50"
+                className="text-red-300 focus:text-red-300 focus:bg-red-500/10"
               >
                 <Power className="mr-2 h-4 w-4" />
                 Désactiver le portail

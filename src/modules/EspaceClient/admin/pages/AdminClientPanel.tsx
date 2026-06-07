@@ -13,16 +13,16 @@ function OverviewTab() {
   const { projectId } = useParams<{ projectId: string }>();
   const { project, loading, refresh } = useAdminProject(projectId);
   if (!projectId) return null;
-  if (loading) return <div className="py-6 text-sm text-gray-500">Chargement…</div>;
-  if (!project) return <div className="py-6 text-sm text-gray-500">Projet introuvable.</div>;
+  if (loading) return <div className="py-6 text-sm text-muted-foreground">Chargement…</div>;
+  if (!project) return <div className="py-6 text-sm text-muted-foreground">Projet introuvable.</div>;
   return (
     <div className="space-y-5 py-2">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900">{project.name}</h2>
-        {project.client_company && <p className="text-sm text-gray-500">{project.client_company}</p>}
-        {project.portal_client_email && <p className="text-sm text-gray-500">{project.portal_client_email}</p>}
+        <h2 className="text-lg font-semibold text-foreground">{project.name}</h2>
+        {project.client_company && <p className="text-sm text-muted-foreground">{project.client_company}</p>}
+        {project.portal_client_email && <p className="text-sm text-muted-foreground">{project.portal_client_email}</p>}
       </div>
-      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+      <div className="rounded-xl border border-border bg-surface-2 overflow-hidden">
         <PortalStatusSection
           project={{
             id: project.id,
@@ -76,7 +76,7 @@ export function AdminClientPanel() {
   const { basePath } = useAdminBasePath();
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 space-y-6">
-      <Link to={`${basePath}/clients`} className="text-sm text-violet-700 hover:underline">← Tous les clients</Link>
+      <Link to={`${basePath}/clients`} className="text-sm text-primary hover:underline">← Tous les clients</Link>
       <AdminClientTabs />
       <Routes>
         <Route index element={<OverviewTab />} />

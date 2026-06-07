@@ -78,8 +78,8 @@ export function PortalStateCard({ state, email, lastLoginAt }: Props) {
             {d.label}
             {relative && <span className="ml-1.5 text-[10px] font-normal opacity-70">· vu {relative}</span>}
           </p>
-          <p className="text-xs text-[#ede9fe] truncate flex items-center gap-1 mt-0.5">
-            <Mail className="h-3 w-3 text-[#9ca3af] shrink-0" />
+          <p className="text-xs text-foreground truncate flex items-center gap-1 mt-0.5">
+            <Mail className="h-3 w-3 text-muted-foreground shrink-0" />
             <span className="truncate">{email}</span>
           </p>
           {description && (

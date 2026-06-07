@@ -32,7 +32,7 @@ export function LeadCard({ lead, onClick }: LeadCardProps) {
               {lead.full_name}
             </h3>
             {lead.quality_score != null && (
-              <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10.5px] font-bold text-amber-700">
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10.5px] font-bold text-amber-300">
                 <Sparkles className="h-2.5 w-2.5" strokeWidth={2.5} />
                 {lead.quality_score}
               </span>

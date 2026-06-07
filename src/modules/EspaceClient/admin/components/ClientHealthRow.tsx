@@ -18,11 +18,11 @@ export function ClientHealthRow({ client }: { client: AdminClientHealth }) {
   return (
     <button
       onClick={() => navigate(`${basePath}/clients/${client.project_id}`)}
-      className="w-full flex items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white px-4 py-3 text-left hover:border-violet-300 hover:bg-violet-50/40 transition"
+      className="w-full flex items-center justify-between gap-4 rounded-lg border border-border bg-surface-2 px-4 py-3 text-left hover:border-primary/30 hover:bg-primary/10 transition"
     >
       <div className="min-w-0">
-        <div className="font-medium text-gray-900 truncate">{client.project_name}</div>
-        <div className="text-sm text-gray-500 truncate">{client.client_company ?? client.portal_client_email ?? '—'}</div>
+        <div className="font-medium text-foreground truncate">{client.project_name}</div>
+        <div className="text-sm text-muted-foreground truncate">{client.client_company ?? client.portal_client_email ?? '—'}</div>
       </div>
       <div className="flex items-center gap-3 shrink-0">
         {client.invoices_overdue > 0 && <Badge tone="red">{client.invoices_overdue} en retard</Badge>}

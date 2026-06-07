@@ -30,7 +30,7 @@ export function AdminTabScaffold({
   return (
     <div className="space-y-4 py-2">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-gray-700">{title}</h2>
+        <h2 className="text-sm font-semibold text-foreground/80">{title}</h2>
         {action && (
           <Button
             size="sm"
@@ -43,10 +43,10 @@ export function AdminTabScaffold({
         )}
       </div>
       {loading && (
-        <div className="py-6 text-sm text-gray-500"><Loader2 className="inline h-4 w-4 animate-spin" /> Chargement…</div>
+        <div className="py-6 text-sm text-muted-foreground"><Loader2 className="inline h-4 w-4 animate-spin" /> Chargement…</div>
       )}
-      {error && <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
-      {actionError && <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{actionError}</p>}
+      {error && <p className="rounded bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</p>}
+      {actionError && <p className="rounded bg-red-500/10 px-3 py-2 text-sm text-red-300">{actionError}</p>}
       {!loading && !error && isEmpty && <EmptyState icon={emptyIcon} title={emptyTitle} body={emptyBody} />}
       {!loading && !isEmpty && children}
     </div>

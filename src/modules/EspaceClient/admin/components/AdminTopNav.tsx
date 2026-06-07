@@ -16,7 +16,7 @@ export function AdminTopNav() {
         <NavLink
           key={l.to} to={l.to}
           className={({ isActive }) =>
-            `rounded-lg px-3 py-1.5 text-sm font-medium transition ${isActive ? 'bg-violet-100 text-violet-700' : 'text-gray-500 hover:text-gray-800'}`}
+            `rounded-lg px-3 py-1.5 text-sm font-medium transition ${isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground/80'}`}
         >
           {l.label}
         </NavLink>

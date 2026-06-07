@@ -24,10 +24,10 @@ export function AdminClientsPage() {
       <input
         value={q} onChange={e => setQ(e.target.value)} placeholder="Rechercher un client…"
         aria-label="Rechercher un client"
-        className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-violet-400 focus:outline-none"
+        className="w-full rounded-lg border border-border px-4 py-2 text-sm focus:border-primary/30 focus:outline-none"
       />
-      {loading && <div className="text-sm text-gray-500">Chargement…</div>}
-      {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+      {loading && <div className="text-sm text-muted-foreground">Chargement…</div>}
+      {error && <div className="rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
       {!loading && !error && filtered.length === 0 && (
         <EmptyState icon={Users} title="Aucun client" body="Les projets actifs apparaîtront ici." />
       )}

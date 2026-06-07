@@ -62,7 +62,7 @@ export function LeadsQualifiesPage() {
         </div>
 
         {error && (
-          <p className="rounded-md bg-red-50 px-3 py-2 text-[13px] text-red-700">{error}</p>
+          <p className="rounded-md bg-red-500/10 px-3 py-2 text-[13px] text-red-300">{error}</p>
         )}
         {loading && (
           <p className="text-[13px] text-[var(--ps-fg-muted)]">Chargement…</p>

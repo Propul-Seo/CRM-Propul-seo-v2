@@ -15,12 +15,12 @@ export function AdminClientTabs() {
   const { basePath } = useAdminBasePath();
   const base = `${basePath}/clients/${projectId}`;
   return (
-    <nav className="flex gap-1 border-b border-gray-200">
+    <nav className="flex gap-1 border-b border-border">
       {TABS.map(t => (
         <NavLink
           key={t.key} end={t.key === ''} to={t.key ? `${base}/${t.key}` : base}
           className={({ isActive }) =>
-            `px-3 py-2 text-sm border-b-2 -mb-px transition ${isActive ? 'border-violet-600 text-violet-700 font-medium' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
+            `px-3 py-2 text-sm border-b-2 -mb-px transition ${isActive ? 'border-primary text-primary font-medium' : 'border-transparent text-muted-foreground hover:text-foreground/80'}`}
         >
           {t.label}
         </NavLink>
