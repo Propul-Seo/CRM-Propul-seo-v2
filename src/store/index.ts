@@ -30,6 +30,8 @@ export const useStore = create<Store>()(
           const rest = { ...(persisted as Partial<Store>) };
           delete rest.projects;
           delete rest.accountingData;
+          // Zustand réhydrate les slices retirés depuis leurs valeurs par défaut
+          // (projects=[], accountingData=createInitialAccountingData()) → cast sûr.
           return rest as Store;
         }
         return persisted as Store;
