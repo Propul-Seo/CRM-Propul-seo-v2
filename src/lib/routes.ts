@@ -62,6 +62,11 @@ export const routePermissions: Array<{ path: string; permission: string }> = [
   { path: routes.personalTasks, permission: 'can_view_dashboard' },
   { path: routes.accounting, permission: 'can_view_finance' },
   { path: routes.settings, permission: 'can_view_settings' },
+  // NB : `routes.portails` n'est VOLONTAIREMENT pas listé ici (ni dans ADMIN_ONLY_PATHS).
+  // getPermissionForPath('/portails') renvoie donc `null` → le Layout laisse rendre, et
+  // l'accès (admin/manager) est filtré par `PropulspaceAdminGuard` côté module (vérif Supabase).
+  // Choix délibéré pour éviter une colonne de permission dédiée en base. Ne pas « corriger »
+  // en ajoutant /portails ici, et ne pas retirer la garde du module en croyant à un doublon.
 ]
 
 /**

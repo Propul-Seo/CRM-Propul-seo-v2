@@ -71,12 +71,16 @@ export function Sidebar() {
 
   const isAdmin = currentUserData?.role === 'admin';
 
+  // Accès d'une entrée de nav. Ordre : admin (voit tout) → `roles` (si défini, prime)
+  // → `permission` booléenne → public. Si un item définit `roles` ET `permission`,
+  // `roles` l'emporte (court-circuit). Un item sans `roles` NI `permission` est
+  // volontairement visible par tous (accès public assumé).
   const canAccessPage = (item: NavItem) => {
     if (!currentUserData) return true;
     if (isAdmin) return true;
     if (item.roles) return item.roles.includes(currentUserData.role);
     if (item.permission) return currentUserData[item.permission] === true;
-    return true;
+    return true; // ni roles ni permission = accès public intentionnel
   };
 
   const toggleSection = (section: string) => {
