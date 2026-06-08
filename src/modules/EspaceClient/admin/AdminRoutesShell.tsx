@@ -2,8 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AdminBasePathProvider } from './AdminBasePathContext';
 import { PropulspaceAdminGuard } from './PropulspaceAdminGuard';
 import { LeadsQualifiesPage } from './LeadsQualifiesPage';
-import { AdminClientsPage } from './pages/AdminClientsPage';
-import { AdminClientPanel } from './pages/AdminClientPanel';
+import { AdminCockpitPage } from './pages/AdminCockpitPage';
 
 interface AdminRoutesShellProps {
   basePath: string;
@@ -21,8 +20,9 @@ export function AdminRoutesShell({ basePath, mountedInShell }: AdminRoutesShellP
       <PropulspaceAdminGuard>
         <Routes>
           <Route index element={<Navigate to="clients" replace />} />
-          <Route path="clients" element={<AdminClientsPage />} />
-          <Route path="clients/:projectId/*" element={<AdminClientPanel />} />
+          {/* Cockpit 3 colonnes : capte la liste seule ET la sélection client. */}
+          <Route path="clients" element={<AdminCockpitPage />} />
+          <Route path="clients/:projectId/*" element={<AdminCockpitPage />} />
           <Route path="leads" element={<LeadsQualifiesPage />} />
         </Routes>
       </PropulspaceAdminGuard>

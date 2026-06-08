@@ -72,11 +72,9 @@ function SignaturesRoute() {
   return <SignaturesTab projectId={projectId} clientEmail={email} />;
 }
 
-export function AdminClientPanel() {
-  const { basePath } = useAdminBasePath();
+function AdminClientPanelContent() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 space-y-6">
-      <Link to={`${basePath}/clients`} className="text-sm text-primary hover:underline">← Tous les clients</Link>
+    <>
       <AdminClientTabs />
       <Routes>
         <Route index element={<OverviewTab />} />
@@ -86,6 +84,25 @@ export function AdminClientPanel() {
         <Route path="jalons" element={<JalonsRoute />} />
         <Route path="activite" element={<ActiviteRoute />} />
       </Routes>
+    </>
+  );
+}
+
+// `embedded` : rendu dans la colonne centrale du cockpit (pas de wrapper centré
+// ni de lien retour, qui sont assurés par AdminCockpitPage).
+export function AdminClientPanel({ embedded = false }: { embedded?: boolean } = {}) {
+  const { basePath } = useAdminBasePath();
+  if (embedded) {
+    return (
+      <div className="space-y-5 px-4 py-5">
+        <AdminClientPanelContent />
+      </div>
+    );
+  }
+  return (
+    <div className="mx-auto max-w-4xl px-4 py-8 space-y-6">
+      <Link to={`${basePath}/clients`} className="text-sm text-primary hover:underline">← Tous les clients</Link>
+      <AdminClientPanelContent />
     </div>
   );
 }
