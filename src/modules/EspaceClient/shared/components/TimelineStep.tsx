@@ -12,8 +12,8 @@ interface TimelineStepProps {
 const NODE_STYLE: Record<ProjectStepStatus, { bg: string; fg: string; ring: string }> = {
   upcoming:    { bg: 'bg-[var(--ps-bg-subtle)]',     fg: 'text-[var(--ps-fg-muted)]', ring: 'ring-[var(--ps-border)]' },
   in_progress: { bg: 'ps-brand-gradient',            fg: 'text-white',                ring: 'ring-[var(--ps-primary-subtle)]' },
-  completed:   { bg: 'bg-emerald-500',               fg: 'text-white',                ring: 'ring-emerald-100' },
-  blocked:     { bg: 'bg-red-500',                   fg: 'text-white',                ring: 'ring-red-100' },
+  completed:   { bg: 'bg-[var(--ps-success)]',       fg: 'text-white',                ring: 'ring-[var(--ps-success-subtle)]' },
+  blocked:     { bg: 'bg-[var(--ps-danger)]',        fg: 'text-white',                ring: 'ring-[var(--ps-danger-subtle)]' },
 };
 
 const ICON: Record<ProjectStepStatus, typeof Check> = {

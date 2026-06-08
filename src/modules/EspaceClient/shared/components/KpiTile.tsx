@@ -13,10 +13,10 @@ interface KpiTileProps {
 // Tints en classes Tailwind littérales pour que le purge les garde.
 const TINTS: Record<KpiTint, { bg: string; fg: string }> = {
   violet: { bg: 'bg-[var(--ps-primary-subtle)]', fg: 'text-[var(--ps-primary-text)]' },
-  blue:   { bg: 'bg-blue-50',                    fg: 'text-blue-700' },
-  green:  { bg: 'bg-emerald-50',                 fg: 'text-emerald-700' },
-  orange: { bg: 'bg-[var(--ps-warning-subtle)]', fg: 'text-orange-700' },
-  red:    { bg: 'bg-[var(--ps-danger-subtle)]',  fg: 'text-red-700' },
+  blue:   { bg: 'bg-[var(--ps-info-subtle)]',    fg: 'text-[var(--ps-info-text)]' },
+  green:  { bg: 'bg-[var(--ps-success-subtle)]', fg: 'text-[var(--ps-success-text)]' },
+  orange: { bg: 'bg-[var(--ps-warning-subtle)]', fg: 'text-[var(--ps-warning-text)]' },
+  red:    { bg: 'bg-[var(--ps-danger-subtle)]',  fg: 'text-[var(--ps-danger-text)]' },
 };
 
 export function KpiTile({ eyebrow, value, delta, icon: Icon, tint = 'violet' }: KpiTileProps) {

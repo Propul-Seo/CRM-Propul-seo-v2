@@ -18,7 +18,7 @@ export function Hero({ eyebrow, title, subtitle, phasePill }: HeroProps) {
       {eyebrow && (
         <p className="ps-eyebrow">{eyebrow}</p>
       )}
-      <h1 className="ps-gradient-text mt-1.5 text-[28px] font-bold leading-tight tracking-tight md:text-[34px]">
+      <h1 className="ps-h1 mt-1.5 text-[28px] leading-tight md:text-[34px] text-[var(--ps-fg)]">
         {title}
       </h1>
       {subtitle && (

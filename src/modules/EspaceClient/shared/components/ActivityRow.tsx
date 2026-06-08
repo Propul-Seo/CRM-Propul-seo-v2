@@ -12,11 +12,11 @@ interface ActivityRowProps {
 
 const TINTS: Record<BadgeTone, string> = {
   violet: 'bg-[var(--ps-primary-subtle)] text-[var(--ps-primary-text)]',
-  green:  'bg-emerald-50 text-emerald-700',
-  amber:  'bg-amber-50 text-amber-700',
-  red:    'bg-red-50 text-red-700',
-  blue:   'bg-blue-50 text-blue-700',
-  gray:   'bg-zinc-100 text-zinc-700',
+  green:  'bg-[var(--ps-success-subtle)] text-[var(--ps-success-text)]',
+  amber:  'bg-[var(--ps-warning-subtle)] text-[var(--ps-warning-text)]',
+  red:    'bg-[var(--ps-danger-subtle)] text-[var(--ps-danger-text)]',
+  blue:   'bg-[var(--ps-info-subtle)] text-[var(--ps-info-text)]',
+  gray:   'bg-[var(--ps-bg-subtle)] text-[var(--ps-fg-secondary)]',
 };
 
 export function ActivityRow({
