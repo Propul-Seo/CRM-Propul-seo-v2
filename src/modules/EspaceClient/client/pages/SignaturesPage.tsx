@@ -82,7 +82,7 @@ export function SignaturesPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedId(sig.id)}
-                        aria-current={active}
+                        aria-current={active ? 'true' : undefined}
                         className={`flex w-full items-center gap-4 px-6 py-3.5 text-left transition-colors ${
                           active
                             ? 'bg-[var(--ps-primary-subtle)]'

@@ -77,17 +77,18 @@ export function InvoicesPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const result = params.get('paiement');
+    let intervalId: ReturnType<typeof setInterval> | undefined;
     if (result === 'reussi') {
       setBanner({ kind: 'success' });
+      void refresh();
+      void refreshInstallments();
       let count = 0;
-      const id = setInterval(() => {
+      intervalId = setInterval(() => {
         void refresh();
         void refreshInstallments();
         count += 1;
-        if (count >= 4) clearInterval(id);
+        if (count >= 4 && intervalId) clearInterval(intervalId);
       }, 2000);
-      void refresh();
-      void refreshInstallments();
     } else if (result === 'annule') {
       setBanner({ kind: 'cancel' });
     }
@@ -97,6 +98,8 @@ export function InvoicesPage() {
       const newSearch = params.toString();
       window.history.replaceState({}, '', window.location.pathname + (newSearch ? `?${newSearch}` : ''));
     }
+    // Cleanup : stoppe le polling si on quitte la page avant la fin (fuite C-1).
+    return () => { if (intervalId) clearInterval(intervalId); };
   }, [refresh, refreshInstallments]);
 
   const installmentsByInvoice = useMemo(() => {
@@ -374,10 +377,9 @@ function InvoiceDetail({ invoice, installments, payingId, onPay, onDownload, onP
   const isPaid = invoice.status === 'paid';
   const isOverdue = invoice.status === 'overdue';
 
-  // Échéances payables (acompte/solde restant). On privilégie le paiement
-  // échéance par échéance dès qu'il existe des installments (code review M-5 :
-  // pas de "facture entière" si partiellement payée, pour éviter le trop-perçu).
-  const payableInstallments = installments.filter(i => i.status === 'pending' || i.status === 'overdue');
+  // On privilégie le paiement échéance par échéance dès qu'il existe des
+  // installments (garde anti-trop-perçu : pas de "facture entière" si elle est
+  // découpée en acomptes).
   const canPayWhole = (invoice.status === 'sent' || invoice.status === 'overdue') && installments.length === 0;
 
   return (

@@ -37,7 +37,7 @@ export function DashboardPage() {
   const documents  = usePortalDocuments();
 
   const loading =
-    steps.loading && invoices.loading && signatures.loading && documents.loading;
+    steps.loading || invoices.loading || signatures.loading || documents.loading;
 
   // ── KPIs dérivés ───────────────────────────────────────────────
   const stats = useMemo(() => {

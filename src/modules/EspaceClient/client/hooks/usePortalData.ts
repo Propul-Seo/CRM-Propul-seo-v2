@@ -41,7 +41,7 @@ function useList<T>(table: string, orderBy: string, ascending = false): ListResu
 }
 
 export interface PortalInvoice {
-  id: string; invoice_number: string; project_id: string; client_snapshot: Record<string, unknown>;
+  id: string; invoice_number: string | null; project_id: string; client_snapshot: Record<string, unknown>;
   is_deposit: boolean; amount_subtotal: string | number; vat_rate: string | number;
   amount_vat: string | number; amount_total: string | number; currency: string;
   line_items: Array<Record<string, unknown>>; status: string;

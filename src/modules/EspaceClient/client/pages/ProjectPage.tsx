@@ -51,7 +51,7 @@ export function ProjectPage() {
   const documents = usePortalDocuments()
   const { details } = usePortalProjectDetails()
 
-  const loading = steps.loading && documents.loading
+  const loading = steps.loading || documents.loading
   const rows = steps.rows
 
   // ── Dérivés ─────────────────────────────────────────────────────

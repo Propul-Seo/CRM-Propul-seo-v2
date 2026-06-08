@@ -15,10 +15,9 @@ interface Step {
 function buildSteps(sig: PortalSignature): Step[] {
   const { status } = sig;
   const isSigned = status === 'signed';
-  const isClosed = status === 'declined' || status === 'expired';
 
   const sent: StepState = sig.sent_at || status !== 'pending' ? 'done' : 'active';
-  const opened: StepState = isSigned ? 'done' : isClosed ? 'todo' : 'active';
+  const opened: StepState = isSigned ? 'done' : status === 'pending' ? 'active' : 'todo';
   const signedState: StepState = isSigned ? 'done' : 'todo';
   const doneState: StepState = isSigned ? 'done' : 'todo';
 
