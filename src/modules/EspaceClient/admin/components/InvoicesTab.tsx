@@ -67,7 +67,7 @@ export function InvoicesTab({ projectId, clientEmail }: { projectId: string; cli
             {inv.pdf_url && <Button variant="ghost" size="icon" onClick={() => onPdf(inv)} title="PDF"><FileText className="h-4 w-4" /></Button>}
             {inv.status === 'draft' && (
               <>
-                <Button variant="ghost" size="icon" title="Modifier" onClick={() => setEditInvoice(inv)}><Pencil className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" title="Modifier" onClick={() => setEditInvoice(inv)} disabled={busyId === inv.id}><Pencil className="h-4 w-4" /></Button>
                 <Button variant="ghost" size="icon" title="Supprimer" onClick={() => onDelete(inv)} disabled={busyId === inv.id}><Trash2 className="h-4 w-4" /></Button>
                 <Button size="sm" onClick={() => onSend(inv)} disabled={busyId === inv.id}>
                   {busyId === inv.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Send className="mr-1 h-4 w-4" />Envoyer</>}
@@ -79,7 +79,7 @@ export function InvoicesTab({ projectId, clientEmail }: { projectId: string; cli
                 <Button variant="outline" size="sm" onClick={() => onRemind(inv)} disabled={busyId === inv.id || !clientEmail} title={!clientEmail ? 'Email client requis' : undefined}>
                   {busyId === inv.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Bell className="mr-1 h-4 w-4" />Relancer</>}
                 </Button>
-                <Button variant="ghost" size="icon" title="Annuler" onClick={() => setCancelTarget(inv)}><Ban className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" title="Annuler" onClick={() => setCancelTarget(inv)} disabled={busyId === inv.id}><Ban className="h-4 w-4" /></Button>
               </>
             )}
           </li>

@@ -46,8 +46,8 @@ export function AdminInvoiceForm({ open, onOpenChange, onSubmit, editInvoice, on
   // Pré-remplissage en mode édition (les acomptes ne sont pas éditables ici — cf. spec D4).
   useEffect(() => {
     if (open && editInvoice) {
-      const items = (editInvoice.line_items as unknown as Array<{ label: string; amount: number }>) ?? [];
-      setLines(items.length ? items.map((l) => ({ label: l.label, amount: String(l.amount) })) : [{ label: '', amount: '' }]);
+      const items = (editInvoice.line_items as unknown as Array<{ label?: string; amount?: number }>) ?? [];
+      setLines(items.length ? items.map((l) => ({ label: l.label ?? '', amount: l.amount != null ? String(l.amount) : '' })) : [{ label: '', amount: '' }]);
       setVatRate(String(editInvoice.vat_rate ?? 0));
       setIssueDate(editInvoice.issue_date ?? todayISO());
       setDueDate(editInvoice.due_date ?? '');
