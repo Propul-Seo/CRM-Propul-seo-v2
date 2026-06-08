@@ -51,9 +51,14 @@ export function ProjectsV3Header({
             <div className="flex items-center gap-3 text-[13px] text-[#9ca3af]">
               <strong className="font-semibold text-[#ede9fe]">
                 {projectCount} projet{projectCount !== 1 ? 's' : ''}
+                {viewMode === 'list' ? ' en cours' : ''}
               </strong>
-              <span className="text-[#6b7280]">·</span>
-              <span>Glissez-déposez pour changer le statut</span>
+              {viewMode !== 'list' && (
+                <>
+                  <span className="text-[#6b7280]">·</span>
+                  <span>Glissez-déposez pour changer le statut</span>
+                </>
+              )}
             </div>
           </div>
           <button

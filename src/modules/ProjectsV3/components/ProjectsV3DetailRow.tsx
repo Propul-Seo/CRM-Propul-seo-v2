@@ -17,7 +17,9 @@ const CELL = 'px-3 py-2.5 align-middle'
 
 export function ProjectsV3DetailRow({ project, portalHealth, assigneeLabel, onRowClick }: Props) {
   const poles = getActivePoles(project.presta_type)
-  const score = clampScore(project.completion_score)
+  // Avancement = `progress` (même champ que les cartes V3 ProjectCardV3) pour
+  // éviter un % différent entre la vue cartes et la vue liste.
+  const score = clampScore(project.progress)
   const statusClass = getStatusStyle(project.status).badge
 
   return (

@@ -57,7 +57,7 @@ function sortValue(project: ProjectV2, key: DetailSortKey): number | string {
     case 'status':
       return project.status
     case 'completion':
-      return clampScore(project.completion_score)
+      return clampScore(project.progress)
     case 'budget':
       return project.budget ?? -1
     case 'end_date':

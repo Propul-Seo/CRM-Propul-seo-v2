@@ -161,7 +161,7 @@ export function ProjectsV3Page() {
   return (
     <div className="min-h-full bg-[#0a0814] text-[#ede9fe] p-8 max-w-[1600px] mx-auto">
       <ProjectsV3Header
-        projectCount={filteredProjects.length}
+        projectCount={viewMode === 'list' ? byColumn.en_cours.length : filteredProjects.length}
         filterUserId={filterUserId}
         onFilterUserChange={setFilterUserId}
         users={projectAssignees}
