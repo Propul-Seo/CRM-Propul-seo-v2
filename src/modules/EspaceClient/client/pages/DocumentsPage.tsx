@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { FileText, Download, Loader2, Search, X, Eye } from 'lucide-react'
-import { Hero, EmptyState, FileIcon, SectionHead, FilePreviewDialog } from '@/modules/EspaceClient/shared/components'
+import { Hero, EmptyState, FileIcon, SectionHead, FilePreviewDialog, Skeleton } from '@/modules/EspaceClient/shared/components'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { usePortalDocuments, getSignedStorageUrl, type PortalDocument } from '../hooks/usePortalData'
@@ -117,14 +117,23 @@ export function DocumentsPage() {
             })}
           </div>
         </div>
-        <SectionHead title={`${filtered.length} document${filtered.length > 1 ? 's' : ''}${filtered.length !== rows.length ? ` sur ${rows.length}` : ''}`} />
+        <SectionHead title={loading ? 'Documents' : `${filtered.length} document${filtered.length > 1 ? 's' : ''}${filtered.length !== rows.length ? ` sur ${rows.length}` : ''}`} />
         {loading && (
-          <div className="flex items-center justify-center py-8 text-[var(--ps-fg-muted)]">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </div>
+          <ul className="divide-y divide-[var(--ps-border-soft)]">
+            {[0, 1, 2, 3].map(i => (
+              <li key={i} className="flex items-center gap-4 px-6 py-3.5">
+                <Skeleton className="h-10 w-10 rounded-lg" />
+                <div className="min-w-0 flex-1">
+                  <Skeleton className="h-3.5 w-1/2 rounded-md" />
+                  <Skeleton className="mt-2 h-3 w-1/3 rounded-md" />
+                </div>
+                <Skeleton className="h-8 w-28 rounded-lg" />
+              </li>
+            ))}
+          </ul>
         )}
         {error && (
-          <p className="m-4 rounded-md bg-red-50 px-3 py-2 text-[13px] text-red-700">{error}</p>
+          <p className="m-4 rounded-xl border border-[var(--ps-danger-subtle)] bg-[var(--ps-danger-subtle)] px-3.5 py-2.5 text-[13px] text-[var(--ps-danger-text)]">{error}</p>
         )}
         {!loading && filtered.length === 0 && (
           <div className="p-6">

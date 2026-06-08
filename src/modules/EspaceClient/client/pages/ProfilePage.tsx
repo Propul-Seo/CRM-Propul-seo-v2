@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { UserRound, LogOut, Loader2, KeyRound, Save } from 'lucide-react'
+import { LogOut, Loader2, KeyRound, Save } from 'lucide-react'
 import { toast } from 'sonner'
-import { Hero, SectionHead } from '@/modules/EspaceClient/shared/components'
+import { Hero, SectionHead, StatusBadge } from '@/modules/EspaceClient/shared/components'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -87,12 +87,14 @@ export function ProfilePage() {
         <SectionHead title="Projet" />
         <dl className="grid grid-cols-1 gap-4 px-6 py-4 sm:grid-cols-2">
           <div>
-            <dt className="text-[11px] uppercase tracking-wider text-[var(--ps-fg-muted)]">Nom</dt>
-            <dd className="text-[13.5px] font-medium text-[var(--ps-fg)]">{project.name ?? '—'}</dd>
+            <dt className="ps-eyebrow ps-eyebrow-muted">Nom</dt>
+            <dd className="mt-1 text-[13.5px] font-medium text-[var(--ps-fg)]">{project.name ?? '—'}</dd>
           </div>
           <div>
-            <dt className="text-[11px] uppercase tracking-wider text-[var(--ps-fg-muted)]">Statut</dt>
-            <dd className="text-[13.5px] font-medium text-[var(--ps-fg)]">{project.status ?? '—'}</dd>
+            <dt className="ps-eyebrow ps-eyebrow-muted">Statut</dt>
+            <dd className="mt-1.5">
+              {project.status ? <StatusBadge status={project.status} /> : <span className="text-[13.5px] font-medium text-[var(--ps-fg)]">—</span>}
+            </dd>
           </div>
         </dl>
       </section>
@@ -125,8 +127,6 @@ export function ProfilePage() {
           Se déconnecter
         </Button>
       </section>
-
-      <UserRound className="hidden" aria-hidden />
     </div>
   )
 }
@@ -134,7 +134,7 @@ export function ProfilePage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <Label className="text-[11px] uppercase tracking-wider text-[var(--ps-fg-muted)] mb-1 block">{label}</Label>
+      <Label className="ps-eyebrow ps-eyebrow-muted mb-1.5 block">{label}</Label>
       {children}
     </div>
   )

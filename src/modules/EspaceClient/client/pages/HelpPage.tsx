@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronDown, HelpCircle, Mail, MessageSquare, Search, X, LayoutDashboard, FolderKanban, FileText, Receipt, PenLine } from 'lucide-react'
-import { Hero, SectionHead } from '@/modules/EspaceClient/shared/components'
+import { ChevronDown, HelpCircle, Mail, MessageSquare, Search, X, SearchX, LayoutDashboard, FolderKanban, FileText, Receipt, PenLine } from 'lucide-react'
+import { Hero, SectionHead, EmptyState } from '@/modules/EspaceClient/shared/components'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CONTACT_EMAIL, WHATSAPP_NUMBER, AGENCY_NAME } from '@/modules/EspaceClient/shared/constants'
@@ -72,7 +72,7 @@ export function HelpPage() {
               <Link
                 key={link.to}
                 to={link.to}
-                className="flex flex-col items-center gap-1.5 rounded-lg border border-[var(--ps-border-soft)] bg-[var(--ps-bg-subtle)]/50 px-3 py-3 text-center transition-colors hover:border-[var(--ps-primary-subtle)] hover:bg-[var(--ps-primary-subtle)]/30"
+                className="flex flex-col items-center gap-1.5 rounded-lg border border-[var(--ps-border-soft)] bg-[var(--ps-bg-subtle)] px-3 py-3 text-center transition-colors hover:border-[var(--ps-primary-subtle)] hover:bg-[var(--ps-primary-subtle)]"
               >
                 <Icon className="h-5 w-5 text-[var(--ps-primary-text)]" />
                 <span className="text-[12px] font-medium text-[var(--ps-fg)]">{link.label}</span>
@@ -105,9 +105,13 @@ export function HelpPage() {
           </div>
         </div>
         {filtered.length === 0 ? (
-          <p className="px-6 py-8 text-center text-[13px] text-[var(--ps-fg-muted)]">
-            Aucune réponse ne correspond à votre recherche.
-          </p>
+          <div className="p-6">
+            <EmptyState
+              icon={SearchX}
+              title="Aucune réponse trouvée"
+              body="Aucune question ne correspond à votre recherche. Essayez d'autres mots-clés ou contactez-nous directement."
+            />
+          </div>
         ) : (
           <ul className="divide-y divide-[var(--ps-border-soft)]">
             {filtered.map((item, idx) => {
@@ -142,7 +146,7 @@ export function HelpPage() {
           L'équipe {AGENCY_NAME} répond en moins d'une heure ouvrée.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Button asChild className="ps-brand-gradient text-white">
+          <Button asChild className="bg-[var(--ps-primary)] text-white hover:bg-[var(--ps-primary-hover)]">
             <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
               <MessageSquare className="mr-1.5 h-4 w-4" />
               WhatsApp
