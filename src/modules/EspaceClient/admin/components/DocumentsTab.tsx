@@ -1,12 +1,15 @@
 import { useMemo, useState } from 'react';
-import { Plus, Download, Eye, EyeOff, Pencil, Trash2, FolderOpen } from 'lucide-react';
+import { Plus, Download, Eye, EyeOff, Pencil, Trash2, FolderOpen, FileSearch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { FileIcon } from '@/modules/EspaceClient/shared/components';
+import { FileIcon, FilePreviewDialog } from '@/modules/EspaceClient/shared/components';
 import { AdminTabScaffold } from './AdminTabScaffold';
 import { AdminDocumentUpload } from './AdminDocumentUpload';
 import { AdminDocumentEditDialog } from './AdminDocumentEditDialog';
 import { useAdminDocuments } from '../hooks/useAdminDocuments';
+import { getAdminSignedUrl } from '../lib/adminStorage';
 import type { PortalDocument } from '@/modules/EspaceClient/client/hooks/usePortalData';
+
+const BUCKET = 'propulspace-documents';
 
 const FILTERS: Array<{ label: string; types: string[] | null }> = [
   { label: 'Tous', types: null },
@@ -23,6 +26,7 @@ export function DocumentsTab({ projectId }: { projectId: string }) {
   const { documents, loading, error, uploadDocument, updateDocument, deleteDocument, downloadDocument } = useAdminDocuments(projectId);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [editing, setEditing] = useState<PortalDocument | null>(null);
+  const [preview, setPreview] = useState<PortalDocument | null>(null);
   const [filter, setFilter] = useState(0);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -74,6 +78,7 @@ export function DocumentsTab({ projectId }: { projectId: string }) {
                 <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${doc.visible_to_client ? 'bg-emerald-500/10 text-emerald-300' : 'bg-surface-2 text-muted-foreground'}`}>
                   {doc.visible_to_client ? 'Visible client' : 'Masqué'}
                 </span>
+                <Button variant="ghost" size="icon" title="Aperçu" onClick={() => setPreview(doc)}><FileSearch className="h-4 w-4" /></Button>
                 <Button variant="ghost" size="icon" title="Télécharger" onClick={() => void downloadDocument(doc)}><Download className="h-4 w-4" /></Button>
                 <Button variant="ghost" size="icon" title={doc.visible_to_client ? 'Masquer au client' : 'Rendre visible'} disabled={busyId === doc.id} onClick={() => onToggle(doc)}>
                   {doc.visible_to_client ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -85,6 +90,13 @@ export function DocumentsTab({ projectId }: { projectId: string }) {
           </ul>
         </div>
       </AdminTabScaffold>
+      <FilePreviewDialog
+        open={preview !== null}
+        onOpenChange={(o) => { if (!o) setPreview(null); }}
+        name={preview?.name ?? ''}
+        mime={preview?.file_mime_type ?? null}
+        resolveUrl={() => preview ? getAdminSignedUrl(BUCKET, preview.file_url) : Promise.resolve(null)}
+      />
       <AdminDocumentUpload open={uploadOpen} onOpenChange={setUploadOpen} onSubmit={uploadDocument} />
       <AdminDocumentEditDialog
         open={editing !== null}

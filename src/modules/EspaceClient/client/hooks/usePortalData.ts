@@ -48,6 +48,7 @@ export interface PortalInvoice {
   issue_date: string; due_date: string; paid_at: string | null;
   stripe_payment_link_url: string | null; pdf_url: string | null;
   client_visible_notes: string | null; created_at: string;
+  title: string | null;
 }
 
 export interface PortalInstallment {

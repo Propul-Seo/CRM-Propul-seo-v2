@@ -3,6 +3,13 @@ import { v2, supabase } from '@/lib/supabase';
 import { adminRpc } from '../lib/adminRpc';
 import type { PortalInvoice, PortalInstallment } from '@/modules/EspaceClient/client/hooks/usePortalData';
 
+/** Facture telle que lue par l'admin via la vue `propulspace_invoices_admin_v2`
+ *  (toutes colonnes) : PortalInvoice + champs réservés admin. Cf. migration 296. */
+export interface AdminInvoice extends PortalInvoice {
+  cancellation_reason: string | null;
+  cancelled_at: string | null;
+}
+
 export interface CreateInvoiceInput {
   amountSubtotal: number;
   isDeposit: boolean;
@@ -11,6 +18,7 @@ export interface CreateInvoiceInput {
   issueDate: string;                     // 'YYYY-MM-DD'
   dueDate?: string | null;
   clientVisibleNotes?: string | null;
+  title?: string | null;                 // intitulé libre (ex. « Paiement 1/2 »)
   installments: Array<{ label: string; amount: number; due_date: string }>;
 }
 
@@ -20,10 +28,11 @@ export interface UpdateInvoiceInput {
   lineItems: Array<{ label: string; amount: number }>;
   dueDate?: string | null;
   clientVisibleNotes?: string | null;
+  title?: string | null;
 }
 
 interface UseAdminInvoicesResult {
-  invoices: PortalInvoice[];
+  invoices: AdminInvoice[];
   installmentsByInvoice: Map<string, PortalInstallment[]>;
   loading: boolean;
   error: string | null;
@@ -37,17 +46,17 @@ interface UseAdminInvoicesResult {
 }
 
 export function useAdminInvoices(projectId: string): UseAdminInvoicesResult {
-  const [invoices, setInvoices] = useState<PortalInvoice[]>([]);
+  const [invoices, setInvoices] = useState<AdminInvoice[]>([]);
   const [installmentsByInvoice, setMap] = useState<Map<string, PortalInstallment[]>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const inv = await v2.from('propulspace_invoices').select('*').eq('project_id', projectId).order('issue_date', { ascending: false });
+    const inv = await v2.from('propulspace_invoices_admin').select('*').eq('project_id', projectId).order('issue_date', { ascending: false });
     if (inv.error) { setError(inv.error.message); setInvoices([]); setMap(new Map()); setLoading(false); return; }
     setError(null);
-    const rows = (inv.data ?? []) as unknown as PortalInvoice[];
+    const rows = (inv.data ?? []) as unknown as AdminInvoice[];
     setInvoices(rows);
     const ids = rows.map(r => r.id);
     const map = new Map<string, PortalInstallment[]>();
@@ -75,6 +84,7 @@ export function useAdminInvoices(projectId: string): UseAdminInvoicesResult {
       p_due_date: input.dueDate ?? null,
       p_client_visible_notes: input.clientVisibleNotes ?? null,
       p_installments: input.installments,
+      p_title: input.title ?? null,
     });
     if (err) return { id: null, error: err.message };
     await refresh();
@@ -89,6 +99,7 @@ export function useAdminInvoices(projectId: string): UseAdminInvoicesResult {
       p_line_items: input.lineItems,
       p_due_date: input.dueDate ?? null,
       p_client_visible_notes: input.clientVisibleNotes ?? null,
+      p_title: input.title ?? null,
     });
     if (err) return { error: err.message };
     await refresh();

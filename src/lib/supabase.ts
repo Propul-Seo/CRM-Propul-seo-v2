@@ -141,6 +141,8 @@ const V2_TABLE_MAP: Record<string, string> = {
   project_documents: 'project_documents_v2',
   follow_ups: 'project_follow_ups_v2',
   invoices: 'project_invoices_v2',
+  // Vue admin dédiée (toutes colonnes, filtrée par is_admin()) — cf. migration 296.
+  propulspace_invoices_admin: 'propulspace_invoices_admin_v2',
   checklist_items: 'checklist_items_v2',
   // Tables sans suffixe _v2 dans public
   comm_tasks: 'comm_tasks',

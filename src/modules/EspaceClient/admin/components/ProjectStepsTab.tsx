@@ -8,6 +8,8 @@ import { STEP_STATUSES } from './tabConstants';
 import { useAdminProjectSteps } from '../hooks/useAdminProjectSteps';
 import type { PortalProjectStep } from '@/modules/EspaceClient/client/hooks/usePortalData';
 
+const fmtDate = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+
 export function ProjectStepsTab({ projectId }: { projectId: string }) {
   const { steps, loading, error, createStep, updateStep, deleteStep, reorder } = useAdminProjectSteps(projectId);
   const [formOpen, setFormOpen] = useState(false);
@@ -62,6 +64,15 @@ export function ProjectStepsTab({ projectId }: { projectId: string }) {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-foreground">{step.label}{!step.visible_to_client && <span className="ml-2 text-xs text-muted-foreground">Masqué</span>}</p>
                 {step.description && <p className="truncate text-xs text-muted-foreground">{step.description}</p>}
+                {(step.date_start || step.date_planned_end || step.date_actual_end) && (
+                  <p className="text-[11px] text-muted-foreground">
+                    {[
+                      step.date_start && `Début ${fmtDate(step.date_start)}`,
+                      step.date_planned_end && `Prévu ${fmtDate(step.date_planned_end)}`,
+                      step.date_actual_end && `Terminé ${fmtDate(step.date_actual_end)}`,
+                    ].filter(Boolean).join(' · ')}
+                  </p>
+                )}
               </div>
               <select className="rounded border border-border px-2 py-1 text-xs" value={step.status} disabled={busyId === step.id} onChange={e => onStatus(step, e.target.value)}>
                 {STEP_STATUSES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}

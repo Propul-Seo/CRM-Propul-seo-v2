@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { FileText, Download, Loader2, Search, X } from 'lucide-react'
-import { Hero, EmptyState, FileIcon, SectionHead } from '@/modules/EspaceClient/shared/components'
+import { FileText, Download, Loader2, Search, X, Eye } from 'lucide-react'
+import { Hero, EmptyState, FileIcon, SectionHead, FilePreviewDialog } from '@/modules/EspaceClient/shared/components'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { usePortalDocuments, getSignedStorageUrl, type PortalDocument } from '../hooks/usePortalData'
@@ -50,6 +50,7 @@ function extOf(name: string): string {
 export function DocumentsPage() {
   const { rows, loading, error } = usePortalDocuments()
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
+  const [preview, setPreview] = useState<PortalDocument | null>(null)
   const [filter, setFilter] = useState<string>('all')
   const [search, setSearch] = useState('')
 
@@ -149,6 +150,9 @@ export function DocumentsPage() {
                     {` · v${doc.version}`}
                   </p>
                 </div>
+                <Button size="sm" variant="ghost" onClick={() => setPreview(doc)} title="Aperçu">
+                  <Eye className="h-3.5 w-3.5" />
+                </Button>
                 <Button
                   size="sm"
                   variant="outline"
@@ -169,6 +173,19 @@ export function DocumentsPage() {
           </ul>
         )}
       </section>
+
+      <FilePreviewDialog
+        open={preview !== null}
+        onOpenChange={(o) => { if (!o) setPreview(null) }}
+        name={preview?.name ?? ''}
+        mime={preview?.file_mime_type ?? null}
+        resolveUrl={async () => {
+          if (!preview) return null
+          const bucket = inferBucket(preview.file_url)
+          if (bucket === 'external') return preview.file_url
+          return getSignedStorageUrl(bucket, preview.file_url)
+        }}
+      />
     </div>
   )
 }
