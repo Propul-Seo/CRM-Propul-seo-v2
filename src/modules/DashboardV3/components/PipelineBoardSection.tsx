@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Clock, Pause, Play, Sparkles, UsersRound, type LucideIcon } from 'lucide-react';
+import { Pause, Play, Sparkles, UsersRound, type LucideIcon } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { itemVariants } from '../lib/animations';
 import { statusToColumn, V3_COLUMN_LABELS, V3_COLUMN_ORDER, type V3Column } from '../../ProjectsV3/utils/statusMapping';
@@ -35,24 +35,18 @@ interface PipelineBoardSectionProps {
 }
 
 const PROJECT_COLUMN_ICONS: Record<V3Column, LucideIcon> = {
-  planification: Clock,
-  en_cours: Play,
-  en_pause: Pause,
+  actifs: Play,
+  inactifs: Pause,
   propulseo: Sparkles,
 };
 
 const PROJECT_COLUMN_STYLES: Record<V3Column, { accent: string; border: string; glow: string }> = {
-  planification: {
-    accent: 'text-violet-200',
-    border: 'border-violet-400/20',
-    glow: 'from-violet-400/12',
-  },
-  en_cours: {
+  actifs: {
     accent: 'text-emerald-300',
     border: 'border-emerald-400/20',
     glow: 'from-emerald-400/10',
   },
-  en_pause: {
+  inactifs: {
     accent: 'text-amber-300',
     border: 'border-amber-400/20',
     glow: 'from-amber-400/10',

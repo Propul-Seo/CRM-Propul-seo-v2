@@ -46,11 +46,11 @@ export function ProjectsV3DetailList({
 }: Props) {
   const [sort, setSort] = useState<DetailSort>({ key: 'last_activity', dir: 'desc' })
 
-  const enCours = useMemo(
-    () => projects.filter((p) => statusToColumn(p.status) === 'en_cours'),
+  const actifs = useMemo(
+    () => projects.filter((p) => statusToColumn(p.status) === 'actifs'),
     [projects],
   )
-  const rows = useMemo(() => sortProjects(enCours, sort), [enCours, sort])
+  const rows = useMemo(() => sortProjects(actifs, sort), [actifs, sort])
 
   const toggleSort = (key: DetailSortKey) => {
     setSort((prev) =>
@@ -60,10 +60,10 @@ export function ProjectsV3DetailList({
     )
   }
 
-  if (enCours.length === 0) {
+  if (actifs.length === 0) {
     return (
       <div className="rounded-[10px] border border-dashed border-[rgba(139,92,246,0.25)] bg-[#0f0b1e]/60 px-6 py-16 text-center">
-        <p className="text-[14px] font-semibold text-[#ede9fe]">Aucun projet « En cours »</p>
+        <p className="text-[14px] font-semibold text-[#ede9fe]">Aucun projet actif</p>
         <p className="mt-1 text-[12px] text-[#9ca3af]">
           Ajustez les filtres ou faites avancer un projet pour le voir ici.
         </p>

@@ -1,45 +1,46 @@
 import type { ProjectStatusV2 } from '@/types/project-v2'
 
 /**
- * Colonnes V3 : 3 statuts agrégés simplifiés.
+ * Colonnes V3 simplifiées (board « Projets actifs ») : 3 buckets.
+ *  - actifs    : projets réellement en production
+ *  - inactifs  : pas encore démarrés (planification) OU en pause
+ *  - propulseo : projets internes Propul'SEO
  */
-export type V3Column = 'planification' | 'en_cours' | 'en_pause' | 'propulseo'
+export type V3Column = 'actifs' | 'inactifs' | 'propulseo'
 
-export const V3_COLUMN_ORDER: V3Column[] = ['planification', 'en_cours', 'en_pause', 'propulseo']
+export const V3_COLUMN_ORDER: V3Column[] = ['actifs', 'inactifs', 'propulseo']
 
 export const V3_COLUMN_LABELS: Record<V3Column, string> = {
-  planification: 'Planification',
-  en_cours: 'En cours',
-  en_pause: 'En pause',
+  actifs: 'Actifs',
+  inactifs: 'Inactifs',
   propulseo: 'Projets Propulseo',
 }
 
 /**
  * Map statut V2 → colonne V3.
- * Les projets archivés (closed) et livrés sont exclus de la vue "en cours".
- * Pour rester aligné avec la V2 actuelle :
- *  - planification : prospect, brief_received, quote_sent
- *  - en_cours      : in_progress, review, delivered, maintenance
- *  - en_pause      : on_hold, closed
+ *  - actifs   : in_progress, review, delivered, maintenance (en production)
+ *  - inactifs : prospect, brief_received, quote_sent (planification) + on_hold (pause)
+ *  - propulseo: propulseo_internal
+ * Note : `closed` est exclu du board (vue « Projets terminés ») ; on le range dans
+ * `inactifs` par défaut au cas où il transiterait.
  */
 export function statusToColumn(status: ProjectStatusV2): V3Column {
   switch (status) {
-    case 'prospect':
-    case 'brief_received':
-    case 'quote_sent':
-      return 'planification'
     case 'in_progress':
     case 'review':
     case 'delivered':
     case 'maintenance':
-      return 'en_cours'
+      return 'actifs'
+    case 'prospect':
+    case 'brief_received':
+    case 'quote_sent':
     case 'on_hold':
     case 'closed':
-      return 'en_pause'
+      return 'inactifs'
     case 'propulseo_internal':
       return 'propulseo'
     default:
-      return 'en_cours'
+      return 'actifs'
   }
 }
 
@@ -49,9 +50,8 @@ export function statusToColumn(status: ProjectStatusV2): V3Column {
  */
 export function columnToDefaultStatus(column: V3Column): ProjectStatusV2 {
   switch (column) {
-    case 'planification': return 'brief_received'
-    case 'en_cours':      return 'in_progress'
-    case 'en_pause':      return 'on_hold'
-    case 'propulseo':     return 'propulseo_internal'
+    case 'actifs':    return 'in_progress'
+    case 'inactifs':  return 'on_hold'
+    case 'propulseo': return 'propulseo_internal'
   }
 }

@@ -120,9 +120,8 @@ export function ProjectsV3Page() {
 
   const byColumn = useMemo(() => {
     const acc: Record<V3Column, ProjectV2[]> = {
-      planification: [],
-      en_cours: [],
-      en_pause: [],
+      actifs: [],
+      inactifs: [],
       propulseo: [],
     }
     for (const p of filteredProjects) {
@@ -163,7 +162,7 @@ export function ProjectsV3Page() {
   return (
     <div className="min-h-full bg-[#0a0814] text-[#ede9fe] p-8 max-w-[1600px] mx-auto">
       <ProjectsV3Header
-        projectCount={viewMode === 'list' ? byColumn.en_cours.length : filteredProjects.length}
+        projectCount={viewMode === 'list' ? byColumn.actifs.length : filteredProjects.length}
         filterUserId={filterUserId}
         onFilterUserChange={setFilterUserId}
         users={projectAssignees}
@@ -193,7 +192,7 @@ export function ProjectsV3Page() {
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <div className="grid grid-cols-4 gap-5">
+        <div className="grid grid-cols-3 gap-5">
           {V3_COLUMN_ORDER.map(column => {
             const items = byColumn[column]
             const itemIds = items.map(p => p.id)

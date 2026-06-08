@@ -56,7 +56,7 @@ export function useDashboardData() {
     currentYearRevenue = 0;
   }
 
-  const activeProjectsCount = projects.filter(p => statusToColumn(p.status) !== 'en_pause').length;
+  const activeProjectsCount = projects.filter(p => statusToColumn(p.status) !== 'inactifs').length;
   const crmOfferLeads = siteWebCrm.leads.filter(lead => lead.normalized_status === 'offre_envoyee');
 
   const urgentTasks = (tasks as unknown as TaskShape[] | undefined)?.filter(

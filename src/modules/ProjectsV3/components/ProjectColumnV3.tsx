@@ -1,4 +1,4 @@
-import { Clock, Play, Pause, Inbox, Sparkles, type LucideIcon } from 'lucide-react'
+import { Play, Pause, Inbox, Sparkles, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
@@ -18,16 +18,14 @@ interface Props {
 }
 
 const COLUMN_ICONS: Record<V3Column, LucideIcon> = {
-  planification: Clock,
-  en_cours: Play,
-  en_pause: Pause,
+  actifs: Play,
+  inactifs: Pause,
   propulseo: Sparkles,
 }
 
 const COLUMN_ICON_COLORS: Record<V3Column, string> = {
-  planification: '#8B5CF6',
-  en_cours: '#10b981',
-  en_pause: '#f59e0b',
+  actifs: '#10b981',
+  inactifs: '#f59e0b',
   propulseo: '#ec4899',
 }
 

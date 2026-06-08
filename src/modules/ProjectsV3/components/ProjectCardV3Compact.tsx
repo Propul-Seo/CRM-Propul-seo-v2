@@ -9,9 +9,8 @@ interface Props {
 }
 
 const COLUMN_BORDER_COLORS: Record<V3Column, string> = {
-  planification: '#8B5CF6',
-  en_cours: '#10b981',
-  en_pause: '#f59e0b',
+  actifs: '#10b981',
+  inactifs: '#f59e0b',
   propulseo: '#ec4899',
 }
 
