@@ -23,4 +23,6 @@ export interface ActivityRecord<T extends string = string> {
   realizedAt?: string | null
   /** Actions futures / prochaines étapes — affichées dans un bloc « À venir ». */
   nextActions?: string | null
+  /** SP5 : l'activité est-elle exposée au portail client ? */
+  visibleToClient?: boolean
 }

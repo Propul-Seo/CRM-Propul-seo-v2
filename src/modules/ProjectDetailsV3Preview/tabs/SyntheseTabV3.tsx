@@ -51,6 +51,7 @@ export function SyntheseTabV3({ project, checklistProgress, onEdit }: Props) {
       is_auto: a.is_auto,
       realizedAt: meta.realized_at ?? null,
       nextActions: meta.next_actions ?? null,
+      visibleToClient: a.visible_to_client ?? false,
     }
   })
 
@@ -120,6 +121,17 @@ export function SyntheseTabV3({ project, checklistProgress, onEdit }: Props) {
                   : undefined
               }
               onDelete={isAdmin ? deleteActivity : undefined}
+              onToggleVisible={
+                isAdmin
+                  ? async (id, visible) => {
+                      try {
+                        await updateActivity(id, { visible_to_client: visible })
+                      } catch (err) {
+                        toast.error(err instanceof Error ? err.message : 'Impossible de changer la visibilité')
+                      }
+                    }
+                  : undefined
+              }
               emptyState={
                 <div className="text-center py-10 px-6">
                   <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(139,92,246,0.12)] border border-[rgba(139,92,246,0.25)] mb-4">

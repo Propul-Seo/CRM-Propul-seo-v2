@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileText, Pencil, Trash2, ChevronDown, ChevronRight } from 'lucide-react'
+import { FileText, Pencil, Trash2, ChevronDown, ChevronRight, Eye, EyeOff } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
@@ -32,9 +32,10 @@ interface ItemProps<T extends string> {
   styleMap: Record<T, TimelineStyle>
   onUpdate?: (id: string, updates: { type: T; content: string }) => Promise<void>
   onDelete?: (id: string) => Promise<void>
+  onToggleVisible?: (id: string, visible: boolean) => Promise<void>
 }
 
-function ActivityItem<T extends string>({ activity, actions, styleMap, onUpdate, onDelete }: ItemProps<T>) {
+function ActivityItem<T extends string>({ activity, actions, styleMap, onUpdate, onDelete, onToggleVisible }: ItemProps<T>) {
   const [expanded, setExpanded] = useState(true)
   const [editing, setEditing] = useState(false)
   const action = actions.find((a) => a.type === activity.type)
@@ -60,24 +61,41 @@ function ActivityItem<T extends string>({ activity, actions, styleMap, onUpdate,
               {expanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
               {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true, locale: fr })}
             </button>
-            {(onUpdate || onDelete) && (
-              <div className="ml-auto flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                {onUpdate && (
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditing(true)}>
-                    <Pencil className="h-3 w-3" />
-                  </Button>
-                )}
-                {onDelete && (
+            {(onUpdate || onDelete || onToggleVisible) && (
+              <div className="ml-auto flex items-center gap-1">
+                {onToggleVisible && (
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 hover:text-destructive"
-                    onClick={async () => {
-                      if (window.confirm('Supprimer cette activité ?')) await onDelete(activity.id)
-                    }}
+                    className={cn('h-6 w-6', activity.visibleToClient ? 'text-[#a78bfa]' : 'text-[#6b7280]')}
+                    title={activity.visibleToClient
+                      ? 'Visible par le client — cliquer pour masquer'
+                      : 'Masqué au client — cliquer pour rendre visible'}
+                    onClick={async () => { await onToggleVisible(activity.id, !activity.visibleToClient) }}
                   >
-                    <Trash2 className="h-3 w-3" />
+                    {activity.visibleToClient ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
                   </Button>
+                )}
+                {(onUpdate || onDelete) && (
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {onUpdate && (
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditing(true)}>
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                    )}
+                    {onDelete && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 hover:text-destructive"
+                        onClick={async () => {
+                          if (window.confirm('Supprimer cette activité ?')) await onDelete(activity.id)
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
             )}
@@ -132,6 +150,7 @@ interface Props<T extends string> {
   styleMap: Record<T, TimelineStyle>
   onUpdate?: (id: string, updates: { type: T; content: string }) => Promise<void>
   onDelete?: (id: string) => Promise<void>
+  onToggleVisible?: (id: string, visible: boolean) => Promise<void>
   emptyHint?: string
   /** Si fourni, remplace le rendu d'empty state par défaut. */
   emptyState?: React.ReactNode
@@ -143,6 +162,7 @@ export function ActivityTimeline<T extends string>({
   styleMap,
   onUpdate,
   onDelete,
+  onToggleVisible,
   emptyHint = 'Aucune activité — utilisez les boutons ci-dessus pour en créer une.',
   emptyState,
 }: Props<T>) {
@@ -169,6 +189,7 @@ export function ActivityTimeline<T extends string>({
                 styleMap={styleMap}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
+                onToggleVisible={onToggleVisible}
               />
             ))}
           </div>

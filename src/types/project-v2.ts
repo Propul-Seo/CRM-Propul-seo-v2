@@ -132,6 +132,8 @@ export interface ProjectActivity {
   content: string
   is_auto: boolean
   metadata?: Record<string, unknown>
+  /** SP5 : l'activité est-elle exposée au portail client ? (migration 297) */
+  visible_to_client?: boolean
   created_at: string
 }
 
