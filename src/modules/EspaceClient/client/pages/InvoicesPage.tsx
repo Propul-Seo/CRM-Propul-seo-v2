@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Receipt, Loader2, CreditCard, Download, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Receipt, Loader2, CreditCard, Download, CheckCircle2, AlertCircle, Eye } from 'lucide-react';
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import {
-  Hero, EmptyState, SectionHead, StatusBadge,
+  Hero, EmptyState, SectionHead, StatusBadge, InvoicePreviewDialog,
 } from '@/modules/EspaceClient/shared/components';
 import {
   usePortalInvoices, usePortalInstallments, getSignedStorageUrl,
@@ -44,6 +44,7 @@ export function InvoicesPage() {
   const { rows, loading, error, refresh } = usePortalInvoices();
   const { rows: installments, refresh: refreshInstallments } = usePortalInstallments();
   const [selected, setSelected] = useState<PortalInvoice | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [payingId, setPayingId] = useState<string | null>(null);
   const [banner, setBanner] = useState<PaymentBanner | null>(null);
 
@@ -177,7 +178,7 @@ export function InvoicesPage() {
         )}
       </section>
 
-      <Sheet open={!!selected} onOpenChange={open => { if (!open) setSelected(null); }}>
+      <Sheet open={!!selected} onOpenChange={open => { if (!open) { setSelected(null); setPreviewOpen(false); } }}>
         {selected && (
           <SheetContent side="right" className="propulspace-portal w-full overflow-y-auto sm:max-w-xl">
             <SheetHeader>
@@ -243,6 +244,10 @@ export function InvoicesPage() {
               )}
 
               <div className="flex flex-wrap gap-2 border-t border-[var(--ps-border-soft)] pt-4">
+                <Button variant="outline" onClick={() => setPreviewOpen(true)}>
+                  <Eye className="mr-1.5 h-4 w-4" />
+                  Aperçu
+                </Button>
                 {selected.pdf_url && (
                   <Button variant="outline" onClick={() => downloadPdf(selected)}>
                     <Download className="mr-1.5 h-4 w-4" />
@@ -269,6 +274,13 @@ export function InvoicesPage() {
           </SheetContent>
         )}
       </Sheet>
+
+      <InvoicePreviewDialog
+        open={previewOpen}
+        invoice={selected}
+        installments={selected ? (installmentsByInvoice.get(selected.id) ?? []) : []}
+        onOpenChange={setPreviewOpen}
+      />
     </div>
   );
 }

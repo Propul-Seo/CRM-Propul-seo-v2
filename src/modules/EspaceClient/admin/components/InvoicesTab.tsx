@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Plus, Send, Bell, Loader2, FileText, Pencil, Trash2, Ban } from 'lucide-react';
+import { Plus, Send, Bell, Loader2, FileText, Pencil, Trash2, Ban, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { StatusBadge, EmptyState } from '@/modules/EspaceClient/shared/components';
+import { StatusBadge, EmptyState, InvoicePreviewDialog } from '@/modules/EspaceClient/shared/components';
 import { useAdminInvoices, type AdminInvoice } from '../hooks/useAdminInvoices';
 import { AdminInvoiceForm } from './AdminInvoiceForm';
 import { CancelInvoiceDialog } from './CancelInvoiceDialog';
@@ -12,9 +12,10 @@ const money = (a: string | number, c = 'EUR') =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: c }).format(typeof a === 'string' ? parseFloat(a) : a);
 
 export function InvoicesTab({ projectId, clientEmail }: { projectId: string; clientEmail: string | null }) {
-  const { invoices, loading, error, createInvoice, updateInvoice, deleteInvoice, cancelInvoice, sendInvoice, remindInvoice } = useAdminInvoices(projectId);
+  const { invoices, installmentsByInvoice, loading, error, createInvoice, updateInvoice, deleteInvoice, cancelInvoice, sendInvoice, remindInvoice } = useAdminInvoices(projectId);
   const [formOpen, setFormOpen] = useState(false);
   const [editInvoice, setEditInvoice] = useState<AdminInvoice | null>(null);
+  const [previewInvoice, setPreviewInvoice] = useState<AdminInvoice | null>(null);
   const [cancelTarget, setCancelTarget] = useState<AdminInvoice | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -65,6 +66,7 @@ export function InvoicesTab({ projectId, clientEmail }: { projectId: string; cli
             </div>
             <span className="text-sm font-bold">{money(inv.amount_total, inv.currency)}</span>
             <StatusBadge status={inv.status} />
+            <Button variant="ghost" size="icon" onClick={() => setPreviewInvoice(inv)} title="Aperçu"><Eye className="h-4 w-4" /></Button>
             {inv.pdf_url && <Button variant="ghost" size="icon" onClick={() => onPdf(inv)} title="PDF"><FileText className="h-4 w-4" /></Button>}
             {inv.status === 'draft' && (
               <>
@@ -97,6 +99,12 @@ export function InvoicesTab({ projectId, clientEmail }: { projectId: string; cli
         onUpdate={updateInvoice}
         onSubmit={createInvoice}
         onOpenChange={(o) => { if (!o) setEditInvoice(null); }}
+      />
+      <InvoicePreviewDialog
+        open={!!previewInvoice}
+        invoice={previewInvoice}
+        installments={previewInvoice ? installmentsByInvoice.get(previewInvoice.id) ?? [] : []}
+        onOpenChange={(o) => { if (!o) setPreviewInvoice(null); }}
       />
       <CancelInvoiceDialog
         open={!!cancelTarget}
