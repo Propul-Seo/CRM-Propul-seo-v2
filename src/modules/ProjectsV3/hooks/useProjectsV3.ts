@@ -24,6 +24,9 @@ export function useProjectsV3(): UseProjectsV3Return {
       .from('projects')
       .select('*')
       .eq('is_archived', false)
+      // Les projets « Clôturé » quittent le board actif → ils n'apparaissent que
+      // dans « Projets terminés » (useCompletedProjectsV3). Cohérent avec ce module.
+      .neq('status', 'closed')
       .order('last_activity_at', { ascending: false })
     if (!error && data) setProjects(data as ProjectV2[])
     setLoading(false)

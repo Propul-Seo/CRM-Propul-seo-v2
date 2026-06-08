@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Briefcase,
+  CircleCheckBig,
   Building2,
   Calculator,
   Settings,
@@ -107,6 +108,7 @@ export function Sidebar() {
     items: [
       { to: routes.dashboard,             label: 'Dashboard',           icon: LayoutDashboard, permission: 'can_view_dashboard' },
       { to: routes.projectsV3,            label: 'Projets actifs',      icon: Briefcase,       permission: 'can_view_projects' },
+      { to: routes.projectsV3Completed,   label: 'Projets terminés',    icon: CircleCheckBig,  permission: 'can_view_projects' },
       { to: routes.leadsV3,               label: 'CRM',                 icon: UserCheck,       permission: 'can_view_leads' },
       { to: routes.portails,              label: 'Portails clients',    icon: Building2,       roles: ['admin', 'manager'] },
       { to: routes.procedures,            label: 'Procédures',          icon: BookOpen,        permission: 'can_view_procedures' },
