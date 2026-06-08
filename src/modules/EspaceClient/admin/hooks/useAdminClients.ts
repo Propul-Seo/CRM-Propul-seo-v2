@@ -12,12 +12,14 @@ export interface AdminClientHealth {
   invoices_pending: number;
   signatures_pending: number;
   documents_count: number;
+  status: string | null;
 }
 
 // Projet actif (table projects_v2 via le proxy v2)
 interface ActiveProjectRow {
   id: string;
   name: string;
+  status: string | null;
   client_company: string | null;
   client_first_name: string | null;
   portal_client_email: string | null;
@@ -51,7 +53,7 @@ export function useAdminClients(): UseAdminClientsResult {
     // 1) Liste de tous les projets actifs (un projet = un client), avec ou sans portail.
     const { data: projectsData, error: projectsErr } = await v2
       .from('projects')
-      .select('id, name, client_company, client_first_name, portal_client_email, portal_activated_at')
+      .select('id, name, status, client_company, client_first_name, portal_client_email, portal_activated_at')
       .is('archived_at', null)
       .order('name', { ascending: true });
     if (projectsErr) { setError(projectsErr.message); setClients([]); setLoading(false); return; }
@@ -81,6 +83,7 @@ export function useAdminClients(): UseAdminClientsResult {
         invoices_pending: h?.invoices_pending ?? 0,
         signatures_pending: h?.signatures_pending ?? 0,
         documents_count: h?.documents_count ?? 0,
+        status: p.status,
       };
     });
 
