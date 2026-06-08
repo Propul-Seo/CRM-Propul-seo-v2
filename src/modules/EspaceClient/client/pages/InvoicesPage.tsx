@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Receipt, Loader2, CreditCard, Download, CheckCircle2, AlertCircle, Eye } from 'lucide-react';
+import { Receipt, Loader2, CreditCard, Download, CheckCircle2, AlertCircle } from 'lucide-react';
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import {
-  Hero, EmptyState, SectionHead, StatusBadge, InvoicePreviewDialog,
+  Hero, EmptyState, SectionHead, StatusBadge, InvoiceDocument,
 } from '@/modules/EspaceClient/shared/components';
 import {
   usePortalInvoices, usePortalInstallments, getSignedStorageUrl,
@@ -44,7 +44,6 @@ export function InvoicesPage() {
   const { rows, loading, error, refresh } = usePortalInvoices();
   const { rows: installments, refresh: refreshInstallments } = usePortalInstallments();
   const [selected, setSelected] = useState<PortalInvoice | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
   const [payingId, setPayingId] = useState<string | null>(null);
   const [banner, setBanner] = useState<PaymentBanner | null>(null);
 
@@ -178,109 +177,104 @@ export function InvoicesPage() {
         )}
       </section>
 
-      <Sheet open={!!selected} onOpenChange={open => { if (!open) { setSelected(null); setPreviewOpen(false); } }}>
+      <Sheet open={!!selected} onOpenChange={open => { if (!open) setSelected(null); }}>
         {selected && (
-          <SheetContent side="right" className="propulspace-portal w-full overflow-y-auto sm:max-w-xl">
-            <SheetHeader>
-              <SheetTitle>{selected.invoice_number}</SheetTitle>
-              <SheetDescription>
-                {selected.title && <span className="block font-medium text-[var(--ps-fg-secondary)]">{selected.title}</span>}
-                Émise le {formatDate(selected.issue_date)} · Échéance {formatDate(selected.due_date)}
-              </SheetDescription>
-            </SheetHeader>
-
-            <div className="mt-4 space-y-4">
-              <div className="rounded-xl border border-[var(--ps-border-soft)] bg-[var(--ps-bg-subtle)] p-4">
-                <p className="text-[11px] uppercase tracking-wider text-[var(--ps-fg-muted)]">Total TTC</p>
-                <p className="ps-num text-[26px] font-bold text-[var(--ps-fg)]">
-                  {formatMoney(selected.amount_total, selected.currency)}
-                </p>
-                <p className="mt-1 text-[12px] text-[var(--ps-fg-muted)]">
-                  HT {formatMoney(selected.amount_subtotal, selected.currency)}
-                  {' · '}TVA {selected.vat_rate}%
-                </p>
-                <div className="mt-2"><StatusBadge status={selected.status} /></div>
+          <SheetContent side="right" className="propulspace-portal w-full overflow-hidden p-0 sm:max-w-5xl">
+            <div className="flex h-full flex-col lg:flex-row">
+              {/* Document facture, affiché directement en grand à gauche */}
+              <div className="flex-1 overflow-y-auto bg-slate-100 p-4 lg:p-6">
+                <div className="mx-auto max-w-2xl overflow-hidden rounded-xl shadow-sm">
+                  <InvoiceDocument invoice={selected} installments={installmentsByInvoice.get(selected.id) ?? []} />
+                </div>
               </div>
 
-              {selected.client_visible_notes && (
-                <div className="rounded-xl border border-[var(--ps-border-soft)] p-3 text-[13px] text-[var(--ps-fg-secondary)]">
-                  {selected.client_visible_notes}
-                </div>
-              )}
+              {/* Résumé + actions à droite */}
+              <div className="w-full shrink-0 overflow-y-auto border-t border-[var(--ps-border-soft)] p-6 lg:w-[360px] lg:border-l lg:border-t-0">
+                <SheetHeader>
+                  <SheetTitle>{selected.invoice_number}</SheetTitle>
+                  <SheetDescription>
+                    {selected.title && <span className="block font-medium text-[var(--ps-fg-secondary)]">{selected.title}</span>}
+                    Émise le {formatDate(selected.issue_date)} · Échéance {formatDate(selected.due_date)}
+                  </SheetDescription>
+                </SheetHeader>
 
-              {(installmentsByInvoice.get(selected.id)?.length ?? 0) > 0 && (
-                <div>
-                  <p className="ps-eyebrow ps-eyebrow-muted mb-2">Échéances</p>
-                  <ul className="divide-y divide-[var(--ps-border-soft)] rounded-xl border border-[var(--ps-border-soft)]">
-                    {installmentsByInvoice.get(selected.id)?.map(inst => {
-                      const isPayable = inst.status === 'pending' || inst.status === 'overdue';
-                      return (
-                        <li key={inst.id} className="flex items-center gap-3 px-3 py-2.5 text-[12.5px]">
-                          <div className="min-w-0 flex-1">
-                            <p className="font-medium text-[var(--ps-fg)]">{inst.label || `Échéance ${inst.installment_number}`}</p>
-                            <p className="text-[11px] text-[var(--ps-fg-muted)]">Due le {formatDate(inst.due_date)}</p>
-                          </div>
-                          <span className="ps-num font-semibold text-[var(--ps-fg)]">
-                            {formatMoney(inst.amount, selected.currency)}
-                          </span>
-                          <StatusBadge status={inst.status} />
-                          {isPayable && (
-                            <Button
-                              size="sm"
-                              onClick={() => handlePay('installment', inst.id)}
-                              disabled={payingId === inst.id}
-                              className="ps-brand-gradient text-white"
-                            >
-                              {payingId === inst.id
-                                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                : <>Payer</>}
-                            </Button>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
+                <div className="mt-4 space-y-4">
+                  <div className="rounded-xl border border-[var(--ps-border-soft)] bg-[var(--ps-bg-subtle)] p-4">
+                    <p className="text-[11px] uppercase tracking-wider text-[var(--ps-fg-muted)]">Total TTC</p>
+                    <p className="ps-num text-[26px] font-bold text-[var(--ps-fg)]">
+                      {formatMoney(selected.amount_total, selected.currency)}
+                    </p>
+                    <p className="mt-1 text-[12px] text-[var(--ps-fg-muted)]">
+                      HT {formatMoney(selected.amount_subtotal, selected.currency)}
+                      {' · '}TVA {selected.vat_rate}%
+                    </p>
+                    <div className="mt-2"><StatusBadge status={selected.status} /></div>
+                  </div>
 
-              <div className="flex flex-wrap gap-2 border-t border-[var(--ps-border-soft)] pt-4">
-                <Button variant="outline" onClick={() => setPreviewOpen(true)}>
-                  <Eye className="mr-1.5 h-4 w-4" />
-                  Aperçu
-                </Button>
-                {selected.pdf_url && (
-                  <Button variant="outline" onClick={() => downloadPdf(selected)}>
-                    <Download className="mr-1.5 h-4 w-4" />
-                    Télécharger le PDF
-                  </Button>
-                )}
-                {/* Code review M-5 : on retire "Payer la facture entière" si
-                    partially_paid pour éviter un trop-perçu (le client a déjà
-                    réglé un ou plusieurs acomptes). On force à compléter
-                    acompte par acompte via les boutons "Payer" individuels. */}
-                {(selected.status === 'sent' || selected.status === 'overdue') && (
-                  <Button
-                    onClick={() => handlePay('invoice', selected.id)}
-                    disabled={payingId === selected.id}
-                    className="ps-brand-gradient text-white"
-                  >
-                    {payingId === selected.id
-                      ? <><Loader2 className="mr-1.5 h-4 w-4 animate-spin" />Redirection…</>
-                      : <><CreditCard className="mr-1.5 h-4 w-4" />Payer la facture entière</>}
-                  </Button>
-                )}
+                  {(installmentsByInvoice.get(selected.id)?.length ?? 0) > 0 && (
+                    <div>
+                      <p className="ps-eyebrow ps-eyebrow-muted mb-2">Échéances</p>
+                      <ul className="divide-y divide-[var(--ps-border-soft)] rounded-xl border border-[var(--ps-border-soft)]">
+                        {installmentsByInvoice.get(selected.id)?.map(inst => {
+                          const isPayable = inst.status === 'pending' || inst.status === 'overdue';
+                          return (
+                            <li key={inst.id} className="flex items-center gap-3 px-3 py-2.5 text-[12.5px]">
+                              <div className="min-w-0 flex-1">
+                                <p className="font-medium text-[var(--ps-fg)]">{inst.label || `Échéance ${inst.installment_number}`}</p>
+                                <p className="text-[11px] text-[var(--ps-fg-muted)]">Due le {formatDate(inst.due_date)}</p>
+                              </div>
+                              <span className="ps-num font-semibold text-[var(--ps-fg)]">
+                                {formatMoney(inst.amount, selected.currency)}
+                              </span>
+                              <StatusBadge status={inst.status} />
+                              {isPayable && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handlePay('installment', inst.id)}
+                                  disabled={payingId === inst.id}
+                                  className="ps-brand-gradient text-white"
+                                >
+                                  {payingId === inst.id
+                                    ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    : <>Payer</>}
+                                </Button>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-2 border-t border-[var(--ps-border-soft)] pt-4">
+                    {selected.pdf_url && (
+                      <Button variant="outline" onClick={() => downloadPdf(selected)}>
+                        <Download className="mr-1.5 h-4 w-4" />
+                        Télécharger le PDF
+                      </Button>
+                    )}
+                    {/* Code review M-5 : on retire "Payer la facture entière" si
+                        partially_paid pour éviter un trop-perçu (le client a déjà
+                        réglé un ou plusieurs acomptes). On force à compléter
+                        acompte par acompte via les boutons "Payer" individuels. */}
+                    {(selected.status === 'sent' || selected.status === 'overdue') && (
+                      <Button
+                        onClick={() => handlePay('invoice', selected.id)}
+                        disabled={payingId === selected.id}
+                        className="ps-brand-gradient text-white"
+                      >
+                        {payingId === selected.id
+                          ? <><Loader2 className="mr-1.5 h-4 w-4 animate-spin" />Redirection…</>
+                          : <><CreditCard className="mr-1.5 h-4 w-4" />Payer la facture entière</>}
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </SheetContent>
         )}
       </Sheet>
-
-      <InvoicePreviewDialog
-        open={previewOpen}
-        invoice={selected}
-        installments={selected ? (installmentsByInvoice.get(selected.id) ?? []) : []}
-        onOpenChange={setPreviewOpen}
-      />
     </div>
   );
 }

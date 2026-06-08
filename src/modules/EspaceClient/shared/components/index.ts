@@ -12,6 +12,7 @@ export { ActivityRow } from './ActivityRow';
 export { TimelineStep } from './TimelineStep';
 export { StatusPage, type StatusTone } from './StatusPage';
 export { FileIcon } from './FileIcon';
+export { InvoiceDocument } from './InvoiceDocument';
 export { InvoicePreviewDialog } from './InvoicePreviewDialog';
 export { FilePreviewDialog } from './FilePreviewDialog';
 export { BrandPill } from './BrandPill';
