@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Sparkles } from 'lucide-react'
-import { QuickActionBar, ActivityTimeline, ActivityModal, type ActivityRecord } from '@/components/activities-hub'
+import { Sparkles, Plus } from 'lucide-react'
+import { ActivityTimeline, type ActivityRecord } from '@/components/activities-hub'
 import { MetricCard } from '../components/MetricCard'
+import { ProjectActivityModalV3 } from '../components/ProjectActivityModalV3'
 import { useProjectActivitiesV3 } from '../hooks/useProjectActivitiesV3'
 import { useIsProjectV3Admin } from '../hooks/useIsProjectV3Admin'
 import { PROJECT_V3_ACTIONS, PROJECT_V3_ALL_ACTIONS, PROJECT_V3_TIMELINE_STYLES } from '../activityConfig'
@@ -35,28 +36,36 @@ export function SyntheseTabV3({ project, checklistProgress, onEdit }: Props) {
   const { activities, loading, addActivity, updateActivity, deleteActivity } = useProjectActivitiesV3(project.id)
   const { isAdmin } = useIsProjectV3Admin()
 
-  // Modale ouverte par un bouton de l'état vide ("Première décision projet"…) :
-  // on préremplit le contenu avec le libellé du bouton pour que l'utilisateur
-  // puisse compléter sans tout retaper.
-  const [primerModal, setPrimerModal] = useState<{ type: ActivityType; content: string } | null>(null)
+  // Modale d'ajout enrichie. `null` = fermée. Les boutons de l'état vide
+  // ("Première décision projet"…) préremplissent type + contenu.
+  const [addModal, setAddModal] = useState<{ type: ActivityType; content: string } | null>(null)
 
-  const records: ActivityRecord<ActivityType>[] = activities.map((a) => ({
-    id: a.id,
-    type: a.type,
-    content: a.content ?? '',
-    created_at: a.created_at,
-    author_name: a.author_name,
-    is_auto: a.is_auto,
-  }))
+  const records: ActivityRecord<ActivityType>[] = activities.map((a) => {
+    const meta = (a.metadata ?? {}) as { realized_at?: string | null; next_actions?: string | null }
+    return {
+      id: a.id,
+      type: a.type,
+      content: a.content ?? '',
+      created_at: a.created_at,
+      author_name: a.author_name,
+      is_auto: a.is_auto,
+      realizedAt: meta.realized_at ?? null,
+      nextActions: meta.next_actions ?? null,
+    }
+  })
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Quick actions */}
-      <QuickActionBar
-        actions={PROJECT_V3_ACTIONS}
-        onAdd={async (type, content) => { await addActivity(type, content) }}
-        showMore={false}
-      />
+      {/* Ajout d'activité (modal enrichi) */}
+      <div className="px-5 py-3 border-b border-[rgba(139,92,246,0.15)]">
+        <button
+          onClick={() => setAddModal({ type: PROJECT_V3_ACTIONS[0].type, content: '' })}
+          className="inline-flex items-center gap-2 rounded-lg bg-[#8B5CF6] px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#7c4ddb]"
+        >
+          <Plus className="h-4 w-4" />
+          Ajouter une activité
+        </button>
+      </div>
 
       {/* Contenu scrollable */}
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
@@ -126,7 +135,7 @@ export function SyntheseTabV3({ project, checklistProgress, onEdit }: Props) {
                     {PRIMER_PROMPTS.map((p) => (
                       <button
                         key={p.type}
-                        onClick={() => setPrimerModal({ type: p.type, content: p.label })}
+                        onClick={() => setAddModal({ type: p.type, content: p.label })}
                         className="px-3 py-1.5 text-xs font-medium rounded-md bg-[rgba(139,92,246,0.15)] text-[#A78BFA] border border-[rgba(139,92,246,0.3)] hover:bg-[rgba(139,92,246,0.25)] transition-colors"
                       >
                         {p.label}
@@ -140,19 +149,20 @@ export function SyntheseTabV3({ project, checklistProgress, onEdit }: Props) {
         </div>
       </div>
 
-      <ActivityModal
-        open={primerModal !== null}
-        onClose={() => setPrimerModal(null)}
-        onSubmit={async (type, content) => {
+      <ProjectActivityModalV3
+        open={addModal !== null}
+        onClose={() => setAddModal(null)}
+        defaultType={addModal?.type}
+        initialContent={addModal?.content ?? ''}
+        onSubmit={async ({ type, content, realizedAt, nextActions }) => {
           try {
-            await addActivity(type, content)
+            await addActivity(type, content, {
+              metadata: { realized_at: realizedAt, next_actions: nextActions },
+            })
           } catch (err) {
             toast.error(err instanceof Error ? err.message : "Impossible d'ajouter l'activité")
           }
         }}
-        actions={PROJECT_V3_ACTIONS}
-        defaultType={primerModal?.type ?? PROJECT_V3_ACTIONS[0].type}
-        initialContent={primerModal?.content ?? ''}
       />
     </div>
   )

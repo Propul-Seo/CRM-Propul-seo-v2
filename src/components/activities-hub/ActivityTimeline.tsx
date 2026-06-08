@@ -84,8 +84,19 @@ function ActivityItem<T extends string>({ activity, actions, styleMap, onUpdate,
           </div>
           {expanded && (
             <>
+              {activity.realizedAt && (
+                <p className="text-[10px] font-medium text-[#a78bfa] mb-1">
+                  Réalisé le {format(new Date(activity.realizedAt), 'd MMMM yyyy', { locale: fr })}
+                </p>
+              )}
               {activity.content && (
                 <p className="text-xs text-[#ede9fe] leading-relaxed whitespace-pre-wrap">{activity.content}</p>
+              )}
+              {activity.nextActions && (
+                <div className="mt-2 rounded-md border border-[rgba(139,92,246,0.2)] bg-[rgba(139,92,246,0.06)] px-2.5 py-1.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-[#9ca3af] mb-0.5">À venir</p>
+                  <p className="text-xs text-[#d1cdf0] leading-relaxed whitespace-pre-wrap">{activity.nextActions}</p>
+                </div>
               )}
               {activity.author_name && (
                 <p className="text-[10px] text-[#9ca3af] mt-1">Par {activity.author_name}</p>

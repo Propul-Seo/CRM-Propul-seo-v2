@@ -19,4 +19,8 @@ export interface ActivityRecord<T extends string = string> {
   created_at: string
   author_name?: string | null
   is_auto?: boolean
+  /** Date de réalisation (ISO) — affichée en tête si fournie. */
+  realizedAt?: string | null
+  /** Actions futures / prochaines étapes — affichées dans un bloc « À venir ». */
+  nextActions?: string | null
 }
