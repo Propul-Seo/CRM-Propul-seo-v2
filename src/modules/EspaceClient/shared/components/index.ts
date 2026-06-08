@@ -2,6 +2,7 @@ export { Hero } from './Hero';
 export { KpiTile, type KpiTint } from './KpiTile';
 export { Badge, StatusBadge, type BadgeTone } from './Badge';
 export { Progress } from './Progress';
+export { ProgressRing } from './ProgressRing';
 export { SectionHead } from './SectionHead';
 export { EmptyState } from './EmptyState';
 export { Skeleton } from './Skeleton';
