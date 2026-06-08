@@ -6,7 +6,6 @@ const TABS = [
   { key: 'factures', label: 'Factures' },
   { key: 'signatures', label: 'Signatures' },
   { key: 'documents', label: 'Documents' },
-  { key: 'jalons', label: 'Jalons' },
   { key: 'activite', label: 'Activité' },
 ];
 

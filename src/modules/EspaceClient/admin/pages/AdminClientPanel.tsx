@@ -59,6 +59,11 @@ function OverviewTab() {
           onRefresh={refresh}
         />
       </div>
+
+      {/* Jalons du projet (fusionnés dans l'Aperçu) */}
+      <div className="border-t border-border pt-6">
+        <ProjectStepsTab projectId={projectId} />
+      </div>
     </div>
   );
 }
@@ -68,12 +73,6 @@ function InvoicesRoute() {
   const email = useAdminClientEmail(projectId);
   if (!projectId) return null;
   return <InvoicesTab projectId={projectId} clientEmail={email} />;
-}
-
-function JalonsRoute() {
-  const { projectId } = useParams<{ projectId: string }>();
-  if (!projectId) return null;
-  return <ProjectStepsTab projectId={projectId} />;
 }
 
 function DocumentsRoute() {
@@ -104,7 +103,6 @@ function AdminClientPanelContent() {
         <Route path="factures" element={<InvoicesRoute />} />
         <Route path="signatures" element={<SignaturesRoute />} />
         <Route path="documents" element={<DocumentsRoute />} />
-        <Route path="jalons" element={<JalonsRoute />} />
         <Route path="activite" element={<ActiviteRoute />} />
       </Routes>
     </>
