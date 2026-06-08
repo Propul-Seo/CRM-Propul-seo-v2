@@ -1,6 +1,6 @@
 import type { ProjectStatusV2 } from '@/types/project-v2'
 
-// Pipeline canonique (status général projet V2)
+// Pipeline canonique (status général projet V2) — référence complète (labels, couleurs).
 export const PROJECT_STATUS_ORDER: ProjectStatusV2[] = [
   'prospect',
   'brief_received',
@@ -12,6 +12,19 @@ export const PROJECT_STATUS_ORDER: ProjectStatusV2[] = [
   'on_hold',
   'closed',
   'propulseo_internal',
+]
+
+// Étapes détaillées du pipeline (sélecteur de DROITE). On exclut les statuts qui
+// sont désormais pilotés comme un « type » de haut niveau dans la sidebar gauche
+// (in_progress = En cours, on_hold = En pause, propulseo_internal = Projet Propulseo).
+export const PIPELINE_STEP_ORDER: ProjectStatusV2[] = [
+  'prospect',
+  'brief_received',
+  'quote_sent',
+  'review',
+  'delivered',
+  'maintenance',
+  'closed',
 ]
 
 export const PROJECT_STATUS_LABELS: Record<ProjectStatusV2, string> = {

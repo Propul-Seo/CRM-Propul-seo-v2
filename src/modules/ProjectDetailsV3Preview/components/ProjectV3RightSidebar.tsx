@@ -3,7 +3,7 @@ import { User, Plus, Pencil, Receipt } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ProjectV2, ProjectStatusV2 } from '@/types/project-v2'
 import {
-  PROJECT_STATUS_ORDER,
+  PIPELINE_STEP_ORDER,
   PROJECT_STATUS_LABELS,
   getStatusStyle,
 } from '../statusConfig'
@@ -205,7 +205,7 @@ export function ProjectV3RightSidebar({ project, users, onContactSaved, onAssign
       <div className="border-b border-[rgba(139,92,246,0.15)] py-4 px-4 space-y-3">
         <PipelineSelect status={project.status} onChange={onStatusChange} />
         <div className="space-y-1">
-          {PROJECT_STATUS_ORDER.map((s) => {
+          {PIPELINE_STEP_ORDER.map((s) => {
             const conf = getStatusStyle(s)
             const isActive = s === project.status
             return (

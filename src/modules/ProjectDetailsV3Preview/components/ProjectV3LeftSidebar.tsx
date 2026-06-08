@@ -4,14 +4,22 @@ import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import type { ProjectV2 } from '@/types/project-v2'
+import type { ProjectV2, ProjectStatusV2 } from '@/types/project-v2'
 import { formatPresta } from '../statusConfig'
+import {
+  V3_COLUMN_ORDER,
+  V3_COLUMN_LABELS,
+  statusToColumn,
+  columnToDefaultStatus,
+} from '@/modules/ProjectsV3/utils/statusMapping'
 
 interface Props {
   project: ProjectV2
   /** Progression calculée depuis la checklist (source de vérité). */
   checklistProgress: number
   onEdit: () => void
+  /** Change le « type » (colonne V3) du projet → met à jour le status sous-jacent. */
+  onStatusChange?: (status: ProjectStatusV2) => void | Promise<void>
 }
 
 function SidebarSection({
@@ -153,9 +161,10 @@ function getCompanyInfo(data: ProjectV2['company_data']): {
   }
 }
 
-export function ProjectV3LeftSidebar({ project, checklistProgress, onEdit }: Props) {
+export function ProjectV3LeftSidebar({ project, checklistProgress, onEdit, onStatusChange }: Props) {
   const company = getCompanyInfo(project.company_data)
   const isEnriched = !!project.company_enriched_at
+  const currentColumn = statusToColumn(project.status)
 
   return (
     <div className="flex flex-col">
@@ -186,6 +195,40 @@ export function ProjectV3LeftSidebar({ project, checklistProgress, onEdit }: Pro
             </span>
           </div>
         )}
+      </div>
+
+      {/* Type (colonne V3) — sélecteur cliquable */}
+      <div className="border-b border-[rgba(139,92,246,0.15)] px-4 py-4">
+        <p className="text-[10px] font-semibold text-[#9ca3af] uppercase tracking-widest mb-2.5">Type</p>
+        <div className="flex flex-col gap-1">
+          {V3_COLUMN_ORDER.map((column) => {
+            const isActive = column === currentColumn
+            return (
+              <button
+                key={column}
+                type="button"
+                disabled={!onStatusChange}
+                onClick={() => onStatusChange?.(columnToDefaultStatus(column))}
+                className={cn(
+                  'flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[12px] text-left transition-all',
+                  isActive
+                    ? 'border border-[rgba(139,92,246,0.4)] bg-[rgba(139,92,246,0.12)] font-semibold text-[#ede9fe]'
+                    : 'text-[#9ca3af] hover:bg-[rgba(139,92,246,0.06)] hover:text-[#ede9fe]',
+                  !onStatusChange && 'cursor-default',
+                )}
+              >
+                <span
+                  className={cn(
+                    'h-1.5 w-1.5 rounded-full shrink-0',
+                    isActive ? 'bg-[#8B5CF6]' : 'bg-[rgba(139,92,246,0.25)]',
+                  )}
+                />
+                {V3_COLUMN_LABELS[column]}
+                {isActive && <span className="ml-auto text-[9px] text-[#A78BFA]">● Actuel</span>}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* À propos */}

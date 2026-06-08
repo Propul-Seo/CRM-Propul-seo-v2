@@ -150,6 +150,7 @@ export function ProjectDetailsV3Preview() {
               project={project}
               checklistProgress={checklist.progress}
               onEdit={() => setEditOpen(true)}
+              onStatusChange={handleStatusChange}
             />
           </div>
         )}
