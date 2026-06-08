@@ -44,6 +44,14 @@ export interface AdminRpcMap {
   };
   admin_send_invoice: {
     args: { p_invoice_id: string };
+    returns: string;                // invoice_number attribué à l'envoi
+  };
+  admin_delete_invoice: {
+    args: { p_invoice_id: string };
+    returns: null;
+  };
+  admin_cancel_invoice: {
+    args: { p_invoice_id: string; p_reason?: string | null };
     returns: null;
   };
   admin_create_project_step: {
