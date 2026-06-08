@@ -23,6 +23,7 @@ import { ProjectCardV3 } from './components/ProjectCardV3'
 import { ProjectCardV3Compact } from './components/ProjectCardV3Compact'
 import { SortableProjectCardV3 } from './components/SortableProjectCardV3'
 import { SortableProjectCardV3Compact } from './components/SortableProjectCardV3Compact'
+import { ProjectsV3DetailList } from './components/ProjectsV3DetailList'
 import { statusToColumn, V3_COLUMN_ORDER, type V3Column } from './utils/statusMapping'
 import { getActivePoles, type V3Pole } from './utils/poleMapping'
 import { useProjectDragDropV3 } from './hooks/useProjectDragDropV3'
@@ -35,7 +36,8 @@ const VIEW_MODE_STORAGE_KEY = 'propulseo:projects-v3:view-mode'
 function loadViewMode(): V3ViewMode {
   if (typeof window === 'undefined') return 'normal'
   const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY)
-  return stored === 'compact' ? 'compact' : 'normal'
+  if (stored === 'compact' || stored === 'list') return stored
+  return 'normal'
 }
 
 function useDebounced<T>(value: T, delay: number): T {
@@ -172,6 +174,14 @@ export function ProjectsV3Page() {
         onViewModeChange={handleViewModeChange}
       />
 
+      {viewMode === 'list' ? (
+        <ProjectsV3DetailList
+          projects={filteredProjects}
+          portalHealthByProjectId={portalHealthByProjectId}
+          assigneeLabelsById={assigneeLabelsById}
+          onRowClick={(id) => navigate(`/projets-v3-preview/${id}`)}
+        />
+      ) : (
       <DndContext
         sensors={sensors}
         collisionDetection={collisionDetectionStrategy}
@@ -241,6 +251,7 @@ export function ProjectsV3Page() {
           ) : null}
         </DragOverlay>
       </DndContext>
+      )}
 
       <NewProjectModalV3
         open={newOpen}

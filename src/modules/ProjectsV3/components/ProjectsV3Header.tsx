@@ -1,4 +1,4 @@
-import { Plus, Search, LayoutGrid, Rows3 } from 'lucide-react'
+import { Plus, Search, LayoutGrid, Rows3, List } from 'lucide-react'
 import { V3_POLE_ORDER, V3_POLE_LABELS, V3_POLE_COLORS, type V3Pole } from '../utils/poleMapping'
 import { ProjectAssigneeButtons } from './ProjectAssigneeButtons'
 
@@ -7,7 +7,7 @@ interface UserOption {
   name: string
 }
 
-export type V3ViewMode = 'normal' | 'compact'
+export type V3ViewMode = 'normal' | 'compact' | 'list'
 
 interface Props {
   projectCount: number
@@ -142,6 +142,19 @@ export function ProjectsV3Header({
             }}
           >
             <Rows3 className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onViewModeChange('list')}
+            title="Liste détaillée (projets en cours)"
+            aria-pressed={viewMode === 'list'}
+            className="h-[28px] w-[30px] flex items-center justify-center rounded transition-colors duration-150"
+            style={{
+              background: viewMode === 'list' ? 'rgba(139, 92, 246, 0.18)' : 'transparent',
+              color: viewMode === 'list' ? '#A78BFA' : '#6b7280',
+            }}
+          >
+            <List className="h-3.5 w-3.5" />
           </button>
         </div>
 
