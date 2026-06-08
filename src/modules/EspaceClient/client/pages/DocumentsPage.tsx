@@ -13,7 +13,14 @@ function formatSize(bytes: number | null): string {
 }
 
 async function downloadDocument(doc: PortalDocument) {
-  const url = await getSignedStorageUrl(inferBucket(doc.file_url), doc.file_url)
+  const bucket = inferBucket(doc.file_url)
+  // Doc à lien externe (ex. charte fournie via une URL WeTransfer/Drive/Notion) :
+  // pas de fichier Storage à signer, on ouvre directement le lien.
+  if (bucket === 'external') {
+    window.open(doc.file_url, '_blank', 'noopener,noreferrer')
+    return
+  }
+  const url = await getSignedStorageUrl(bucket, doc.file_url)
   if (!url) {
     alert('Impossible de générer le lien de téléchargement. Réessayez plus tard.')
     return
