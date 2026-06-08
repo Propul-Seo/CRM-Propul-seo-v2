@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Plus, Send, Bell, Loader2, FileText } from 'lucide-react';
+import { Plus, Send, Bell, Loader2, FileText, Pencil, Trash2, Ban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusBadge, EmptyState } from '@/modules/EspaceClient/shared/components';
 import { useAdminInvoices } from '../hooks/useAdminInvoices';
 import { AdminInvoiceForm } from './AdminInvoiceForm';
+import { CancelInvoiceDialog } from './CancelInvoiceDialog';
 import { getAdminSignedUrl } from '../lib/adminStorage';
 import type { PortalInvoice } from '@/modules/EspaceClient/client/hooks/usePortalData';
 
@@ -12,8 +13,10 @@ const money = (a: string | number, c = 'EUR') =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: c }).format(typeof a === 'string' ? parseFloat(a) : a);
 
 export function InvoicesTab({ projectId, clientEmail }: { projectId: string; clientEmail: string | null }) {
-  const { invoices, loading, error, createInvoice, sendInvoice, remindInvoice } = useAdminInvoices(projectId);
+  const { invoices, loading, error, createInvoice, updateInvoice, deleteInvoice, cancelInvoice, sendInvoice, remindInvoice } = useAdminInvoices(projectId);
   const [formOpen, setFormOpen] = useState(false);
+  const [editInvoice, setEditInvoice] = useState<PortalInvoice | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<PortalInvoice | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -26,6 +29,13 @@ export function InvoicesTab({ projectId, clientEmail }: { projectId: string; cli
   async function onRemind(inv: PortalInvoice) {
     setBusyId(inv.id); setActionError(null);
     const { error } = await remindInvoice(inv, clientEmail);
+    if (error) setActionError(error);
+    setBusyId(null);
+  }
+  async function onDelete(inv: PortalInvoice) {
+    if (!window.confirm(`Supprimer le brouillon ${inv.invoice_number ?? ''} ? Cette action est définitive.`)) return;
+    setBusyId(inv.id); setActionError(null);
+    const { error } = await deleteInvoice(inv.id);
     if (error) setActionError(error);
     setBusyId(null);
   }
@@ -49,26 +59,51 @@ export function InvoicesTab({ projectId, clientEmail }: { projectId: string; cli
         {invoices.map(inv => (
           <li key={inv.id} className="flex items-center gap-3 py-3">
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-foreground">{inv.invoice_number}{inv.is_deposit && <span className="ml-2 text-xs text-muted-foreground">Acompte</span>}</p>
+              <p className="text-sm font-semibold text-foreground">{inv.invoice_number ?? 'Brouillon'}{inv.is_deposit && <span className="ml-2 text-xs text-muted-foreground">Acompte</span>}</p>
               <p className="text-xs text-muted-foreground">Émise le {new Date(inv.issue_date).toLocaleDateString('fr-FR')}</p>
             </div>
             <span className="text-sm font-bold">{money(inv.amount_total, inv.currency)}</span>
             <StatusBadge status={inv.status} />
             {inv.pdf_url && <Button variant="ghost" size="icon" onClick={() => onPdf(inv)} title="PDF"><FileText className="h-4 w-4" /></Button>}
             {inv.status === 'draft' && (
-              <Button size="sm" onClick={() => onSend(inv)} disabled={busyId === inv.id}>
-                {busyId === inv.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Send className="mr-1 h-4 w-4" />Envoyer</>}
-              </Button>
+              <>
+                <Button variant="ghost" size="icon" title="Modifier" onClick={() => setEditInvoice(inv)} disabled={busyId === inv.id}><Pencil className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" title="Supprimer" onClick={() => onDelete(inv)} disabled={busyId === inv.id}><Trash2 className="h-4 w-4" /></Button>
+                <Button size="sm" onClick={() => onSend(inv)} disabled={busyId === inv.id}>
+                  {busyId === inv.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Send className="mr-1 h-4 w-4" />Envoyer</>}
+                </Button>
+              </>
             )}
             {(inv.status === 'sent' || inv.status === 'overdue') && (
-              <Button variant="outline" size="sm" onClick={() => onRemind(inv)} disabled={busyId === inv.id || !clientEmail}>
-                {busyId === inv.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Bell className="mr-1 h-4 w-4" />Relancer</>}
-              </Button>
+              <>
+                <Button variant="outline" size="sm" onClick={() => onRemind(inv)} disabled={busyId === inv.id || !clientEmail} title={!clientEmail ? 'Email client requis' : undefined}>
+                  {busyId === inv.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Bell className="mr-1 h-4 w-4" />Relancer</>}
+                </Button>
+                <Button variant="ghost" size="icon" title="Annuler" onClick={() => setCancelTarget(inv)} disabled={busyId === inv.id}><Ban className="h-4 w-4" /></Button>
+              </>
             )}
           </li>
         ))}
       </ul>
       <AdminInvoiceForm open={formOpen} onOpenChange={setFormOpen} onSubmit={createInvoice} />
+      <AdminInvoiceForm
+        open={!!editInvoice}
+        editInvoice={editInvoice}
+        onUpdate={updateInvoice}
+        onSubmit={createInvoice}
+        onOpenChange={(o) => { if (!o) setEditInvoice(null); }}
+      />
+      <CancelInvoiceDialog
+        open={!!cancelTarget}
+        invoiceNumber={cancelTarget?.invoice_number ?? null}
+        onOpenChange={(o) => { if (!o) setCancelTarget(null); }}
+        onConfirm={async (reason) => {
+          if (!cancelTarget) return { error: 'Aucune facture' };
+          const res = await cancelInvoice(cancelTarget.id, reason);
+          if (!res.error) setCancelTarget(null);
+          return res;
+        }}
+      />
     </div>
   );
 }

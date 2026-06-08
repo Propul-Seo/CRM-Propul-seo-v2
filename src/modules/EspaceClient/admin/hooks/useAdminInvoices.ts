@@ -14,6 +14,14 @@ export interface CreateInvoiceInput {
   installments: Array<{ label: string; amount: number; due_date: string }>;
 }
 
+export interface UpdateInvoiceInput {
+  amountSubtotal: number;
+  vatRate: number;
+  lineItems: Array<{ label: string; amount: number }>;
+  dueDate?: string | null;
+  clientVisibleNotes?: string | null;
+}
+
 interface UseAdminInvoicesResult {
   invoices: PortalInvoice[];
   installmentsByInvoice: Map<string, PortalInstallment[]>;
@@ -21,6 +29,9 @@ interface UseAdminInvoicesResult {
   error: string | null;
   refresh: () => Promise<void>;
   createInvoice: (input: CreateInvoiceInput) => Promise<{ id: string | null; error: string | null }>;
+  updateInvoice: (invoiceId: string, input: UpdateInvoiceInput) => Promise<{ error: string | null }>;
+  deleteInvoice: (invoiceId: string) => Promise<{ error: string | null }>;
+  cancelInvoice: (invoiceId: string, reason: string) => Promise<{ error: string | null }>;
   sendInvoice: (invoice: PortalInvoice, clientEmail: string | null) => Promise<{ error: string | null }>;
   remindInvoice: (invoice: PortalInvoice, clientEmail: string | null) => Promise<{ error: string | null }>;
 }
@@ -70,16 +81,45 @@ export function useAdminInvoices(projectId: string): UseAdminInvoicesResult {
     return { id: typeof data === 'string' ? data : null, error: null };
   }, [projectId, refresh]);
 
-  const sendInvoice = useCallback<UseAdminInvoicesResult['sendInvoice']>(async (invoice, clientEmail) => {
-    const { error: err } = await adminRpc('admin_send_invoice', { p_invoice_id: invoice.id });
+  const updateInvoice = useCallback<UseAdminInvoicesResult['updateInvoice']>(async (invoiceId, input) => {
+    const { error: err } = await adminRpc('admin_update_invoice', {
+      p_invoice_id: invoiceId,
+      p_amount_subtotal: input.amountSubtotal,
+      p_vat_rate: input.vatRate,
+      p_line_items: input.lineItems,
+      p_due_date: input.dueDate ?? null,
+      p_client_visible_notes: input.clientVisibleNotes ?? null,
+    });
     if (err) return { error: err.message };
+    await refresh();
+    return { error: null };
+  }, [refresh]);
+
+  const deleteInvoice = useCallback<UseAdminInvoicesResult['deleteInvoice']>(async (invoiceId) => {
+    const { error: err } = await adminRpc('admin_delete_invoice', { p_invoice_id: invoiceId });
+    if (err) return { error: err.message };
+    await refresh();
+    return { error: null };
+  }, [refresh]);
+
+  const cancelInvoice = useCallback<UseAdminInvoicesResult['cancelInvoice']>(async (invoiceId, reason) => {
+    const { error: err } = await adminRpc('admin_cancel_invoice', { p_invoice_id: invoiceId, p_reason: reason || null });
+    if (err) return { error: err.message };
+    await refresh();
+    return { error: null };
+  }, [refresh]);
+
+  const sendInvoice = useCallback<UseAdminInvoicesResult['sendInvoice']>(async (invoice, clientEmail) => {
+    const { data, error: err } = await adminRpc('admin_send_invoice', { p_invoice_id: invoice.id });
+    if (err) return { error: err.message };
+    const invoiceNumber = typeof data === 'string' ? data : invoice.invoice_number;
     await supabase.functions.invoke('generate-invoice-pdf', { body: { invoice_id: invoice.id } }).catch(() => undefined);
     if (clientEmail) {
       await supabase.functions.invoke('send-portal-email', {
         body: {
           template_key: 'invoice-sent',
           to: { email: clientEmail },
-          params: { invoice_number: invoice.invoice_number, amount_total: String(invoice.amount_total) },
+          params: { invoice_number: invoiceNumber ?? '', amount_total: String(invoice.amount_total) },
           dedupe_key: `${invoice.id}-sent`,
         },
       }).catch(() => undefined);
@@ -102,5 +142,5 @@ export function useAdminInvoices(projectId: string): UseAdminInvoicesResult {
     return { error: err ? (err.message ?? 'Échec') : null };
   }, []);
 
-  return { invoices, installmentsByInvoice, loading, error, refresh, createInvoice, sendInvoice, remindInvoice };
+  return { invoices, installmentsByInvoice, loading, error, refresh, createInvoice, updateInvoice, deleteInvoice, cancelInvoice, sendInvoice, remindInvoice };
 }
