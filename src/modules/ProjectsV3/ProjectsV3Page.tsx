@@ -34,10 +34,12 @@ import { getProjectAssigneeIds, getProjectAssignees } from './utils/projectAssig
 const VIEW_MODE_STORAGE_KEY = 'propulseo:projects-v3:view-mode'
 
 function loadViewMode(): V3ViewMode {
-  if (typeof window === 'undefined') return 'normal'
+  // Vue par défaut = « Liste détaillée » (projets En cours uniquement), à l'arrivée
+  // sur Projets actifs. L'utilisateur peut basculer en kanban/compact (mémorisé).
+  if (typeof window === 'undefined') return 'list'
   const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY)
-  if (stored === 'compact' || stored === 'list') return stored
-  return 'normal'
+  if (stored === 'compact' || stored === 'list' || stored === 'normal') return stored
+  return 'list'
 }
 
 function useDebounced<T>(value: T, delay: number): T {
