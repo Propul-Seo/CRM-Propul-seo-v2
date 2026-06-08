@@ -40,7 +40,9 @@ export function statusToColumn(status: ProjectStatusV2): V3Column {
     case 'propulseo_internal':
       return 'propulseo'
     default:
-      return 'actifs'
+      // Statut legacy/inconnu (ex. 'perdu', 'signe', 'en_production') → inactifs
+      // par sécurité : on évite qu'un projet perdu/archivé s'affiche parmi les actifs.
+      return 'inactifs'
   }
 }
 

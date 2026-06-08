@@ -78,11 +78,17 @@ EXECUTE FUNCTION public.trg_recompute_project_progress_v2();
 -- 3. Backfill des projets existants (one-shot)
 -- ----------------------------------------------------------------------------
 -- ⚠️ Le garde-fou R-018 (trg_guard_portal_columns_admin_only, BEFORE UPDATE sur
--- projects_v2) interdit de modifier `progress` hors team_member. En runtime ce
--- n'est pas un souci (seuls des membres d'équipe modifient la checklist → bypass
--- is_team_member()), MAIS ce backfill tourne dans le SQL Editor où la session
--- n'est PAS team_member → il faut désactiver le garde-fou le temps de l'UPDATE,
--- puis le réactiver. (Nécessite le rôle propriétaire de la table — OK en SQL Editor.)
+-- projects_v2) — dans sa version active mig 260 (whitelist jsonb fail-safe) —
+-- interdit de modifier TOUTE colonne hors [client_first_name, client_phone,
+-- client_company, updated_at, last_activity_at] pour un non-team_member. Donc
+-- `progress` EST bloqué hors team_member. En runtime ce n'est pas un souci (seuls
+-- des membres d'équipe modifient la checklist → bypass is_team_member()), MAIS ce
+-- backfill tourne dans le SQL Editor où la session n'est PAS team_member → on
+-- désactive le garde-fou le temps de l'UPDATE, puis on le réactive.
+-- Transaction explicite : si l'UPDATE échoue, le ROLLBACK réactive le trigger
+-- (pas de fenêtre où le garde-fou reste désactivé). Nécessite le rôle
+-- propriétaire de la table — OK en SQL Editor.
+BEGIN;
 ALTER TABLE public.projects_v2 DISABLE TRIGGER trg_guard_portal_columns_admin_only;
 
 UPDATE public.projects_v2 p
@@ -97,6 +103,7 @@ SET progress = COALESCE((
 ), 0);
 
 ALTER TABLE public.projects_v2 ENABLE TRIGGER trg_guard_portal_columns_admin_only;
+COMMIT;
 
 COMMENT ON FUNCTION public.recompute_project_progress_v2(uuid) IS
   'SP/projets-v3 : recalcule projects_v2.progress depuis la checklist (items racine done/total). Appelée par le trigger sur checklist_items_v2.';

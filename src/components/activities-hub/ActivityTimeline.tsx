@@ -84,11 +84,16 @@ function ActivityItem<T extends string>({ activity, actions, styleMap, onUpdate,
           </div>
           {expanded && (
             <>
-              {activity.realizedAt && (
-                <p className="text-[10px] font-medium text-[#a78bfa] mb-1">
-                  Réalisé le {format(new Date(activity.realizedAt), 'd MMMM yyyy', { locale: fr })}
-                </p>
-              )}
+              {(() => {
+                if (!activity.realizedAt) return null
+                const d = new Date(activity.realizedAt)
+                if (Number.isNaN(d.getTime())) return null
+                return (
+                  <p className="text-[10px] font-medium text-[#a78bfa] mb-1">
+                    Réalisé le {format(d, 'd MMMM yyyy', { locale: fr })}
+                  </p>
+                )
+              })()}
               {activity.content && (
                 <p className="text-xs text-[#ede9fe] leading-relaxed whitespace-pre-wrap">{activity.content}</p>
               )}

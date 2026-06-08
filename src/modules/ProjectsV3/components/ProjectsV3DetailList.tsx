@@ -46,6 +46,8 @@ export function ProjectsV3DetailList({
 }: Props) {
   const [sort, setSort] = useState<DetailSort>({ key: 'last_activity', dir: 'desc' })
 
+  // Vue « Liste détaillée » = volontairement les projets ACTIFS uniquement
+  // (les colonnes Inactifs/Propulseo ne sont pas listées ici, par design).
   const actifs = useMemo(
     () => projects.filter((p) => statusToColumn(p.status) === 'actifs'),
     [projects],
