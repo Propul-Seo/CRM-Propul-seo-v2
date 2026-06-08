@@ -79,11 +79,20 @@ export interface PortalProjectStep {
   visible_to_client: boolean;
 }
 
+export interface PortalActivity {
+  id: string; project_id: string; type: string; content: string;
+  author_name: string | null; realized_at: string | null; next_actions: string | null;
+  is_auto: boolean; created_at: string;
+}
+
 export const usePortalInvoices       = () => useList<PortalInvoice>('propulspace_invoices', 'issue_date');
 export const usePortalInstallments   = () => useList<PortalInstallment>('propulspace_invoice_installments', 'due_date', true);
 export const usePortalDocuments      = () => useList<PortalDocument>('propulspace_documents', 'created_at');
 export const usePortalSignatures     = () => useList<PortalSignature>('propulspace_signatures', 'created_at');
 export const usePortalProjectSteps   = () => useList<PortalProjectStep>('propulspace_project_steps', 'step_order', true);
+// SP5 : fil d'activité visible du projet (vue propulspace_activities_v2). Renvoie
+// vide tant que la migration 297 n'est pas appliquée (erreur silencieuse → []).
+export const usePortalProjectActivities = () => useList<PortalActivity>('propulspace_activities', 'created_at');
 
 // Génère une URL signée temporaire pour un path Storage privé. Utilisé
 // pour les téléchargements de documents / factures depuis le portail.

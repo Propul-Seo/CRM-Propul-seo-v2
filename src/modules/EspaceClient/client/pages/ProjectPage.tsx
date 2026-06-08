@@ -8,10 +8,11 @@ import {
 } from '@/modules/EspaceClient/shared/components'
 import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext'
 import {
-  usePortalProjectSteps, usePortalDocuments,
+  usePortalProjectSteps, usePortalDocuments, usePortalProjectActivities,
   getSignedStorageUrl, type PortalDocument, type PortalProjectStep,
 } from '../hooks/usePortalData'
 import { usePortalProjectDetails } from '../hooks/usePortalProjectDetails'
+import { ClientActivityTimeline } from '../components/ClientActivityTimeline'
 import { inferBucket } from '@/modules/ProjectDetailsV3Preview/tabs/documents/constants'
 import type { ProjectStepStatus } from '@/modules/EspaceClient/shared/types/portal.types'
 
@@ -49,6 +50,7 @@ export function ProjectPage() {
   const { project } = usePortal()
   const steps = usePortalProjectSteps()
   const documents = usePortalDocuments()
+  const activities = usePortalProjectActivities()
   const { details } = usePortalProjectDetails()
 
   const loading = steps.loading || documents.loading
@@ -211,6 +213,8 @@ export function ProjectPage() {
                     </ul>
                   </div>
                 )}
+
+                <ClientActivityTimeline activities={activities.rows} loading={activities.loading} />
               </div>
 
               {/* DROITE : Activité & prochaine étape */}

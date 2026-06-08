@@ -117,6 +117,31 @@ export interface AdminRpcMap {
     args: { p_document_id: string };
     returns: null;
   };
+  admin_create_activity: {
+    args: {
+      p_project_id: string;
+      p_type: string;
+      p_content: string;
+      p_author_name?: string | null;
+      p_metadata?: Record<string, unknown>;
+      p_visible_to_client?: boolean;
+    };
+    returns: string;            // activity id (uuid)
+  };
+  admin_update_activity: {
+    args: {
+      p_id: string;
+      p_type?: string | null;
+      p_content?: string | null;
+      p_metadata?: Record<string, unknown> | null;
+      p_visible_to_client?: boolean | null;
+    };
+    returns: null;
+  };
+  admin_delete_activity: {
+    args: { p_id: string };
+    returns: null;
+  };
   admin_get_audit_log: {
     args: {
       p_project_id: string;
