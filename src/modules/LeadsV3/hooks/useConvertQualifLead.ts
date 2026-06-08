@@ -1,19 +1,19 @@
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { adminRpc } from '@/modules/EspaceClient/admin/lib/adminRpc'
 import type { QualificationLead } from './useLeadsV3Qualification'
 
 interface ConvertResult {
   success: boolean
   projectId?: string
   documentsCreated?: number
-  portalInvited?: boolean
   error?: string
 }
 
 interface RpcResponse {
   project_id: string
+  lead_type: string
   documents_created: number
-  portal_activated: boolean
+  contact_created: boolean
 }
 
 function isRpcResponse(v: unknown): v is RpcResponse {
@@ -21,29 +21,28 @@ function isRpcResponse(v: unknown): v is RpcResponse {
   const o = v as Record<string, unknown>
   return typeof o.project_id === 'string'
     && typeof o.documents_created === 'number'
-    && typeof o.portal_activated === 'boolean'
 }
 
 /**
  * Convertit un lead qualif `submitted` en projet V2 + crée les rows GED
  * depuis les fichiers uploadés (logo, charte, screenshots).
  *
- * Tout passe par la RPC SECURITY DEFINER `admin_convert_qualif_to_project`
- * qui exécute INSERT projet + INSERT documents + UPDATE qualif en transaction
- * atomique (migration 245). Plus de double-call ni de risque de désync.
+ * Tout passe par la RPC unifiée SP2 `admin_convert_lead_to_project`
+ * (p_lead_type='qualification') qui exécute INSERT projet + contact primary
+ * + activité + INSERT documents + UPDATE qualif en transaction atomique.
  *
- * Si `activatePortal` est true, l'edge function `admin-portal-invite` est
- * appelée APRÈS la RPC (best-effort, échec non bloquant).
+ * Le portail est découplé de la conversion (décision Q6) : l'activation se
+ * fait depuis la section Propul'Space admin (PortalStatusSection), plus ici.
  */
 export function useConvertQualifLead() {
   const [converting, setConverting] = useState(false)
 
-  const convert = async (lead: QualificationLead, activatePortal: boolean): Promise<ConvertResult> => {
+  const convert = async (lead: QualificationLead): Promise<ConvertResult> => {
     setConverting(true)
     try {
-      const { data, error } = await supabase.rpc('admin_convert_qualif_to_project', {
-        p_qualif_id: lead.id,
-        p_activate_portal: activatePortal,
+      const { data, error } = await adminRpc('admin_convert_lead_to_project', {
+        p_lead_id: lead.id,
+        p_lead_type: 'qualification',
       })
 
       if (error) {
@@ -54,28 +53,11 @@ export function useConvertQualifLead() {
         if (import.meta.env.DEV) console.error('[useConvertQualifLead] RPC shape inattendu:', data)
         return { success: false, error: 'RPC retour invalide (shape inattendu)' }
       }
-      const projectId = data.project_id
-
-      let portalInvited = false
-      if (activatePortal) {
-        try {
-          const { error: inviteErr } = await supabase.functions.invoke('admin-portal-invite', {
-            body: { projectId, email: lead.email },
-          })
-          portalInvited = !inviteErr
-          if (inviteErr && import.meta.env.DEV) {
-            console.error('[useConvertQualifLead] portal invite failed:', inviteErr)
-          }
-        } catch (e) {
-          if (import.meta.env.DEV) console.error('[useConvertQualifLead] portal invite exception:', e)
-        }
-      }
 
       return {
         success: true,
-        projectId,
+        projectId: data.project_id,
         documentsCreated: data.documents_created,
-        portalInvited,
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Erreur inconnue'

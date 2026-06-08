@@ -122,6 +122,18 @@ export interface AdminRpcMap {
     args: { p_signature_id: string; p_reason?: string | null };
     returns: null;
   };
+  admin_convert_lead_to_project: {
+    args: {
+      p_lead_id: string;
+      p_lead_type: 'qualification' | 'site_web' | 'erp';
+    };
+    returns: {
+      project_id: string;
+      lead_type: string;
+      documents_created: number;
+      contact_created: boolean;
+    };
+  };
 }
 
 export async function adminRpc<K extends keyof AdminRpcMap & string>(

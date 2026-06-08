@@ -1,20 +1,14 @@
 import { useState } from 'react'
-import { v2 } from '@/lib/supabase'
-import type { ProjectV2 } from '@/types/project-v2'
+import { adminRpc } from '@/modules/EspaceClient/admin/lib/adminRpc'
+
+/** Type de pipeline source pour la conversion (hors qualification). */
+export type LeadConversionType = 'site_web' | 'erp'
 
 interface ConvertInput {
-  /** Nom du projet (par défaut, le nom de l'entreprise du lead). */
-  name: string
-  /** Nom du client (entreprise ou contact). */
-  client_name: string | null
-  /** Identifiant utilisateur assigné (responsable). */
-  assigned_to: string | null
-  /** Nom du responsable pour cache visuel. */
-  assigned_name: string | null
-  /** Budget estimé (si dispo côté lead). */
-  budget: number | null
-  /** Source du lead (origine). */
-  source: string | null
+  /** Identifiant du lead source (contacts.id pour site_web, crmerp_leads.id pour erp). */
+  leadId: string
+  /** Pipeline d'origine du lead — détermine la table source côté RPC. */
+  leadType: LeadConversionType
 }
 
 interface ConvertResult {
@@ -23,9 +17,24 @@ interface ConvertResult {
   error?: string
 }
 
+interface RpcResponse {
+  project_id: string
+  lead_type: string
+  documents_created: number
+  contact_created: boolean
+}
+
+function isRpcResponse(v: unknown): v is RpcResponse {
+  if (typeof v !== 'object' || v === null) return false
+  const o = v as Record<string, unknown>
+  return typeof o.project_id === 'string'
+}
+
 /**
- * Crée un `projects_v2` minimal à partir d'un lead signé.
- * Ne supprime ni n'archive le lead source — la conversion est non destructive.
+ * Convertit un lead signé (site web ou ERP) en projet `projects_v2` COMPLET
+ * via la RPC unifiée SP2 `admin_convert_lead_to_project` : projet +
+ * contact primary + activité système + marquage `converted_to_project_id`
+ * sur la source (anti double-conversion). La conversion est non destructive.
  */
 export function useConvertLeadToProject() {
   const [converting, setConverting] = useState(false)
@@ -33,30 +42,19 @@ export function useConvertLeadToProject() {
   const convert = async (input: ConvertInput): Promise<ConvertResult> => {
     setConverting(true)
     try {
-      const payload: Partial<ProjectV2> = {
-        name: input.name.trim() || 'Nouveau projet',
-        client_name: input.client_name?.trim() || null,
-        status: 'brief_received',
-        priority: 'medium',
-        presta_type: ['site_web'],
-        category: 'site_web',
-        assigned_to: input.assigned_to,
-        assigned_name: input.assigned_name,
-        budget: input.budget,
-        progress: 0,
-        is_archived: false,
-        start_date: new Date().toISOString().slice(0, 10),
-      }
-      const { data, error } = await v2
-        .from('projects')
-        .insert(payload)
-        .select('id')
-        .single()
+      const { data, error } = await adminRpc('admin_convert_lead_to_project', {
+        p_lead_id: input.leadId,
+        p_lead_type: input.leadType,
+      })
       if (error) {
-        console.error('[useConvertLeadToProject] insert failed', error)
+        console.error('[useConvertLeadToProject] rpc failed', error)
         return { success: false, error: error.message }
       }
-      return { success: true, projectId: (data as { id: string }).id }
+      if (!isRpcResponse(data)) {
+        if (import.meta.env.DEV) console.error('[useConvertLeadToProject] RPC shape inattendu:', data)
+        return { success: false, error: 'RPC retour invalide (shape inattendu)' }
+      }
+      return { success: true, projectId: data.project_id }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erreur inconnue'
       console.error('[useConvertLeadToProject] exception', err)

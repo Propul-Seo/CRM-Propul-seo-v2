@@ -75,41 +75,17 @@ export function LeadsV3Page() {
   }
 
   /**
-   * Convertit un lead signé en projet V3.
-   * Récupère les infos depuis le lead source (budget, responsable) puis crée
-   * un `projects_v2` minimal. Le lead n'est pas archivé — conversion non destructive.
+   * Convertit un lead signé en projet V3 via la RPC unifiée SP2.
+   * Le mapping des champs (nom, budget, responsable…) est fait côté serveur
+   * depuis la table source. Le lead n'est pas archivé — conversion non destructive.
    */
   const handleConvertLead = async (card: LeadCardData) => {
     setConvertingId(card.id)
     try {
-      const payloadName = card.company || card.contact || 'Nouveau projet'
-      let payloadBudget: number | null = card.amount
-      let assignedTo: string | null = null
-      let assignedName: string | null = card.assignee
-
-      if (tab === 'site_web') {
-        const lead = sw.leads.find(l => l.id === card.id)
-        if (lead) {
-          payloadBudget = lead.project_price ?? card.amount
-          assignedTo = lead.assigned_to ?? null
-          assignedName = lead.assigned_user?.name ?? lead.assigned_user_name ?? card.assignee
-        }
-      } else {
-        const lead = erp.leads.find(l => l.id === card.id)
-        if (lead) {
-          assignedTo = lead.assignee_id ?? null
-          assignedName = lead.assignee?.name ?? card.assignee
-        }
-      }
-
-      const res = await convert({
-        name: payloadName,
-        client_name: card.company || card.contact,
-        assigned_to: assignedTo,
-        assigned_name: assignedName,
-        budget: payloadBudget,
-        source: card.source,
-      })
+      // L'onglet courant détermine le pipeline source : site_web (contacts)
+      // ou erp (crmerp_leads). La RPC lit la bonne table selon ce type.
+      const leadType = tab === 'site_web' ? 'site_web' : 'erp'
+      const res = await convert({ leadId: card.id, leadType })
 
       if (res.success && res.projectId) {
         toast.success('Lead converti en projet ✓', {

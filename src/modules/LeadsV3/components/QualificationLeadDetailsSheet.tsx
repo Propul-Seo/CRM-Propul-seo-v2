@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -45,7 +44,6 @@ export function QualificationLeadDetailsSheet({ lead, open, onOpenChange, onActi
   const { archive, archiving } = useArchiveQualifLead()
   const [confirmConvert, setConfirmConvert] = useState(false)
   const [confirmArchive, setConfirmArchive] = useState(false)
-  const [activatePortal, setActivatePortal] = useState(true)
   const [archiveReason, setArchiveReason] = useState('')
 
   if (!lead) return null
@@ -53,14 +51,12 @@ export function QualificationLeadDetailsSheet({ lead, open, onOpenChange, onActi
   const busy = converting || archiving
 
   const handleConvert = async () => {
-    const res = await convert(lead, activatePortal)
+    const res = await convert(lead)
     setConfirmConvert(false)
     if (res.success && res.projectId) {
-      toast.success(
-        res.portalInvited ? 'Projet créé + portail activé ✓'
-          : activatePortal ? 'Projet créé (portail à activer manuellement)' : 'Projet créé ✓',
-        { action: { label: 'Ouvrir le projet', onClick: () => navigate(`/projets-v3-preview/${res.projectId}`) } },
-      )
+      toast.success('Projet créé ✓', {
+        action: { label: 'Ouvrir le projet', onClick: () => navigate(`/projets-v3-preview/${res.projectId}`) },
+      })
       onOpenChange(false); onActionComplete?.()
     } else toast.error(`Conversion échouée : ${res.error ?? 'erreur inconnue'}`)
   }
@@ -175,16 +171,9 @@ export function QualificationLeadDetailsSheet({ lead, open, onOpenChange, onActi
             <AlertDialogTitle className="text-[#ede9fe]">Convertir ce lead en projet ?</AlertDialogTitle>
             <AlertDialogDescription className="text-[#a78bfa]">
               Un nouveau projet sera créé avec les infos du questionnaire. Le lead sera marqué comme converti.
+              L'activation du portail client se gère séparément depuis l'espace Propul'Space du projet.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <label className="flex items-start gap-2.5 rounded-lg border border-[#1f1b3a] bg-[#0f0a1f]/60 px-3 py-2.5 text-[13px] text-[#ede9fe]">
-            <Checkbox checked={activatePortal} onCheckedChange={v => setActivatePortal(v === true)}
-              className="mt-0.5 border-[#a78bfa]/40 data-[state=checked]:border-violet-600 data-[state=checked]:bg-violet-600" />
-            <span>
-              <span className="font-semibold">Activer le portail client</span>
-              <span className="mt-0.5 block text-[12px] text-[#9ca3af]">Envoie l'invitation à {lead.email}.</span>
-            </span>
-          </label>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={converting} className="border-[#1f1b3a] bg-transparent text-[#ede9fe] hover:bg-[#1a1233]">Annuler</AlertDialogCancel>
             <AlertDialogAction onClick={handleConvert} disabled={converting}
