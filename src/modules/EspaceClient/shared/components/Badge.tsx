@@ -52,6 +52,7 @@ const STATUS_MAP: Record<string, { tone: BadgeTone; label: string }> = {
   overdue:    { tone: 'red',   label: 'En retard' },
   cancelled:  { tone: 'gray',  label: 'Annulée' },
   refunded:   { tone: 'amber', label: 'Remboursée' },
+  partially_paid: { tone: 'amber', label: 'Partiellement payée' },
   // signatures
   pending:    { tone: 'amber', label: 'En attente' },
   signed:     { tone: 'green', label: 'Signé' },
