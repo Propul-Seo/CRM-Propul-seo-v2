@@ -2,11 +2,10 @@ import { useState } from 'react';
 import { Plus, Send, Bell, Loader2, FileText, Pencil, Trash2, Ban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusBadge, EmptyState } from '@/modules/EspaceClient/shared/components';
-import { useAdminInvoices } from '../hooks/useAdminInvoices';
+import { useAdminInvoices, type AdminInvoice } from '../hooks/useAdminInvoices';
 import { AdminInvoiceForm } from './AdminInvoiceForm';
 import { CancelInvoiceDialog } from './CancelInvoiceDialog';
 import { getAdminSignedUrl } from '../lib/adminStorage';
-import type { PortalInvoice } from '@/modules/EspaceClient/client/hooks/usePortalData';
 
 const BUCKET = 'propulspace-documents';
 const money = (a: string | number, c = 'EUR') =>
@@ -15,31 +14,31 @@ const money = (a: string | number, c = 'EUR') =>
 export function InvoicesTab({ projectId, clientEmail }: { projectId: string; clientEmail: string | null }) {
   const { invoices, loading, error, createInvoice, updateInvoice, deleteInvoice, cancelInvoice, sendInvoice, remindInvoice } = useAdminInvoices(projectId);
   const [formOpen, setFormOpen] = useState(false);
-  const [editInvoice, setEditInvoice] = useState<PortalInvoice | null>(null);
-  const [cancelTarget, setCancelTarget] = useState<PortalInvoice | null>(null);
+  const [editInvoice, setEditInvoice] = useState<AdminInvoice | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<AdminInvoice | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  async function onSend(inv: PortalInvoice) {
+  async function onSend(inv: AdminInvoice) {
     setBusyId(inv.id); setActionError(null);
     const { error } = await sendInvoice(inv, clientEmail);
     if (error) setActionError(error);
     setBusyId(null);
   }
-  async function onRemind(inv: PortalInvoice) {
+  async function onRemind(inv: AdminInvoice) {
     setBusyId(inv.id); setActionError(null);
     const { error } = await remindInvoice(inv, clientEmail);
     if (error) setActionError(error);
     setBusyId(null);
   }
-  async function onDelete(inv: PortalInvoice) {
+  async function onDelete(inv: AdminInvoice) {
     if (!window.confirm(`Supprimer le brouillon ${inv.invoice_number ?? ''} ? Cette action est définitive.`)) return;
     setBusyId(inv.id); setActionError(null);
     const { error } = await deleteInvoice(inv.id);
     if (error) setActionError(error);
     setBusyId(null);
   }
-  async function onPdf(inv: PortalInvoice) {
+  async function onPdf(inv: AdminInvoice) {
     if (!inv.pdf_url) return;
     const url = await getAdminSignedUrl(BUCKET, inv.pdf_url);
     if (url) window.open(url, '_blank', 'noopener,noreferrer');
@@ -57,9 +56,11 @@ export function InvoicesTab({ projectId, clientEmail }: { projectId: string; cli
       {!loading && invoices.length === 0 && <EmptyState icon={FileText} title="Aucune facture" body="Créez la première facture de ce client." />}
       <ul className="divide-y divide-border">
         {invoices.map(inv => (
-          <li key={inv.id} className="flex items-center gap-3 py-3">
+          <li key={inv.id} className="py-3">
+           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-foreground">{inv.invoice_number ?? 'Brouillon'}{inv.is_deposit && <span className="ml-2 text-xs text-muted-foreground">Acompte</span>}</p>
+              {inv.title && <p className="truncate text-xs font-medium text-foreground/70">{inv.title}</p>}
               <p className="text-xs text-muted-foreground">Émise le {new Date(inv.issue_date).toLocaleDateString('fr-FR')}</p>
             </div>
             <span className="text-sm font-bold">{money(inv.amount_total, inv.currency)}</span>
@@ -81,6 +82,10 @@ export function InvoicesTab({ projectId, clientEmail }: { projectId: string; cli
                 </Button>
                 <Button variant="ghost" size="icon" title="Annuler" onClick={() => setCancelTarget(inv)} disabled={busyId === inv.id}><Ban className="h-4 w-4" /></Button>
               </>
+            )}
+           </div>
+            {inv.status === 'cancelled' && inv.cancellation_reason && (
+              <p className="mt-1.5 text-xs text-muted-foreground"><span className="font-medium text-foreground/70">Motif d'annulation :</span> {inv.cancellation_reason}</p>
             )}
           </li>
         ))}

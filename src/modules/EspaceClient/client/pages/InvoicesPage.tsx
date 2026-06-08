@@ -161,6 +161,7 @@ export function InvoicesPage() {
                       {inv.invoice_number}
                       {inv.is_deposit && <span className="ml-2 text-[11px] font-medium text-[var(--ps-fg-muted)]">Acompte</span>}
                     </p>
+                    {inv.title && <p className="truncate text-[12px] font-medium text-[var(--ps-fg-secondary)]">{inv.title}</p>}
                     <p className="text-[12px] text-[var(--ps-fg-muted)]">
                       Émise le {formatDate(inv.issue_date)} · Échéance {formatDate(inv.due_date)}
                     </p>
@@ -182,6 +183,7 @@ export function InvoicesPage() {
             <SheetHeader>
               <SheetTitle>{selected.invoice_number}</SheetTitle>
               <SheetDescription>
+                {selected.title && <span className="block font-medium text-[var(--ps-fg-secondary)]">{selected.title}</span>}
                 Émise le {formatDate(selected.issue_date)} · Échéance {formatDate(selected.due_date)}
               </SheetDescription>
             </SheetHeader>

@@ -24,6 +24,7 @@ const todayISO = () => new Date().toISOString().slice(0, 10);
 
 export function AdminInvoiceForm({ open, onOpenChange, onSubmit, editInvoice, onUpdate }: Props) {
   const [lines, setLines] = useState<Line[]>([{ label: '', amount: '' }]);
+  const [title, setTitle] = useState('');
   const [isDeposit, setIsDeposit] = useState(false);
   const [vatRate, setVatRate] = useState('0');
   const [issueDate, setIssueDate] = useState(todayISO());
@@ -39,7 +40,7 @@ export function AdminInvoiceForm({ open, onOpenChange, onSubmit, editInvoice, on
   const total = useMemo(() => subtotal * (1 + (parseFloat(vatRate) || 0) / 100), [subtotal, vatRate]);
 
   function reset() {
-    setLines([{ label: '', amount: '' }]); setIsDeposit(false); setVatRate('0');
+    setLines([{ label: '', amount: '' }]); setTitle(''); setIsDeposit(false); setVatRate('0');
     setIssueDate(todayISO()); setDueDate(''); setNotes(''); setInstallments([]); setFormError(null);
   }
 
@@ -48,6 +49,7 @@ export function AdminInvoiceForm({ open, onOpenChange, onSubmit, editInvoice, on
     if (open && editInvoice) {
       const items = (editInvoice.line_items as unknown as Array<{ label?: string; amount?: number }>) ?? [];
       setLines(items.length ? items.map((l) => ({ label: l.label ?? '', amount: l.amount != null ? String(l.amount) : '' })) : [{ label: '', amount: '' }]);
+      setTitle(editInvoice.title ?? '');
       setVatRate(String(editInvoice.vat_rate ?? 0));
       setIssueDate(editInvoice.issue_date ?? todayISO());
       setDueDate(editInvoice.due_date ?? '');
@@ -83,10 +85,12 @@ export function AdminInvoiceForm({ open, onOpenChange, onSubmit, editInvoice, on
       ? await onUpdate(editInvoice.id, {
           amountSubtotal, vatRate: parseFloat(vatRate) || 0, lineItems: cleanLines,
           dueDate: dueDate || null, clientVisibleNotes: notes.trim() || null,
+          title: title.trim() || null,
         })
       : await onSubmit({
           amountSubtotal, isDeposit, vatRate: parseFloat(vatRate) || 0, lineItems: cleanLines,
           issueDate, dueDate: dueDate || null, clientVisibleNotes: notes.trim() || null,
+          title: title.trim() || null,
           installments: cleanInst,
         });
     setSubmitting(false);
@@ -99,6 +103,10 @@ export function AdminInvoiceForm({ open, onOpenChange, onSubmit, editInvoice, on
       <DialogContent className="max-w-lg">
         <DialogHeader><DialogTitle>{isEdit ? 'Modifier la facture' : 'Nouvelle facture'}</DialogTitle></DialogHeader>
         <div className="space-y-4">
+          <div>
+            <Label>Intitulé (optionnel)</Label>
+            <Input placeholder="Ex. Paiement 1/2" value={title} onChange={e => setTitle(e.target.value)} />
+          </div>
           <div className="space-y-2">
             <Label>Lignes</Label>
             {lines.map((l, i) => (
