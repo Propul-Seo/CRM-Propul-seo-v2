@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react'
-import { portalSupabase } from '@/lib/supabase'
 import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext'
 
 export interface PortalProjectDetails {
@@ -29,7 +28,7 @@ export function usePortalProjectDetails(): {
   error: string | null
   refresh: () => Promise<void>
 } {
-  const { project } = usePortal()
+  const { project, storage } = usePortal()
   const [details, setDetails] = useState<PortalProjectDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -37,7 +36,7 @@ export function usePortalProjectDetails(): {
   const refresh = useCallback(async () => {
     setLoading(true)
     setError(null)
-    const { data, error: err } = await portalSupabase
+    const { data, error: err } = await storage
       .from('projects_v2')
       .select('id, name, status, description, presta_type, start_date, end_date, budget, client_first_name, client_phone, client_company, assigned_name, portal_activated_at')
       .eq('id', project.id)
@@ -45,7 +44,7 @@ export function usePortalProjectDetails(): {
     if (err) { setError(err.message); setDetails(null) }
     else setDetails(data as PortalProjectDetails | null)
     setLoading(false)
-  }, [project.id])
+  }, [project.id, storage])
 
   useEffect(() => { void refresh() }, [refresh])
 

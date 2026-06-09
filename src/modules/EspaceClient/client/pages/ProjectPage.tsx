@@ -15,6 +15,8 @@ import { usePortalProjectDetails } from '../hooks/usePortalProjectDetails'
 import { ClientActivityTimeline } from '../components/ClientActivityTimeline'
 import { inferBucket } from '@/modules/ProjectDetailsV3Preview/tabs/documents/constants'
 import type { ProjectStepStatus } from '@/modules/EspaceClient/shared/types/portal.types'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/types/database'
 
 // ── Formatage dates ───────────────────────────────────────────────
 function formatLong(iso: string | null): string | undefined {
@@ -371,13 +373,13 @@ function TimelineRow({ step, isLast }: { step: PortalProjectStep; isLast: boolea
 }
 
 // ── Livrable téléchargeable ───────────────────────────────────────
-async function downloadDocument(doc: PortalDocument): Promise<void> {
+async function downloadDocument(storage: SupabaseClient<Database>, doc: PortalDocument): Promise<void> {
   const bucket = inferBucket(doc.file_url)
   if (bucket === 'external') {
     window.open(doc.file_url, '_blank', 'noopener,noreferrer')
     return
   }
-  const url = await getSignedStorageUrl(bucket, doc.file_url)
+  const url = await getSignedStorageUrl(storage, bucket, doc.file_url)
   if (!url) {
     alert('Impossible de générer le lien de téléchargement. Réessayez plus tard.')
     return
@@ -386,10 +388,11 @@ async function downloadDocument(doc: PortalDocument): Promise<void> {
 }
 
 function DeliverableRow({ doc }: { doc: PortalDocument }) {
+  const { storage } = usePortal()
   const [downloading, setDownloading] = useState(false)
   async function handle() {
     setDownloading(true)
-    await downloadDocument(doc)
+    await downloadDocument(storage, doc)
     setDownloading(false)
   }
   return (

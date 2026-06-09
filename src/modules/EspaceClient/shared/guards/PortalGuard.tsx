@@ -3,6 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import { usePortalAuth } from '@/modules/EspaceClient/shared/hooks/usePortalAuth';
 import { PortalProvider } from '@/modules/EspaceClient/shared/context/PortalContext';
+import { v2Portal, portalSupabase } from '@/lib/supabase';
 import '@/modules/EspaceClient/shared/layouts/portal-theme.css';
 
 interface PortalGuardProps {
@@ -34,7 +35,7 @@ export function PortalGuard({ children }: PortalGuardProps) {
   }
 
   return (
-    <PortalProvider value={{ email: state.email, project: state.project, signOut, previewMode: false }}>
+    <PortalProvider value={{ email: state.email, project: state.project, signOut, previewMode: false, db: v2Portal, storage: portalSupabase }}>
       {children}
     </PortalProvider>
   );

@@ -1,11 +1,19 @@
 import { createContext, useContext, type ReactNode } from 'react';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PortalProject } from '@/modules/EspaceClient/shared/hooks/usePortalAuth';
+import type { Database } from '@/types/database';
+import type { V2Client } from '@/lib/supabase';
 
 interface PortalContextValue {
   email: string;
   project: PortalProject;
   signOut: () => Promise<void>;
   previewMode: boolean;
+  // Client de lecture selon le mode : portail (session client) en usage réel,
+  // admin (session CRM, droit is_admin) en aperçu admin. `db` = proxy pour
+  // `.from()`, `storage` = vrai SupabaseClient pour Storage/RPC/functions/auth.
+  db: V2Client;
+  storage: SupabaseClient<Database>;
 }
 
 const PortalContext = createContext<PortalContextValue | null>(null);

@@ -159,6 +159,9 @@ function createV2Proxy(client: SupabaseClient<Database>) {
   }
 }
 
+// Type du proxy v2 (objet { from }) — exposé pour typer le PortalContext.
+export type V2Client = ReturnType<typeof createV2Proxy>;
+
 export const v2 = createV2Proxy(supabase);
 export const v2Anon = createV2Proxy(supabaseAnon);
 // Proxy v2 sur le client portail : pour que les lectures `v2.from('projects')`

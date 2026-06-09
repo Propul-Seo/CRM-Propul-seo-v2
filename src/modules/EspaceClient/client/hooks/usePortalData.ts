@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { portalSupabase as supabase, v2Portal as v2 } from '@/lib/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/database';
+import type { V2Client } from '@/lib/supabase';
 import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext';
 
 // Hooks de lecture des entités portail (tables propulspace.* exposées via
@@ -19,7 +21,7 @@ interface ListResult<T> {
 type ListFilter = readonly [op: 'eq' | 'neq', col: string, val: string | boolean];
 
 function useList<T>(
-  table: string, orderBy: string, ascending: boolean,
+  db: V2Client, table: string, orderBy: string, ascending: boolean,
   projectId: string, filters: readonly ListFilter[] = [],
 ): ListResult<T> {
   const [rows, setRows] = useState<T[]>([]);
@@ -38,7 +40,7 @@ function useList<T>(
   const filterKey = filters.map(f => f.join(':')).join('|');
   const refresh = useCallback(async () => {
     setLoading(true);
-    let q = v2.from(table).select('*').eq('project_id', projectId);
+    let q = db.from(table).select('*').eq('project_id', projectId);
     for (const [op, col, val] of filters) {
       q = op === 'eq' ? q.eq(col, val) : q.neq(col, val);
     }
@@ -48,7 +50,7 @@ function useList<T>(
     else { setError(null); setRows((data ?? []) as T[]); }
     setLoading(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [table, orderBy, ascending, projectId, filterKey]);
+  }, [db, table, orderBy, ascending, projectId, filterKey]);
 
   useEffect(() => { void refresh(); }, [refresh]);
   return { rows, loading, error, refresh };
@@ -100,13 +102,14 @@ export interface PortalActivity {
 }
 
 export const usePortalInvoices = () => {
-  const { project } = usePortal();
-  return useList<PortalInvoice>('propulspace_invoices', 'issue_date', false, project.id, [['neq', 'status', 'draft']]);
+  const { project, db } = usePortal();
+  return useList<PortalInvoice>(db, 'propulspace_invoices', 'issue_date', false, project.id, [['neq', 'status', 'draft']]);
 };
 
 // Les échéances n'ont pas de project_id : on les scope par les ids des factures
 // du projet (parité admin ; la RLS scoperait déjà côté client réel).
 export const usePortalInstallments = (invoiceIds: string[]) => {
+  const { db } = usePortal();
   const [rows, setRows] = useState<PortalInstallment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,41 +123,41 @@ export const usePortalInstallments = (invoiceIds: string[]) => {
       if (mountedRef.current) { setRows([]); setError(null); setLoading(false); }
       return;
     }
-    const { data, error: err } = await v2.from('propulspace_invoice_installments')
+    const { data, error: err } = await db.from('propulspace_invoice_installments')
       .select('*').in('invoice_id', invoiceIds).order('due_date', { ascending: true });
     if (!mountedRef.current) return;
     if (err) { setError(err.message); setRows([]); }
     else { setError(null); setRows((data ?? []) as PortalInstallment[]); }
     setLoading(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idsKey]);
+  }, [idsKey, db]);
   useEffect(() => { void refresh(); }, [refresh]);
   return { rows, loading, error, refresh };
 };
 
 export const usePortalDocuments = () => {
-  const { project } = usePortal();
-  return useList<PortalDocument>('propulspace_documents', 'created_at', false, project.id, [['eq', 'visible_to_client', true]]);
+  const { project, db } = usePortal();
+  return useList<PortalDocument>(db, 'propulspace_documents', 'created_at', false, project.id, [['eq', 'visible_to_client', true]]);
 };
 export const usePortalSignatures = () => {
-  const { project } = usePortal();
-  return useList<PortalSignature>('propulspace_signatures', 'created_at', false, project.id, []);
+  const { project, db } = usePortal();
+  return useList<PortalSignature>(db, 'propulspace_signatures', 'created_at', false, project.id, []);
 };
 export const usePortalProjectSteps = () => {
-  const { project } = usePortal();
-  return useList<PortalProjectStep>('propulspace_project_steps', 'step_order', true, project.id, [['eq', 'visible_to_client', true]]);
+  const { project, db } = usePortal();
+  return useList<PortalProjectStep>(db, 'propulspace_project_steps', 'step_order', true, project.id, [['eq', 'visible_to_client', true]]);
 };
 // SP5 : fil d'activité visible du projet (vue propulspace_activities). Renvoie
 // vide tant que la migration 297 n'est pas appliquée (erreur silencieuse → []).
 export const usePortalProjectActivities = () => {
-  const { project } = usePortal();
-  return useList<PortalActivity>('propulspace_activities', 'created_at', false, project.id, []);
+  const { project, db } = usePortal();
+  return useList<PortalActivity>(db, 'propulspace_activities', 'created_at', false, project.id, []);
 };
 
 // Génère une URL signée temporaire pour un path Storage privé. Utilisé
 // pour les téléchargements de documents / factures depuis le portail.
-export async function getSignedStorageUrl(bucket: string, path: string): Promise<string | null> {
-  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, SIGNED_URL_TTL_S);
+export async function getSignedStorageUrl(storage: SupabaseClient<Database>, bucket: string, path: string): Promise<string | null> {
+  const { data, error } = await storage.storage.from(bucket).createSignedUrl(path, SIGNED_URL_TTL_S);
   if (error || !data) return null;
   return data.signedUrl;
 }

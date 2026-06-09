@@ -4,7 +4,10 @@ import { Hero, EmptyState, FileIcon, SectionHead, FilePreviewDialog, Skeleton } 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { usePortalDocuments, getSignedStorageUrl, type PortalDocument } from '../hooks/usePortalData'
+import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext'
 import { inferBucket } from '@/modules/ProjectDetailsV3Preview/tabs/documents/constants'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/types/database'
 
 function formatSize(bytes: number | null): string {
   if (!bytes) return ''
@@ -12,7 +15,7 @@ function formatSize(bytes: number | null): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-async function downloadDocument(doc: PortalDocument) {
+async function downloadDocument(storage: SupabaseClient<Database>, doc: PortalDocument) {
   const bucket = inferBucket(doc.file_url)
   // Doc à lien externe (ex. charte fournie via une URL WeTransfer/Drive/Notion) :
   // pas de fichier Storage à signer, on ouvre directement le lien.
@@ -20,7 +23,7 @@ async function downloadDocument(doc: PortalDocument) {
     window.open(doc.file_url, '_blank', 'noopener,noreferrer')
     return
   }
-  const url = await getSignedStorageUrl(bucket, doc.file_url)
+  const url = await getSignedStorageUrl(storage, bucket, doc.file_url)
   if (!url) {
     alert('Impossible de générer le lien de téléchargement. Réessayez plus tard.')
     return
@@ -49,6 +52,7 @@ function extOf(name: string): string {
 
 export function DocumentsPage() {
   const { rows, loading, error } = usePortalDocuments()
+  const { storage } = usePortal()
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [preview, setPreview] = useState<PortalDocument | null>(null)
   const [filter, setFilter] = useState<string>('all')
@@ -64,7 +68,7 @@ export function DocumentsPage() {
 
   async function handleDownload(doc: PortalDocument) {
     setDownloadingId(doc.id)
-    await downloadDocument(doc)
+    await downloadDocument(storage, doc)
     setDownloadingId(null)
   }
 
@@ -192,7 +196,7 @@ export function DocumentsPage() {
           if (!preview) return null
           const bucket = inferBucket(preview.file_url)
           if (bucket === 'external') return preview.file_url
-          return getSignedStorageUrl(bucket, preview.file_url)
+          return getSignedStorageUrl(storage, bucket, preview.file_url)
         }}
       />
     </div>

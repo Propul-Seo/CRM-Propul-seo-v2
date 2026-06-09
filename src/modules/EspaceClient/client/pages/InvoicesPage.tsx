@@ -62,7 +62,7 @@ async function startCheckout(
 }
 
 export function InvoicesPage() {
-  const { project } = usePortal();
+  const { project, storage } = usePortal();
   const { rows, loading, error, refresh } = usePortalInvoices();
   const invoiceIds = useMemo(() => rows.map(i => i.id), [rows]);
   const { rows: installments, refresh: refreshInstallments } = usePortalInstallments(invoiceIds);
@@ -157,7 +157,7 @@ export function InvoicesPage() {
 
   async function downloadPdf(inv: PortalInvoice) {
     if (!inv.pdf_url) return;
-    const url = await getSignedStorageUrl(STORAGE_BUCKET, inv.pdf_url);
+    const url = await getSignedStorageUrl(storage, STORAGE_BUCKET, inv.pdf_url);
     if (url) window.open(url, '_blank', 'noopener,noreferrer');
   }
 
