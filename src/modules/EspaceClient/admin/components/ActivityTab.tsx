@@ -1,26 +1,11 @@
 import { useState } from 'react';
-import { Activity, FileText, Receipt, PenLine, ChevronDown, ArrowRight, Loader2 } from 'lucide-react';
+import { Activity, ChevronDown, ArrowRight, Loader2 } from 'lucide-react';
 import { Badge } from '@/modules/EspaceClient/shared/components';
 import { AdminFilterPills, AdminEmptyState } from './kit';
+import { AUDIT_RESOURCES, AUDIT_FALLBACK, AUDIT_VERB, auditItemName, fmtAuditDateTime } from './activityShared';
 import { useAdminAuditLog } from '../hooks/useAdminAuditLog';
 import type { AuditLogRow } from '../lib/adminRpc';
 
-const fmtDateTime = (iso: string) => new Date(iso).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
-
-type Tone = 'primary' | 'blue' | 'amber';
-interface ResourceMeta { icon: typeof FileText; tone: Tone; label: string }
-
-const RESOURCES: Record<string, ResourceMeta> = {
-  'propulspace.documents': { icon: FileText, tone: 'primary', label: 'Document' },
-  'propulspace.invoices': { icon: Receipt, tone: 'blue', label: 'Facture' },
-  'propulspace.signatures': { icon: PenLine, tone: 'amber', label: 'Signature' },
-};
-const VERBS: Record<AuditLogRow['action'], string> = { insert: 'ajouté', update: 'modifié', delete: 'supprimé' };
-const BUBBLE: Record<Tone, string> = {
-  primary: 'bg-primary/15 text-primary ring-1 ring-primary/30',
-  blue: 'bg-blue-500/10 text-blue-300 ring-1 ring-blue-500/20',
-  amber: 'bg-amber-500/10 text-amber-300 ring-1 ring-amber-500/20',
-};
 const BADGE_TONE: Record<AuditLogRow['action'], 'green' | 'blue' | 'red'> = { insert: 'green', update: 'blue', delete: 'red' };
 
 // Filtre piloté serveur (setResourceType refetche) — pas de filtrage client.
@@ -31,25 +16,16 @@ const FILTERS: Array<{ label: string; value: string | null }> = [
   { label: 'Signatures', value: 'propulspace.signatures' },
 ];
 
-function itemName(diff: AuditLogRow['diff']): string {
-  const pick = (src: Record<string, unknown> | undefined, key: string): string | null => {
-    const v = src?.[key];
-    return typeof v === 'string' && v.length > 0 ? v : null;
-  };
-  return pick(diff?.after, 'name') ?? pick(diff?.before, 'name')
-    ?? pick(diff?.after, 'invoice_number') ?? pick(diff?.before, 'invoice_number') ?? 'Sans titre';
-}
-
 function EventCard({ row }: { row: AuditLogRow }) {
   const [open, setOpen] = useState(false);
-  const meta = RESOURCES[row.resource_type] ?? { icon: FileText, tone: 'primary' as Tone, label: 'Élément' };
+  const meta = AUDIT_RESOURCES[row.resource_type] ?? AUDIT_FALLBACK;
   const Icon = meta.icon;
-  const name = itemName(row.diff);
+  const name = auditItemName(row.diff) || 'Sans titre';
 
   return (
     <article className="rounded-xl border border-border bg-surface-2 p-4 shadow-glow-sm sm:p-5">
       <div className="flex items-start gap-4">
-        <span className={'grid h-11 w-11 shrink-0 place-items-center rounded-xl ' + BUBBLE[meta.tone]}>
+        <span className={'grid h-11 w-11 shrink-0 place-items-center rounded-xl ' + meta.bubble}>
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
@@ -57,18 +33,18 @@ function EventCard({ row }: { row: AuditLogRow }) {
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{meta.label}</p>
               <h3 className="mt-0.5 flex items-center gap-1.5 text-base font-semibold tracking-tight text-foreground">
-                <span>{VERBS[row.action]}</span>
+                <span>{AUDIT_VERB[row.action]}</span>
                 <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 <span className="truncate text-foreground/90">{name}</span>
               </h3>
             </div>
-            <Badge tone={BADGE_TONE[row.action]}>{VERBS[row.action]}</Badge>
+            <Badge tone={BADGE_TONE[row.action]}>{AUDIT_VERB[row.action]}</Badge>
           </div>
 
           <p className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
             <span className="font-medium text-foreground/70">{row.actor_label}</span>
             <span className="text-foreground/30">•</span>
-            <span className="tabular-nums">{fmtDateTime(row.created_at)}</span>
+            <span className="tabular-nums">{fmtAuditDateTime(row.created_at)}</span>
           </p>
 
           {row.diff && (

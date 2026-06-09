@@ -8,6 +8,7 @@ import { ActivityTab } from '../components/ActivityTab';
 import { SignaturesTab } from '../components/SignaturesTab';
 import { Building2, Mail } from 'lucide-react';
 import { PortalStatusSection } from '../components/PortalStatusSection';
+import { OverviewActivityCard } from '../components/OverviewActivityCard';
 import { useAdminClientEmail, useAdminProject } from '../hooks/useAdminClients';
 
 function OverviewTab() {
@@ -55,8 +56,11 @@ function OverviewTab() {
         />
       </div>
 
-      {/* Jalons du projet (fusionnés dans l'Aperçu) */}
-      <ProjectStepsTab projectId={projectId} />
+      {/* Jalons | Activité récente (Aperçu V1 — 2 colonnes) */}
+      <div className="grid items-start gap-4 lg:grid-cols-2">
+        <ProjectStepsTab projectId={projectId} />
+        <OverviewActivityCard projectId={projectId} />
+      </div>
     </div>
   );
 }
