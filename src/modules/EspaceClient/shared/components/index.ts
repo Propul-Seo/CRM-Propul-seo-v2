@@ -13,6 +13,7 @@ export { ActivityRow } from './ActivityRow';
 export { TimelineStep } from './TimelineStep';
 export { StatusPage, type StatusTone } from './StatusPage';
 export { FileIcon } from './FileIcon';
+export { DocumentTypeIcon, docMeta, DOC_CHIP_TONE, type DocTone, type DocMeta } from './DocumentTypeIcon';
 export { InvoiceDocument } from './InvoiceDocument';
 export { InvoicePreviewDialog } from './InvoicePreviewDialog';
 export { FilePreviewDialog } from './FilePreviewDialog';
