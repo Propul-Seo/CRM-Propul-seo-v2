@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { FileSignature, FileDown, Bell, X, Plus, CalendarClock, Loader2 } from 'lucide-react';
-import { StatusBadge } from '@/modules/EspaceClient/shared/components';
+import { StatusBadge, FilePreviewDialog } from '@/modules/EspaceClient/shared/components';
 import { AdminFilterPills, AdminEmptyState } from '@/modules/EspaceClient/admin/components/kit';
 import { AdminSignatureForm } from './AdminSignatureForm';
 import { useAdminSignatures } from '../hooks/useAdminSignatures';
+import { signaturePreviewTarget } from '@/modules/EspaceClient/admin/lib/signaturePreview';
 import type { PortalSignature } from '@/modules/EspaceClient/client/hooks/usePortalData';
 
 const fmtDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('fr-FR') : '');
@@ -42,6 +43,7 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterKey>('all');
+  const [pdfPreview, setPdfPreview] = useState<{ name: string; url: string } | null>(null);
 
   async function onRemind(sig: PortalSignature) {
     setBusyId(sig.id); setActionError(null);
@@ -55,6 +57,13 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
     const { error } = await cancelSignature(sig);
     if (error) setActionError(error);
     setBusyId(null);
+  }
+
+  function openPreview(s: PortalSignature) {
+    const target = signaturePreviewTarget(s);
+    if (!target) return;
+    if (target.kind === 'external') { window.open(target.url, '_blank', 'noopener,noreferrer'); return; }
+    setPdfPreview({ name: s.name, url: target.url });
   }
 
   const total = signatures.length;
@@ -131,7 +140,14 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
               const dates = dateLabels(s);
               const busy = busyId === s.id;
               return (
-                <article key={s.id} className="rounded-xl border border-border bg-surface-2 p-4 shadow-glow-sm transition-colors hover:bg-surface-3/40">
+                <article
+                  key={s.id}
+                  onClick={() => openPreview(s)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPreview(s); } }}
+                  className="cursor-pointer rounded-xl border border-border bg-surface-2 p-4 shadow-glow-sm transition-colors hover:bg-surface-3/40"
+                >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex min-w-0 items-start gap-3.5">
                       <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-3 text-muted-foreground">
@@ -167,7 +183,7 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
                       {s.status === 'signed' && s.docuseal_signed_pdf_url && (
                         <button
                           type="button"
-                          onClick={() => window.open(s.docuseal_signed_pdf_url!, '_blank', 'noopener,noreferrer')}
+                          onClick={(e) => { e.stopPropagation(); window.open(s.docuseal_signed_pdf_url!, '_blank', 'noopener,noreferrer'); }}
                           className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-foreground/70 transition-colors hover:bg-surface-3 hover:text-foreground"
                         >
                           <FileDown className="h-4 w-4" /> PDF signé
@@ -177,7 +193,7 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
                         <>
                           <button
                             type="button"
-                            onClick={() => onCancel(s)}
+                            onClick={(e) => { e.stopPropagation(); onCancel(s); }}
                             disabled={busy}
                             className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-300 disabled:opacity-40"
                           >
@@ -185,7 +201,7 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
                           </button>
                           <button
                             type="button"
-                            onClick={() => onRemind(s)}
+                            onClick={(e) => { e.stopPropagation(); onRemind(s); }}
                             disabled={busy || !clientEmail || !s.docuseal_signing_url}
                             title={!s.docuseal_signing_url ? 'Lien de signature indisponible' : undefined}
                             className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/15 disabled:cursor-not-allowed disabled:opacity-50"
@@ -203,6 +219,13 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
         </>
       )}
 
+      <FilePreviewDialog
+        open={pdfPreview !== null}
+        onOpenChange={(o) => { if (!o) setPdfPreview(null); }}
+        name={pdfPreview?.name ?? ''}
+        mime="application/pdf"
+        resolveUrl={() => Promise.resolve(pdfPreview?.url ?? null)}
+      />
       <AdminSignatureForm open={formOpen} onOpenChange={setFormOpen} defaultEmail={clientEmail} onSubmit={createSignature} />
     </div>
   );
