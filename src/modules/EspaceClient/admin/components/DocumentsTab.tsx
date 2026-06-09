@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Loader2, FolderPlus, Download, Eye, EyeOff, Pencil, Trash2, FolderOpen, FileSearch } from 'lucide-react';
+import { Loader2, FolderPlus, Download, Eye, EyeOff, Pencil, Trash2, FolderOpen } from 'lucide-react';
 import {
   DocumentTypeIcon, docMeta, DOC_CHIP_TONE, FilePreviewDialog,
 } from '@/modules/EspaceClient/shared/components';
@@ -128,7 +128,11 @@ export function DocumentsTab({ projectId }: { projectId: string }) {
                 return (
                   <li
                     key={doc.id}
-                    className="group rounded-xl border border-border bg-surface-2 p-4 shadow-glow-sm transition-colors hover:border-border-subtle hover:bg-surface-3 sm:p-5"
+                    onClick={() => setPreview(doc)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPreview(doc); } }}
+                    className="group cursor-pointer rounded-xl border border-border bg-surface-2 p-4 shadow-glow-sm transition-colors hover:border-border-subtle hover:bg-surface-3 sm:p-5"
                   >
                     <div className="flex items-start gap-4">
                       <DocumentTypeIcon type={doc.document_type} mime={doc.file_mime_type} className="h-12 w-12" />
@@ -156,13 +160,12 @@ export function DocumentsTab({ projectId }: { projectId: string }) {
                         </div>
                       </div>
                       <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
-                        <button type="button" title="Aperçu" aria-label="Aperçu" onClick={() => setPreview(doc)} className={actionBtn}><FileSearch className="h-4 w-4" /></button>
-                        <button type="button" title="Télécharger" aria-label="Télécharger" onClick={() => void downloadDocument(doc)} className={actionBtn}><Download className="h-4 w-4" /></button>
-                        <button type="button" title={doc.visible_to_client ? 'Masquer au client' : 'Rendre visible'} aria-label="Visibilité" disabled={busy} onClick={() => onToggle(doc)} className={actionBtn}>
+                        <button type="button" title="Télécharger" aria-label="Télécharger" onClick={(e) => { e.stopPropagation(); void downloadDocument(doc); }} className={actionBtn}><Download className="h-4 w-4" /></button>
+                        <button type="button" title={doc.visible_to_client ? 'Masquer au client' : 'Rendre visible'} aria-label="Visibilité" disabled={busy} onClick={(e) => { e.stopPropagation(); onToggle(doc); }} className={actionBtn}>
                           {doc.visible_to_client ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
-                        <button type="button" title="Modifier" aria-label="Modifier" onClick={() => setEditing(doc)} className={actionBtn}><Pencil className="h-4 w-4" /></button>
-                        <button type="button" title="Supprimer" aria-label="Supprimer" disabled={busy} onClick={() => onDelete(doc)} className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-300 disabled:opacity-40"><Trash2 className="h-4 w-4" /></button>
+                        <button type="button" title="Modifier" aria-label="Modifier" onClick={(e) => { e.stopPropagation(); setEditing(doc); }} className={actionBtn}><Pencil className="h-4 w-4" /></button>
+                        <button type="button" title="Supprimer" aria-label="Supprimer" disabled={busy} onClick={(e) => { e.stopPropagation(); onDelete(doc); }} className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-300 disabled:opacity-40"><Trash2 className="h-4 w-4" /></button>
                       </div>
                     </div>
                   </li>
