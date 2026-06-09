@@ -7,7 +7,6 @@ import { DocumentsTab } from '../components/DocumentsTab';
 import { ActivityTab } from '../components/ActivityTab';
 import { SignaturesTab } from '../components/SignaturesTab';
 import { Building2, Mail } from 'lucide-react';
-import { AdminSectionHeader } from '../components/kit';
 import { PortalStatusSection } from '../components/PortalStatusSection';
 import { useAdminClientEmail, useAdminProject } from '../hooks/useAdminClients';
 
@@ -18,34 +17,30 @@ function OverviewTab() {
   if (loading) return <div className="py-6 text-sm text-muted-foreground">Chargement…</div>;
   if (!project) return <div className="py-6 text-sm text-muted-foreground">Projet introuvable.</div>;
   return (
-    <div className="space-y-6 py-2">
-      {/* Identité client : société + projet + email portail */}
-      <div className="rounded-xl border border-border bg-surface-2 p-5">
-        <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary/10">
-            <Building2 className="h-6 w-6 text-primary" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h2 className="truncate text-lg font-semibold text-foreground">{project.name}</h2>
-            {project.client_company && (
-              <p className="mt-0.5 truncate text-sm text-muted-foreground">{project.client_company}</p>
-            )}
-            {project.portal_client_email && (
-              <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Mail className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{project.portal_client_email}</span>
-              </p>
-            )}
+    <div className="space-y-4 py-2">
+      {/* Identité client (Atelier) */}
+      <section className="rounded-xl border border-border bg-surface-2 p-5 shadow-glow-sm">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Client</p>
+        <div className="mt-2 flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary/10">
+            <Building2 className="h-5 w-5 text-primary" />
+          </span>
+          <div className="min-w-0">
+            <h2 className="truncate text-lg font-semibold text-foreground">{project.client_company ?? project.name}</h2>
+            <p className="truncate text-sm text-muted-foreground">{project.name}</p>
           </div>
         </div>
-      </div>
+        {project.portal_client_email && (
+          <span className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-surface-3 px-2.5 py-1 text-xs text-foreground/70">
+            <Mail className="h-3.5 w-3.5" />
+            {project.portal_client_email}
+          </span>
+        )}
+      </section>
 
       {/* Accès portail */}
       <div>
-        <AdminSectionHeader
-          title="Accès portail"
-          subtitle="Gérez l'espace client externe et l'invitation par email."
-        />
+        <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Accès portail</p>
         <PortalStatusSection
           project={{
             id: project.id,
@@ -61,9 +56,7 @@ function OverviewTab() {
       </div>
 
       {/* Jalons du projet (fusionnés dans l'Aperçu) */}
-      <div className="border-t border-border pt-6">
-        <ProjectStepsTab projectId={projectId} />
-      </div>
+      <ProjectStepsTab projectId={projectId} />
     </div>
   );
 }
