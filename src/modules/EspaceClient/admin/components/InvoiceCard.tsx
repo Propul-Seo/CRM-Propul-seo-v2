@@ -6,6 +6,8 @@ import type { PortalInstallment } from '@/modules/EspaceClient/client/hooks/useP
 const money = (a: string | number, c = 'EUR') =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: c }).format(typeof a === 'string' ? parseFloat(a) : a);
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('fr-FR');
+// Comportement SP3 d'origine : relance/annulation sur sent|overdue uniquement.
+// (partially_paid exclu — l'avoir formel est reporté, cf. cycle de vie facture SP3.)
 const REMINDABLE = new Set(['sent', 'overdue']);
 
 function Ghost({ icon: Icon, label, onClick, disabled, tone = 'default' }: {
