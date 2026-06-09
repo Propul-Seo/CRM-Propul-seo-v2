@@ -17,12 +17,14 @@ const TYPE_CHIP: Record<string, string> = {
 
 type FilterKey = 'all' | 'pending' | 'signed' | 'expired';
 
-function dateLabel(s: PortalSignature): { label: string; value: string } | null {
-  if (s.status === 'signed' && s.signed_at) return { label: 'Signé le', value: fmtDate(s.signed_at) };
-  if (s.status === 'pending' && s.expires_at) return { label: 'Expire le', value: fmtDate(s.expires_at) };
-  if (s.status === 'expired' && s.expires_at) return { label: 'Expiré le', value: fmtDate(s.expires_at) };
-  if (s.sent_at) return { label: 'Envoyé le', value: fmtDate(s.sent_at) };
-  return null;
+// Date principale selon le statut + « Envoyé le » en secondaire dès que sent_at existe.
+function dateLabels(s: PortalSignature): Array<{ label: string; value: string }> {
+  const out: Array<{ label: string; value: string }> = [];
+  if (s.status === 'signed' && s.signed_at) out.push({ label: 'Signé le', value: fmtDate(s.signed_at) });
+  else if (s.status === 'pending' && s.expires_at) out.push({ label: 'Expire le', value: fmtDate(s.expires_at) });
+  else if (s.status === 'expired' && s.expires_at) out.push({ label: 'Expiré le', value: fmtDate(s.expires_at) });
+  if (s.sent_at) out.push({ label: 'Envoyé le', value: fmtDate(s.sent_at) });
+  return out;
 }
 
 function Tile({ value, label, tint }: { value: number; label: string; tint?: string }) {
@@ -126,7 +128,7 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
           />
           <div className="space-y-3">
             {rows.map(s => {
-              const date = dateLabel(s);
+              const dates = dateLabels(s);
               const busy = busyId === s.id;
               return (
                 <article key={s.id} className="rounded-xl border border-border bg-surface-2 p-4 shadow-glow-sm transition-colors hover:bg-surface-3/40">
@@ -142,10 +144,17 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
                             {TYPE_LABEL[s.signature_type] ?? s.signature_type}
                           </span>
                         </div>
-                        {date && (
+                        {dates.length > 0 && (
                           <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <CalendarClock className="h-3.5 w-3.5" />
-                            {date.label} <span className="tabular-nums text-foreground/70">{date.value}</span>
+                            <CalendarClock className="h-3.5 w-3.5 shrink-0" />
+                            <span>
+                              {dates.map((d, i) => (
+                                <span key={d.label}>
+                                  {i > 0 && <span className="mx-1.5 text-muted-foreground/40">·</span>}
+                                  {d.label} <span className="tabular-nums text-foreground/70">{d.value}</span>
+                                </span>
+                              ))}
+                            </span>
                           </p>
                         )}
                       </div>
