@@ -64,7 +64,8 @@ async function startCheckout(
 export function InvoicesPage() {
   const { project } = usePortal();
   const { rows, loading, error, refresh } = usePortalInvoices();
-  const { rows: installments, refresh: refreshInstallments } = usePortalInstallments();
+  const invoiceIds = useMemo(() => rows.map(i => i.id), [rows]);
+  const { rows: installments, refresh: refreshInstallments } = usePortalInstallments(invoiceIds);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState('');

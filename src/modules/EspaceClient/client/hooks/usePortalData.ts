@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { portalSupabase as supabase, v2Portal as v2 } from '@/lib/supabase';
+import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext';
 
 // Hooks de lecture des entités portail (tables propulspace.* exposées via
 // vues public.propulspace_*_v2 + RLS security_invoker). Les hooks
@@ -15,7 +16,12 @@ interface ListResult<T> {
   refresh: () => Promise<void>;
 }
 
-function useList<T>(table: string, orderBy: string, ascending = false): ListResult<T> {
+type ListFilter = readonly [op: 'eq' | 'neq', col: string, val: string | boolean];
+
+function useList<T>(
+  table: string, orderBy: string, ascending: boolean,
+  projectId: string, filters: readonly ListFilter[] = [],
+): ListResult<T> {
   const [rows, setRows] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,14 +33,22 @@ function useList<T>(table: string, orderBy: string, ascending = false): ListResu
     return () => { mountedRef.current = false; };
   }, []);
 
+  // Filtre explicite par projet + prédicats de parité client : redondant avec la
+  // RLS pour un vrai client, indispensable en aperçu admin (RLS permissive).
+  const filterKey = filters.map(f => f.join(':')).join('|');
   const refresh = useCallback(async () => {
     setLoading(true);
-    const { data, error: err } = await v2.from(table).select('*').order(orderBy, { ascending });
+    let q = v2.from(table).select('*').eq('project_id', projectId);
+    for (const [op, col, val] of filters) {
+      q = op === 'eq' ? q.eq(col, val) : q.neq(col, val);
+    }
+    const { data, error: err } = await q.order(orderBy, { ascending });
     if (!mountedRef.current) return;
     if (err) { setError(err.message); setRows([]); }
     else { setError(null); setRows((data ?? []) as T[]); }
     setLoading(false);
-  }, [table, orderBy, ascending]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [table, orderBy, ascending, projectId, filterKey]);
 
   useEffect(() => { void refresh(); }, [refresh]);
   return { rows, loading, error, refresh };
@@ -85,14 +99,57 @@ export interface PortalActivity {
   is_auto: boolean; created_at: string;
 }
 
-export const usePortalInvoices       = () => useList<PortalInvoice>('propulspace_invoices', 'issue_date');
-export const usePortalInstallments   = () => useList<PortalInstallment>('propulspace_invoice_installments', 'due_date', true);
-export const usePortalDocuments      = () => useList<PortalDocument>('propulspace_documents', 'created_at');
-export const usePortalSignatures     = () => useList<PortalSignature>('propulspace_signatures', 'created_at');
-export const usePortalProjectSteps   = () => useList<PortalProjectStep>('propulspace_project_steps', 'step_order', true);
-// SP5 : fil d'activité visible du projet (vue propulspace_activities_v2). Renvoie
+export const usePortalInvoices = () => {
+  const { project } = usePortal();
+  return useList<PortalInvoice>('propulspace_invoices', 'issue_date', false, project.id, [['neq', 'status', 'draft']]);
+};
+
+// Les échéances n'ont pas de project_id : on les scope par les ids des factures
+// du projet (parité admin ; la RLS scoperait déjà côté client réel).
+export const usePortalInstallments = (invoiceIds: string[]) => {
+  const [rows, setRows] = useState<PortalInstallment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const mountedRef = useRef(true);
+  useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
+
+  const idsKey = invoiceIds.join(',');
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    if (invoiceIds.length === 0) {
+      if (mountedRef.current) { setRows([]); setError(null); setLoading(false); }
+      return;
+    }
+    const { data, error: err } = await v2.from('propulspace_invoice_installments')
+      .select('*').in('invoice_id', invoiceIds).order('due_date', { ascending: true });
+    if (!mountedRef.current) return;
+    if (err) { setError(err.message); setRows([]); }
+    else { setError(null); setRows((data ?? []) as PortalInstallment[]); }
+    setLoading(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idsKey]);
+  useEffect(() => { void refresh(); }, [refresh]);
+  return { rows, loading, error, refresh };
+};
+
+export const usePortalDocuments = () => {
+  const { project } = usePortal();
+  return useList<PortalDocument>('propulspace_documents', 'created_at', false, project.id, [['eq', 'visible_to_client', true]]);
+};
+export const usePortalSignatures = () => {
+  const { project } = usePortal();
+  return useList<PortalSignature>('propulspace_signatures', 'created_at', false, project.id, []);
+};
+export const usePortalProjectSteps = () => {
+  const { project } = usePortal();
+  return useList<PortalProjectStep>('propulspace_project_steps', 'step_order', true, project.id, [['eq', 'visible_to_client', true]]);
+};
+// SP5 : fil d'activité visible du projet (vue propulspace_activities). Renvoie
 // vide tant que la migration 297 n'est pas appliquée (erreur silencieuse → []).
-export const usePortalProjectActivities = () => useList<PortalActivity>('propulspace_activities', 'created_at');
+export const usePortalProjectActivities = () => {
+  const { project } = usePortal();
+  return useList<PortalActivity>('propulspace_activities', 'created_at', false, project.id, []);
+};
 
 // Génère une URL signée temporaire pour un path Storage privé. Utilisé
 // pour les téléchargements de documents / factures depuis le portail.
