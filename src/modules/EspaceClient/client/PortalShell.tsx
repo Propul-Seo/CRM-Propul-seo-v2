@@ -5,48 +5,66 @@ import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext';
 import { WelcomeWizardProvider } from './welcome/WelcomeWizardContext';
 import { WelcomeWizard } from './welcome/WelcomeWizard';
 
-const TAB_PATH: Record<PortalTab, string> = {
-  dashboard:  '/espace-client',
-  project:    '/espace-client/project',
-  documents:  '/espace-client/documents',
-  invoices:   '/espace-client/invoices',
-  signatures: '/espace-client/signatures',
-  help:       '/espace-client/help',
+// Segment relatif par onglet (vide = index). La base est injectable pour que le
+// shell soit réutilisable sous la route d'aperçu admin (/portails/.../apercu-client).
+const TAB_SEGMENT: Record<PortalTab, string> = {
+  dashboard:  '',
+  project:    'project',
+  documents:  'documents',
+  invoices:   'invoices',
+  signatures: 'signatures',
+  help:       'help',
 };
 
-function pathToTab(pathname: string): PortalTab {
-  // Match le plus spécifique d'abord. Ordre des entrées non garanti côté
-  // Object.entries, on prend la plus longue préfixe match pour éviter que
-  // /espace-client matche avant /espace-client/project.
-  const entries = Object.entries(TAB_PATH) as Array<[PortalTab, string]>;
+function tabToPath(basePath: string, tab: PortalTab): string {
+  const seg = TAB_SEGMENT[tab];
+  return seg ? `${basePath}/${seg}` : basePath;
+}
+
+function pathToTab(pathname: string, basePath: string): PortalTab {
+  // Match le plus spécifique (segment le plus long) d'abord, sinon dashboard.
+  const entries = Object.entries(TAB_SEGMENT) as Array<[PortalTab, string]>;
   const sorted = entries.sort((a, b) => b[1].length - a[1].length);
-  const found = sorted.find(([, p]) => pathname === p || pathname.startsWith(`${p}/`));
+  const found = sorted.find(([, seg]) => {
+    const p = seg ? `${basePath}/${seg}` : basePath;
+    return pathname === p || pathname.startsWith(`${p}/`);
+  });
   return found?.[0] ?? 'dashboard';
 }
 
-export function PortalShell() {
-  const { email, project, signOut } = usePortal();
+export function PortalShell({ basePath = '/espace-client' }: { basePath?: string }) {
+  const { email, project, signOut, previewMode } = usePortal();
   const location = useLocation();
   const navigate = useNavigate();
-  const activeTab = pathToTab(location.pathname);
+  const activeTab = pathToTab(location.pathname, basePath);
 
   // Préfère le nom client défini sur le projet, sinon dérive de l'email.
   const clientName = project.client_name ?? email.split('@')[0] ?? email;
 
+  const layout = (
+    <PortalLayout
+      activeTab={activeTab}
+      onTabChange={tab => navigate(tabToPath(basePath, tab))}
+      clientName={clientName}
+      projectName={project.name ?? undefined}
+      onLogout={async () => {
+        await signOut();
+        // En aperçu, signOut = retour cockpit (géré par le provider d'aperçu).
+        if (!previewMode) navigate('/espace-client/login', { replace: true });
+      }}
+    >
+      <Outlet />
+    </PortalLayout>
+  );
+
+  // Aperçu admin : on ne monte pas le wizard d'accueil (auto-open + écritures
+  // on-mount inutiles et indésirables en lecture seule). Le WelcomeBanner est
+  // masqué côté DashboardPage en previewMode.
+  if (previewMode) return layout;
+
   return (
     <WelcomeWizardProvider projectId={project.id}>
-      <PortalLayout
-        activeTab={activeTab}
-        onTabChange={tab => navigate(TAB_PATH[tab])}
-        clientName={clientName}
-        projectName={project.name ?? undefined}
-        onLogout={async () => {
-          await signOut();
-          navigate('/espace-client/login', { replace: true });
-        }}
-      >
-        <Outlet />
-      </PortalLayout>
+      {layout}
       {/* Wizard monté au niveau shell : une seule instance pour tout le portail,
           ouverture pilotée par le context (auto-open au login + bouton Reprendre
           de WelcomeBanner). */}

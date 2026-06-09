@@ -1,5 +1,5 @@
-import { Mail, LayoutGrid, FileText, PenLine, FolderClosed, Clock3, type LucideIcon } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { Mail, LayoutGrid, FileText, PenLine, FolderClosed, Clock3, Eye, type LucideIcon } from 'lucide-react';
+import { NavLink, Link } from 'react-router-dom';
 import { Badge } from '@/modules/EspaceClient/shared/components';
 import { useAdminBasePath } from '@/modules/EspaceClient/admin/AdminBasePathContext';
 import type { AdminClientHealth } from '../../hooks/useAdminClients';
@@ -77,6 +77,12 @@ export function CockpitClientHeader({ client }: { client: AdminClientHealth | nu
           ))}
         </nav>
         <div className="flex flex-wrap items-center gap-1.5">
+          <Link
+            to={`${base}/apercu-client`}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface-2 px-2.5 py-1.5 text-[12px] font-medium text-foreground transition-colors hover:bg-surface-3"
+          >
+            <Eye className="h-3.5 w-3.5" /> Voir comme le client
+          </Link>
           <Kpi short="Impayés" value={String(overdue)} kind={overdue > 0 ? 'rose' : 'neutral'} />
           <Kpi short="Signat." value={String(signatures)} kind={signatures > 0 ? 'amber' : 'neutral'} />
           <Kpi short="Docs" value={String(client.documents_count)} kind="neutral" />

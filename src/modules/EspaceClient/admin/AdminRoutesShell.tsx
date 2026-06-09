@@ -3,6 +3,7 @@ import { AdminBasePathProvider } from './AdminBasePathContext';
 import { PropulspaceAdminGuard } from './PropulspaceAdminGuard';
 import { LeadsQualifiesPage } from './LeadsQualifiesPage';
 import { AdminCockpitPage } from './pages/AdminCockpitPage';
+import { AdminPortalPreviewPage } from './preview/AdminPortalPreviewPage';
 
 interface AdminRoutesShellProps {
   basePath: string;
@@ -22,6 +23,8 @@ export function AdminRoutesShell({ basePath, mountedInShell }: AdminRoutesShellP
           <Route index element={<Navigate to="clients" replace />} />
           {/* Cockpit 3 colonnes : capte la liste seule ET la sélection client. */}
           <Route path="clients" element={<AdminCockpitPage />} />
+          {/* Aperçu client (lecture seule) — plus spécifique, déclaré avant le cockpit. */}
+          <Route path="clients/:projectId/apercu-client/*" element={<AdminPortalPreviewPage />} />
           <Route path="clients/:projectId/*" element={<AdminCockpitPage />} />
           <Route path="leads" element={<LeadsQualifiesPage />} />
         </Routes>

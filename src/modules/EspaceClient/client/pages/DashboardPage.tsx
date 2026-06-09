@@ -28,7 +28,7 @@ const PROJECT_PATH = '/espace-client/project';
 const UNPAID_STATUSES = new Set(['overdue', 'sent', 'partially_paid']);
 
 export function DashboardPage() {
-  const { email, project } = usePortal();
+  const { email, project, previewMode } = usePortal();
   const firstName = project.client_name?.split(' ')[0] ?? email.split('@')[0] ?? 'Client';
 
   const steps      = usePortalProjectSteps();
@@ -126,7 +126,7 @@ export function DashboardPage() {
 
   return (
     <div className="ps-fade-in space-y-6">
-      <WelcomeBanner />
+      {!previewMode && <WelcomeBanner />}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
         {/* ── Colonne principale ─────────────────────────────── */}
