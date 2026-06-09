@@ -15,7 +15,10 @@ import { AdminClientPanel } from './AdminClientPanel';
 //   centre = en-tête client + KPI en chips, puis panneau à onglets
 // Sélection pilotée par l'URL (/clients/:projectId/*).
 export function AdminCockpitPage() {
-  const { basePath } = useAdminBasePath();
+  const { basePath, mountedInShell } = useAdminBasePath();
+  // En shell CRM : pas d'AdminTopNav (3.5rem) au-dessus → le cockpit remplit tout
+  // le <main> (sinon une bande sombre de 56px apparaît en bas).
+  const shellH = mountedInShell ? 'h-screen' : 'h-[calc(100vh-3.5rem)]';
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const { clients, loading, error } = useAdminClients();
@@ -57,8 +60,8 @@ export function AdminCockpitPage() {
       <AdminTopNav />
 
       {/* ≥ lg : cockpit 2 colonnes (liste groupée + détail à KPI en tête) */}
-      <div className="hidden h-[calc(100vh-3.5rem)] min-h-0 lg:flex">
-        <aside className="w-[440px] shrink-0 border-r border-border">
+      <div className={`hidden ${shellH} min-h-0 lg:flex`}>
+        <aside className="w-[360px] shrink-0 border-r border-border">
           {list}
         </aside>
         <main className="min-w-0 flex-1 overflow-y-auto">
@@ -90,7 +93,7 @@ export function AdminCockpitPage() {
             <AdminClientPanel embedded />
           </div>
         ) : (
-          <div className="h-[calc(100vh-3.5rem)] min-h-0">{list}</div>
+          <div className={`${shellH} min-h-0`}>{list}</div>
         )}
       </div>
     </>
