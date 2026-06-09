@@ -8,7 +8,9 @@ import { CancelInvoiceDialog } from './CancelInvoiceDialog';
 import { getAdminSignedUrl } from '../lib/adminStorage';
 
 const BUCKET = 'propulspace-documents';
-const REMINDABLE = new Set(['sent', 'overdue', 'partially_paid']);
+// Comportement SP3 d'origine : relance/annulation sur sent|overdue uniquement.
+// (partially_paid exclu — l'avoir formel est reporté, cf. cycle de vie facture SP3.)
+const REMINDABLE = new Set(['sent', 'overdue']);
 
 const money = (a: string | number, c = 'EUR') =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: c }).format(typeof a === 'string' ? parseFloat(a) : a);
@@ -108,7 +110,7 @@ export function InvoicesTab({ projectId, clientEmail }: { projectId: string; cli
             const busy = busyId === inv.id;
             const isDraft = inv.status === 'draft';
             const canRemind = REMINDABLE.has(inv.status);
-            const canCancel = inv.status === 'sent' || inv.status === 'overdue' || inv.status === 'partially_paid';
+            const canCancel = inv.status === 'sent' || inv.status === 'overdue';
             return (
               <AdminCard key={inv.id} className="transition-colors hover:border-primary/40">
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2">

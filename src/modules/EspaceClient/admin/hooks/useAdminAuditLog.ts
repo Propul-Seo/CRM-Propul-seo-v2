@@ -37,8 +37,9 @@ export function useAdminAuditLog(projectId: string): UseAdminAuditLogResult {
   useEffect(() => { void fetchPage(0, resourceType); }, [fetchPage, resourceType]);
 
   const loadMore = useCallback(async () => {
+    if (loading) return; // garde anti double-clic (évite des lignes en double)
     await fetchPage(rows.length, resourceType);
-  }, [fetchPage, rows.length, resourceType]);
+  }, [fetchPage, rows.length, resourceType, loading]);
 
   return { rows, loading, error, hasMore, resourceType, setResourceType, loadMore };
 }

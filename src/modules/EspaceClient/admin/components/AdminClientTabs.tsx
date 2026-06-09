@@ -10,8 +10,9 @@ const TABS = [
 ];
 
 export function AdminClientTabs() {
-  const { projectId } = useParams();
+  const { projectId } = useParams<{ projectId: string }>();
   const { basePath } = useAdminBasePath();
+  if (!projectId) return null;
   const base = `${basePath}/clients/${projectId}`;
   return (
     <nav className="flex gap-1 border-b border-border">
