@@ -87,10 +87,10 @@ function SignaturesRoute() {
   return <SignaturesTab projectId={projectId} clientEmail={email} />;
 }
 
-function AdminClientPanelContent() {
+function AdminClientPanelContent({ showTabs }: { showTabs: boolean }) {
   return (
     <>
-      <AdminClientTabs />
+      {showTabs && <AdminClientTabs />}
       <Routes>
         <Route index element={<OverviewTab />} />
         <Route path="factures" element={<InvoicesRoute />} />
@@ -109,14 +109,14 @@ export function AdminClientPanel({ embedded = false }: { embedded?: boolean } = 
   if (embedded) {
     return (
       <div className="space-y-5 px-4 py-5">
-        <AdminClientPanelContent />
+        <AdminClientPanelContent showTabs={false} />
       </div>
     );
   }
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 space-y-6">
       <Link to={`${basePath}/clients`} className="text-sm text-primary hover:underline">← Tous les clients</Link>
-      <AdminClientPanelContent />
+      <AdminClientPanelContent showTabs={true} />
     </div>
   );
 }
