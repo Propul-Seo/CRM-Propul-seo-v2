@@ -62,7 +62,7 @@ async function startCheckout(
 }
 
 export function InvoicesPage() {
-  const { project, storage } = usePortal();
+  const { project, storage, previewMode } = usePortal();
   const { rows, loading, error, refresh } = usePortalInvoices();
   const invoiceIds = useMemo(() => rows.map(i => i.id), [rows]);
   const { rows: installments, refresh: refreshInstallments } = usePortalInstallments(invoiceIds);
@@ -145,6 +145,7 @@ export function InvoicesPage() {
   }, [rows]);
 
   async function handlePay(target: 'invoice' | 'installment', target_id: string) {
+    if (previewMode) return;
     setPayingId(target_id);
     const { url, error: payErr } = await startCheckout(target, target_id);
     if (payErr || !url) {
@@ -366,6 +367,7 @@ interface InvoiceDetailProps {
 }
 
 function InvoiceDetail({ invoice, installments, payingId, onPay, onDownload, onPreview }: InvoiceDetailProps) {
+  const { previewMode } = usePortal();
   const currency = invoice.currency || 'EUR';
   const fmtMoney = (a: string | number) => money(a, currency);
 
@@ -381,7 +383,7 @@ function InvoiceDetail({ invoice, installments, payingId, onPay, onDownload, onP
   // On privilégie le paiement échéance par échéance dès qu'il existe des
   // installments (garde anti-trop-perçu : pas de "facture entière" si elle est
   // découpée en acomptes).
-  const canPayWhole = (invoice.status === 'sent' || invoice.status === 'overdue') && installments.length === 0;
+  const canPayWhole = !previewMode && (invoice.status === 'sent' || invoice.status === 'overdue') && installments.length === 0;
 
   return (
     <section className="ps-surface flex flex-col overflow-hidden p-7 md:p-8">
@@ -478,7 +480,7 @@ function InvoiceDetail({ invoice, installments, payingId, onPay, onDownload, onP
           <p className="ps-eyebrow ps-eyebrow-muted mb-2.5">Échéances</p>
           <ul className="divide-y divide-[var(--ps-border-soft)] overflow-hidden rounded-xl border border-[var(--ps-border-soft)]">
             {installments.map(inst => {
-              const isPayable = !isCancelled && (inst.status === 'pending' || inst.status === 'overdue');
+              const isPayable = !previewMode && !isCancelled && (inst.status === 'pending' || inst.status === 'overdue');
               return (
                 <li key={inst.id} className="flex items-center gap-3 px-4 py-2.5 text-[12.5px]">
                   <div className="min-w-0 flex-1">

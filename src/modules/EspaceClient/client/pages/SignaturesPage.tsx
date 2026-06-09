@@ -184,11 +184,11 @@ function SignatureViewer({ signature }: { signature: PortalSignature }) {
 
 // ── Rail d'action droit ────────────────────────────────────────────
 function SignatureRail({ signature }: { signature: PortalSignature }) {
-  const { project } = usePortal();
+  const { project, previewMode } = usePortal();
   const signerName = project.client_name ?? 'Vous';
   const typeLabel = TYPE_LABELS[signature.signature_type] ?? signature.signature_type;
 
-  const canSign = signature.status === 'pending' && !!signature.docuseal_signing_url;
+  const canSign = !previewMode && signature.status === 'pending' && !!signature.docuseal_signing_url;
   const hasSignedPdf = signature.status === 'signed' && !!signature.docuseal_signed_pdf_url;
 
   return (

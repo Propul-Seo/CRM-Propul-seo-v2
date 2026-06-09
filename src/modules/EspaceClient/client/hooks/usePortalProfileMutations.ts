@@ -26,11 +26,12 @@ interface ProfileUpdates {
  *      guard_portal_columns_admin_only avec une erreur "insufficient_privilege".
  */
 export function usePortalProfileMutations() {
-  const { project } = usePortal()
+  const { project, previewMode } = usePortal()
   const [savingProfile, setSavingProfile] = useState(false)
   const [changingPwd, setChangingPwd] = useState(false)
 
   const updateProfile = async (updates: ProfileUpdates): Promise<MutationResult> => {
+    if (previewMode) return { success: false, error: 'Aperçu en lecture seule.' }
     setSavingProfile(true)
     try {
       const { error } = await portalSupabase
@@ -45,6 +46,7 @@ export function usePortalProfileMutations() {
   }
 
   const changePassword = async (newPassword: string): Promise<MutationResult> => {
+    if (previewMode) return { success: false, error: 'Aperçu en lecture seule.' }
     if (newPassword.length < 8) {
       return { success: false, error: 'Le mot de passe doit faire au moins 8 caractères' }
     }

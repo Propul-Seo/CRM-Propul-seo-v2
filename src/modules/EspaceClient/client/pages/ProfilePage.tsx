@@ -11,7 +11,7 @@ import { usePortalProjectDetails } from '../hooks/usePortalProjectDetails'
 import { usePortalProfileMutations } from '../hooks/usePortalProfileMutations'
 
 export function ProfilePage() {
-  const { email, project, signOut } = usePortal()
+  const { email, project, signOut, previewMode } = usePortal()
   const navigate = useNavigate()
   const { details, refresh } = usePortalProjectDetails()
   const { updateProfile, changePassword, savingProfile, changingPwd } = usePortalProfileMutations()
@@ -63,20 +63,20 @@ export function ProfilePage() {
         <SectionHead title="Mes coordonnées" />
         <div className="grid grid-cols-1 gap-4 px-6 py-4 sm:grid-cols-2">
           <Field label="Prénom">
-            <Input value={form.first_name} onChange={e => setForm({ ...form, first_name: e.target.value })} placeholder="Ex. Marie" />
+            <Input value={form.first_name} onChange={e => setForm({ ...form, first_name: e.target.value })} placeholder="Ex. Marie" readOnly={previewMode} />
           </Field>
           <Field label="Téléphone">
-            <Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="06 12 34 56 78" type="tel" />
+            <Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="06 12 34 56 78" type="tel" readOnly={previewMode} />
           </Field>
           <Field label="Entreprise">
-            <Input value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} placeholder="Ma société" />
+            <Input value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} placeholder="Ma société" readOnly={previewMode} />
           </Field>
           <Field label="Email de connexion (non modifiable)">
             <Input value={email} disabled />
           </Field>
         </div>
         <div className="border-t border-[var(--ps-border-soft)] px-6 py-3 flex justify-end">
-          <Button onClick={handleSaveProfile} disabled={savingProfile}>
+          <Button onClick={handleSaveProfile} disabled={savingProfile || previewMode}>
             {savingProfile ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
             Enregistrer
           </Button>
@@ -99,7 +99,7 @@ export function ProfilePage() {
         </dl>
       </section>
 
-      <section className="ps-surface overflow-hidden">
+      {!previewMode && (<section className="ps-surface overflow-hidden">
         <SectionHead title="Sécurité" />
         <div className="grid grid-cols-1 gap-4 px-6 py-4 sm:grid-cols-2">
           <Field label="Nouveau mot de passe">
@@ -115,9 +115,9 @@ export function ProfilePage() {
             Changer le mot de passe
           </Button>
         </div>
-      </section>
+      </section>)}
 
-      <section className="ps-surface p-6">
+      {!previewMode && (<section className="ps-surface p-6">
         <h2 className="ps-h3">Session</h2>
         <p className="mt-1 text-[13px] text-[var(--ps-fg-secondary)]">
           Déconnectez-vous pour terminer votre session sur cet appareil.
@@ -126,7 +126,7 @@ export function ProfilePage() {
           <LogOut className="mr-1.5 h-4 w-4" />
           Se déconnecter
         </Button>
-      </section>
+      </section>)}
     </div>
   )
 }

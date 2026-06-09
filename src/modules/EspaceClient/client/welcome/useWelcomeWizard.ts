@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { portalSupabase as supabase } from '@/lib/supabase';
+import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext';
 
 // Sprint B.2 recadré — hook du wizard d'accueil court (5 étapes).
 // Distinct de useOnboarding (V1, qui devient la base de la page Configuration
@@ -79,6 +80,7 @@ function splitFullName(full: string | null): { first: string | null; last: strin
 }
 
 export function useWelcomeWizard(projectId: string): UseWelcomeWizardResult {
+  const { previewMode } = usePortal();
   const [row, setRow] = useState<Partial<WelcomeRow> | null>(null);
   const [qualification, setQualification] = useState<QualificationLead | null>(null);
   const [loading, setLoading] = useState(true);
@@ -94,6 +96,8 @@ export function useWelcomeWizard(projectId: string): UseWelcomeWizardResult {
   // Si la row vient d'être créée et qu'une qualif est rattachée, on pré-remplit
   // les welcome_* depuis la qualif au premier accès uniquement (champs vides).
   useEffect(() => {
+    // Aperçu admin : wizard inerte (aucune écriture/RPC au montage, pas d'auto-open).
+    if (previewMode) { setLoading(false); return; }
     let cancelled = false;
     (async () => {
       const { error: upsertErr } = await supabase.from(TABLE).upsert(
@@ -143,10 +147,10 @@ export function useWelcomeWizard(projectId: string): UseWelcomeWizardResult {
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [projectId]);
+  }, [projectId, previewMode]);
 
   const persist = useCallback(async (patch: Partial<WelcomeRow>) => {
-    if (persistingRef.current || !rowRef.current?.id) return;
+    if (previewMode || persistingRef.current || !rowRef.current?.id) return;
     persistingRef.current = true;
     setSaving(true);
     setSaveError(null);
@@ -160,7 +164,7 @@ export function useWelcomeWizard(projectId: string): UseWelcomeWizardResult {
       persistingRef.current = false;
       setSaving(false);
     }
-  }, []);
+  }, [previewMode]);
 
   const setField = useCallback<WelcomeSetField>((key, value) => {
     setRow(prev => {
@@ -185,7 +189,7 @@ export function useWelcomeWizard(projectId: string): UseWelcomeWizardResult {
   }, [persist]);
 
   const dismiss = useCallback(async () => {
-    if (!rowRef.current?.id) return;
+    if (previewMode || !rowRef.current?.id) return;
     const nextCount = (rowRef.current.welcome_dismissed_count ?? 0) + 1;
     await supabase.from(TABLE).update({
       welcome_dismissed_count: nextCount,
@@ -196,9 +200,10 @@ export function useWelcomeWizard(projectId: string): UseWelcomeWizardResult {
       welcome_dismissed_count: nextCount,
       welcome_last_dismissed_at: new Date().toISOString(),
     }));
-  }, []);
+  }, [previewMode]);
 
   const complete = useCallback(async () => {
+    if (previewMode) return { error: null };
     if (!rowRef.current?.id) return { error: 'Wizard non initialisé' };
     const { error } = await supabase.from(TABLE).update({
       welcome_completed_at: new Date().toISOString(),
@@ -211,11 +216,11 @@ export function useWelcomeWizard(projectId: string): UseWelcomeWizardResult {
       welcome_current_step: 5,
     }));
     return { error: null };
-  }, []);
+  }, [previewMode]);
 
   const currentStep = row?.welcome_current_step ?? 1;
   const isCompleted = row?.welcome_completed_at != null;
-  const shouldOpenAutomatically = !isCompleted
+  const shouldOpenAutomatically = !previewMode && !isCompleted
     && (row?.welcome_dismissed_count ?? 0) < DISMISS_THRESHOLD;
 
   return {
