@@ -48,7 +48,7 @@ export function ProfilePage() {
 
   async function handleLogout() {
     await signOut()
-    navigate('/espace-client/login', { replace: true })
+    if (!previewMode) navigate('/espace-client/login', { replace: true })
   }
 
   return (

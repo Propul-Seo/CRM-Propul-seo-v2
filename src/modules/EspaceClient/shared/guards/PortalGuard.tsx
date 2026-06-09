@@ -35,7 +35,7 @@ export function PortalGuard({ children }: PortalGuardProps) {
   }
 
   return (
-    <PortalProvider value={{ email: state.email, project: state.project, signOut, previewMode: false, db: v2Portal, storage: portalSupabase }}>
+    <PortalProvider value={{ email: state.email, project: state.project, signOut, previewMode: false, basePath: '/espace-client', db: v2Portal, storage: portalSupabase }}>
       {children}
     </PortalProvider>
   );

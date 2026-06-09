@@ -5,6 +5,7 @@ import type { PortalProject } from '@/modules/EspaceClient/shared/hooks/usePorta
 
 interface Props {
   projectId: string
+  basePath: string
   onExit: () => void
   children: ReactNode
 }
@@ -14,7 +15,7 @@ interface Props {
 // portail. Charge le projet cible par id — l'admin y a accès — et NE passe
 // JAMAIS par usePortalAuth (qui résout via la session portail, absente côté
 // admin). previewMode:true neutralise toutes les écritures du portail.
-export function PortalPreviewProvider({ projectId, onExit, children }: Props) {
+export function PortalPreviewProvider({ projectId, basePath, onExit, children }: Props) {
   const [project, setProject] = useState<PortalProject | null>(null)
   const [state, setState] = useState<'loading' | 'ready' | 'not-found'>('loading')
 
@@ -54,6 +55,7 @@ export function PortalPreviewProvider({ projectId, onExit, children }: Props) {
       email: project.portal_client_email ?? '',
       project,
       previewMode: true,
+      basePath,
       signOut: async () => { onExit() },
       db: v2,
       storage: supabase,

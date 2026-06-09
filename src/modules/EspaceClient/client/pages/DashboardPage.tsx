@@ -21,14 +21,10 @@ const EUR = new Intl.NumberFormat('fr-FR', {
   style: 'currency', currency: 'EUR', maximumFractionDigits: 0,
 });
 
-const INVOICES_PATH = '/espace-client/invoices';
-const SIGNATURES_PATH = '/espace-client/signatures';
-const PROJECT_PATH = '/espace-client/project';
-
 const UNPAID_STATUSES = new Set(['overdue', 'sent', 'partially_paid']);
 
 export function DashboardPage() {
-  const { email, project, previewMode } = usePortal();
+  const { email, project, previewMode, basePath } = usePortal();
   const firstName = project.client_name?.split(' ')[0] ?? email.split('@')[0] ?? 'Client';
 
   const steps      = usePortalProjectSteps();
@@ -76,7 +72,7 @@ export function DashboardPage() {
           ? `En retard · échéance ${formatShortDate(i.due_date)}`
           : `Échéance le ${formatShortDate(i.due_date)}`,
         cta: 'Payer',
-        to: INVOICES_PATH,
+        to: `${basePath}/invoices`,
       }));
 
     signatures.rows
@@ -89,12 +85,12 @@ export function DashboardPage() {
         title: s.name,
         meta: 'En attente de votre signature',
         cta: 'Signer',
-        to: SIGNATURES_PATH,
+        to: `${basePath}/signatures`,
       }));
 
     list.sort((a, b) => a.rank - b.rank);
     return { priority: list[0] ?? null, secondary: list.slice(1, 4) };
-  }, [invoices.rows, signatures.rows]);
+  }, [invoices.rows, signatures.rows, basePath]);
 
   // ── Activité récente : fusion docs + factures + signatures ──────
   const activity = useMemo(() => {
@@ -221,7 +217,7 @@ export function DashboardPage() {
             <SectionHead
               title="Activité récente"
               action={
-                <Link to={PROJECT_PATH} className="inline-flex items-center gap-1 text-[12px] font-medium text-[var(--ps-primary-text)] hover:underline">
+                <Link to={`${basePath}/project`} className="inline-flex items-center gap-1 text-[12px] font-medium text-[var(--ps-primary-text)] hover:underline">
                   Voir le projet
                   <ArrowUpRight className="h-3 w-3" />
                 </Link>
@@ -295,7 +291,7 @@ export function DashboardPage() {
                 ))}
               </ul>
             )}
-            <Link to={PROJECT_PATH} className="mt-4 inline-flex items-center gap-1 text-[12px] font-medium text-[var(--ps-primary-text)] hover:underline">
+            <Link to={`${basePath}/project`} className="mt-4 inline-flex items-center gap-1 text-[12px] font-medium text-[var(--ps-primary-text)] hover:underline">
               Voir la frise complète
               <ArrowUpRight className="h-3 w-3" />
             </Link>

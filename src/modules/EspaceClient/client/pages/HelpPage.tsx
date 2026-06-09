@@ -4,6 +4,7 @@ import { ChevronDown, HelpCircle, Mail, MessageSquare, Search, X, SearchX, Layou
 import { Hero, SectionHead, EmptyState } from '@/modules/EspaceClient/shared/components'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext'
 import { CONTACT_EMAIL, WHATSAPP_NUMBER, AGENCY_NAME } from '@/modules/EspaceClient/shared/constants'
 
 const FAQ: Array<{ q: string; a: string; tags: string[] }> = [
@@ -34,14 +35,15 @@ const FAQ: Array<{ q: string; a: string; tags: string[] }> = [
 ]
 
 const QUICK_LINKS = [
-  { to: '/espace-client',            label: 'Tableau de bord', icon: LayoutDashboard },
-  { to: '/espace-client/project',    label: 'Mon projet',      icon: FolderKanban },
-  { to: '/espace-client/documents',  label: 'Documents',       icon: FileText },
-  { to: '/espace-client/invoices',   label: 'Factures',        icon: Receipt },
-  { to: '/espace-client/signatures', label: 'Signatures',      icon: PenLine },
+  { seg: '',           label: 'Tableau de bord', icon: LayoutDashboard },
+  { seg: 'project',    label: 'Mon projet',      icon: FolderKanban },
+  { seg: 'documents',  label: 'Documents',       icon: FileText },
+  { seg: 'invoices',   label: 'Factures',        icon: Receipt },
+  { seg: 'signatures', label: 'Signatures',      icon: PenLine },
 ]
 
 export function HelpPage() {
+  const { basePath } = usePortal()
   const [openIdx, setOpenIdx] = useState<number | null>(0)
   const [search, setSearch] = useState('')
 
@@ -70,8 +72,8 @@ export function HelpPage() {
             const Icon = link.icon
             return (
               <Link
-                key={link.to}
-                to={link.to}
+                key={link.seg}
+                to={link.seg ? `${basePath}/${link.seg}` : basePath}
                 className="flex flex-col items-center gap-1.5 rounded-lg border border-[var(--ps-border-soft)] bg-[var(--ps-bg-subtle)] px-3 py-3 text-center transition-colors hover:border-[var(--ps-primary-subtle)] hover:bg-[var(--ps-primary-subtle)]"
               >
                 <Icon className="h-5 w-5 text-[var(--ps-primary-text)]" />

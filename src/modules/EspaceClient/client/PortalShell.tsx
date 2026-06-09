@@ -32,8 +32,8 @@ function pathToTab(pathname: string, basePath: string): PortalTab {
   return found?.[0] ?? 'dashboard';
 }
 
-export function PortalShell({ basePath = '/espace-client' }: { basePath?: string }) {
-  const { email, project, signOut, previewMode } = usePortal();
+export function PortalShell() {
+  const { email, project, signOut, previewMode, basePath } = usePortal();
   const location = useLocation();
   const navigate = useNavigate();
   const activeTab = pathToTab(location.pathname, basePath);

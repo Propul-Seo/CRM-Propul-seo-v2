@@ -24,11 +24,11 @@ export function AdminPortalPreviewPage() {
 
   // Base = chemin jusqu'à /apercu-client inclus (indépendant du point de montage
   // /portails vs /admin/propulspace). cockpitPath = base sans /apercu-client.
-  const base = pathname.slice(0, pathname.indexOf(MARKER) + MARKER.length)
+  const base = pathname.slice(0, pathname.lastIndexOf(MARKER) + MARKER.length)
   const cockpitPath = base.slice(0, base.length - MARKER.length)
 
   return (
-    <PortalPreviewProvider projectId={projectId} onExit={() => navigate(cockpitPath)}>
+    <PortalPreviewProvider projectId={projectId} basePath={base} onExit={() => navigate(cockpitPath)}>
       <div className="propulspace-portal min-h-screen">
         <div className="sticky top-0 z-50 flex items-center justify-between gap-3 bg-amber-500/15 px-4 py-2 text-sm text-amber-900 ring-1 ring-amber-500/30">
           <span>Mode aperçu — vous voyez le portail tel que le client le voit (lecture seule).</span>
@@ -41,7 +41,7 @@ export function AdminPortalPreviewPage() {
           </button>
         </div>
         <Routes>
-          <Route element={<PortalShell basePath={base} />}>
+          <Route element={<PortalShell />}>
             <Route index element={<DashboardPage />} />
             <Route path="project" element={<ProjectPage />} />
             <Route path="documents" element={<DocumentsPage />} />

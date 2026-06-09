@@ -9,6 +9,9 @@ interface PortalContextValue {
   project: PortalProject;
   signOut: () => Promise<void>;
   previewMode: boolean;
+  // Base de route du portail (« /espace-client » en réel, route d'aperçu admin
+  // sinon) — source unique pour la nav interne des pages.
+  basePath: string;
   // Client de lecture selon le mode : portail (session client) en usage réel,
   // admin (session CRM, droit is_admin) en aperçu admin. `db` = proxy pour
   // `.from()`, `storage` = vrai SupabaseClient pour Storage/RPC/functions/auth.
