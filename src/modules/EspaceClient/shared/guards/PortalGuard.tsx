@@ -34,7 +34,7 @@ export function PortalGuard({ children }: PortalGuardProps) {
   }
 
   return (
-    <PortalProvider value={{ email: state.email, project: state.project, signOut }}>
+    <PortalProvider value={{ email: state.email, project: state.project, signOut, previewMode: false }}>
       {children}
     </PortalProvider>
   );

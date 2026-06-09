@@ -5,6 +5,7 @@ interface PortalContextValue {
   email: string;
   project: PortalProject;
   signOut: () => Promise<void>;
+  previewMode: boolean;
 }
 
 const PortalContext = createContext<PortalContextValue | null>(null);
