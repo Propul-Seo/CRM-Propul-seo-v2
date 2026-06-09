@@ -16,7 +16,7 @@ function Ghost({ icon: Icon, label, onClick, disabled, tone = 'default' }: {
   const hover = tone === 'danger' ? 'hover:bg-red-500/10 hover:text-red-300' : 'hover:bg-surface-3 hover:text-foreground';
   return (
     <button
-      type="button" onClick={onClick} disabled={disabled} title={label} aria-label={label}
+      type="button" onClick={(e) => { e.stopPropagation(); onClick(); }} disabled={disabled} title={label} aria-label={label}
       className={`grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition-colors disabled:opacity-40 ${hover}`}
     >
       <Icon className="h-4 w-4" />
@@ -71,9 +71,15 @@ export function InvoiceCard({
   const ref = invoice.invoice_number ?? 'Brouillon';
 
   return (
-    <article className="rounded-xl border border-border bg-surface-2 p-5 shadow-glow-sm">
+    <article
+      onClick={onPreview}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPreview(); } }}
+      className="cursor-pointer rounded-xl border border-border bg-surface-2 p-3 shadow-glow-sm transition-colors hover:bg-surface-3/40"
+    >
       <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 space-y-1.5">
+        <div className="min-w-0 space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{ref}</span>
             {invoice.is_deposit && <Badge tone="violet">Acompte</Badge>}
@@ -82,7 +88,7 @@ export function InvoiceCard({
           <p className="text-xs text-muted-foreground">Émise le {fmtDate(invoice.issue_date)}</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
-          <span className="tabular-nums text-2xl font-semibold tracking-tight text-foreground">{money(invoice.amount_total, invoice.currency)}</span>
+          <span className="tabular-nums text-xl font-semibold tracking-tight text-foreground">{money(invoice.amount_total, invoice.currency)}</span>
           <StatusBadge status={invoice.status} />
         </div>
       </div>
@@ -95,11 +101,11 @@ export function InvoiceCard({
         </p>
       )}
 
-      <div className="mt-4 flex items-center justify-between gap-3 border-t border-border-subtle pt-3.5">
+      <div className="mt-3 flex items-center justify-between gap-3 border-t border-border-subtle pt-3">
         <div className="flex items-center gap-2">
           {isDraft && (
             <button
-              type="button" onClick={onSend} disabled={busy}
+              type="button" onClick={(e) => { e.stopPropagation(); onSend(); }} disabled={busy}
               className="inline-flex items-center gap-1.5 rounded-md bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/25 disabled:opacity-50"
             >
               {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />} Envoyer
@@ -107,7 +113,7 @@ export function InvoiceCard({
           )}
           {canRemind && (
             <button
-              type="button" onClick={onRemind} disabled={busy || !clientEmail}
+              type="button" onClick={(e) => { e.stopPropagation(); onRemind(); }} disabled={busy || !clientEmail}
               title={!clientEmail ? 'Email client requis' : undefined}
               className="inline-flex items-center gap-1.5 rounded-md bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-300 transition-colors hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -116,7 +122,6 @@ export function InvoiceCard({
           )}
         </div>
         <div className="flex items-center gap-0.5">
-          <Ghost icon={Eye} label="Aperçu" onClick={onPreview} disabled={busy} />
           {invoice.pdf_url && <Ghost icon={FileText} label="Ouvrir le PDF" onClick={onPdf} disabled={busy} />}
           {isDraft && <Ghost icon={Pencil} label="Modifier" onClick={onEdit} disabled={busy} />}
           {isDraft && <Ghost icon={Trash2} label="Supprimer" onClick={onDelete} disabled={busy} tone="danger" />}
