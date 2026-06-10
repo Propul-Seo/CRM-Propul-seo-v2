@@ -29,8 +29,8 @@ export function AdminPortalPreviewPage() {
 
   return (
     <PortalPreviewProvider projectId={projectId} basePath={base} onExit={() => navigate(cockpitPath)}>
-      <div className="propulspace-portal min-h-screen">
-        <div className="sticky top-0 z-50 flex items-center justify-between gap-3 bg-amber-500/15 px-4 py-2 text-sm text-amber-900 ring-1 ring-amber-500/30">
+      <div className="propulspace-portal ps-preview-shell min-h-screen">
+        <div className="sticky top-0 z-[60] flex h-10 items-center justify-between gap-3 bg-amber-100 px-4 text-[13px] text-amber-900 ring-1 ring-amber-300/70">
           <span>Mode aperçu — vous voyez le portail tel que le client le voit (lecture seule).</span>
           <button
             type="button"

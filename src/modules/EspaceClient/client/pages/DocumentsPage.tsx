@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { FileText, Download, Loader2, Search, X, Eye } from 'lucide-react'
+import { FileText, Download, Loader2, Search, X } from 'lucide-react'
 import { Hero, EmptyState, FileIcon, SectionHead, FilePreviewDialog, Skeleton } from '@/modules/EspaceClient/shared/components'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -153,7 +153,14 @@ export function DocumentsPage() {
         {!loading && filtered.length > 0 && (
           <ul className="divide-y divide-[var(--ps-border-soft)]">
             {filtered.map(doc => (
-              <li key={doc.id} className="flex items-center gap-4 px-6 py-3.5">
+              <li
+                key={doc.id}
+                onClick={() => setPreview(doc)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPreview(doc) } }}
+                className="flex cursor-pointer items-center gap-4 px-6 py-3.5 transition-colors hover:bg-[var(--ps-bg-subtle)]"
+              >
                 <FileIcon ext={extOf(doc.name)} mime={doc.file_mime_type ?? undefined} className="h-10 w-10" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13.5px] font-medium text-[var(--ps-fg)]">{doc.name}</p>
@@ -163,13 +170,10 @@ export function DocumentsPage() {
                     {` · v${doc.version}`}
                   </p>
                 </div>
-                <Button size="sm" variant="ghost" onClick={() => setPreview(doc)} title="Aperçu">
-                  <Eye className="h-3.5 w-3.5" />
-                </Button>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => handleDownload(doc)}
+                  onClick={(e) => { e.stopPropagation(); handleDownload(doc) }}
                   disabled={downloadingId === doc.id}
                 >
                   {downloadingId === doc.id ? (

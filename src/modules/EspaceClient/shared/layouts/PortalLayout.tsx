@@ -15,6 +15,8 @@ interface PortalLayoutProps {
   clientName: string;
   projectName?: string;
   onLogout: () => void;
+  /** WhatsApp du membre assigné, transmis au FAB de contact. */
+  whatsappNumber?: string | null;
 }
 
 function getInitials(name: string): string {
@@ -33,6 +35,7 @@ export function PortalLayout({
   clientName,
   projectName,
   onLogout,
+  whatsappNumber,
 }: PortalLayoutProps) {
   // Force light theme while the portal is mounted (the CRM admin uses
   // a global `dark` class on <html>). The portal is only ever mounted from
@@ -52,7 +55,7 @@ export function PortalLayout({
 
   return (
     <div className="propulspace-portal flex min-h-screen flex-col">
-      <header className="ps-frosted sticky top-0 z-20 border-b border-[var(--ps-border-soft)]">
+      <header className="ps-frosted sticky top-[var(--ps-header-top,0px)] z-20 border-b border-[var(--ps-border-soft)]">
         <div className="mx-auto flex h-[60px] max-w-6xl items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3">
             <BrandPill />
@@ -111,7 +114,7 @@ export function PortalLayout({
       </footer>
 
       <PortalTabBar activeTab={activeTab} onTabChange={onTabChange} variant="mobile" />
-      <PortalContactFab projectName={projectName} />
+      <PortalContactFab projectName={projectName} whatsappNumber={whatsappNumber} />
     </div>
   );
 }

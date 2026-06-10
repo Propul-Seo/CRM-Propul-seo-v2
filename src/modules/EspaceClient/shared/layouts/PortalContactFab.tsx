@@ -10,16 +10,17 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import {
-  WHATSAPP_NUMBER,
   CONTACT_EMAIL,
   AGENCY_NAME,
 } from '@/modules/EspaceClient/shared/constants';
 
 interface PortalContactFabProps {
   projectName?: string;
+  /** WhatsApp du membre assigné (résolu côté PortalShell). Bouton masqué si absent. */
+  whatsappNumber?: string | null;
 }
 
-export function PortalContactFab({ projectName }: PortalContactFabProps) {
+export function PortalContactFab({ projectName, whatsappNumber }: PortalContactFabProps) {
   const [open, setOpen] = useState(false);
 
   const wamePrefill = encodeURIComponent(
@@ -28,7 +29,9 @@ export function PortalContactFab({ projectName }: PortalContactFabProps) {
   const mailtoPrefill = encodeURIComponent(
     `Question sur ${projectName ?? 'mon projet'}`,
   );
-  const whatsappHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${wamePrefill}`;
+  const whatsappHref = whatsappNumber
+    ? `https://wa.me/${whatsappNumber}?text=${wamePrefill}`
+    : null;
   const mailtoHref = `mailto:${CONTACT_EMAIL}?subject=${mailtoPrefill}`;
 
   return (
@@ -56,19 +59,21 @@ export function PortalContactFab({ projectName }: PortalContactFabProps) {
           </SheetDescription>
         </SheetHeader>
         <div className="mt-6 flex flex-col gap-3 pb-4">
-          <Button
-            asChild
-            size="lg"
-            className="h-14 justify-start gap-3 rounded-xl bg-[#25D366] text-white shadow-sm hover:bg-[#1da851]"
-          >
-            <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
-              <MessageSquare className="h-5 w-5" />
-              <span className="flex flex-col items-start text-left">
-                <span className="font-semibold">WhatsApp</span>
-                <span className="text-xs opacity-90">Réponse en quelques minutes</span>
-              </span>
-            </a>
-          </Button>
+          {whatsappHref && (
+            <Button
+              asChild
+              size="lg"
+              className="h-14 justify-start gap-3 rounded-xl bg-[#25D366] text-white shadow-sm hover:bg-[#1da851]"
+            >
+              <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                <MessageSquare className="h-5 w-5" />
+                <span className="flex flex-col items-start text-left">
+                  <span className="font-semibold">WhatsApp</span>
+                  <span className="text-xs opacity-90">Réponse en quelques minutes</span>
+                </span>
+              </a>
+            </Button>
+          )}
           <Button
             asChild
             size="lg"

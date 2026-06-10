@@ -5,7 +5,8 @@ import { Hero, SectionHead, EmptyState } from '@/modules/EspaceClient/shared/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext'
-import { CONTACT_EMAIL, WHATSAPP_NUMBER, AGENCY_NAME } from '@/modules/EspaceClient/shared/constants'
+import { usePortalProjectDetails } from '../hooks/usePortalProjectDetails'
+import { CONTACT_EMAIL, resolveTeamWhatsapp, AGENCY_NAME } from '@/modules/EspaceClient/shared/constants'
 
 const FAQ: Array<{ q: string; a: string; tags: string[] }> = [
   { q: 'Comment télécharger une facture ?',
@@ -15,11 +16,11 @@ const FAQ: Array<{ q: string; a: string; tags: string[] }> = [
     a: 'Dans le détail de la facture, cliquez sur "Payer en ligne". Vous serez redirigé vers une page Stripe sécurisée. Une fois payée, le statut se met à jour automatiquement.',
     tags: ['facture', 'paiement', 'stripe'] },
   { q: "J'ai signé un document mais le statut n'a pas changé.",
-    a: "Le statut se met à jour sous 5 minutes en moyenne. Si après 30 minutes rien n'a bougé, contactez-nous.",
-    tags: ['signature', 'docuseal'] },
-  { q: "Mon lien magique n'a pas marché.",
-    a: "Les liens magiques expirent au bout d'1 heure pour des raisons de sécurité. Demandez-en un nouveau depuis la page de connexion.",
-    tags: ['connexion', 'magic link'] },
+    a: "Le statut se met à jour automatiquement une fois la signature finalisée. Si rien n'a bougé après quelques minutes, contactez-nous.",
+    tags: ['signature'] },
+  { q: 'Comment me connecter à mon espace ?',
+    a: "Avec votre email et votre mot de passe. Vous pouvez aussi demander un lien de connexion à usage unique (« Recevoir un lien à la place »), ou réinitialiser votre mot de passe via « Mot de passe oublié ? » depuis la page de connexion.",
+    tags: ['connexion', 'mot de passe', 'lien'] },
   { q: 'Je ne vois pas tous mes documents.',
     a: "Seuls les documents marqués \"visibles client\" par l'équipe Propul'SEO sont affichés ici. Les brouillons internes ne sont jamais partagés sans validation.",
     tags: ['document'] },
@@ -44,6 +45,8 @@ const QUICK_LINKS = [
 
 export function HelpPage() {
   const { basePath } = usePortal()
+  const { details } = usePortalProjectDetails()
+  const whatsapp = resolveTeamWhatsapp(details?.assigned_name)
   const [openIdx, setOpenIdx] = useState<number | null>(0)
   const [search, setSearch] = useState('')
 
@@ -148,12 +151,14 @@ export function HelpPage() {
           L'équipe {AGENCY_NAME} répond en moins d'une heure ouvrée.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Button asChild className="bg-[var(--ps-primary)] text-white hover:bg-[var(--ps-primary-hover)]">
-            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
-              <MessageSquare className="mr-1.5 h-4 w-4" />
-              WhatsApp
-            </a>
-          </Button>
+          {whatsapp && (
+            <Button asChild className="bg-[var(--ps-primary)] text-white hover:bg-[var(--ps-primary-hover)]">
+              <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer">
+                <MessageSquare className="mr-1.5 h-4 w-4" />
+                WhatsApp
+              </a>
+            </Button>
+          )}
           <Button asChild variant="outline">
             <a href={`mailto:${CONTACT_EMAIL}`}>
               <Mail className="mr-1.5 h-4 w-4" />

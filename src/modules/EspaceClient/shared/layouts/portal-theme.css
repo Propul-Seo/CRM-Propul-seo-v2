@@ -314,6 +314,38 @@ html.ps-dark-surface #root {
   border-radius: var(--ps-radius-input);
 }
 
+/* ─── SHADCN TOKENS → CLAIR (override theme dark CRM) ───────
+   Le CRM admin n'a qu'un thème sombre unique au :root (--background,
+   --input, --accent… tous foncés, en triplets HSL). Les primitives shadcn
+   du portail (Button variant=outline → bg-background, Dialog, DropdownMenu…)
+   héritaient donc d'un fond noir. On remappe les tokens shadcn sur les
+   valeurs claires --ps-* — sauf le back-office admin (.ps-theme-dark) qui
+   reste sombre. Format : triplet HSL (consommé via hsl(var(--token))). */
+.propulspace-portal:not(.ps-theme-dark) {
+  --background: 0 0% 100%;
+  --foreground: 240 6% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 6% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 6% 10%;
+  --primary: 262 83% 58%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 5% 96%;
+  --secondary-foreground: 240 6% 10%;
+  --muted: 240 5% 96%;
+  --muted-foreground: 240 4% 46%;
+  --accent: 240 5% 96%;
+  --accent-foreground: 240 6% 10%;
+  --border: 240 6% 90%;
+  --input: 240 6% 90%;
+  --ring: 262 83% 58%;
+}
+
+/* Décalage du header portail sous le bandeau d'aperçu admin (lecture seule).
+   En portail réel, --ps-header-top est indéfini → fallback 0px côté header
+   (cf. PortalLayout), donc aucun impact hors aperçu. */
+.ps-preview-shell { --ps-header-top: 2.5rem; }
+
 /* ─── WELCOME WIZARD PREMIUM TOKENS (palier polish) ─────── */
 /* Utilities supplémentaires pour le wizard d'accueil. Réutilisables ailleurs.
    Documentés ici pour que les agents de polish s'y conforment plutôt que

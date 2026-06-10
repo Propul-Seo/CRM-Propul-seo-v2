@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Send, LogIn, CheckCircle2, ArrowLeft, KeyRound } from 'lucide-react';
+import { Mail, Lock, Send, LogIn, CheckCircle2, ArrowLeft, KeyRound, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BrandPill, StatusPage } from '@/modules/EspaceClient/shared/components';
@@ -85,6 +85,20 @@ export function ClientLoginPage() {
     }
     // Succès : le useEffect ci-dessus surveille state.status === 'ready' et
     // redirige vers /espace-client. PortalGuard prend ensuite le relais.
+    setForm({ kind: 'idle' });
+  }
+
+  // Dev only — connexion démo en un clic (jamais inclus dans le build prod).
+  // Compte préparé via scripts/setup-demo-portal.mjs (projet Boulangerie Dupont).
+  const DEMO_EMAIL = 'lyestriki@gmail.com';
+  const DEMO_PASSWORD = 'Demo1234!';
+  async function onDemoLogin() {
+    setForm({ kind: 'sending' });
+    const { error } = await signInWithPassword(DEMO_EMAIL, DEMO_PASSWORD);
+    if (error) {
+      setForm({ kind: 'error', message: humanizeAuthError(error) });
+      return;
+    }
     setForm({ kind: 'idle' });
   }
 
@@ -240,6 +254,19 @@ export function ClientLoginPage() {
                   Recevoir un lien à la place
                 </button>
               </div>
+
+              {/* Dev only — accès démo direct (retiré du build prod) */}
+              {import.meta.env.DEV && (
+                <button
+                  type="button"
+                  onClick={onDemoLogin}
+                  disabled={submitting}
+                  className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-[var(--ps-fg-muted)]/40 px-3 py-2 text-[12px] text-[var(--ps-fg-muted)] transition hover:bg-black/5 disabled:opacity-60"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Connexion démo (Boulangerie Dupont)
+                </button>
+              )}
             </form>
           )}
 

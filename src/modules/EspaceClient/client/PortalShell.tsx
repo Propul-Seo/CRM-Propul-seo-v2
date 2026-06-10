@@ -1,7 +1,8 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { PortalLayout } from '@/modules/EspaceClient/shared/layouts/PortalLayout';
-import type { PortalTab } from '@/modules/EspaceClient/shared/constants';
+import { resolveTeamWhatsapp, type PortalTab } from '@/modules/EspaceClient/shared/constants';
 import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext';
+import { usePortalProjectDetails } from './hooks/usePortalProjectDetails';
 import { WelcomeWizardProvider } from './welcome/WelcomeWizardContext';
 import { WelcomeWizard } from './welcome/WelcomeWizard';
 
@@ -37,6 +38,9 @@ export function PortalShell() {
   const location = useLocation();
   const navigate = useNavigate();
   const activeTab = pathToTab(location.pathname, basePath);
+  // Contact WhatsApp = membre Propul'SEO assigné au projet (Aide + FAB).
+  const { details } = usePortalProjectDetails();
+  const whatsappNumber = resolveTeamWhatsapp(details?.assigned_name);
 
   // Préfère le nom client défini sur le projet, sinon dérive de l'email.
   const clientName = project.client_name ?? email.split('@')[0] ?? email;
@@ -47,6 +51,7 @@ export function PortalShell() {
       onTabChange={tab => navigate(tabToPath(basePath, tab))}
       clientName={clientName}
       projectName={project.name ?? undefined}
+      whatsappNumber={whatsappNumber}
       onLogout={async () => {
         await signOut();
         // En aperçu, signOut = retour cockpit (géré par le provider d'aperçu).

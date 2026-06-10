@@ -49,7 +49,7 @@ export const ERP_INTEGRATIONS = [
   { value: 'compta_pennylane', label: 'Comptabilité (Pennylane / Sage / QuickBooks)', hint: 'Synchroniser la compta' },
   { value: 'paiement_stripe',  label: 'Paiement (Stripe)',           hint: 'Encaisser en ligne' },
   { value: 'email_brevo',      label: 'Email marketing (Brevo / Mailchimp)', hint: 'Campagnes automatiques' },
-  { value: 'esign_docuseal',   label: 'Signature électronique (DocuSeal / Yousign)', hint: 'Contrats signés en ligne' },
+  { value: 'esign_docuseal',   label: 'Signature électronique', hint: 'Contrats signés en ligne' },
   { value: 'calendrier',       label: 'Calendrier (Google / Outlook)', hint: 'Sync agenda' },
   { value: 'autre',            label: 'Autre',                       hint: 'Précisez' },
 ] as const;
