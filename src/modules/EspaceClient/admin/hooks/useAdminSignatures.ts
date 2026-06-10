@@ -8,25 +8,26 @@ export interface CreateSignatureInput {
   signatureType: string;          // 'quote' | 'contract' | 'addendum' | 'other'
   signerEmail: string;
   signerName?: string;
-  templateId: string;
+  documentId: string;             // document du projet à faire signer
 }
 
 interface UseAdminSignaturesResult {
   signatures: PortalSignature[];
   loading: boolean;
   error: string | null;
-  createEnabled: boolean;
   refresh: () => Promise<void>;
   createSignature: (input: CreateSignatureInput) => Promise<{ error: string | null }>;
   remindSignature: (sig: PortalSignature, clientEmail: string | null) => Promise<{ error: string | null }>;
   cancelSignature: (sig: PortalSignature) => Promise<{ error: string | null }>;
 }
 
+// Lien vers l'espace client (le client signe in-portail après connexion).
+const portalUrl = () => `${window.location.origin}/espace-client`;
+
 export function useAdminSignatures(projectId: string): UseAdminSignaturesResult {
   const [signatures, setSignatures] = useState<PortalSignature[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [createEnabled, setCreateEnabled] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -39,48 +40,36 @@ export function useAdminSignatures(projectId: string): UseAdminSignaturesResult 
 
   useEffect(() => { void refresh(); }, [refresh]);
 
-  // Probe DocuSeal au montage → grise le bouton de création si non configuré.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await supabase.functions
-        .invoke('admin-docuseal-create-submission', { body: { probe: true } })
-        .catch(() => ({ data: null }));
-      const configured = Boolean((res.data as { configured?: boolean } | null)?.configured);
-      if (!cancelled) setCreateEnabled(configured);
-    })();
-    return () => { cancelled = true; };
-  }, []);
-
   const createSignature = useCallback<UseAdminSignaturesResult['createSignature']>(async (input) => {
-    const { data, error: err } = await supabase.functions.invoke('admin-docuseal-create-submission', {
-      body: {
-        project_id: projectId,
-        template_id: input.templateId,
-        name: input.name,
-        signature_type: input.signatureType,
-        signer_email: input.signerEmail,
-        signer_name: input.signerName,
-      },
+    const { data, error: err } = await adminRpc('admin_create_signature', {
+      p_project_id: projectId,
+      p_document_id: input.documentId,
+      p_signature_type: input.signatureType,
+      p_name: input.name,
+      p_signer_email: input.signerEmail,
     });
-    if (err) return { error: err.message ?? 'Échec de la création' };
-    const res = data as { ok?: boolean; reason?: string } | null;
-    if (res && res.ok === false) {
-      return { error: res.reason === 'not_configured' ? "DocuSeal n'est pas encore configuré." : 'Création impossible.' };
-    }
+    if (err) return { error: err.message };
+    // Email « document à signer » (best-effort, ne bloque pas la création).
+    await supabase.functions.invoke('send-portal-email', {
+      body: {
+        template_key: 'signature-requested',
+        to: { email: input.signerEmail, name: input.signerName },
+        params: { doc_title: input.name, doc_type: input.signatureType, sign_url: portalUrl() },
+        dedupe_key: `${data as string}-requested`,
+      },
+    }).catch(() => undefined);
     await refresh();
     return { error: null };
   }, [projectId, refresh]);
 
   const remindSignature = useCallback<UseAdminSignaturesResult['remindSignature']>(async (sig, clientEmail) => {
     if (!clientEmail) return { error: "Pas d'email client" };
-    if (!sig.docuseal_signing_url) return { error: 'Lien de signature indisponible' };
     const today = new Date().toISOString().slice(0, 10);
     const { error: err } = await supabase.functions.invoke('send-portal-email', {
       body: {
         template_key: 'signature-requested',
         to: { email: clientEmail },
-        params: { doc_title: sig.name, doc_type: sig.signature_type, sign_url: sig.docuseal_signing_url },
+        params: { doc_title: sig.name, doc_type: sig.signature_type, sign_url: portalUrl() },
         dedupe_key: `${sig.id}-reminder-${today}`,
       },
     });
@@ -94,5 +83,5 @@ export function useAdminSignatures(projectId: string): UseAdminSignaturesResult 
     return { error: null };
   }, [refresh]);
 
-  return { signatures, loading, error, createEnabled, refresh, createSignature, remindSignature, cancelSignature };
+  return { signatures, loading, error, refresh, createSignature, remindSignature, cancelSignature };
 }

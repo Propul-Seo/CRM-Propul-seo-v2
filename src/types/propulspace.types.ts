@@ -237,10 +237,12 @@ export interface SignaturesRow {
   document_id: string | null;
   signature_type: string;
   name: string;
-  docuseal_submission_id: string;
-  docuseal_template_id: string | null;
-  docuseal_signing_url: string | null;
-  docuseal_signed_pdf_url: string | null;
+  signed_pdf_url: string | null;
+  signed_name: string | null;
+  signer_email: string | null;
+  signature_image: string | null;
+  consent_at: string | null;
+  document_sha256: string | null;
   status: string;
   sent_at: string | null;
   signed_at: string | null;

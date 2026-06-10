@@ -4,8 +4,12 @@ import { StatusBadge, FilePreviewDialog } from '@/modules/EspaceClient/shared/co
 import { AdminFilterPills, AdminEmptyState } from '@/modules/EspaceClient/admin/components/kit';
 import { AdminSignatureForm } from './AdminSignatureForm';
 import { useAdminSignatures } from '../hooks/useAdminSignatures';
-import { signaturePreviewTarget } from '@/modules/EspaceClient/admin/lib/signaturePreview';
+import { useAdminDocuments } from '../hooks/useAdminDocuments';
+import { signedPdfPath } from '@/modules/EspaceClient/admin/lib/signaturePreview';
+import { getAdminSignedUrl } from '@/modules/EspaceClient/admin/lib/adminStorage';
 import type { PortalSignature } from '@/modules/EspaceClient/client/hooks/usePortalData';
+
+const BUCKET = 'propulspace-documents';
 
 const fmtDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('fr-FR') : '');
 const TYPE_LABEL: Record<string, string> = { quote: 'Devis', contract: 'Contrat', addendum: 'Avenant', other: 'Autre' };
@@ -38,7 +42,8 @@ function Tile({ value, label, tint }: { value: number; label: string; tint?: str
 }
 
 export function SignaturesTab({ projectId, clientEmail }: { projectId: string; clientEmail: string | null }) {
-  const { signatures, loading, error, createEnabled, createSignature, remindSignature, cancelSignature } = useAdminSignatures(projectId);
+  const { signatures, loading, error, createSignature, remindSignature, cancelSignature } = useAdminSignatures(projectId);
+  const { documents } = useAdminDocuments(projectId);
   const [formOpen, setFormOpen] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -59,11 +64,11 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
     setBusyId(null);
   }
 
-  function openPreview(s: PortalSignature) {
-    const target = signaturePreviewTarget(s);
-    if (!target) return;
-    if (target.kind === 'external') { window.open(target.url, '_blank', 'noopener,noreferrer'); return; }
-    setPdfPreview({ name: s.name, url: target.url });
+  async function openPreview(s: PortalSignature) {
+    const path = signedPdfPath(s);
+    if (!path) return;
+    const url = await getAdminSignedUrl(BUCKET, path);
+    if (url) setPdfPreview({ name: s.name, url });
   }
 
   const total = signatures.length;
@@ -92,9 +97,7 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
           <button
             type="button"
             onClick={() => setFormOpen(true)}
-            disabled={!createEnabled}
-            title={!createEnabled ? 'DocuSeal non configuré' : undefined}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-white shadow-glow-sm transition-colors hover:bg-primary/85 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-white shadow-glow-sm transition-colors hover:bg-primary/85"
           >
             <Plus className="h-4 w-4" /> Nouvelle signature
           </button>
@@ -180,10 +183,14 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
 
                   {(s.status === 'signed' || s.status === 'pending') && (
                     <div className="mt-3.5 flex items-center justify-end gap-2 border-t border-border-subtle pt-3">
-                      {s.status === 'signed' && s.docuseal_signed_pdf_url && (
+                      {s.status === 'signed' && s.signed_pdf_url && (
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); window.open(s.docuseal_signed_pdf_url!, '_blank', 'noopener,noreferrer'); }}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const url = await getAdminSignedUrl(BUCKET, s.signed_pdf_url!);
+                            if (url) window.open(url, '_blank', 'noopener,noreferrer');
+                          }}
                           className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-foreground/70 transition-colors hover:bg-surface-3 hover:text-foreground"
                         >
                           <FileDown className="h-4 w-4" /> PDF signé
@@ -202,8 +209,7 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); onRemind(s); }}
-                            disabled={busy || !clientEmail || !s.docuseal_signing_url}
-                            title={!s.docuseal_signing_url ? 'Lien de signature indisponible' : undefined}
+                            disabled={busy || !clientEmail}
                             className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/15 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />} Relancer
@@ -226,7 +232,7 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
         mime="application/pdf"
         resolveUrl={() => Promise.resolve(pdfPreview?.url ?? null)}
       />
-      <AdminSignatureForm open={formOpen} onOpenChange={setFormOpen} defaultEmail={clientEmail} onSubmit={createSignature} />
+      <AdminSignatureForm open={formOpen} onOpenChange={setFormOpen} defaultEmail={clientEmail} documents={documents} onSubmit={createSignature} />
     </div>
   );
 }

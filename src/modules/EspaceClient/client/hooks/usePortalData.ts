@@ -83,7 +83,7 @@ export interface PortalDocument {
 
 export interface PortalSignature {
   id: string; project_id: string; document_id: string | null; signature_type: string;
-  name: string; docuseal_signing_url: string | null; docuseal_signed_pdf_url: string | null;
+  name: string; signed_name: string | null; signed_pdf_url: string | null;
   status: string; sent_at: string | null; signed_at: string | null;
   expires_at: string | null; created_at: string;
 }

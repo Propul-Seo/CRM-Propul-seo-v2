@@ -563,7 +563,7 @@ export const EMAIL_TEMPLATES: Record<TemplateKey, string> = {
     <td class="px py-hero" style="padding: 28px 32px 8px;">
       <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: #5B21B6; margin-bottom: 10px;">Signature requise</div>
       <h1 style="font-family: -apple-system, BlinkMacSystemFont, 'Inter', Arial, sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; color: #18181B; margin: 0 0 14px;">Bonjour {{ params.first_name }},</h1>
-      <div style="font-size: 14.5px; line-height: 1.6; color: #52525B;">Le document <strong style="color: #18181B;">{{ params.doc_title }}</strong> est prêt à être signé. La signature se fait en quelques secondes via DocuSeal.</div>
+      <div style="font-size: 14.5px; line-height: 1.6; color: #52525B;">Le document <strong style="color: #18181B;">{{ params.doc_title }}</strong> est prêt à être signé. La signature se fait en quelques secondes, directement dans votre espace client.</div>
     </td>
   </tr>
   <tr>
@@ -577,10 +577,6 @@ export const EMAIL_TEMPLATES: Record<TemplateKey, string> = {
         <tr>
           <td style="padding: 12px 16px; font-size: 13px; color: #52525B; border-bottom: 1px solid #E4E4E7;">Type</td>
           <td align="right" style="padding: 12px 16px; font-size: 13.5px; color: #18181B; font-weight: 600; border-bottom: 1px solid #E4E4E7;">{{ params.doc_type }}</td>
-        </tr>
-        <tr>
-          <td style="padding: 12px 16px; font-size: 13px; color: #52525B; ">À signer avant le</td>
-          <td align="right" style="padding: 12px 16px; font-size: 13.5px; color: #18181B; font-weight: 600; ">{{ params.expires_at }}</td>
         </tr>
       </table>
     </td>
@@ -597,7 +593,7 @@ export const EMAIL_TEMPLATES: Record<TemplateKey, string> = {
     </td>
   </tr>
   <tr><td class="px" style="padding: 4px 32px 22px; font-size: 12.5px; color: #A1A1AA; line-height: 1.55;">
-    Signature électronique sécurisée via DocuSeal · valeur juridique équivalente à une signature manuscrite (eIDAS).
+    Signature électronique sécurisée dans votre espace client · valeur juridique reconnue (eIDAS art. 25).
   </td></tr>
 
         <!-- FOOTER -->
@@ -660,7 +656,7 @@ export const EMAIL_TEMPLATES: Record<TemplateKey, string> = {
     <td class="px py-hero" style="padding: 28px 32px 8px;">
       <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: #5B21B6; margin-bottom: 10px;">✓ Signature enregistrée</div>
       <h1 style="font-family: -apple-system, BlinkMacSystemFont, 'Inter', Arial, sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; color: #18181B; margin: 0 0 14px;">Merci {{ params.first_name }} !</h1>
-      <div style="font-size: 14.5px; line-height: 1.6; color: #52525B;">Votre signature a bien été enregistrée le <strong style="color: #18181B;">{{ params.signed_at }}</strong>. Le PDF signé est joint à cet email et également disponible dans votre espace.</div>
+      <div style="font-size: 14.5px; line-height: 1.6; color: #52525B;">Votre signature a bien été enregistrée le <strong style="color: #18181B;">{{ params.signed_at }}</strong>. Le PDF signé, avec sa page de preuve, est disponible dans votre espace client.</div>
     </td>
   </tr>
   <tr>
@@ -677,14 +673,9 @@ export const EMAIL_TEMPLATES: Record<TemplateKey, string> = {
         </tr>
         <tr>
           <td style="padding: 12px 16px; font-size: 13px; color: #52525B; ">Valeur juridique</td>
-          <td align="right" style="padding: 12px 16px; font-size: 13.5px; color: #18181B; font-weight: 600; ">eIDAS · niveau avancé</td>
+          <td align="right" style="padding: 12px 16px; font-size: 13.5px; color: #18181B; font-weight: 600; ">eIDAS · signature simple</td>
         </tr>
       </table>
-    </td>
-  </tr>
-  <tr>
-    <td class="px" style="padding: 6px 32px 18px;">
-      <div style="background: #DCFCE7; color: #166534; padding: 12px 16px; border-radius: 10px; font-size: 13px; line-height: 1.55;">Pièce jointe : {{ params.doc_title }}_signé.pdf</div>
     </td>
   </tr>
   <tr>

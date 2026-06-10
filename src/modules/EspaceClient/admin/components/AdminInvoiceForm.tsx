@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, Trash2, Loader2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { AdminFormDialog, AdminFormField } from './kit';
 import type { CreateInvoiceInput, UpdateInvoiceInput } from '../hooks/useAdminInvoices';
 import type { PortalInvoice } from '@/modules/EspaceClient/client/hooks/usePortalData';
 import { validateInvoiceForm } from '../lib/invoiceFormValidation';
@@ -99,79 +99,84 @@ export function AdminInvoiceForm({ open, onOpenChange, onSubmit, editInvoice, on
   }
 
   return (
-    <Dialog open={open} onOpenChange={o => { if (!o) reset(); onOpenChange(o); }}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader><DialogTitle>{isEdit ? 'Modifier la facture' : 'Nouvelle facture'}</DialogTitle></DialogHeader>
-        <div className="space-y-4">
-          <div>
-            <Label>Intitulé (optionnel)</Label>
-            <Input placeholder="Ex. Paiement 1/2" value={title} onChange={e => setTitle(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label>Lignes</Label>
-            {lines.map((l, i) => (
-              <div key={i} className="flex gap-2">
-                <Input placeholder="Désignation" value={l.label}
-                  onChange={e => setLines(ls => ls.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
-                <Input type="number" min="0" step="0.01" placeholder="€ HT" className="w-28" value={l.amount}
-                  onChange={e => setLines(ls => ls.map((x, j) => j === i ? { ...x, amount: e.target.value } : x))} />
-                <Button type="button" variant="ghost" size="icon"
-                  onClick={() => setLines(ls => ls.length > 1 ? ls.filter((_, j) => j !== i) : ls)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            <Button type="button" variant="outline" size="sm" onClick={() => setLines(ls => [...ls, { label: '', amount: '' }])}>
-              <Plus className="mr-1 h-4 w-4" /> Ligne
+    <AdminFormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isEdit ? 'Modifier la facture' : 'Nouvelle facture'}
+      size="lg"
+      formError={formError}
+      onSubmit={handleSubmit}
+      submitting={submitting}
+      submitLabel={isEdit ? 'Enregistrer' : 'Créer (brouillon)'}
+      onClose={reset}
+    >
+      <AdminFormField label="Intitulé (optionnel)">
+        <Input placeholder="Ex. Paiement 1/2" value={title} onChange={e => setTitle(e.target.value)} />
+      </AdminFormField>
+      <div className="space-y-2">
+        <Label>Lignes</Label>
+        {lines.map((l, i) => (
+          <div key={i} className="flex gap-2">
+            <Input placeholder="Désignation" value={l.label}
+              onChange={e => setLines(ls => ls.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
+            <Input type="number" min="0" step="0.01" placeholder="€ HT" className="w-28" value={l.amount}
+              onChange={e => setLines(ls => ls.map((x, j) => j === i ? { ...x, amount: e.target.value } : x))} />
+            <Button type="button" variant="ghost" size="icon"
+              onClick={() => setLines(ls => ls.length > 1 ? ls.filter((_, j) => j !== i) : ls)}>
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><Label>TVA (%)</Label><Input type="number" min="0" step="0.01" value={vatRate} onChange={e => setVatRate(e.target.value)} /></div>
-            {!isEdit && (
-              <label className="flex items-end gap-2 pb-2 text-sm">
-                <input type="checkbox" checked={isDeposit} onChange={e => setIsDeposit(e.target.checked)} /> Facture d'acompte
-              </label>
-            )}
-            <div><Label>Émission</Label><Input type="date" value={issueDate} onChange={e => setIssueDate(e.target.value)} disabled={isEdit} /></div>
-            <div><Label>Échéance</Label><Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} /></div>
+        ))}
+        <Button type="button" variant="outline" size="sm" onClick={() => setLines(ls => [...ls, { label: '', amount: '' }])}>
+          <Plus className="mr-1 h-4 w-4" /> Ligne
+        </Button>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <AdminFormField label="TVA (%)">
+          <Input type="number" min="0" step="0.01" value={vatRate} onChange={e => setVatRate(e.target.value)} />
+        </AdminFormField>
+        {!isEdit && (
+          <label className="flex items-end gap-2 pb-2 text-sm">
+            <input type="checkbox" checked={isDeposit} onChange={e => setIsDeposit(e.target.checked)} /> Facture d'acompte
+          </label>
+        )}
+        <AdminFormField label="Émission">
+          <Input type="date" value={issueDate} onChange={e => setIssueDate(e.target.value)} disabled={isEdit} />
+        </AdminFormField>
+        <AdminFormField label="Échéance">
+          <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+        </AdminFormField>
+      </div>
+      <AdminFormField label="Note visible client">
+        <Input value={notes} onChange={e => setNotes(e.target.value)} />
+      </AdminFormField>
+      {!isEdit && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label>Acomptes / échéances (optionnel)</Label>
+            <Button type="button" variant="outline" size="sm"
+              onClick={() => setInstallments(is => [...is, { label: '', amount: '', due_date: '' }])}>
+              <Plus className="mr-1 h-4 w-4" /> Échéance
+            </Button>
           </div>
-          <div><Label>Note visible client</Label><Input value={notes} onChange={e => setNotes(e.target.value)} /></div>
-          {!isEdit && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Acomptes / échéances (optionnel)</Label>
-                <Button type="button" variant="outline" size="sm"
-                  onClick={() => setInstallments(is => [...is, { label: '', amount: '', due_date: '' }])}>
-                  <Plus className="mr-1 h-4 w-4" /> Échéance
-                </Button>
-              </div>
-              {installments.map((it, i) => (
-                <div key={i} className="flex gap-2">
-                  <Input placeholder="Libellé" value={it.label}
-                    onChange={e => setInstallments(is => is.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
-                  <Input type="number" min="0" step="0.01" placeholder="€" className="w-24" value={it.amount}
-                    onChange={e => setInstallments(is => is.map((x, j) => j === i ? { ...x, amount: e.target.value } : x))} />
-                  <Input type="date" className="w-40" value={it.due_date}
-                    onChange={e => setInstallments(is => is.map((x, j) => j === i ? { ...x, due_date: e.target.value } : x))} />
-                  <Button type="button" variant="ghost" size="icon" onClick={() => setInstallments(is => is.filter((_, j) => j !== i))}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
+          {installments.map((it, i) => (
+            <div key={i} className="flex gap-2">
+              <Input placeholder="Libellé" value={it.label}
+                onChange={e => setInstallments(is => is.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
+              <Input type="number" min="0" step="0.01" placeholder="€" className="w-24" value={it.amount}
+                onChange={e => setInstallments(is => is.map((x, j) => j === i ? { ...x, amount: e.target.value } : x))} />
+              <Input type="date" className="w-40" value={it.due_date}
+                onChange={e => setInstallments(is => is.map((x, j) => j === i ? { ...x, due_date: e.target.value } : x))} />
+              <Button type="button" variant="ghost" size="icon" onClick={() => setInstallments(is => is.filter((_, j) => j !== i))}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
-          )}
-          <div className="rounded-lg bg-surface-2 px-3 py-2 text-sm">
-            Sous-total HT <strong>{subtotal.toFixed(2)} €</strong> · Total TTC <strong>{total.toFixed(2)} €</strong>
-          </div>
-          {formError && <p className="text-sm text-red-300">{formError}</p>}
+          ))}
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => { reset(); onOpenChange(false); }}>Annuler</Button>
-          <Button onClick={handleSubmit} disabled={submitting}>
-            {submitting && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />} {isEdit ? 'Enregistrer' : 'Créer (brouillon)'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      )}
+      <div className="rounded-lg bg-surface-2 px-3 py-2 text-sm">
+        Sous-total HT <strong>{subtotal.toFixed(2)} €</strong> · Total TTC <strong>{total.toFixed(2)} €</strong>
+      </div>
+    </AdminFormDialog>
   );
 }

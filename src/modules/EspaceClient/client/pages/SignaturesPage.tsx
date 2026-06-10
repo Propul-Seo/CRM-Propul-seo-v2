@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  PenLine, ExternalLink, Download, Maximize2, FileText, ChevronRight,
+  PenLine, Download, Maximize2, FileText, ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   EmptyState, SectionHead, StatusBadge, StatusPage, Skeleton, FilePreviewDialog,
 } from '@/modules/EspaceClient/shared/components';
 import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext';
-import { usePortalSignatures, type PortalSignature } from '../hooks/usePortalData';
+import { usePortalSignatures, getSignedStorageUrl, type PortalSignature } from '../hooks/usePortalData';
 import { SignatureStepper } from '../components/SignatureStepper';
+import { SignatureSignModal } from '../components/SignatureSignModal';
+
+const BUCKET = 'propulspace-documents';
 
 function formatDate(iso: string | null): string {
   if (!iso) return '—';
@@ -24,8 +27,10 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 export function SignaturesPage() {
-  const { rows, loading, error } = usePortalSignatures();
+  const { rows, loading, error, refresh } = usePortalSignatures();
+  const { project } = usePortal();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [signOpen, setSignOpen] = useState(false);
 
   // Sélection auto : on cible en priorité un document à signer, sinon le premier.
   useEffect(() => {
@@ -115,8 +120,18 @@ export function SignaturesPage() {
           <SignatureViewer signature={selected} />
 
           {/* Rail d'action (droite / en-dessous sur mobile) */}
-          <SignatureRail signature={selected} />
+          <SignatureRail signature={selected} onSign={() => setSignOpen(true)} />
         </div>
+      )}
+
+      {selected && (
+        <SignatureSignModal
+          open={signOpen}
+          onOpenChange={setSignOpen}
+          signature={selected}
+          signerDefaultName={project.client_name ?? ''}
+          onSigned={() => { void refresh(); }}
+        />
       )}
     </div>
   );
@@ -124,8 +139,18 @@ export function SignaturesPage() {
 
 // ── Viewer PDF sombre, fidèle Variante A ───────────────────────────
 function SignatureViewer({ signature }: { signature: PortalSignature }) {
+  const { storage } = usePortal();
   const [preview, setPreview] = useState(false);
-  const pdfUrl = signature.docuseal_signed_pdf_url;
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    if (signature.signed_pdf_url) {
+      void getSignedStorageUrl(storage, BUCKET, signature.signed_pdf_url).then(u => { if (active) setPdfUrl(u); });
+    } else {
+      setPdfUrl(null);
+    }
+    return () => { active = false; };
+  }, [signature.signed_pdf_url, storage]);
   const filename = `${signature.name}.pdf`;
 
   return (
@@ -183,13 +208,19 @@ function SignatureViewer({ signature }: { signature: PortalSignature }) {
 }
 
 // ── Rail d'action droit ────────────────────────────────────────────
-function SignatureRail({ signature }: { signature: PortalSignature }) {
-  const { project, previewMode } = usePortal();
+function SignatureRail({ signature, onSign }: { signature: PortalSignature; onSign: () => void }) {
+  const { project, previewMode, storage } = usePortal();
   const signerName = project.client_name ?? 'Vous';
   const typeLabel = TYPE_LABELS[signature.signature_type] ?? signature.signature_type;
 
-  const canSign = !previewMode && signature.status === 'pending' && !!signature.docuseal_signing_url;
-  const hasSignedPdf = signature.status === 'signed' && !!signature.docuseal_signed_pdf_url;
+  const canSign = !previewMode && signature.status === 'pending';
+  const hasSignedPdf = signature.status === 'signed' && !!signature.signed_pdf_url;
+
+  async function downloadSigned() {
+    if (!signature.signed_pdf_url) return;
+    const url = await getSignedStorageUrl(storage, BUCKET, signature.signed_pdf_url);
+    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+  }
 
   return (
     <aside className="ps-surface flex flex-col overflow-hidden p-0">
@@ -247,24 +278,19 @@ function SignatureRail({ signature }: { signature: PortalSignature }) {
       {/* Pied : actions */}
       <div className="mt-auto flex flex-col gap-2.5 border-t border-[var(--ps-border-soft)] p-6">
         {canSign && (
-          <Button asChild className="w-full bg-[var(--ps-primary)] text-white hover:bg-[var(--ps-primary-hover)]">
-            <a href={signature.docuseal_signing_url ?? '#'} target="_blank" rel="noopener noreferrer">
-              <PenLine className="mr-1.5 h-4 w-4" />
-              Signer le document
-              <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
-            </a>
+          <Button onClick={onSign} className="w-full bg-[var(--ps-primary)] text-white hover:bg-[var(--ps-primary-hover)]">
+            <PenLine className="mr-1.5 h-4 w-4" />
+            Signer le document
           </Button>
         )}
         {hasSignedPdf && (
           <Button
             variant="outline"
-            asChild
+            onClick={downloadSigned}
             className="w-full border-[var(--ps-border-strong)] text-[var(--ps-fg)]"
           >
-            <a href={signature.docuseal_signed_pdf_url ?? '#'} target="_blank" rel="noopener noreferrer">
-              <Download className="mr-1.5 h-4 w-4" />
-              Télécharger le document signé
-            </a>
+            <Download className="mr-1.5 h-4 w-4" />
+            Télécharger le document signé
           </Button>
         )}
         {!canSign && !hasSignedPdf && (

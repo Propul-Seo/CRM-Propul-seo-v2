@@ -1,9 +1,9 @@
 import { Check } from 'lucide-react';
 import type { PortalSignature } from '../hooks/usePortalData';
 
-// Frise verticale Envoyé → Ouvert → Signé → Terminé dérivée du statut DocuSeal.
-// On ne stocke pas l'étape « Ouvert » côté données : on la considère atteinte
-// dès qu'un lien de signature existe (pending = ouvert/en attente).
+// Frise verticale Envoyé → Ouvert → Signé → Terminé dérivée du statut de la
+// signature. On ne stocke pas l'étape « Ouvert » côté données : on la considère
+// atteinte tant que la demande est en attente (pending = ouvert/en attente).
 
 type StepState = 'done' | 'active' | 'todo';
 

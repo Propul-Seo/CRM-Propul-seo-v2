@@ -1,14 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { AdminFormDialog, AdminFormField, AdminSelect } from './kit';
 import type { ProjectStepInput } from '../hooks/useAdminProjectSteps';
 import type { PortalProjectStep } from '@/modules/EspaceClient/client/hooks/usePortalData';
 import { STEP_STATUSES } from './tabConstants';
 
-const SELECT_CLASS = 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm';
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
 interface Props {
@@ -57,35 +53,38 @@ export function AdminProjectStepForm({ open, onOpenChange, initial, onSubmit }: 
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader><DialogTitle>{initial ? 'Modifier le jalon' : 'Nouveau jalon'}</DialogTitle></DialogHeader>
-        <div className="space-y-3">
-          <div><Label>Libellé</Label><Input value={label} onChange={e => setLabel(e.target.value)} placeholder="Ex. Maquettes validées" /></div>
-          <div>
-            <Label>Statut</Label>
-            <select className={SELECT_CLASS} value={status} onChange={e => setStatus(e.target.value)}>
-              {STEP_STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-            </select>
-          </div>
-          <div><Label>Description</Label><Input value={description} onChange={e => setDescription(e.target.value)} /></div>
-          <div className="grid grid-cols-3 gap-2">
-            <div><Label>Début</Label><Input type="date" value={dateStart} onChange={e => setDateStart(e.target.value)} /></div>
-            <div><Label>Prévu</Label><Input type="date" value={datePlannedEnd} onChange={e => setDatePlannedEnd(e.target.value)} /></div>
-            <div><Label>Réel</Label><Input type="date" value={dateActualEnd} onChange={e => setDateActualEnd(e.target.value)} /></div>
-          </div>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={visible} onChange={e => setVisible(e.target.checked)} /> Visible par le client
-          </label>
-          {formError && <p className="text-sm text-red-300">{formError}</p>}
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
-          <Button onClick={handleSubmit} disabled={submitting}>
-            {submitting && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />} {initial ? 'Enregistrer' : 'Créer'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <AdminFormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={initial ? 'Modifier le jalon' : 'Nouveau jalon'}
+      formError={formError}
+      onSubmit={handleSubmit}
+      submitting={submitting}
+      submitLabel={initial ? 'Enregistrer' : 'Créer'}
+    >
+      <AdminFormField label="Libellé">
+        <Input value={label} onChange={e => setLabel(e.target.value)} placeholder="Ex. Maquettes validées" />
+      </AdminFormField>
+      <AdminFormField label="Statut">
+        <AdminSelect options={STEP_STATUSES} value={status} onChange={e => setStatus(e.target.value)} />
+      </AdminFormField>
+      <AdminFormField label="Description">
+        <Input value={description} onChange={e => setDescription(e.target.value)} />
+      </AdminFormField>
+      <div className="grid grid-cols-3 gap-2">
+        <AdminFormField label="Début">
+          <Input type="date" value={dateStart} onChange={e => setDateStart(e.target.value)} />
+        </AdminFormField>
+        <AdminFormField label="Prévu">
+          <Input type="date" value={datePlannedEnd} onChange={e => setDatePlannedEnd(e.target.value)} />
+        </AdminFormField>
+        <AdminFormField label="Réel">
+          <Input type="date" value={dateActualEnd} onChange={e => setDateActualEnd(e.target.value)} />
+        </AdminFormField>
+      </div>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={visible} onChange={e => setVisible(e.target.checked)} /> Visible par le client
+      </label>
+    </AdminFormDialog>
   );
 }

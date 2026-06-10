@@ -155,6 +155,16 @@ export interface AdminRpcMap {
     args: { p_signature_id: string; p_reason?: string | null };
     returns: null;
   };
+  admin_create_signature: {
+    args: {
+      p_project_id: string;
+      p_document_id: string;
+      p_signature_type: string;
+      p_name: string;
+      p_signer_email: string;
+    };
+    returns: string;            // signature id (uuid)
+  };
   admin_convert_lead_to_project: {
     args: {
       p_lead_id: string;
