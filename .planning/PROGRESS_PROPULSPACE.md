@@ -7,12 +7,11 @@
 
 ## 1. État global
 
-- **Sprint en cours** : R-018 fermé. Test E2E complet validé. Brevo SMTP branché (port 587).
-- **Tâche en cours** : reste 9 emails transactionnels Brevo + INDEX perf + switcher multi-projets + tests pgTAP (R-007).
-- **Phase produit** : Phase 2 livrée à **97%** (R-018 RGPD critique fermé). Reste exploitation (Brevo emails) + R-019 audit RLS tables liées.
-- **Branche** : `feature/propulspace-phase-2-front` (exception multi-phases assumée, merge dans `main` fin Phase 2 après QA validée)
-- **Project Supabase** : ERP (`tbuqctfgjjxnevmsvucl`)
-- **Dernière mise à jour** : 2026-05-21 PM (session R-018) — 5 migrations RLS (259→263) + script tests SQL versionné + plan superpowers + tag git r-018-resolved. Fuite RGPD critique fermée (7/7 tests PASS).
+- **Sprint en cours** : **Fusion CRM ↔ Propul'Space** (convergence DB par tranches). SP0+V0+F1, **SP1, SP4, SP2 livrés et mergés sur `main` @ `92de63e`** (2026-06-08).
+- **Tâche en cours** : redeploy Coolify + smoke tests ; merger la vue « Liste détaillée » ProjectsV3 (branche **locale** `feat/projets-v3-vue-liste`) ; appliquer migrations différées **287/290** (~1 sem) ; puis **SP3** (facturation).
+- **Migrations en prod** : 285 (hotfix anon), 286 (SP1 vue+RLS `project_contacts`), 288/289 (SP4 docs canoniques), 291/292 (SP2 conversion unifiée). **Différées NON appliquées** : 287 (archive `leads`/`clients`), 290 (drop legacy docs).
+- **Project Supabase** : ERP (`tbuqctfgjjxnevmsvucl`) — ⚠️ le MCP pointe sur CoProFlex, migrations appliquées **à la main** par Lyes.
+- **Dernière mise à jour** : 2026-06-08 (session SP1+SP4+SP2 + vue Liste). Specs `docs/superpowers/specs/2026-06-08-sp{1,2,4}-*-design.md`. Build + **163 tests verts**, tsc 522 (dette pré-existante).
 
 ---
 
@@ -48,6 +47,19 @@
 ## 3. Journal des tâches (cumulatif)
 
 > Ordre chronologique. Une entrée par tâche close.
+
+### ✅ SP3 (cycle de vie facture) — édition/suppression/annulation + numéro à l'envoi (2026-06-08, branche feat)
+**Branche** : `feat/sp3-facturation-cycle-de-vie` @ `1f966f2` (**NON mergée**). Spec/plan : `docs/superpowers/{specs,plans}/2026-06-08-sp3-facturation-cycle-de-vie*`.
+**Constat** : l'UI admin facturation (`InvoicesTab`/`AdminInvoiceForm`/`useAdminInvoices`, RPC 270/271/272) était **déjà construite et routée** (`AdminClientPanel`). Audit des 6 onglets admin (4 sous-agents) → vrai gap = cycle de vie facture incomplet ; faux positifs sécu écartés (modèle « tous les admins voient tout » assumé, cf mémoire `admin-acces-equipe-globale`).
+**Livré** :
+- Migration **295** : `invoice_number` nullable + colonnes `cancellation_reason`/`cancelled_at` ; `admin_create_invoice` n'attribue plus le numéro (NULL) ; `admin_send_invoice` l'attribue à l'envoi et le **renvoie** (`returns text`) ; nouvelles RPC `admin_delete_invoice` (draft only) et `admin_cancel_invoice` (sent/overdue non payée).
+- Front : hook (`updateInvoice`/`deleteInvoice`/`cancelInvoice` + email avec numéro d'envoi), `AdminInvoiceForm` mode édition + garde-fous (`invoiceFormValidation` pure + 5 tests Vitest), `InvoicesTab` (« Brouillon » + boutons Modifier/Supprimer/Annuler + `CancelInvoiceDialog`), badge `partially_paid`.
+**Décisions** : numéro attribué à l'envoi (continuité légale, pas de trou) ; annulation simple (factures non payées) — avoir formel reporté. Limite assumée : acomptes non éditables en édition.
+**Vérif** : `npx tsc --noEmit` 0 erreur, **167 tests verts** (+5), `npx vite build` OK. Migration 295 **appliquée en prod par Lyes**. ⚠️ `npm run build` plante sur Windows (dette `||true` + erreurs préexistantes supabase-types/frenchDateUtils ; cf mémoire `build-windows-npm-debt`).
+**Revue de code** (effort high, 3 finders, commit `91ac1f5`) : 13 candidats → 2 vrais corrigés (boutons Modifier/Annuler désactivés pendant une action en cours ; pré-remplissage du formulaire défensif si `line_items` d'une autre forme), reste écarté (intentionnel : `partially_paid` sans annulation = avoir reporté ; ou hors-scope : duplication SQL inhérente, styles de confirmation).
+**Reste** : recette navigateur (7 points) → merge. Tranches suivantes : Facture→GED (ADR-003), unification compta CRM↔portail, édition infos client (GAP-06), avoir formel, correctifs Signatures/Jalons.
+
+---
 
 ### ✅ R-018 — Refonte policy RLS projects_v2 (terminé 2026-05-21 PM)
 **Démarré** : 2026-05-21 (session R-018)
@@ -898,3 +910,43 @@ Bloc E — Code review :
 - 🟢 **A.2b** "reportée" dans le PROGRESS est en fait livrée (vu en preview : `/espace-client/login` a déjà "Mot de passe oublié" + "Recevoir un lien à la place"). Marquer cochée.
 
 **Validation** : Lyes a piloté tous les arbitrages (Approche B badges au lieu Vue 10, Option C archive/delete forcé, Option A vue unifiée documents, onglet Questionnaire séparé du Brief).
+
+---
+
+## Session 2026-06-09 — Cockpit portail v2 : cartes cliquables + aperçu client admin (lecture seule)
+
+**Branche** : `feat/propulspace-portail-v2` @ `af4e15e` — **non mergée**. tsc + `npx vite build` verts. (UX back-office portail, hors périmètre SP fusion DB.)
+
+**Phase A — interactions cartes** (161f46c / 9b31704 / 371dbed) : onglets Factures/Documents/Signatures du panneau client admin → carte entière cliquable ouvre l'aperçu, œil/loupe retirés, actions internes en `stopPropagation`, cartes factures compactées (p-5→p-3). Helper pur `signaturePreviewTarget` (validé tsc — suite vitest cassée, cf. ci-dessous).
+
+**Feature B — « Voir comme le client »** (7ed4cba→af4e15e) : bouton dans le header cockpit ouvre le **vrai portail** de n'importe quel client en **lecture seule, sans login, zéro migration**.
+- Découverte clé : portail et admin CRM ont **2 sessions Supabase isolées** (`portalSupabase`/`v2Portal` vs `supabase`/`v2`). L'aperçu route le client de lecture via le `PortalContext` (`db` + `storage` + `basePath` + `previewMode`). Mémoire `portail-deux-sessions-supabase`.
+- L'admin lit déjà tout via RLS `ps_*_admin_all`/`team_all` (FOR ALL) → pas de migration. Lectures filtrées explicitement par `project_id` (RLS admin permissive). Écritures (paiement Stripe, profil, mdp, signature, wizard d'accueil + ses écritures on-mount) toutes neutralisées en `previewMode`. Route `/portails/clients/:projectId/apercu-client`, `PortalPreviewProvider` + `AdminPortalPreviewPage`.
+
+**Ultracode** : workflow blueprint (5 agents, 91 points Supabase recensés) → a évité d'oublier les écritures-au-montage du wizard + le piège « changer le mdp de l'admin ». Revue adversariale (4 agents) → verdict **lecture seule ✅ / pas de fuite ✅ / portail réel intact ✅** + 3 vrais bugs trouvés (liens `/espace-client` en dur dans DashboardPage/HelpPage qui éjectaient l'admin de l'aperçu) → corrigés via `basePath` dans le `PortalContext`.
+
+**Dette signalée cette session** : suite **vitest cassée** sur tous les tests (incompat vitest 4.1.6) — fix différé, valider la logique pure via tsc. Mémoire `vitest-suite-cassee`.
+
+**Reste** : vérif navigateur par Lyes, puis merge. Spec `docs/superpowers/specs/2026-06-09-apercu-client-admin-et-cartes-portail-design.md` + plan `docs/superpowers/plans/2026-06-09-apercu-client-admin-et-cartes-portail.md`.
+
+---
+
+## Session 2026-06-10 — Bugfixes portail + audit Aide + Signature MAISON (SES)
+
+**Branche** : `feat/propulspace-portail-v2` @ `af4e15e` — **non mergée, RIEN commité** (tsc complet vert).
+
+**Bugfixes portail (début)** : boutons noirs corrigés à la racine — le CRM n'a qu'un thème sombre au `:root`, les primitives shadcn du portail héritaient du noir → remap des tokens shadcn → clair scopé `.propulspace-portal:not(.ps-theme-dark)` (portal-theme.css). Bandeau aperçu rendu opaque + header décalé sous lui (`--ps-header-top`).
+
+**B — doc client cliquable** : ligne entière du DocumentsPage client → ouvre l'aperçu (comme l'admin), Télécharger en `stopPropagation`.
+
+**C — audit Aide** : `CONTACT_EMAIL` → `team@propulseo-site.com` (FAB + Aide). FAQ corrigée (« lien magique » → « comment me connecter », mot de passe principal ; timing signature inventé retiré). **WhatsApp dynamique** = numéro du **membre assigné** au projet (`assigned_name` → `resolveTeamWhatsapp` ; Lyes 0651986418 / Étienne 0695321389, accents normalisés ; masqué si non reconnu) câblé Aide + FAB.
+
+**D — Signature MAISON (SES, Niveau 1)** — DocuSeal/Documenso ABANDONNÉS (self-host lourd + cert PKI ; plans gratuits cloud sans API). Choix : SES maison, légal pour devis/contrats B2B (eIDAS art. 25 ; Code civil 1366-1367 → robustesse = journal de preuve). Mémoire `signature-maison-ses`.
+- **Migration 298** (appliquée par Lyes) : retire colonnes DocuSeal, ajoute journal de preuve (`signed_name`/`signer_email`/`signature_image`/`consent_at`/`document_sha256`), renomme `signed_pdf_url`, RPC `admin_create_signature`. **Cascade gérée** : la vue exposée `public.propulspace_signatures` listait les colonnes DocuSeal → drop vue → alter table → recrée vue (les vues dé-versionnées ne sont PAS dans le repo — créées en prod à la main, désync).
+- **Edge fn `portal-sign-document`** (à déployer) : auth client (`portal_client_email` == caller), SHA-256 du PDF source, PDF signé + **page de preuve** via pdf-lib, upload storage, journal de preuve, email Brevo `signature-completed`.
+- **Front** : `SignatureSignModal` (canvas dessin OU nom tapé en cursive + consentement), SignaturesPage câblée (résout `signed_pdf_url` storage), AdminSignatureForm (sélecteur de document du projet), `useAdminSignatures` via RPC. Nettoyage DocuSeal complet (2 edge fns + intégration + env + label + templates + types ; reste `database.ts` à régénérer).
+- **Revue adversariale ultracode** (4 dimensions, 7/10 confirmés) → 4 correctifs : IP `x-forwarded-for` dernière entrée + validée (anti-spoof + anti-échec INET), `portal_url` ajouté à l'email signé, `expires_at` retiré (pas d'expiration), email « eIDAS avancé » → « simple » (honnêteté). Écartés à raison : RPC grant `authenticated` (convention projet), vue `_v2` droppée (legacy), types `database.ts` docuseal (à régénérer).
+
+**Déploiement edge functions** (découvert) : pas de CLI, pas de CI, pas de `config.toml`. Ajout scripts npm `functions:login` / `functions:deploy` (npx supabase, ref `tbuqctfgjjxnevmsvucl`, bundle `_shared` auto). Mémoire `supabase-edge-functions-deploy`. Spec `docs/superpowers/specs/2026-06-09-signature-maison-ses-design.md`.
+
+**Reste** : déployer `portal-sign-document` + tester un cycle, committer (B/C/D), puis **A — refonte modals admin** (facture en référence).

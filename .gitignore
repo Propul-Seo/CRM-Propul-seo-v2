@@ -12,8 +12,15 @@
 *.key
 *.pem
 *.secret
+*.p12
+*.crt
+*.pfx
 secrets/
 credentials/
+
+# Documenso self-host (certificat de signature + env rempli — JAMAIS commit)
+documenso/certificate.*
+documenso/private.*
 
 # Supabase
 supabase/.env
@@ -82,3 +89,12 @@ test-results/
 
 # Previews / sorties générées
 output/
+
+# Maquettes HTML temporaires (servies par Vite, non versionnées)
+public/mockups/
+
+# tokenade — per-project cache / scaffold flag / dedup refs
+.tokenade/
+
+# tokenade — legacy per-project embedding model cache (now global)
+.fastembed_cache/

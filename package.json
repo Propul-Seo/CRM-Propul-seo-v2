@@ -9,6 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "audit:lines": "node scripts/audit-lines.mjs",
+    "functions:login": "npx -y supabase login",
+    "functions:deploy": "npx -y supabase functions deploy --project-ref tbuqctfgjjxnevmsvucl",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",

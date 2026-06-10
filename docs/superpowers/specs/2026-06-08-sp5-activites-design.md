@@ -48,7 +48,17 @@ Front (gated sur la migration — donc **non livré cette session**) :
   le bloc « Activité & prochaine étape » de `ProjectPage.tsx` (déjà refondu en V2).
 - `useProjectActivitiesV3` : bascule des écritures directes → RPC `admin_*` + entrées `AdminRpcMap`.
 
-## 4. ⚠️ Décisions à trancher par Lyes (avant de figer le SQL)
+## 4. ✅ Décisions TRANCHÉES par Lyes (2026-06-08)
+
+- **D1** = opt-in : notes manuelles **invisibles par défaut**, visibles si l'admin coche `visible_to_client`.
+- **D2** = les `next_actions` sont **exposées au client SI l'activité est cochée visible** (même drapeau, pas de drapeau séparé) → la vue portail inclut `next_actions`.
+- **D3** = `author_name` exposé. Jamais `user_id`.
+- **D4 / D6** = les activités **`is_auto` (système)** sont **visibles d'office** par le client (fait via un trigger `BEFORE INSERT` qui met `visible_to_client = true` quand `is_auto`), tandis que les manuelles restent en opt-in.
+- **D5** = oui, RPC `admin_*_activity`. **D7** = sync calendrier reportée (SP6). **D8** = migration 297.
+
+> Tableau d'origine conservé ci-dessous pour mémoire.
+
+## 4-bis. Décisions (proposées initialement)
 
 | # | Question | Défaut recommandé (dans le brouillon) |
 |---|---|---|
