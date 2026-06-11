@@ -79,6 +79,15 @@ export function ClientLoginPage() {
     return () => clearTimeout(t);
   }, [resetToast]);
 
+  // Code validé mais aucun espace associé à cet email → feedback explicite.
+  // Sinon l'écran de saisie resterait figé : la session passe en 'no-project'
+  // (pas 'ready'), donc le useEffect de redirection ci-dessus ne se déclenche pas.
+  useEffect(() => {
+    if (state.status === 'no-project' && form.kind === 'sent-magic') {
+      setVerifyError("Code validé, mais aucun espace client n'est associé à cet email. Contactez votre agence.");
+    }
+  }, [state.status, form.kind]);
+
   async function onSubmitPassword(e: FormEvent) {
     e.preventDefault();
     const trimmed = email.trim().toLowerCase();
