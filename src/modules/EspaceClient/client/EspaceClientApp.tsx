@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { useForceLightTheme } from '@/modules/EspaceClient/shared/hooks/useForceLightTheme';
 import { PortalGuard } from '@/modules/EspaceClient/shared/guards/PortalGuard';
 import { ClientLoginPage } from './ClientLoginPage';
 import { PortalShell } from './PortalShell';
@@ -18,6 +19,10 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage';
 // Sous-router /espace-client/*. Routes publiques (login + statuts) en dehors
 // du PortalGuard ; routes protégées via PortalGuard → PortalShell → Outlet.
 export function EspaceClientApp() {
+  // Force la surface CLAIRE (#FAFAFA) du portail : retire la classe `dark` du CRM
+  // et pose `ps-light-surface` sur <html>. Indispensable sur le sous-domaine
+  // espace.* (où le portail est toute l'app) ET sous crm./espace-client.
+  useForceLightTheme();
   return (
     <Routes>
       <Route path="login" element={<ClientLoginPage />} />

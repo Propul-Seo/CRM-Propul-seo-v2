@@ -105,7 +105,9 @@ function AuthenticatedApp() {
 
 function App() {
   useEffect(() => {
-    document.documentElement.classList.add('dark');
+    // Le thème sombre est propre au CRM interne. Sur le sous-domaine portail
+    // (espace.*), l'app EST le portail client (clair) → ne pas poser `dark`.
+    if (!isPortalHost()) document.documentElement.classList.add('dark');
   }, []);
 
   // Sous-domaine espace.* → on sert directement le portail client (Propul'Space)
