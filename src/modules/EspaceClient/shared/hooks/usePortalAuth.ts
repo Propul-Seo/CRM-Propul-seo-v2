@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { portalSupabase as supabase } from '@/lib/supabase';
+import { portalBase } from '@/modules/EspaceClient/shared/portalHost';
 
 export interface PortalProject {
   id: string;
@@ -90,7 +91,7 @@ export function usePortalAuth(): UsePortalAuthResult {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: redirectTo ?? `${window.location.origin}/espace-client`,
+          emailRedirectTo: redirectTo ?? `${window.location.origin}${portalBase() || '/'}`,
           shouldCreateUser: false,
         },
       });
@@ -116,7 +117,7 @@ export function usePortalAuth(): UsePortalAuthResult {
   const requestPasswordReset = useCallback<UsePortalAuthResult['requestPasswordReset']>(
     async (email, redirectTo) => {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectTo ?? `${window.location.origin}/espace-client/reset-password`,
+        redirectTo: redirectTo ?? `${window.location.origin}${portalBase()}/reset-password`,
       });
       return { error: error?.message ?? null };
     },

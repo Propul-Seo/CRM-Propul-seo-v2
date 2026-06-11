@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { usePortalAuth } from '@/modules/EspaceClient/shared/hooks/usePortalAuth';
 import { PortalProvider } from '@/modules/EspaceClient/shared/context/PortalContext';
 import { v2Portal, portalSupabase } from '@/lib/supabase';
+import { portalBase } from '@/modules/EspaceClient/shared/portalHost';
 import '@/modules/EspaceClient/shared/layouts/portal-theme.css';
 
 interface PortalGuardProps {
@@ -25,17 +26,17 @@ export function PortalGuard({ children }: PortalGuardProps) {
   }
 
   if (state.status === 'unauthenticated') {
-    return <Navigate to="/espace-client/login" replace />;
+    return <Navigate to={`${portalBase()}/login`} replace />;
   }
 
   if (state.status === 'no-project') {
     // Email connecté mais pas de projet associé → on traite comme
     // session expirée / lien invalide.
-    return <Navigate to="/espace-client/expired" replace />;
+    return <Navigate to={`${portalBase()}/expired`} replace />;
   }
 
   return (
-    <PortalProvider value={{ email: state.email, project: state.project, signOut, previewMode: false, basePath: '/espace-client', db: v2Portal, storage: portalSupabase }}>
+    <PortalProvider value={{ email: state.email, project: state.project, signOut, previewMode: false, basePath: portalBase(), db: v2Portal, storage: portalSupabase }}>
       {children}
     </PortalProvider>
   );

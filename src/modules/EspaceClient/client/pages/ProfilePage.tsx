@@ -9,6 +9,7 @@ import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext'
 import { useNavigate } from 'react-router-dom'
 import { usePortalProjectDetails } from '../hooks/usePortalProjectDetails'
 import { usePortalProfileMutations } from '../hooks/usePortalProfileMutations'
+import { portalBase } from '@/modules/EspaceClient/shared/portalHost'
 
 export function ProfilePage() {
   const { email, project, signOut, previewMode } = usePortal()
@@ -48,7 +49,7 @@ export function ProfilePage() {
 
   async function handleLogout() {
     await signOut()
-    if (!previewMode) navigate('/espace-client/login', { replace: true })
+    if (!previewMode) navigate(`${portalBase()}/login`, { replace: true })
   }
 
   return (

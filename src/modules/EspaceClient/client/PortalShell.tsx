@@ -2,6 +2,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { PortalLayout } from '@/modules/EspaceClient/shared/layouts/PortalLayout';
 import { resolveTeamWhatsapp, type PortalTab } from '@/modules/EspaceClient/shared/constants';
 import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext';
+import { portalBase } from '@/modules/EspaceClient/shared/portalHost';
 import { usePortalProjectDetails } from './hooks/usePortalProjectDetails';
 import { WelcomeWizardProvider } from './welcome/WelcomeWizardContext';
 import { WelcomeWizard } from './welcome/WelcomeWizard';
@@ -55,7 +56,7 @@ export function PortalShell() {
       onLogout={async () => {
         await signOut();
         // En aperçu, signOut = retour cockpit (géré par le provider d'aperçu).
-        if (!previewMode) navigate('/espace-client/login', { replace: true });
+        if (!previewMode) navigate(`${portalBase()}/login`, { replace: true });
       }}
     >
       <Outlet />

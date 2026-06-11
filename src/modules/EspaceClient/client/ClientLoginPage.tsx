@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { BrandPill, StatusPage } from '@/modules/EspaceClient/shared/components';
 import { usePortalAuth } from '@/modules/EspaceClient/shared/hooks/usePortalAuth';
 import { AGENCY_NAME } from '@/modules/EspaceClient/shared/constants';
+import { portalRoot } from '@/modules/EspaceClient/shared/portalHost';
 import '@/modules/EspaceClient/shared/layouts/portal-theme.css';
 
 // Sprint A.2b — refonte complète.
@@ -44,7 +45,7 @@ export function ClientLoginPage() {
   // accessible pour qu'ils puissent se reconnecter avec un email client.
   useEffect(() => {
     if (state.status === 'ready') {
-      navigate('/espace-client', { replace: true });
+      navigate(portalRoot(), { replace: true });
     }
   }, [state.status, navigate]);
   const [email, setEmail] = useState('');

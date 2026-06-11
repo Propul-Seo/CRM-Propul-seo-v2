@@ -5,6 +5,7 @@ import { Layout } from './components/layout/Layout';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { useAuth } from './hooks/useAuth';
 import { LoginPage } from './components/auth/LoginPage';
+import { isPortalHost } from './modules/EspaceClient/shared/portalHost';
 
 const ClientPortalPage = lazy(() =>
   import('./modules/ClientPortal/ClientPortalPage').then(m => ({ default: m.ClientPortalPage }))
@@ -106,6 +107,21 @@ function App() {
   useEffect(() => {
     document.documentElement.classList.add('dark');
   }, []);
+
+  // Sous-domaine espace.* → on sert directement le portail client (Propul'Space)
+  // à la racine. Sur crm.* (et localhost), routage complet du CRM ci-dessous,
+  // le portail restant accessible sous /espace-client (rétro-compat + aperçu admin).
+  if (isPortalHost()) {
+    return (
+      <BrowserRouter>
+        <ErrorBoundary>
+          <Suspense fallback={<div className="min-h-screen bg-white" />}>
+            <EspaceClientApp />
+          </Suspense>
+        </ErrorBoundary>
+      </BrowserRouter>
+    );
+  }
 
   return (
     <BrowserRouter>

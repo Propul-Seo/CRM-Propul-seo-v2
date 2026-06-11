@@ -4,6 +4,7 @@ import { Lock, Loader2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { portalSupabase as supabase } from '@/lib/supabase'
 import { PasswordSetForm } from '@/modules/EspaceClient/shared/components'
+import { portalBase, portalRoot } from '@/modules/EspaceClient/shared/portalHost'
 import '@/modules/EspaceClient/shared/layouts/portal-theme.css'
 
 // Page atterrissage après clic sur le lien d'invitation Supabase Auth.
@@ -82,7 +83,7 @@ export function SetupPasswordPage() {
           Le lien d'invitation a expiré ou a déjà été utilisé. Demandez à votre
           agence de vous renvoyer un nouveau lien d'accès.
         </p>
-        <Button onClick={() => navigate('/espace-client/login')}>
+        <Button onClick={() => navigate(`${portalBase()}/login`)}>
           Aller à la page de connexion
         </Button>
       </div>
@@ -122,7 +123,7 @@ export function SetupPasswordPage() {
         <PasswordSetForm
           submitLabel="Enregistrer et accéder à mon espace"
           successMessage="Mot de passe enregistré. Redirection…"
-          onSuccess={() => setTimeout(() => navigate('/espace-client', { replace: true }), 1500)}
+          onSuccess={() => setTimeout(() => navigate(portalRoot(), { replace: true }), 1500)}
         />
       </div>
     </div>

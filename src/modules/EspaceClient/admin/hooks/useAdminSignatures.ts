@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { v2, supabase } from '@/lib/supabase';
 import { adminRpc } from '../lib/adminRpc';
+import { PUBLIC_PORTAL_URL } from '@/modules/EspaceClient/shared/portalHost';
 import type { PortalSignature } from '@/modules/EspaceClient/client/hooks/usePortalData';
 
 export interface CreateSignatureInput {
@@ -22,7 +23,8 @@ interface UseAdminSignaturesResult {
 }
 
 // Lien vers l'espace client (le client signe in-portail après connexion).
-const portalUrl = () => `${window.location.origin}/espace-client`;
+// Sous-domaine public du portail (l'admin tourne sur crm., le lien doit pointer espace.).
+const portalUrl = () => PUBLIC_PORTAL_URL;
 
 export function useAdminSignatures(projectId: string): UseAdminSignaturesResult {
   const [signatures, setSignatures] = useState<PortalSignature[]>([]);

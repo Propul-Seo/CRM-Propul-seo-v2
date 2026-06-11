@@ -4,6 +4,7 @@ import { KeyRound, Loader2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { portalSupabase as supabase } from '@/lib/supabase'
 import { PasswordSetForm } from '@/modules/EspaceClient/shared/components'
+import { portalBase } from '@/modules/EspaceClient/shared/portalHost'
 import '@/modules/EspaceClient/shared/layouts/portal-theme.css'
 
 // Sprint A.2b — page de réinitialisation du mot de passe.
@@ -81,7 +82,7 @@ export function ResetPasswordPage() {
     } catch { /* ignore */ }
     await supabase.auth.signOut()
     setTimeout(() => {
-      navigate('/espace-client/login', { replace: true })
+      navigate(`${portalBase()}/login`, { replace: true })
     }, 1500)
   }
 
@@ -102,7 +103,7 @@ export function ResetPasswordPage() {
           Le lien de réinitialisation a expiré ou a déjà été utilisé. Demandez
           un nouveau lien depuis la page de connexion.
         </p>
-        <Button onClick={() => navigate('/espace-client/login')}>
+        <Button onClick={() => navigate(`${portalBase()}/login`)}>
           Aller à la page de connexion
         </Button>
       </div>
