@@ -24,6 +24,8 @@ export interface UsePortalAuthResult {
   state: PortalAuthState;
   signInWithPassword: (email: string, password: string) => Promise<{ error: string | null }>;
   signInWithMagicLink: (email: string, redirectTo?: string) => Promise<{ error: string | null }>;
+  /** Vérifie le code à 6 chiffres reçu par email (OTP, immunisé au pré-chargement des liens). */
+  verifyMagicCode: (email: string, token: string) => Promise<{ error: string | null }>;
   requestPasswordReset: (email: string, redirectTo?: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -100,6 +102,16 @@ export function usePortalAuth(): UsePortalAuthResult {
     [],
   );
 
+  // Vérifie le code à 6 chiffres (type 'email'). Succès → onAuthStateChange
+  // déclenche la transition vers 'ready' (puis redirection côté login).
+  const verifyMagicCode = useCallback<UsePortalAuthResult['verifyMagicCode']>(
+    async (email, token) => {
+      const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
+      return { error: error?.message ?? null };
+    },
+    [],
+  );
+
   // A.2b — login direct par email + mot de passe (post-SetupPasswordPage).
   // Si Supabase retourne "Invalid login credentials", on traduit en message
   // user-friendly côté UI (cf ClientLoginPage).
@@ -128,5 +140,5 @@ export function usePortalAuth(): UsePortalAuthResult {
     await supabase.auth.signOut();
   }, []);
 
-  return { state, signInWithPassword, signInWithMagicLink, requestPasswordReset, signOut, refresh };
+  return { state, signInWithPassword, signInWithMagicLink, verifyMagicCode, requestPasswordReset, signOut, refresh };
 }

@@ -30,12 +30,13 @@ function humanizeAuthError(raw: string): string {
   if (/email not confirmed/i.test(raw)) return 'Adresse email non confirmée.';
   if (/rate limit/i.test(raw)) return 'Trop de tentatives. Réessayez dans quelques minutes.';
   if (/user not found/i.test(raw)) return 'Aucun compte associé à cet email.';
+  if (/(otp|token).*(expired|invalid)|invalid.*(otp|token)/i.test(raw)) return 'Code incorrect ou expiré. Vérifiez-le ou demandez-en un nouveau.';
   return raw;
 }
 
 export function ClientLoginPage() {
   const navigate = useNavigate();
-  const { state, signInWithPassword, signInWithMagicLink, requestPasswordReset } = usePortalAuth();
+  const { state, signInWithPassword, signInWithMagicLink, verifyMagicCode, requestPasswordReset } = usePortalAuth();
   const [mode, setMode] = useState<Mode>('password');
 
   // Redirection réactive : uniquement si la session correspond à un client portail
@@ -51,6 +52,10 @@ export function ClientLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [form, setForm] = useState<FormState>({ kind: 'idle' });
+  // Saisie du code à 6 chiffres (étape after 'sent-magic').
+  const [code, setCode] = useState('');
+  const [verifying, setVerifying] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
   // Code review M-1 : flag éphémère sessionStorage (consommé une seule fois,
   // non forgeable via URL — l'ancienne version utilisait ?reset=success en
   // query param, vulnérable au phishing social).
@@ -113,7 +118,27 @@ export function ClientLoginPage() {
       setForm({ kind: 'error', message: humanizeAuthError(error) });
       return;
     }
+    setCode(''); setVerifyError(null);
     setForm({ kind: 'sent-magic', email: trimmed });
+  }
+
+  async function onVerifyCode(e: FormEvent) {
+    e.preventDefault();
+    if (form.kind !== 'sent-magic' || code.length !== 6) return;
+    setVerifying(true); setVerifyError(null);
+    const { error } = await verifyMagicCode(form.email, code);
+    setVerifying(false);
+    if (error) { setVerifyError(humanizeAuthError(error)); return; }
+    // Succès : onAuthStateChange → state 'ready' → le useEffect redirige.
+  }
+
+  async function onResendCode() {
+    if (form.kind !== 'sent-magic') return;
+    setVerifying(true); setVerifyError(null);
+    const { error } = await signInWithMagicLink(form.email);
+    setVerifying(false);
+    setCode('');
+    if (error) setVerifyError(humanizeAuthError(error));
   }
 
   async function onSubmitForgot(e: FormEvent) {
@@ -136,14 +161,70 @@ export function ClientLoginPage() {
   // États de confirmation (magic link envoyé ou reset envoyé) : page dédiée.
   if (form.kind === 'sent-magic') {
     return (
-      <div className="propulspace-portal min-h-screen">
-        <StatusPage
-          icon={CheckCircle2}
-          tone="green"
-          title="Email envoyé"
-          subtitle={`Un lien de connexion vient d'être envoyé à ${form.email}. Cliquez dessus pour accéder à votre espace.`}
-          footnote="Pensez à vérifier vos spams. Le lien expire dans 1 heure."
-        />
+      <div className="propulspace-portal flex min-h-screen items-center justify-center px-6 py-16">
+        <div className="ps-surface relative w-full max-w-[420px] overflow-hidden p-8">
+          <div
+            aria-hidden
+            className="ps-hero-glow pointer-events-none absolute -top-32 left-1/2 h-[280px] w-[280px] -translate-x-1/2 rounded-full opacity-60 blur-3xl"
+          />
+          <div className="relative">
+            <div className="mb-6 flex flex-col items-center gap-3 text-center">
+              <BrandPill size="lg" />
+              <p className="ps-eyebrow ps-eyebrow-muted">Vérification</p>
+              <h1 className="ps-gradient-text text-[26px] font-bold leading-tight tracking-tight">Entrez votre code</h1>
+              <p className="max-w-[320px] text-[13.5px] leading-relaxed text-[var(--ps-fg-secondary)]">
+                Un code à 6 chiffres a été envoyé à <strong className="text-[var(--ps-fg)]">{form.email}</strong>. Saisissez-le ci-dessous pour accéder à votre espace.
+              </p>
+            </div>
+
+            <form onSubmit={onVerifyCode} className="space-y-3">
+              <Input
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                placeholder="000000"
+                value={code}
+                onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                disabled={verifying}
+                autoFocus
+                className="h-12 text-center text-2xl font-semibold tracking-[0.4em]"
+              />
+              <Button
+                type="submit"
+                disabled={verifying || code.length !== 6}
+                className="ps-brand-gradient h-11 w-full text-white disabled:opacity-60"
+              >
+                {verifying ? <>Vérification…</> : <><LogIn className="mr-2 h-4 w-4" />Me connecter</>}
+              </Button>
+
+              {verifyError && (
+                <p className="rounded-md bg-red-50 px-3 py-2 text-[12.5px] text-red-700">{verifyError}</p>
+              )}
+
+              <div className="flex items-center justify-between pt-1 text-[12px]">
+                <button
+                  type="button"
+                  onClick={onResendCode}
+                  disabled={verifying}
+                  className="text-[var(--ps-primary-text)] hover:underline disabled:opacity-60"
+                >
+                  Renvoyer le code
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setForm({ kind: 'idle' }); setCode(''); setVerifyError(null); }}
+                  className="text-[var(--ps-fg-muted)] hover:text-[var(--ps-fg)] hover:underline"
+                >
+                  Changer d'email
+                </button>
+              </div>
+            </form>
+
+            <p className="mt-5 text-center text-[11.5px] text-[var(--ps-fg-muted)]">
+              Le code expire dans 1 heure. Pensez à vérifier vos spams.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -189,7 +270,7 @@ export function ClientLoginPage() {
             </h1>
             <p className="max-w-[300px] text-[13.5px] leading-relaxed text-[var(--ps-fg-secondary)]">
               {mode === 'password'  && `Connectez-vous à votre espace ${AGENCY_NAME} avec votre email et mot de passe.`}
-              {mode === 'magic-link' && `Recevez un lien de connexion à usage unique sur votre email.`}
+              {mode === 'magic-link' && `Recevez un code de connexion à usage unique sur votre email.`}
               {mode === 'forgot'     && `Entrez votre email, nous vous enverrons un lien pour réinitialiser votre mot de passe.`}
             </p>
           </div>
@@ -252,7 +333,7 @@ export function ClientLoginPage() {
                   onClick={() => { setMode('magic-link'); setForm({ kind: 'idle' }); setPassword(''); }}
                   className="text-[var(--ps-fg-muted)] hover:text-[var(--ps-fg)] hover:underline"
                 >
-                  Recevoir un lien à la place
+                  Recevoir un code à la place
                 </button>
               </div>
 
@@ -292,7 +373,7 @@ export function ClientLoginPage() {
                 disabled={submitting || !email.trim()}
                 className="ps-brand-gradient h-11 w-full text-white disabled:opacity-60"
               >
-                {submitting ? <>Envoi en cours…</> : <><Send className="mr-2 h-4 w-4" />Recevoir le lien de connexion</>}
+                {submitting ? <>Envoi en cours…</> : <><Send className="mr-2 h-4 w-4" />Recevoir mon code</>}
               </Button>
 
               {form.kind === 'error' && (
