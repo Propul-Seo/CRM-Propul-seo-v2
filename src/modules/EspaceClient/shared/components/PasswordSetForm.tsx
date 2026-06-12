@@ -86,14 +86,14 @@ export function PasswordSetForm({ submitLabel, successMessage, onSuccess, disabl
       </div>
 
       {form.kind === 'error' && (
-        <div className="flex items-start gap-2 rounded-md bg-red-50 border border-red-200 px-3 py-2 text-[12px] text-red-800">
+        <div className="flex items-start gap-2 rounded-md bg-[var(--ps-danger-subtle)] border border-[var(--ps-danger-subtle)] px-3 py-2 text-[12px] text-[var(--ps-danger-text)]">
           <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
           <span>{form.message}</span>
         </div>
       )}
 
       {form.kind === 'success' && (
-        <div className="flex items-start gap-2 rounded-md bg-emerald-50 border border-emerald-200 px-3 py-2 text-[12px] text-emerald-800">
+        <div className="flex items-start gap-2 rounded-md bg-[var(--ps-success-subtle)] border border-[var(--ps-success-subtle)] px-3 py-2 text-[12px] text-[var(--ps-success-text)]">
           <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
           <span>{successMessage}</span>
         </div>

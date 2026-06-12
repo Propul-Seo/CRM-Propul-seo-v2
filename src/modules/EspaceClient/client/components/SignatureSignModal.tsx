@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { portalSupabase } from '@/lib/supabase';
+import { PORTAL_DIALOG_CLASS } from '@/modules/EspaceClient/shared/constants';
 import type { PortalSignature } from '../hooks/usePortalData';
 
 interface Props {
@@ -24,15 +25,10 @@ const tabClass = (active: boolean) =>
       : 'text-[var(--ps-fg-muted)] hover:bg-[var(--ps-bg-subtle)] hover:text-[var(--ps-fg)]'
   }`;
 
-// Encre de la signature : lue depuis le token --ps-fg au runtime plutôt qu'un
-// hex figé. Le token n'est défini que sous .propulspace-portal, donc on le lit
-// depuis un élément du portail (le canvas) et non document.documentElement.
-// Fallback sur l'encre du thème clair si le token n'est pas résolu.
-function inkColor(el: Element | null): string {
-  const scope = el?.closest('.propulspace-portal') ?? el;
-  const ink = scope ? getComputedStyle(scope).getPropertyValue('--ps-fg').trim() : '';
-  return ink || '#18181B';
-}
+// Encre de la signature : toujours foncée. La zone de signature est un « papier »
+// blanc (le tracé est uploadé sur un PDF à fond blanc) — indépendamment du thème
+// sombre de la modale, une encre claire serait invisible sur le document final.
+const SIGNATURE_INK = '#18181B';
 
 export function SignatureSignModal({ open, onOpenChange, signature, signerDefaultName, onSigned }: Props) {
   const [mode, setMode] = useState<Mode>('draw');
@@ -59,7 +55,7 @@ export function SignatureSignModal({ open, onOpenChange, signature, signerDefaul
   function down(e: RPointerEvent<HTMLCanvasElement>) {
     drawing.current = true; const { x, y } = at(e);
     const ctx = canvasRef.current!.getContext('2d')!;
-    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.strokeStyle = inkColor(canvasRef.current);
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.strokeStyle = SIGNATURE_INK;
   }
   function move(e: RPointerEvent<HTMLCanvasElement>) {
     if (!drawing.current) return; const { x, y } = at(e);
@@ -75,7 +71,7 @@ export function SignatureSignModal({ open, onOpenChange, signature, signerDefaul
     const name = typedName.trim(); if (!name) return null;
     const c = document.createElement('canvas'); c.width = 600; c.height = 200;
     const ctx = c.getContext('2d'); if (!ctx) return null;
-    ctx.fillStyle = inkColor(canvasRef.current); ctx.font = '64px "Segoe Script", "Brush Script MT", cursive';
+    ctx.fillStyle = SIGNATURE_INK; ctx.font = '64px "Segoe Script", "Brush Script MT", cursive';
     ctx.textBaseline = 'middle'; ctx.fillText(name, 20, 100);
     return c.toDataURL('image/png');
   }
@@ -107,7 +103,7 @@ export function SignatureSignModal({ open, onOpenChange, signature, signerDefaul
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="propulspace-portal max-w-lg">
+      <DialogContent className={`${PORTAL_DIALOG_CLASS} max-w-lg`}>
         <DialogHeader><DialogTitle>Signer « {signature.name} »</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div className="flex gap-2 rounded-lg bg-[var(--ps-bg-subtle)] p-1">
@@ -137,7 +133,7 @@ export function SignatureSignModal({ open, onOpenChange, signature, signerDefaul
             </div>
           ) : (
             <div className="flex h-[120px] items-center justify-center rounded-lg border border-[var(--ps-border)] bg-white px-4">
-              <p className="truncate font-[cursive] text-[40px] leading-none text-[var(--ps-fg)]">
+              <p className="truncate font-[cursive] text-[40px] leading-none text-[#18181B]">
                 {typedName.trim() || 'Votre nom'}
               </p>
             </div>

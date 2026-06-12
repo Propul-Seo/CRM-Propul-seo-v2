@@ -19,7 +19,7 @@ export function PortalGuard({ children }: PortalGuardProps) {
 
   if (state.status === 'loading') {
     return (
-      <div className="propulspace-portal flex min-h-screen items-center justify-center">
+      <div className="propulspace-portal ps-theme-night flex min-h-screen items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-[var(--ps-primary)]" />
       </div>
     );

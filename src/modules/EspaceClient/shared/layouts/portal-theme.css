@@ -23,6 +23,14 @@ html.ps-dark-surface #root {
   background: #0A0A0B !important;
 }
 
+/* Surface « nuit encre » du portail client (distincte du sombre admin zinc) :
+   une encre tiède teintée violet. Posée par useForcePortalSurface('night'). */
+html.ps-night-surface,
+html.ps-night-surface body,
+html.ps-night-surface #root {
+  background: #0B0A0F !important;
+}
+
 .propulspace-portal {
   /* ─── SURFACES ─────────────────────────────────────────── */
   --ps-bg: #FAFAFA;
@@ -151,6 +159,77 @@ html.ps-dark-surface #root {
   background:
     radial-gradient(ellipse 90% 60% at 50% -10%, rgba(139, 92, 246, 0.10), transparent 60%),
     var(--ps-bg);
+}
+
+/* ─── NIGHT THEME MODIFIER (portail client « nuit encre ») ──
+   Nuit PROPRE au portail, distincte du sombre admin (.ps-theme-dark) :
+   encre tiède teintée violet (#0B0A0F/#17141F), halo violet plus présent,
+   violet boutons #7B49E8 (texte blanc AA 5.3:1). Mêmes utilitaires .ps-*
+   hérités via var(). Appliqué : <div class="propulspace-portal ps-theme-night">.
+   Tous les contrastes vérifiés WCAG AA (corps ≥4.5:1, accents UI ≥3:1). */
+.propulspace-portal.ps-theme-night {
+  --ps-bg: #0B0A0F;
+  --ps-bg-elevated: #17141F;
+  --ps-bg-subtle: #221D2C;
+  --ps-bg-frosted: rgba(23, 20, 31, 0.72);
+
+  --ps-fg: #F6F4FB;
+  --ps-fg-secondary: #B4ACC2;
+  --ps-fg-muted: #8B8398;
+
+  --ps-primary: #7B49E8;
+  --ps-primary-hover: #8350E8;
+  --ps-primary-deep: #6D28D9;
+  --ps-primary-text: #CBB8FB;
+  --ps-primary-subtle: rgba(157, 124, 247, 0.16);
+
+  --ps-success-subtle: rgba(22, 163, 74, 0.18);  --ps-success-text: #4ADE80;
+  --ps-warning-subtle: rgba(234, 88, 12, 0.18);  --ps-warning-text: #FB923C;
+  --ps-danger-subtle:  rgba(220, 38, 38, 0.18);  --ps-danger-text:  #FCA5A5;
+  --ps-info-subtle:    rgba(37, 99, 235, 0.18);  --ps-info-text:    #93C5FD;
+
+  --ps-border: #2C2640;
+  --ps-border-soft: #221C30;
+  --ps-border-strong: #473A60;
+  --ps-shadow-card:     0 1px 2px rgba(0,0,0,.45), 0 1px 3px rgba(0,0,0,.35);
+  --ps-shadow-raised:   0 8px 20px -6px rgba(0,0,0,.60), 0 0 0 1px rgba(255,255,255,.05);
+  --ps-shadow-floating: 0 20px 48px -14px rgba(0,0,0,.70);
+  --ps-shadow-brand:    0 14px 34px -10px rgba(123,73,232,.55);
+  --ps-shadow-success:  0 12px 30px -8px rgba(34,197,94,.35);
+
+  /* Tokens shadcn → nuit : les primitives héritées du CRM (Dialog, Popover,
+     DropdownMenu rendus dans un portal Radix hors scope) suivent ces valeurs. */
+  --background: 252 20% 5%;
+  --foreground: 257 47% 97%;
+  --card: 256 22% 10%;
+  --card-foreground: 257 47% 97%;
+  --popover: 256 22% 10%;
+  --popover-foreground: 257 47% 97%;
+  --primary: 259 78% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 260 21% 14%;
+  --secondary-foreground: 257 47% 97%;
+  --muted: 260 21% 14%;
+  --muted-foreground: 262 15% 72%;
+  --accent: 260 21% 14%;
+  --accent-foreground: 257 47% 97%;
+  --border: 254 25% 20%;
+  --input: 254 25% 20%;
+  --ring: 259 78% 60%;
+
+  color-scheme: dark;
+  color: var(--ps-fg);
+  /* Aurore nocturne : halos violet/indigo répartis sur tout le viewport
+     (ancrés via background-attachment: fixed → couvrent tout le scroll),
+     pour que le fond ne tombe jamais dans un noir plat en bas de page. */
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -12%, rgba(139, 92, 246, 0.22), transparent 60%),
+    radial-gradient(ellipse 65% 50% at 100% 4%,  rgba(124, 58, 237, 0.14), transparent 55%),
+    radial-gradient(ellipse 60% 55% at 6% 42%,   rgba(99, 102, 241, 0.12), transparent 60%),
+    radial-gradient(ellipse 65% 55% at 94% 78%,  rgba(139, 92, 246, 0.12), transparent 60%),
+    radial-gradient(ellipse 75% 50% at 32% 104%, rgba(124, 58, 237, 0.10), transparent 60%),
+    var(--ps-bg);
+  background-attachment: fixed;
 }
 
 .propulspace-portal * { border-color: var(--ps-border-soft); }
@@ -295,8 +374,9 @@ html.ps-dark-surface #root {
   border-radius: var(--ps-radius-input);
 }
 /* Variante sombre : le dégradé violet ~4-10 % est invisible sur fond sombre,
-   on passe sur un shimmer blanc faible. */
-.propulspace-portal.ps-theme-dark .ps-skeleton {
+   on passe sur un shimmer blanc faible. (admin sombre + portail nuit) */
+.propulspace-portal.ps-theme-dark .ps-skeleton,
+.propulspace-portal.ps-theme-night .ps-skeleton {
   background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.05) 75%);
   background-size: 200% 100%;
 }
@@ -323,6 +403,20 @@ html.ps-dark-surface #root {
   box-shadow: 0 0 0 3px var(--ps-primary-subtle);
 }
 
+/* ─── MODALES (DialogContent rescopé portail) ──────────────
+   Le DialogContent de base est figé sur le thème CRM (bg-surface-3,
+   text-foreground). Les modales du portail posent `propulspace-portal
+   ps-theme-night ps-dialog` : ps-dialog force la surface/texte/bordure sur
+   les tokens --ps-* (spécificité 0,2,0 > .bg-surface-3). */
+/* Classes posées sur le MÊME élément (DialogContent rescopé) → combinateur
+   composé (.a.b), pas descendant (.a .b) : le DialogContent n'a pas d'ancêtre
+   .propulspace-portal (rendu dans un portal Radix à la racine du document). */
+.propulspace-portal.ps-dialog {
+  background: var(--ps-bg-elevated) !important;
+  color: var(--ps-fg);
+  border-color: var(--ps-border);
+}
+
 /* ─── FOCUS (accessible violet ring) ───────────────────── */
 .propulspace-portal :focus-visible {
   outline: 2px solid var(--ps-primary);
@@ -335,9 +429,10 @@ html.ps-dark-surface #root {
    --input, --accent… tous foncés, en triplets HSL). Les primitives shadcn
    du portail (Button variant=outline → bg-background, Dialog, DropdownMenu…)
    héritaient donc d'un fond noir. On remappe les tokens shadcn sur les
-   valeurs claires --ps-* — sauf le back-office admin (.ps-theme-dark) qui
-   reste sombre. Format : triplet HSL (consommé via hsl(var(--token))). */
-.propulspace-portal:not(.ps-theme-dark) {
+   valeurs claires --ps-* — sauf le back-office admin (.ps-theme-dark) et le
+   portail nuit (.ps-theme-night), qui définissent leurs propres tokens shadcn
+   sombres. Format : triplet HSL (consommé via hsl(var(--token))). */
+.propulspace-portal:not(.ps-theme-dark):not(.ps-theme-night) {
   --background: 0 0% 100%;
   --foreground: 240 6% 10%;
   --card: 0 0% 100%;

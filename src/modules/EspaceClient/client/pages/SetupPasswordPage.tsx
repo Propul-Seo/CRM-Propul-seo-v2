@@ -68,16 +68,16 @@ export function SetupPasswordPage() {
 
   if (gate.kind === 'loading') {
     return (
-      <div className="propulspace-portal min-h-screen flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-violet-600" />
+      <div className="propulspace-portal ps-theme-nightmin-h-screen flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-[var(--ps-primary)]" />
       </div>
     )
   }
 
   if (gate.kind === 'no-session') {
     return (
-      <div className="propulspace-portal min-h-screen flex flex-col items-center justify-center px-6 text-center">
-        <AlertCircle className="h-12 w-12 text-amber-500 mb-3" />
+      <div className="propulspace-portal ps-theme-nightmin-h-screen flex flex-col items-center justify-center px-6 text-center">
+        <AlertCircle className="h-12 w-12 text-[var(--ps-warning)] mb-3" />
         <h1 className="text-lg font-semibold mb-2">Lien expiré ou invalide</h1>
         <p className="text-sm text-[var(--ps-fg-muted)] mb-5 max-w-sm">
           Le lien d'invitation a expiré ou a déjà été utilisé. Demandez à votre
@@ -92,8 +92,8 @@ export function SetupPasswordPage() {
 
   if (gate.kind === 'internal-user') {
     return (
-      <div className="propulspace-portal min-h-screen flex flex-col items-center justify-center px-6 text-center">
-        <AlertCircle className="h-12 w-12 text-red-500 mb-3" />
+      <div className="propulspace-portal ps-theme-nightmin-h-screen flex flex-col items-center justify-center px-6 text-center">
+        <AlertCircle className="h-12 w-12 text-[var(--ps-danger)] mb-3" />
         <h1 className="text-lg font-semibold mb-2">Page réservée aux clients externes</h1>
         <p className="text-sm text-[var(--ps-fg-muted)] mb-5 max-w-sm">
           Vous êtes connecté en tant que <strong>{gate.email}</strong> (compte
@@ -105,10 +105,10 @@ export function SetupPasswordPage() {
   }
 
   return (
-    <div className="propulspace-portal min-h-screen flex items-center justify-center px-6">
-      <div className="w-full max-w-sm bg-white rounded-lg shadow-sm border border-[var(--ps-border)] p-6 space-y-4">
+    <div className="propulspace-portal ps-theme-nightmin-h-screen flex items-center justify-center px-6">
+      <div className="w-full max-w-sm bg-[var(--ps-bg-elevated)] rounded-lg shadow-sm border border-[var(--ps-border)] p-6 space-y-4">
         <div className="flex flex-col items-center text-center">
-          <div className="h-12 w-12 rounded-full bg-violet-50 text-violet-700 flex items-center justify-center mb-3">
+          <div className="h-12 w-12 rounded-full bg-[var(--ps-primary-subtle)] text-[var(--ps-primary-text)] flex items-center justify-center mb-3">
             <Lock className="h-6 w-6" strokeWidth={2.2} />
           </div>
           <h1 className="text-lg font-semibold text-[var(--ps-fg)]">

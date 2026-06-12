@@ -45,10 +45,10 @@ export function WelcomeWizard({ onCompleted }: WelcomeWizardProps) {
     <Dialog open={isOpen} onOpenChange={(o) => { if (!o) void handleDismiss(); else openWizard(); }}>
       <DialogContent
         className={cn(
-          // Scope Aurora clair : rend les tokens --ps-* et classes .ps-* dispo
+          // Scope nuit encre : rend les tokens --ps-* et classes .ps-* dispo
           // dans le portal Radix (rendu hors de l'arbre .propulspace-portal).
-          'propulspace-portal !min-h-0 max-w-[820px] gap-0 overflow-hidden border-0 p-0',
-          'bg-[var(--ps-bg)] text-[var(--ps-fg)] shadow-[var(--ps-shadow-floating)]',
+          'propulspace-portal ps-theme-night !min-h-0 max-w-[820px] gap-0 overflow-hidden border-0 p-0',
+          'bg-[var(--ps-bg-elevated)] text-[var(--ps-fg)] shadow-[var(--ps-shadow-floating)]',
           'max-sm:h-[100dvh] max-sm:max-w-full max-sm:rounded-none',
           '[&>button]:hidden', // masque le X automatique de shadcn
         )}

@@ -62,7 +62,7 @@ export function PortalLayout({
   const initials = getInitials(clientName);
 
   return (
-    <div className="propulspace-portal min-h-screen">
+    <div className="propulspace-portal ps-theme-night min-h-screen">
       <PortalSidebar
         activeTab={activeTab}
         onTabChange={onTabChange}

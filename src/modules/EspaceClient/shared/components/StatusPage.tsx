@@ -17,8 +17,8 @@ interface StatusPageProps {
 const ICON_BUBBLE: Record<StatusTone, string> = {
   violet: 'ps-brand-gradient text-white shadow-[var(--ps-shadow-brand)]',
   green:  'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-[var(--ps-shadow-success)]',
-  orange: 'bg-[var(--ps-warning-subtle)] text-orange-800',
-  red:    'bg-[var(--ps-danger-subtle)] text-red-800',
+  orange: 'bg-[var(--ps-warning-subtle)] text-[var(--ps-warning-text)]',
+  red:    'bg-[var(--ps-danger-subtle)] text-[var(--ps-danger-text)]',
   gray:   'bg-[var(--ps-bg-subtle)] text-[var(--ps-fg-secondary)]',
 };
 

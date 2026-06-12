@@ -5,6 +5,11 @@
 /** Adresse de contact réelle de l'équipe Propul'SEO (FAB + Aide + mailto). */
 export const CONTACT_EMAIL = 'team@propulseo-site.com';
 
+/** Classes à poser sur un DialogContent du PORTAIL pour le rescoper en nuit
+ *  encre (le contenu est rendu dans un portal Radix, hors de l'arbre du scope).
+ *  À combiner avec les classes de taille : `${PORTAL_DIALOG_CLASS} max-w-lg`. */
+export const PORTAL_DIALOG_CLASS = 'propulspace-portal ps-theme-night ps-dialog';
+
 /** WhatsApp par membre Propul'SEO assigné au projet. Format international wa.me
  *  (sans +, le 0 initial du mobile FR devient 33). La clé est un fragment de nom
  *  en minuscules sans accent, cherché dans projects_v2.assigned_name. */

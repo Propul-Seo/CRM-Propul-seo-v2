@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { FilePreviewDialog } from '@/modules/EspaceClient/shared/components'
 import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext'
+import { PORTAL_DIALOG_CLASS } from '@/modules/EspaceClient/shared/constants'
 import { usePortalDocuments, getSignedStorageUrl, type PortalDocument } from '@/modules/EspaceClient/client/hooks/usePortalData'
 import { inferBucket } from '@/modules/ProjectDetailsV3Preview/tabs/documents/constants'
 import { DocumentsHeader } from './documents-sections/documents-header'
@@ -55,6 +56,7 @@ export function DocumentsPage() {
       <FilePreviewDialog
         open={preview !== null}
         onOpenChange={(o) => { if (!o) setPreview(null) }}
+        themeClassName={PORTAL_DIALOG_CLASS}
         name={preview?.name ?? ''}
         mime={preview?.file_mime_type ?? null}
         resolveUrl={async () => {

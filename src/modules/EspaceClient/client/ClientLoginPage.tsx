@@ -170,7 +170,7 @@ export function ClientLoginPage() {
   // États de confirmation (magic link envoyé ou reset envoyé) : page dédiée.
   if (form.kind === 'sent-magic') {
     return (
-      <div className="propulspace-portal flex min-h-screen items-center justify-center px-6 py-16">
+      <div className="propulspace-portal ps-theme-nightflex min-h-screen items-center justify-center px-6 py-16">
         <div className="ps-surface relative w-full max-w-[420px] overflow-hidden p-8">
           <div
             aria-hidden
@@ -241,7 +241,7 @@ export function ClientLoginPage() {
   if (form.kind === 'sent-reset') {
     // Message neutre (cf code review C-1) : on ne confirme pas l'existence du compte.
     return (
-      <div className="propulspace-portal min-h-screen">
+      <div className="propulspace-portal ps-theme-nightmin-h-screen">
         <StatusPage
           icon={CheckCircle2}
           tone="green"
@@ -256,7 +256,7 @@ export function ClientLoginPage() {
   const submitting = form.kind === 'sending';
 
   return (
-    <div className="propulspace-portal flex min-h-screen items-center justify-center px-6 py-16">
+    <div className="propulspace-portal ps-theme-nightflex min-h-screen items-center justify-center px-6 py-16">
       <div className="ps-surface relative w-full max-w-[420px] overflow-hidden p-8">
         <div
           aria-hidden

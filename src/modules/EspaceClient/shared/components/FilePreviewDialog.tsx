@@ -22,9 +22,12 @@ interface Props {
   mime?: string | null;
   /** Résout l'URL signée (temporaire) du fichier. Appelé à l'ouverture. */
   resolveUrl: () => Promise<string | null>;
+  /** Scope/thème à appliquer au DialogContent (le portail passe la nuit encre ;
+   *  l'admin laisse vide → thème CRM hérité). */
+  themeClassName?: string;
 }
 
-export function FilePreviewDialog({ open, onOpenChange, name, mime = null, resolveUrl }: Props) {
+export function FilePreviewDialog({ open, onOpenChange, name, mime = null, resolveUrl, themeClassName = '' }: Props) {
   const [url, setUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -47,7 +50,7 @@ export function FilePreviewDialog({ open, onOpenChange, name, mime = null, resol
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className={`${themeClassName} max-w-3xl`.trim()}>
         <DialogHeader><DialogTitle className="truncate pr-6 text-sm">{name}</DialogTitle></DialogHeader>
         <div className="flex min-h-[60vh] items-center justify-center">
           {loading && <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />}
