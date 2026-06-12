@@ -79,7 +79,7 @@ function Chiffre({ libelle, valeur, fort }: { libelle: string; valeur: string; f
   return (
     <div className="min-w-0">
       <dt className="text-[11px] font-medium text-[var(--ps-fg-secondary)]">{libelle}</dt>
-      <dd className={`ps-num mt-1 truncate text-[16px] font-semibold tracking-tight [font-family:var(--ps-font-display)] ${
+      <dd className={`ps-num mt-1 truncate text-[15px] font-semibold tracking-tight [font-family:var(--ps-font-display)] ${
         fort ? 'text-[var(--ps-fg)]' : 'text-[var(--ps-fg-secondary)]'
       }`}>
         {valeur}

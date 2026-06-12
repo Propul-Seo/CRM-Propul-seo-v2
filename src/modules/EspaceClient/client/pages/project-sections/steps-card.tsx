@@ -27,7 +27,7 @@ export function StepsCard({ steps, currentId }: StepsCardProps) {
     <section className="ps-surface overflow-hidden">
       <header className="flex items-center justify-between border-b border-[var(--ps-border-soft)] px-5 py-3.5">
         <h2 className="ps-h3 text-[var(--ps-fg)]">Jalons du projet</h2>
-        <Badge tone="gray" dot={false}>{done} / {steps.length} terminés</Badge>
+        <Badge tone="gray" dot={false}><span className="ps-num">{done} / {steps.length} terminés</span></Badge>
       </header>
       <ol className="divide-y divide-[var(--ps-border-soft)]">
         {steps.map(step => (

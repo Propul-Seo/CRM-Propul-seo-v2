@@ -31,7 +31,7 @@ export function InvoicesSkeleton() {
         </div>
       </div>
 
-      <Skeleton className="mt-10 h-[280px] w-full rounded-2xl" />
+      <Skeleton className="mt-10 h-[280px] w-full rounded-[var(--ps-radius-card)]" />
     </div>
   );
 }

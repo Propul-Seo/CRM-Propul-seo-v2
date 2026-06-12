@@ -23,7 +23,7 @@ export function PaymentBannerView({ banner }: { banner: PaymentBanner }) {
         ? 'Paiement annulé. Votre facture reste impayée — vous pouvez réessayer quand vous voulez.'
         : banner.message;
   return (
-    <div role="status" className={`flex items-start gap-2 rounded-xl border px-3.5 py-2.5 text-[13px] ${STYLES[banner.kind]}`}>
+    <div role="status" className={`flex items-start gap-2 rounded-[var(--ps-radius-input)] border px-3.5 py-2.5 text-[13px] ${STYLES[banner.kind]}`}>
       <Icon className="mt-0.5 h-4 w-4 shrink-0" />
       <span>{message}</span>
     </div>

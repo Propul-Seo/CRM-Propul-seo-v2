@@ -40,7 +40,7 @@ export function PortalSidebar({
       {/* Marque */}
       <div className="px-5 pb-4 pt-5">
         <BrandPill />
-        <p className="mt-2.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[var(--ps-fg-muted)]">
+        <p className="ps-eyebrow ps-eyebrow-muted mt-2.5">
           Espace client
         </p>
       </div>
@@ -58,7 +58,7 @@ export function PortalSidebar({
                   onClick={() => onTabChange(item.key)}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13.5px] font-medium tracking-tight transition-colors duration-200 [transition-timing-function:var(--ps-ease)]',
+                    'flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13.5px] font-medium tracking-tight transition-[background-color,color,transform] duration-200 [transition-timing-function:var(--ps-ease)] active:scale-[0.99]',
                     active
                       ? 'bg-[var(--ps-primary-subtle)] text-[var(--ps-primary-text)]'
                       : 'text-[var(--ps-fg-secondary)] hover:bg-[var(--ps-bg-subtle)] hover:text-[var(--ps-fg)]',
@@ -80,7 +80,7 @@ export function PortalSidebar({
           onClick={onProfile}
           aria-current={profileActive ? 'page' : undefined}
           className={cn(
-            'group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors duration-200 [transition-timing-function:var(--ps-ease)]',
+            'group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-[background-color,color,transform] duration-200 [transition-timing-function:var(--ps-ease)] active:scale-[0.99]',
             profileActive
               ? 'bg-[var(--ps-primary-subtle)]'
               : 'hover:bg-[var(--ps-bg-subtle)]',
@@ -105,7 +105,7 @@ export function PortalSidebar({
         <button
           type="button"
           onClick={onLogout}
-          className="mt-1 flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12.5px] font-medium text-[var(--ps-fg-muted)] transition-colors duration-200 hover:bg-[var(--ps-bg-subtle)] hover:text-[var(--ps-fg)]"
+          className="mt-1 flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12.5px] font-medium text-[var(--ps-fg-muted)] transition-[background-color,color,transform] duration-200 [transition-timing-function:var(--ps-ease)] hover:bg-[var(--ps-bg-subtle)] hover:text-[var(--ps-fg)] active:scale-[0.99]"
         >
           <LogOut className="h-3.5 w-3.5" />
           Se déconnecter

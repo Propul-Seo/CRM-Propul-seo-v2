@@ -156,7 +156,7 @@ export function InvoicesPage() {
   if (error) {
     return (
       <div className="ps-fade-in">
-        <p className="rounded-md bg-[var(--ps-danger-subtle)] px-3 py-2 text-[13px] text-[var(--ps-danger-text)]">{error}</p>
+        <p className="rounded-[var(--ps-radius-input)] bg-[var(--ps-danger-subtle)] px-3.5 py-2.5 text-[13px] text-[var(--ps-danger-text)]">{error}</p>
       </div>
     );
   }
@@ -164,7 +164,7 @@ export function InvoicesPage() {
   return (
     <div className="ps-fade-in mx-auto w-full max-w-[1080px]">
       {banner && (
-        <div className="mb-8">
+        <div className="mb-4">
           <PaymentBannerView banner={banner} />
         </div>
       )}

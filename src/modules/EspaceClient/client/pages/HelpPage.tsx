@@ -42,14 +42,14 @@ export function HelpPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           {whatsapp && (
-            <Button asChild className="bg-[var(--ps-primary)] text-white hover:bg-[var(--ps-primary-hover)]">
+            <Button asChild className="ps-tap bg-[var(--ps-primary)] text-white transition-colors duration-200 hover:bg-[var(--ps-primary-hover)]">
               <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer">
                 <MessageSquare className="mr-1.5 h-4 w-4" />
                 WhatsApp
               </a>
             </Button>
           )}
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="ps-tap">
             <a href={`mailto:${CONTACT_EMAIL}`}>
               <Mail className="mr-1.5 h-4 w-4" />
               {CONTACT_EMAIL}

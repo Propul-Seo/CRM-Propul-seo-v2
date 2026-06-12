@@ -37,12 +37,13 @@ export function PortalTabBar({ activeTab, onTabChange }: PortalTabBarProps) {
             <span
               className={cn(
                 'flex h-7 w-12 items-center justify-center rounded-full transition-all duration-300 [transition-timing-function:var(--ps-ease-out)]',
+                'group-active:scale-90',
                 active
                   ? 'bg-[var(--ps-primary-subtle)] scale-100'
                   : 'bg-transparent scale-95 group-hover:bg-[var(--ps-bg-subtle)]',
               )}
             >
-              <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.4 : 1.8} />
+              <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.4 : 1.9} />
             </span>
             <span className={cn('text-[10.5px] tracking-tight', active ? 'font-semibold' : 'font-medium')}>
               {tab.label}

@@ -24,7 +24,7 @@ export function SignaturesCard({ rows, previewMode, onSign, onDownloadSigned }: 
       <header className="flex items-center justify-between gap-3 border-b border-[var(--ps-border-soft)] px-5 py-3.5">
         <h2 className="ps-h3 text-[var(--ps-fg)]">Documents à signer</h2>
         <Badge tone="gray" dot={false}>
-          {pending > 0 ? `${pending} en attente` : 'À jour'}
+          <span className="ps-num">{pending > 0 ? `${pending} en attente` : 'À jour'}</span>
         </Badge>
       </header>
       <ul className="divide-y divide-[var(--ps-border-soft)]">
@@ -68,7 +68,7 @@ function SignatureRow({ sig, previewMode, onSign, onDownload }: RowProps) {
       />
       <div className="min-w-0 flex-1">
         <p className="truncate text-[13.5px] font-medium leading-5 text-[var(--ps-fg)]">{sig.name}</p>
-        <p className="truncate text-[12px] text-[var(--ps-fg-secondary)]">
+        <p className="ps-num truncate text-[12px] text-[var(--ps-fg-secondary)]">
           {TYPE_LABELS[sig.signature_type] ?? sig.signature_type}
           {sig.sent_at && ` · envoyé le ${formatDate(sig.sent_at)}`}
         </p>

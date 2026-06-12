@@ -18,7 +18,7 @@ export function StepsPanel({ steps, basePath }: StepsPanelProps) {
   return (
     <section className="ps-surface overflow-hidden">
       <div className="flex items-baseline justify-between gap-3 border-b border-[var(--ps-border-soft)] px-6 py-4">
-        <h2 className="ps-h2">Avancement du projet</h2>
+        <h2 className="ps-h3 tracking-tight">Avancement du projet</h2>
         {steps.length > 0 && (
           <p className="ps-small ps-num text-[var(--ps-fg-secondary)]">
             {done} sur {steps.length} jalon{steps.length > 1 ? 's' : ''} terminé{done > 1 ? 's' : ''}
@@ -43,10 +43,10 @@ export function StepsPanel({ steps, basePath }: StepsPanelProps) {
       <div className="border-t border-[var(--ps-border-soft)] px-6 py-3.5">
         <Link
           to={`${basePath}/project`}
-          className="inline-flex items-center gap-1 text-[12px] font-medium text-[var(--ps-primary-text)] hover:underline"
+          className="group inline-flex items-center gap-1 text-[12px] font-medium text-[var(--ps-primary-text)] hover:underline"
         >
           Voir la frise complète
-          <ArrowUpRight className="h-3 w-3" />
+          <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={2} />
         </Link>
       </div>
     </section>
@@ -72,11 +72,14 @@ function StepRow({ step }: { step: PortalProjectStep }) {
   const dateLine = stepDateLine(step);
   return (
     <li className="flex min-h-[44px] items-center gap-3.5 px-6 py-3.5">
-      <span className={`h-2 w-2 shrink-0 rounded-full ${DOT[step.status] ?? 'bg-[var(--ps-border-strong)]'}`} />
+      <span
+        className={`h-2 w-2 shrink-0 rounded-full ${DOT[step.status] ?? 'bg-[var(--ps-border-strong)]'} ${step.status === 'in_progress' ? 'ps-pulse' : ''}`}
+        aria-hidden
+      />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[13.5px] font-semibold text-[var(--ps-fg)]">{step.label}</span>
         {dateLine && (
-          <span className="ps-small block text-[var(--ps-fg-secondary)]">{dateLine}</span>
+          <span className="ps-small ps-num block text-[var(--ps-fg-secondary)]">{dateLine}</span>
         )}
       </span>
       <StatusBadge status={step.status} />

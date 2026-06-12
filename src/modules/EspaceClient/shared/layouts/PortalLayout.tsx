@@ -85,7 +85,7 @@ export function PortalLayout({
               type="button"
               onClick={onProfile}
               aria-label="Mon profil"
-              className="rounded-full transition-transform duration-200 [transition-timing-function:var(--ps-ease)] hover:scale-105"
+              className="rounded-full transition-transform duration-200 [transition-timing-function:var(--ps-ease)] hover:scale-105 active:scale-95"
             >
               <Avatar className="h-9 w-9 ring-2 ring-[var(--ps-primary-subtle)] ring-offset-2 ring-offset-[color:var(--ps-bg-elevated)]">
                 <AvatarFallback className="ps-brand-gradient text-[12px] font-bold text-white">
@@ -116,11 +116,11 @@ export function PortalLayout({
         <footer className="border-t border-[var(--ps-border-soft)] py-5 text-center text-[11px] text-[var(--ps-fg-muted)]">
           <span className="font-medium tracking-tight">{AGENCY_NAME}</span>
           <span className="mx-2 opacity-40">·</span>
-          <a href="#" className="hover:underline">Mentions légales</a>
+          <a href="#" className="transition-colors duration-200 hover:text-[var(--ps-fg-secondary)] hover:underline">Mentions légales</a>
           <span className="mx-2 opacity-40">·</span>
-          <a href="#" className="hover:underline">Confidentialité</a>
+          <a href="#" className="transition-colors duration-200 hover:text-[var(--ps-fg-secondary)] hover:underline">Confidentialité</a>
           <span className="mx-2 opacity-40">·</span>
-          <span className="opacity-70">© 2026</span>
+          <span className="ps-num opacity-70">© 2026</span>
         </footer>
       </div>
 

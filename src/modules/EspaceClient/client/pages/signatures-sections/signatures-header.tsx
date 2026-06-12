@@ -36,7 +36,9 @@ export function SignaturesHeader({ total, pending, signed, loading }: Signatures
           <PenLine className={`h-5 w-5 ${pending > 0 ? 'text-[var(--ps-warning-text)]' : 'text-[var(--ps-primary)]'}`} strokeWidth={2} />
         </span>
         <div className="min-w-0">
-          <h1 className="ps-h2 truncate text-[var(--ps-fg)]">{loading ? 'Vos signatures' : titre}</h1>
+          <h1 className="ps-h2 truncate text-[var(--ps-fg)]">
+            <span className="ps-num">{loading ? 'Vos signatures' : titre}</span>
+          </h1>
           <p className="ps-small ps-num truncate">{compteur}</p>
         </div>
       </div>

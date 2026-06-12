@@ -69,7 +69,7 @@ export function DocumentsCard({
                 type="button"
                 onClick={() => onFilterChange(cat.key)}
                 aria-pressed={active}
-                className={`min-h-[36px] rounded-full px-3 text-[12px] font-medium transition-colors ${
+                className={`ps-tap min-h-[36px] rounded-full px-3 text-[12px] font-medium transition-colors duration-200 ${
                   active
                     ? 'bg-[var(--ps-primary-subtle)] text-[var(--ps-primary-text)] ring-1 ring-[var(--ps-primary-subtle)]'
                     : 'text-[var(--ps-fg-secondary)] hover:bg-[var(--ps-bg-subtle)] hover:text-[var(--ps-fg)]'
@@ -98,7 +98,7 @@ export function DocumentsCard({
       )}
 
       {error && (
-        <p className="m-4 rounded-xl border border-[var(--ps-danger-subtle)] bg-[var(--ps-danger-subtle)] px-3.5 py-2.5 text-[13px] text-[var(--ps-danger-text)]">{error}</p>
+        <p className="m-4 rounded-[var(--ps-radius-input)] border border-[var(--ps-danger-subtle)] bg-[var(--ps-danger-subtle)] px-3.5 py-2.5 text-[13px] text-[var(--ps-danger-text)]">{error}</p>
       )}
 
       {!loading && !error && filtered.length === 0 && (
@@ -127,7 +127,7 @@ export function DocumentsCard({
               <FileIcon ext={extOf(doc.name)} mime={doc.file_mime_type ?? undefined} className="h-9 w-9" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[13.5px] font-medium leading-5 text-[var(--ps-fg)]">{doc.name}</p>
-                <p className="text-[12px] text-[var(--ps-fg-secondary)]">
+                <p className="ps-num text-[12px] text-[var(--ps-fg-secondary)]">
                   {TYPE_LABELS[doc.document_type] ?? doc.document_type}
                   {doc.file_size_bytes ? ` · ${formatSize(doc.file_size_bytes)}` : ''}
                   {` · v${doc.version}`}
@@ -138,6 +138,7 @@ export function DocumentsCard({
                 variant="outline"
                 onClick={(e) => { e.stopPropagation(); onDownload(doc) }}
                 disabled={downloadingId === doc.id}
+                className="ps-tap border-[var(--ps-border-strong)] text-[12px] font-semibold text-[var(--ps-fg-secondary)] transition-colors duration-200 hover:bg-[var(--ps-bg-subtle)] hover:text-[var(--ps-fg)]"
               >
                 {downloadingId === doc.id ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />

@@ -23,10 +23,10 @@ export function ProjectSkeleton() {
       </div>
       {/* Jalons | activité + livrables */}
       <div className="grid items-start gap-4 lg:grid-cols-2">
-        <Skeleton className="h-72" />
+        <Skeleton className="h-72 rounded-[var(--ps-radius-card)]" />
         <div className="space-y-4">
-          <Skeleton className="h-40" />
-          <Skeleton className="h-28" />
+          <Skeleton className="h-40 rounded-[var(--ps-radius-card)]" />
+          <Skeleton className="h-28 rounded-[var(--ps-radius-card)]" />
         </div>
       </div>
     </div>

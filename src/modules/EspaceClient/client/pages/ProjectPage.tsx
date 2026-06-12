@@ -57,7 +57,7 @@ export function ProjectPage() {
   if (steps.error) {
     return (
       <div className="ps-fade-in">
-        <p className="rounded-md bg-[var(--ps-danger-subtle)] px-3 py-2 text-[13px] text-[var(--ps-danger-text)]">{steps.error}</p>
+        <p className="rounded-[var(--ps-radius-input)] bg-[var(--ps-danger-subtle)] px-3.5 py-2.5 text-[13px] text-[var(--ps-danger-text)]">{steps.error}</p>
       </div>
     )
   }

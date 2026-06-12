@@ -27,17 +27,17 @@ export function DashboardSkeleton() {
         </div>
       </div>
 
-      <Skeleton className="h-[88px] w-full rounded-[14px]" />
+      <Skeleton className="h-[88px] w-full rounded-[var(--ps-radius-card)]" />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-5">
-          <Skeleton className="h-72 w-full rounded-2xl" />
-          <Skeleton className="h-48 w-full rounded-2xl" />
+          <Skeleton className="h-72 w-full rounded-[var(--ps-radius-card)]" />
+          <Skeleton className="h-48 w-full rounded-[var(--ps-radius-card)]" />
         </div>
         <div className="space-y-5">
-          <Skeleton className="h-32 w-full rounded-2xl" />
-          <Skeleton className="h-24 w-full rounded-2xl" />
-          <Skeleton className="h-48 w-full rounded-2xl" />
+          <Skeleton className="h-32 w-full rounded-[var(--ps-radius-card)]" />
+          <Skeleton className="h-24 w-full rounded-[var(--ps-radius-card)]" />
+          <Skeleton className="h-48 w-full rounded-[var(--ps-radius-card)]" />
         </div>
       </div>
     </div>

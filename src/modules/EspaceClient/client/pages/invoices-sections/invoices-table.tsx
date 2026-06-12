@@ -38,7 +38,7 @@ export function InvoicesTable({
             onChange={e => onQueryChange(e.target.value)}
             placeholder="Chercher une facture…"
             aria-label="Chercher une facture par numéro ou libellé"
-            className="h-10 w-full rounded-[var(--ps-radius-input)] border border-[var(--ps-border)] bg-[var(--ps-bg-elevated)] pl-9 pr-3 text-[13.5px] text-[var(--ps-fg)] outline-none"
+            className="h-10 w-full rounded-[var(--ps-radius-input)] border border-[var(--ps-border)] bg-[var(--ps-bg-elevated)] pl-9 pr-3 text-[13.5px] text-[var(--ps-fg)] transition-colors duration-200 hover:border-[var(--ps-border-strong)]"
           />
         </div>
       </div>
@@ -87,8 +87,10 @@ function LigneFacture({ invoice, selectionnee, onSelect }: LigneProps) {
       type="button"
       onClick={onSelect}
       aria-pressed={selectionnee}
-      className={`flex min-h-[48px] w-full items-center justify-between gap-4 rounded-[var(--ps-radius-input)] px-3 py-3 text-left transition-colors duration-150 ${GRID} ${
-        selectionnee ? 'bg-[var(--ps-primary-subtle)]' : 'hover:bg-[var(--ps-bg-subtle)]'
+      className={`flex min-h-[48px] w-full items-center justify-between gap-4 rounded-[var(--ps-radius-input)] px-3 py-3 text-left transition-[background-color,box-shadow] duration-150 [transition-timing-function:var(--ps-ease)] ${GRID} ${
+        selectionnee
+          ? 'bg-[var(--ps-primary-subtle)] shadow-[inset_3px_0_0_0_var(--ps-primary)]'
+          : 'hover:bg-[var(--ps-bg-subtle)]'
       }`}
     >
       <span className="min-w-0 sm:contents">

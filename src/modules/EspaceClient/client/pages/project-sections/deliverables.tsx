@@ -34,7 +34,7 @@ export function DeliverablesSection({ deliverables }: { deliverables: PortalDocu
     <div className="ps-surface overflow-hidden">
       <header className="flex items-center justify-between border-b border-[var(--ps-border-soft)] px-6 py-4">
         <h3 className="ps-h3 text-[var(--ps-fg)]">Livrables du projet</h3>
-        <Badge tone="gray" dot={false}>{deliverables.length}</Badge>
+        <Badge tone="gray" dot={false}><span className="ps-num">{deliverables.length}</span></Badge>
       </header>
       <ul className="divide-y divide-[var(--ps-border-soft)]">
         {deliverables.map(doc => (
@@ -67,7 +67,7 @@ function DeliverableRow({ doc }: { doc: PortalDocument }) {
         type="button"
         onClick={handle}
         disabled={downloading}
-        className="ps-tap inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-[var(--ps-border-strong)] px-3.5 text-[12px] font-semibold text-[var(--ps-fg-secondary)] transition-colors hover:bg-[var(--ps-bg-subtle)] disabled:opacity-50"
+        className="ps-tap inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-[var(--ps-border-strong)] px-3.5 text-[12px] font-semibold text-[var(--ps-fg-secondary)] transition-colors duration-200 hover:bg-[var(--ps-bg-subtle)] hover:text-[var(--ps-fg)] disabled:opacity-50"
       >
         {downloading
           ? <Loader2 className="h-3.5 w-3.5 animate-spin" />

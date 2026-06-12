@@ -27,7 +27,9 @@ export function FaqCard() {
       <header className="flex items-center justify-between gap-3 border-b border-[var(--ps-border-soft)] px-5 py-3.5">
         <h2 className="ps-h3 text-[var(--ps-fg)]">Questions fréquentes</h2>
         <Badge tone="gray" dot={false}>
-          {filtered.length !== FAQ.length ? `${filtered.length} sur ${FAQ.length}` : `${FAQ.length} questions`}
+          <span className="ps-num">
+            {filtered.length !== FAQ.length ? `${filtered.length} sur ${FAQ.length}` : `${FAQ.length} questions`}
+          </span>
         </Badge>
       </header>
 
