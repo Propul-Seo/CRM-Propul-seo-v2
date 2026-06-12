@@ -22,7 +22,7 @@ export function InvoicesTable({
   rows, totalCount, oldestIssue, selectedId, onSelect, query, onQueryChange,
 }: InvoicesTableProps) {
   return (
-    <section className="mt-12 sm:mt-16" aria-label="Toutes les factures">
+    <section className="mt-4" aria-label="Toutes les factures">
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-b border-[var(--ps-border)] pb-3">
         <div>
           <h2 className="ps-h3">Toutes les factures</h2>
@@ -53,7 +53,7 @@ export function InvoicesTable({
 
       <ul className="divide-y divide-[var(--ps-border-soft)]">
         {rows.length === 0 && (
-          <li className="px-3 py-6 text-center text-[12.5px] text-[var(--ps-fg-muted)]">
+          <li className="px-3 py-5 text-center text-[12.5px] text-[var(--ps-fg-muted)]">
             Aucune facture ne correspond.
           </li>
         )}
@@ -87,7 +87,7 @@ function LigneFacture({ invoice, selectionnee, onSelect }: LigneProps) {
       type="button"
       onClick={onSelect}
       aria-pressed={selectionnee}
-      className={`flex min-h-[56px] w-full items-center justify-between gap-4 rounded-[var(--ps-radius-input)] px-3 py-3.5 text-left transition-colors duration-150 ${GRID} ${
+      className={`flex min-h-[48px] w-full items-center justify-between gap-4 rounded-[var(--ps-radius-input)] px-3 py-3 text-left transition-colors duration-150 ${GRID} ${
         selectionnee ? 'bg-[var(--ps-primary-subtle)]' : 'hover:bg-[var(--ps-bg-subtle)]'
       }`}
     >

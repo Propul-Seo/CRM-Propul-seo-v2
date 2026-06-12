@@ -1,0 +1,28 @@
+// Contenu FAQ du portail (questions, réponses, tags de recherche).
+
+export const FAQ: Array<{ q: string; a: string; tags: string[] }> = [
+  { q: 'Comment télécharger une facture ?',
+    a: "Rendez-vous dans l'onglet Factures, cliquez sur la facture concernée, puis sur \"Télécharger le PDF\". Le lien est valable 1 heure.",
+    tags: ['facture', 'téléchargement', 'pdf'] },
+  { q: 'Comment payer une facture en ligne ?',
+    a: 'Dans le détail de la facture, cliquez sur "Payer en ligne". Vous serez redirigé vers une page Stripe sécurisée. Une fois payée, le statut se met à jour automatiquement.',
+    tags: ['facture', 'paiement', 'stripe'] },
+  { q: "J'ai signé un document mais le statut n'a pas changé.",
+    a: "Le statut se met à jour automatiquement une fois la signature finalisée. Si rien n'a bougé après quelques minutes, contactez-nous.",
+    tags: ['signature'] },
+  { q: 'Comment me connecter à mon espace ?',
+    a: "Avec votre email et votre mot de passe. Vous pouvez aussi recevoir un code de connexion à 6 chiffres à usage unique (« Recevoir un code à la place »), ou réinitialiser votre mot de passe via « Mot de passe oublié ? » depuis la page de connexion.",
+    tags: ['connexion', 'mot de passe', 'code'] },
+  { q: 'Je ne vois pas tous mes documents.',
+    a: "Seuls les documents marqués \"visibles client\" par l'équipe Propul'SEO sont affichés ici. Les brouillons internes ne sont jamais partagés sans validation.",
+    tags: ['document'] },
+  { q: 'Puis-je inviter un collaborateur à voir mon espace ?',
+    a: "Pour la V1 du portail, un seul compte par projet. La gestion multi-utilisateurs arrivera dans une prochaine version.",
+    tags: ['accès', 'compte', 'collaborateur'] },
+  { q: 'Comment changer mon mot de passe ?',
+    a: "Rendez-vous dans Mon profil → section Sécurité. Tapez votre nouveau mot de passe (8 caractères minimum), confirmez-le, et cliquez sur Changer.",
+    tags: ['mot de passe', 'profil', 'sécurité'] },
+  { q: 'Mes coordonnées sont-elles modifiables ?',
+    a: "Oui, depuis Mon profil → Mes coordonnées. Téléphone, entreprise et prénom peuvent être mis à jour à tout moment. L'email de connexion reste figé.",
+    tags: ['profil', 'coordonnées'] },
+]

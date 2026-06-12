@@ -1,55 +1,17 @@
 import { useMemo, useState } from 'react'
-import { FileText, Download, Loader2, Search, X } from 'lucide-react'
-import { Hero, EmptyState, FileIcon, SectionHead, FilePreviewDialog, Skeleton } from '@/modules/EspaceClient/shared/components'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { usePortalDocuments, getSignedStorageUrl, type PortalDocument } from '../hooks/usePortalData'
+import { FilePreviewDialog } from '@/modules/EspaceClient/shared/components'
 import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext'
+import { usePortalDocuments, getSignedStorageUrl, type PortalDocument } from '@/modules/EspaceClient/client/hooks/usePortalData'
 import { inferBucket } from '@/modules/ProjectDetailsV3Preview/tabs/documents/constants'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/database'
+import { DocumentsHeader } from './documents-sections/documents-header'
+import { DocumentsCard } from './documents-sections/documents-card'
+import { FILTER_CATEGORIES, TYPE_LABELS, downloadDocument } from './documents-sections/documents-lib'
 
-function formatSize(bytes: number | null): string {
-  if (!bytes) return ''
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
-async function downloadDocument(storage: SupabaseClient<Database>, doc: PortalDocument) {
-  const bucket = inferBucket(doc.file_url)
-  // Doc à lien externe (ex. charte fournie via une URL WeTransfer/Drive/Notion) :
-  // pas de fichier Storage à signer, on ouvre directement le lien.
-  if (bucket === 'external') {
-    window.open(doc.file_url, '_blank', 'noopener,noreferrer')
-    return
-  }
-  const url = await getSignedStorageUrl(storage, bucket, doc.file_url)
-  if (!url) {
-    alert('Impossible de générer le lien de téléchargement. Réessayez plus tard.')
-    return
-  }
-  window.open(url, '_blank', 'noopener,noreferrer')
-}
-
-const TYPE_LABELS: Record<string, string> = {
-  quote: 'Devis', contract: 'Contrat', invoice: 'Facture',
-  deliverable: 'Livrable', audit: 'Audit', report: 'Rapport',
-  asset_logo: 'Logo', asset_charter: 'Charte', asset_content: 'Contenu',
-  asset_access: 'Accès', legal: 'Légal', other: 'Autre',
-}
-
-const FILTER_CATEGORIES: Array<{ key: string; label: string; types: string[] }> = [
-  { key: 'all',         label: 'Tous',       types: [] },
-  { key: 'contracts',   label: 'Contrats',   types: ['quote', 'contract', 'legal'] },
-  { key: 'invoices',    label: 'Factures',   types: ['invoice'] },
-  { key: 'deliverables', label: 'Livrables', types: ['deliverable', 'audit', 'report'] },
-  { key: 'assets',      label: 'Assets',     types: ['asset_logo', 'asset_charter', 'asset_content', 'asset_access'] },
-]
-
-function extOf(name: string): string {
-  return name.split('.').pop()?.toLowerCase() ?? ''
-}
-
+/**
+ * Page Documents du portail — forme compacte calquée sur l'aperçu admin
+ * (couleurs Aurora) : en-tête masthead + carte dense unique (recherche,
+ * filtres, lignes scannables). Téléchargement et aperçu inchangés.
+ */
 export function DocumentsPage() {
   const { rows, loading, error } = usePortalDocuments()
   const { storage } = usePortal()
@@ -73,123 +35,22 @@ export function DocumentsPage() {
   }
 
   return (
-    <div className="ps-fade-in space-y-6">
-      <Hero
-        eyebrow="Documents"
-        title="Vos documents"
-        subtitle="Tous vos livrables et documents en un seul endroit."
-      />
+    <div className="ps-fade-in space-y-4">
+      <DocumentsHeader count={rows.length} loading={loading} />
 
-      <section className="ps-surface overflow-hidden">
-        <div className="flex flex-col gap-3 border-b border-[var(--ps-border-soft)] px-6 py-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--ps-fg-muted)]" />
-            <Input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Rechercher par nom…"
-              className="pl-8 pr-8"
-            />
-            {search && (
-              <button
-                type="button"
-                aria-label="Effacer"
-                onClick={() => setSearch('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--ps-fg-muted)] hover:text-[var(--ps-fg)]"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {FILTER_CATEGORIES.map(cat => {
-              const active = filter === cat.key
-              return (
-                <button
-                  key={cat.key}
-                  type="button"
-                  onClick={() => setFilter(cat.key)}
-                  className={`rounded-full px-3 py-1 text-[12px] font-medium transition-colors ${
-                    active
-                      ? 'bg-[var(--ps-primary-subtle)] text-[var(--ps-primary-text)] ring-1 ring-[var(--ps-primary-subtle)]'
-                      : 'text-[var(--ps-fg-muted)] hover:bg-[var(--ps-bg-subtle)] hover:text-[var(--ps-fg)]'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-        <SectionHead title={loading ? 'Documents' : `${filtered.length} document${filtered.length > 1 ? 's' : ''}${filtered.length !== rows.length ? ` sur ${rows.length}` : ''}`} />
-        {loading && (
-          <ul className="divide-y divide-[var(--ps-border-soft)]">
-            {[0, 1, 2, 3].map(i => (
-              <li key={i} className="flex items-center gap-4 px-6 py-3.5">
-                <Skeleton className="h-10 w-10 rounded-lg" />
-                <div className="min-w-0 flex-1">
-                  <Skeleton className="h-3.5 w-1/2 rounded-md" />
-                  <Skeleton className="mt-2 h-3 w-1/3 rounded-md" />
-                </div>
-                <Skeleton className="h-8 w-28 rounded-lg" />
-              </li>
-            ))}
-          </ul>
-        )}
-        {error && (
-          <p className="m-4 rounded-xl border border-[var(--ps-danger-subtle)] bg-[var(--ps-danger-subtle)] px-3.5 py-2.5 text-[13px] text-[var(--ps-danger-text)]">{error}</p>
-        )}
-        {!loading && filtered.length === 0 && (
-          <div className="p-6">
-            <EmptyState
-              icon={FileText}
-              title={rows.length === 0 ? "Aucun document pour l'instant" : 'Aucun résultat'}
-              body={rows.length === 0
-                ? "Les devis, contrats et livrables apparaîtront ici dès qu'ils seront ajoutés."
-                : 'Essayez un autre filtre ou modifiez votre recherche.'}
-            />
-          </div>
-        )}
-        {!loading && filtered.length > 0 && (
-          <ul className="divide-y divide-[var(--ps-border-soft)]">
-            {filtered.map(doc => (
-              <li
-                key={doc.id}
-                onClick={() => setPreview(doc)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPreview(doc) } }}
-                className="flex cursor-pointer items-center gap-4 px-6 py-3.5 transition-colors hover:bg-[var(--ps-bg-subtle)]"
-              >
-                <FileIcon ext={extOf(doc.name)} mime={doc.file_mime_type ?? undefined} className="h-10 w-10" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13.5px] font-medium text-[var(--ps-fg)]">{doc.name}</p>
-                  <p className="text-[12px] text-[var(--ps-fg-muted)]">
-                    {TYPE_LABELS[doc.document_type] ?? doc.document_type}
-                    {doc.file_size_bytes ? ` · ${formatSize(doc.file_size_bytes)}` : ''}
-                    {` · v${doc.version}`}
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={(e) => { e.stopPropagation(); handleDownload(doc) }}
-                  disabled={downloadingId === doc.id}
-                >
-                  {downloadingId === doc.id ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <>
-                      <Download className="mr-1.5 h-3.5 w-3.5" />
-                      Télécharger
-                    </>
-                  )}
-                </Button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <DocumentsCard
+        loading={loading}
+        error={error}
+        totalCount={rows.length}
+        filtered={filtered}
+        filter={filter}
+        onFilterChange={setFilter}
+        search={search}
+        onSearchChange={setSearch}
+        downloadingId={downloadingId}
+        onDownload={handleDownload}
+        onPreview={setPreview}
+      />
 
       <FilePreviewDialog
         open={preview !== null}

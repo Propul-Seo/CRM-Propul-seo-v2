@@ -10,7 +10,7 @@ interface InvoicesFooterProps {
 
 export function InvoicesFooter({ paidAmount, totalDue }: InvoicesFooterProps) {
   return (
-    <footer className="mt-14 grid gap-6 border-t border-[var(--ps-border)] pt-6 sm:mt-20 sm:grid-cols-2 sm:items-end">
+    <footer className="mt-4 grid gap-4 border-t border-[var(--ps-border)] pt-4 sm:grid-cols-2 sm:items-end">
       <div>
         <p className="ps-tiny">Total du projet</p>
         <p className="ps-num mt-1 text-[15px] font-medium text-[var(--ps-fg)]">

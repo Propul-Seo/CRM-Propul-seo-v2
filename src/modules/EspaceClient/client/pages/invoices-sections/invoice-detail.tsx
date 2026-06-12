@@ -41,16 +41,16 @@ export function InvoiceDetail({ invoice, installments, payingId, onPay, onDownlo
   const canPayWhole = !previewMode && (invoice.status === 'sent' || invoice.status === 'overdue') && installments.length === 0;
 
   return (
-    <section className="mt-10 sm:mt-12" aria-label="Détail de la facture sélectionnée">
-      <div className="ps-surface p-6 sm:p-8">
+    <section className="mt-4" aria-label="Détail de la facture sélectionnée">
+      <div className="ps-surface p-5">
         {/* Entête : identité de la facture + montant */}
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between sm:gap-10">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
           <div className="min-w-0">
             <p className="ps-num text-[12px] text-[var(--ps-fg-muted)] [font-family:var(--ps-font-mono)]">
               {invoice.invoice_number ?? 'Brouillon'}
             </p>
-            <h2 className="ps-h2 mt-1.5 text-[var(--ps-fg)]">{invoice.title ?? 'Facture'}</h2>
-            <dl className="mt-4 flex flex-wrap gap-x-8 gap-y-2 text-[13px] text-[var(--ps-fg-secondary)]">
+            <h2 className="ps-h3 mt-1 text-[var(--ps-fg)]">{invoice.title ?? 'Facture'}</h2>
+            <dl className="mt-2.5 flex flex-wrap gap-x-6 gap-y-1.5 text-[13px] text-[var(--ps-fg-secondary)]">
               <div className="flex gap-1.5">
                 <dt>Émise le</dt>
                 <dd className="ps-num font-medium text-[var(--ps-fg)]">{formatLongDate(invoice.issue_date)}</dd>
@@ -71,8 +71,8 @@ export function InvoiceDetail({ invoice, installments, payingId, onPay, onDownlo
           </div>
           <div className="shrink-0 sm:text-right">
             <p className="ps-tiny">Montant total TTC</p>
-            <p className="ps-metric ps-num mt-1.5 text-[var(--ps-fg)]">{fmtMoney(invoice.amount_total)}</p>
-            <p className="mt-2 sm:flex sm:justify-end">
+            <p className="ps-metric ps-num mt-1 text-[var(--ps-fg)]">{fmtMoney(invoice.amount_total)}</p>
+            <p className="mt-1.5 sm:flex sm:justify-end">
               <StatutFacture status={invoice.status} />
             </p>
           </div>
@@ -80,8 +80,8 @@ export function InvoiceDetail({ invoice, installments, payingId, onPay, onDownlo
 
         {/* Ligne de vie du paiement */}
         {!isCancelled && (
-          <div className="mt-7 border-t border-[var(--ps-border-soft)] pt-5">
-            <p className="ps-tiny mb-4">Ligne de vie du paiement</p>
+          <div className="mt-4 border-t border-[var(--ps-border-soft)] pt-3.5">
+            <p className="ps-tiny mb-3">Ligne de vie du paiement</p>
             <InvoiceTimeline
               issueDate={invoice.issue_date}
               installments={installments}
@@ -105,7 +105,7 @@ export function InvoiceDetail({ invoice, installments, payingId, onPay, onDownlo
         />
 
         {/* Pied : réassurance + documents + règlement */}
-        <div className="mt-7 flex flex-col gap-5 border-t border-[var(--ps-border-soft)] pt-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-4 flex flex-col gap-4 border-t border-[var(--ps-border-soft)] pt-3.5 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             {awaitingPayment ? (
               <p className="ps-small flex items-center gap-2">
