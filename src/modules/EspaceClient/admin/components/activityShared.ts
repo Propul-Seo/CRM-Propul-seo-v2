@@ -30,3 +30,18 @@ export function auditItemName(diff: AuditLogRow['diff']): string {
 
 export const fmtAuditDateTime = (iso: string) =>
   new Date(iso).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+
+// Horodatage relatif FR discret, partagé par l'Aperçu et l'onglet Activité
+// (arrondi plancher partout pour des libellés cohérents entre les deux vues).
+export function fmtRelative(iso: string): string {
+  const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
+  if (min < 1) return "à l'instant";
+  if (min < 60) return `il y a ${min} min`;
+  const hours = Math.floor(min / 60);
+  if (hours < 24) return `il y a ${hours} h`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'hier';
+  if (days < 7) return `il y a ${days} jours`;
+  if (days < 30) return `il y a ${Math.floor(days / 7)} sem.`;
+  return `il y a ${Math.floor(days / 30)} mois`;
+}

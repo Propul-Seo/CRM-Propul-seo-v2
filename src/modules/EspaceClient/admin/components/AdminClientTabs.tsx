@@ -10,25 +10,28 @@ const TABS: Array<{ key: string; label: string; icon: LucideIcon }> = [
   { key: 'activite', label: 'Activité', icon: Clock3 },
 ];
 
-// Barre d'onglets du panneau client (DA Atelier) : pills à icônes, violet sur
-// l'onglet actif. Routing conservé (NavLink).
+// Barre d'onglets du panneau client (mode pleine page, hors cockpit) :
+// onglets soulignés, actif net (border-b-2 violet), hover doux.
+// Routing conservé (NavLink).
 export function AdminClientTabs() {
   const { projectId } = useParams<{ projectId: string }>();
   const { basePath } = useAdminBasePath();
   if (!projectId) return null;
   const base = `${basePath}/clients/${projectId}`;
   return (
-    <nav className="rounded-xl border border-border bg-surface-2 p-2 shadow-glow-sm">
-      <ul className="flex flex-wrap gap-1">
+    <nav className="border-b border-border">
+      <ul className="-mb-px flex flex-wrap gap-1">
         {TABS.map(({ key, label, icon: Icon }) => (
           <li key={key}>
             <NavLink
               end={key === ''}
               to={key ? `${base}/${key}` : base}
               className={({ isActive }) =>
-                isActive
-                  ? 'inline-flex items-center gap-2 rounded-lg bg-primary/15 px-3.5 py-2 text-sm font-semibold text-primary ring-1 ring-primary/30'
-                  : 'inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-3 hover:text-foreground'
+                `inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-3 pb-2.5 pt-1.5 text-sm transition-colors ${
+                  isActive
+                    ? 'border-primary font-semibold text-primary'
+                    : 'border-transparent font-medium text-muted-foreground hover:border-border hover:text-foreground'
+                }`
               }
             >
               <Icon className="h-4 w-4" />

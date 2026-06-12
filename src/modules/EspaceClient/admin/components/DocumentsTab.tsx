@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
-import { Loader2, FolderPlus, Download, Eye, EyeOff, Pencil, Trash2, FolderOpen } from 'lucide-react';
+import { FolderPlus, Download, Eye, EyeOff, Pencil, Trash2, FolderOpen } from 'lucide-react';
 import {
-  DocumentTypeIcon, docMeta, DOC_CHIP_TONE, FilePreviewDialog,
+  DocumentTypeIcon, docMeta, DOC_CHIP_TONE, FilePreviewDialog, Skeleton,
 } from '@/modules/EspaceClient/shared/components';
-import { AdminEmptyState } from '@/modules/EspaceClient/admin/components/kit';
+import { AdminEmptyState, AdminFilterPills } from '@/modules/EspaceClient/admin/components/kit';
 import { AdminDocumentUpload } from './AdminDocumentUpload';
 import { AdminDocumentEditDialog } from './AdminDocumentEditDialog';
 import { useAdminDocuments } from '../hooks/useAdminDocuments';
@@ -24,6 +24,7 @@ const FILTERS: Array<{ label: string; value: FilterValue; types: string[] | null
 
 const formatSize = (b: number | null) =>
   b == null ? '' : b < 1024 ? `${b} o` : b < 1048576 ? `${(b / 1024).toFixed(0)} Ko` : `${(b / 1048576).toFixed(1)} Mo`;
+const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('fr-FR');
 const countFor = (docs: PortalDocument[], types: string[] | null) =>
   types ? docs.filter(d => types.includes(d.document_type)).length : docs.length;
 
@@ -79,9 +80,20 @@ export function DocumentsTab({ projectId }: { projectId: string }) {
       {actionError && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{actionError}</p>}
 
       {loading ? (
-        <div className="py-10 text-center text-sm text-muted-foreground">
-          <Loader2 className="inline h-4 w-4 animate-spin" /> Chargement…
-        </div>
+        // Squelette : reproduit la forme des lignes document (icône + nom + métadonnées).
+        <ul className="space-y-3" aria-hidden="true">
+          {[0, 1, 2].map(i => (
+            <li key={i} className="rounded-xl border border-border bg-surface-2 p-4 sm:p-5">
+              <div className="flex items-start gap-4">
+                <Skeleton className="h-12 w-12 shrink-0 rounded-xl" />
+                <div className="flex-1 space-y-2.5 pt-1">
+                  <Skeleton className="h-4 w-2/5 rounded-md" />
+                  <Skeleton className="h-3 w-3/5 rounded-md" />
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
       ) : documents.length === 0 ? (
         <AdminEmptyState
           icon={FolderOpen}
@@ -99,24 +111,11 @@ export function DocumentsTab({ projectId }: { projectId: string }) {
         />
       ) : (
         <>
-          <div className="flex flex-wrap gap-2">
-            {FILTERS.map(f => {
-              const active = filter === f.value;
-              const count = countFor(documents, f.types);
-              return (
-                <button
-                  key={f.value}
-                  type="button"
-                  onClick={() => setFilter(f.value)}
-                  className={'inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ' +
-                    (active ? 'bg-primary/15 text-primary ring-1 ring-primary/30' : 'bg-surface-2 text-muted-foreground hover:bg-surface-3 hover:text-foreground')}
-                >
-                  {f.label}
-                  <span className={'rounded-full px-1.5 text-xs tabular-nums ' + (active ? 'bg-primary/20 text-primary' : 'bg-surface-3 text-foreground/70')}>{count}</span>
-                </button>
-              );
-            })}
-          </div>
+          <AdminFilterPills<FilterValue>
+            current={filter}
+            onChange={setFilter}
+            filters={FILTERS.map(f => ({ label: f.label, value: f.value, count: countFor(documents, f.types) }))}
+          />
 
           {filtered.length === 0 ? (
             <p className="py-8 text-center text-sm text-muted-foreground">Aucun document pour ce filtre.</p>
@@ -145,8 +144,16 @@ export function DocumentsTab({ projectId }: { projectId: string }) {
                         </div>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                           <span className={'rounded-md px-2 py-0.5 text-[11px] font-semibold ' + DOC_CHIP_TONE[meta.tone]}>{meta.label}</span>
+                          {doc.file_size_bytes != null && (
+                            <>
+                              <span className="h-1 w-1 rounded-full bg-border" />
+                              <span className="text-xs tabular-nums text-muted-foreground">{formatSize(doc.file_size_bytes)}</span>
+                            </>
+                          )}
                           <span className="h-1 w-1 rounded-full bg-border" />
-                          <span className="text-xs tabular-nums text-muted-foreground">{formatSize(doc.file_size_bytes)}</span>
+                          <span className="text-xs text-muted-foreground">
+                            Ajouté le <span className="tabular-nums">{fmtDate(doc.created_at)}</span>
+                          </span>
                           <span className="h-1 w-1 rounded-full bg-border" />
                           {doc.visible_to_client ? (
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300">

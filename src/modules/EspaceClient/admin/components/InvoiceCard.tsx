@@ -76,7 +76,7 @@ export function InvoiceCard({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPreview(); } }}
-      className="cursor-pointer rounded-xl border border-border bg-surface-2 p-3 shadow-glow-sm transition-colors hover:bg-surface-3/40"
+      className="cursor-pointer rounded-xl border border-border bg-surface-2 p-4 shadow-glow-sm transition-colors hover:border-primary/40 hover:bg-surface-3/40"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 space-y-1">
@@ -84,11 +84,12 @@ export function InvoiceCard({
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{ref}</span>
             {invoice.is_deposit && <Badge tone="violet">Acompte</Badge>}
           </div>
-          {invoice.title && <h3 className="truncate text-lg font-semibold text-foreground">{invoice.title}</h3>}
+          {invoice.title && <h3 className="truncate text-[15px] font-semibold text-foreground">{invoice.title}</h3>}
           <p className="text-xs text-muted-foreground">Émise le {fmtDate(invoice.issue_date)}</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
-          <span className="tabular-nums text-xl font-semibold tracking-tight text-foreground">{money(invoice.amount_total, invoice.currency)}</span>
+          {/* Montant fort : Space Grotesk + tabular-nums via la classe thème .ps-metric. */}
+          <span className="ps-metric text-foreground">{money(invoice.amount_total, invoice.currency)}</span>
           <StatusBadge status={invoice.status} />
         </div>
       </div>

@@ -113,24 +113,25 @@ export function AdminInvoiceForm({ open, onOpenChange, onSubmit, editInvoice, on
       <AdminFormField label="Intitulé (optionnel)">
         <Input placeholder="Ex. Paiement 1/2" value={title} onChange={e => setTitle(e.target.value)} />
       </AdminFormField>
-      <div className="space-y-2">
-        <Label>Lignes</Label>
-        {lines.map((l, i) => (
-          <div key={i} className="flex gap-2">
-            <Input placeholder="Désignation" value={l.label}
-              onChange={e => setLines(ls => ls.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
-            <Input type="number" min="0" step="0.01" placeholder="€ HT" className="w-28" value={l.amount}
-              onChange={e => setLines(ls => ls.map((x, j) => j === i ? { ...x, amount: e.target.value } : x))} />
-            <Button type="button" variant="ghost" size="icon"
-              onClick={() => setLines(ls => ls.length > 1 ? ls.filter((_, j) => j !== i) : ls)}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        ))}
-        <Button type="button" variant="outline" size="sm" onClick={() => setLines(ls => [...ls, { label: '', amount: '' }])}>
-          <Plus className="mr-1 h-4 w-4" /> Ligne
-        </Button>
-      </div>
+      <AdminFormField label="Lignes de facturation" hint="Une désignation et un montant HT par ligne.">
+        <div className="space-y-2">
+          {lines.map((l, i) => (
+            <div key={i} className="flex gap-2">
+              <Input placeholder="Désignation" value={l.label}
+                onChange={e => setLines(ls => ls.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
+              <Input type="number" min="0" step="0.01" placeholder="€ HT" className="w-28" value={l.amount}
+                onChange={e => setLines(ls => ls.map((x, j) => j === i ? { ...x, amount: e.target.value } : x))} />
+              <Button type="button" variant="ghost" size="icon" aria-label="Supprimer la ligne"
+                onClick={() => setLines(ls => ls.length > 1 ? ls.filter((_, j) => j !== i) : ls)}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+          <Button type="button" variant="outline" size="sm" onClick={() => setLines(ls => [...ls, { label: '', amount: '' }])}>
+            <Plus className="mr-1 h-4 w-4" /> Ajouter une ligne
+          </Button>
+        </div>
+      </AdminFormField>
       <div className="grid grid-cols-2 gap-3">
         <AdminFormField label="TVA (%)">
           <Input type="number" min="0" step="0.01" value={vatRate} onChange={e => setVatRate(e.target.value)} />
@@ -140,14 +141,14 @@ export function AdminInvoiceForm({ open, onOpenChange, onSubmit, editInvoice, on
             <input type="checkbox" checked={isDeposit} onChange={e => setIsDeposit(e.target.checked)} /> Facture d'acompte
           </label>
         )}
-        <AdminFormField label="Émission">
+        <AdminFormField label="Date d'émission">
           <Input type="date" value={issueDate} onChange={e => setIssueDate(e.target.value)} disabled={isEdit} />
         </AdminFormField>
-        <AdminFormField label="Échéance">
+        <AdminFormField label="Date d'échéance">
           <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
         </AdminFormField>
       </div>
-      <AdminFormField label="Note visible client">
+      <AdminFormField label="Note visible par le client" hint="Affichée sur la facture dans le portail client.">
         <Input value={notes} onChange={e => setNotes(e.target.value)} />
       </AdminFormField>
       {!isEdit && (
@@ -156,7 +157,7 @@ export function AdminInvoiceForm({ open, onOpenChange, onSubmit, editInvoice, on
             <Label>Acomptes / échéances (optionnel)</Label>
             <Button type="button" variant="outline" size="sm"
               onClick={() => setInstallments(is => [...is, { label: '', amount: '', due_date: '' }])}>
-              <Plus className="mr-1 h-4 w-4" /> Échéance
+              <Plus className="mr-1 h-4 w-4" /> Ajouter une échéance
             </Button>
           </div>
           {installments.map((it, i) => (
@@ -167,15 +168,21 @@ export function AdminInvoiceForm({ open, onOpenChange, onSubmit, editInvoice, on
                 onChange={e => setInstallments(is => is.map((x, j) => j === i ? { ...x, amount: e.target.value } : x))} />
               <Input type="date" className="w-40" value={it.due_date}
                 onChange={e => setInstallments(is => is.map((x, j) => j === i ? { ...x, due_date: e.target.value } : x))} />
-              <Button type="button" variant="ghost" size="icon" onClick={() => setInstallments(is => is.filter((_, j) => j !== i))}>
+              <Button type="button" variant="ghost" size="icon" aria-label="Supprimer l'échéance"
+                onClick={() => setInstallments(is => is.filter((_, j) => j !== i))}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           ))}
         </div>
       )}
-      <div className="rounded-lg bg-surface-2 px-3 py-2 text-sm">
-        Sous-total HT <strong>{subtotal.toFixed(2)} €</strong> · Total TTC <strong>{total.toFixed(2)} €</strong>
+      <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface-2 px-3 py-2.5 text-sm">
+        <span className="text-muted-foreground">
+          Sous-total HT <span className="font-semibold tabular-nums text-foreground">{subtotal.toFixed(2)} €</span>
+        </span>
+        <span className="text-muted-foreground">
+          Total TTC <span className="font-semibold tabular-nums text-foreground">{total.toFixed(2)} €</span>
+        </span>
       </div>
     </AdminFormDialog>
   );

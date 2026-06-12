@@ -1,6 +1,16 @@
-import { Badge } from '@/modules/EspaceClient/shared/components';
+import type { BadgeTone } from '@/modules/EspaceClient/shared/components';
 import type { AdminClientHealth } from '../../hooks/useAdminClients';
 import { deriveClientStatus, clientInitials, clientAvatarTone } from './clientStatus';
+
+// Statut « dot + label » (DA admin) — couleurs de dot alignées sur Badge.
+const STATUS_DOTS: Record<BadgeTone, string> = {
+  violet: 'bg-[var(--ps-primary)]',
+  green:  'bg-[var(--ps-success)]',
+  amber:  'bg-[var(--ps-warning)]',
+  red:    'bg-[var(--ps-danger)]',
+  blue:   'bg-[var(--ps-info)]',
+  gray:   'bg-[var(--ps-fg-muted)]',
+};
 
 interface Props {
   client: AdminClientHealth;
@@ -8,8 +18,10 @@ interface Props {
   onSelect: (projectId: string) => void;
 }
 
-// Ligne compacte (1 ligne) : avatar + société + email + pastille de statut.
+// Ligne compacte (1 ligne) : avatar + société + email + dot de statut.
 // Conçue pour un rail élargi — pas de tableau multi-colonnes qui déborde.
+// Sélection : liseré violet à gauche + fond primary/10 (pas de layout shift,
+// le liseré transparent est toujours présent).
 export function CompactClientRow({ client, selected, onSelect }: Props) {
   const status = deriveClientStatus(client);
   return (
@@ -17,8 +29,8 @@ export function CompactClientRow({ client, selected, onSelect }: Props) {
       type="button"
       onClick={() => onSelect(client.project_id)}
       aria-current={selected ? 'true' : undefined}
-      className={`flex w-full items-center gap-3 border-b border-border px-3.5 py-2.5 text-left transition ${
-        selected ? 'bg-primary/10' : 'hover:bg-surface-2'
+      className={`flex w-full items-center gap-3 border-b border-l-2 border-b-border px-3.5 py-2.5 text-left transition ${
+        selected ? 'border-l-primary bg-primary/10' : 'border-l-transparent hover:bg-surface-2'
       }`}
     >
       <div
@@ -34,7 +46,10 @@ export function CompactClientRow({ client, selected, onSelect }: Props) {
           {client.portal_client_email ?? 'Pas d’accès portail'}
         </div>
       </div>
-      <Badge tone={status.tone}>{status.label}</Badge>
+      <span className="flex shrink-0 items-center gap-1.5" title={status.label}>
+        <span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOTS[status.tone]}`} aria-hidden="true" />
+        <span className="whitespace-nowrap text-[11px] text-muted-foreground">{status.label}</span>
+      </span>
     </button>
   );
 }

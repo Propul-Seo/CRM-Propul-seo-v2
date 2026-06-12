@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { FileSignature, FileDown, Bell, X, Plus, CalendarClock, Loader2 } from 'lucide-react';
-import { StatusBadge, FilePreviewDialog } from '@/modules/EspaceClient/shared/components';
+import { StatusBadge, FilePreviewDialog, Skeleton } from '@/modules/EspaceClient/shared/components';
 import { AdminFilterPills, AdminEmptyState } from '@/modules/EspaceClient/admin/components/kit';
 import { AdminSignatureForm } from './AdminSignatureForm';
 import { useAdminSignatures } from '../hooks/useAdminSignatures';
@@ -114,7 +114,11 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
             <span className="font-semibold tabular-nums text-foreground">{pct}%</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-surface-3">
-            <div className="h-full rounded-full bg-primary transition-all" style={{ width: pct + '%' }} />
+            {/* Largeur dynamique via la custom property --ps-bar-w (cf. .ps-progress-fill). */}
+            <div
+              className="ps-progress-fill h-full rounded-full bg-primary transition-all"
+              style={{ '--ps-bar-w': `${pct}%` } as CSSProperties}
+            />
           </div>
         </div>
       </section>
@@ -123,7 +127,21 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
       {actionError && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{actionError}</p>}
 
       {loading ? (
-        <div className="py-10 text-center text-sm text-muted-foreground"><Loader2 className="inline h-4 w-4 animate-spin" /> Chargement…</div>
+        // Squelette : reproduit la forme des cartes signature (icône + titre + dates + badge).
+        <div className="space-y-3" aria-hidden="true">
+          {[0, 1].map(i => (
+            <div key={i} className="rounded-xl border border-border bg-surface-2 p-4">
+              <div className="flex items-start gap-3.5">
+                <Skeleton className="h-10 w-10 shrink-0 rounded-lg" />
+                <div className="flex-1 space-y-2.5 pt-0.5">
+                  <Skeleton className="h-4 w-2/5 rounded-md" />
+                  <Skeleton className="h-3 w-3/5 rounded-md" />
+                </div>
+                <Skeleton className="h-5 w-20 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : total === 0 ? (
         <AdminEmptyState icon={FileSignature} title="Aucune signature" body="Envoyez un document à signer au client." />
       ) : (
@@ -210,7 +228,8 @@ export function SignaturesTab({ projectId, clientEmail }: { projectId: string; c
                             type="button"
                             onClick={(e) => { e.stopPropagation(); onRemind(s); }}
                             disabled={busy || !clientEmail}
-                            className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/15 disabled:cursor-not-allowed disabled:opacity-50"
+                            title={!clientEmail ? 'Aucun email client associé' : undefined}
+                            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary/85 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />} Relancer
                           </button>

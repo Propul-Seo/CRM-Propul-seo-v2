@@ -7,6 +7,14 @@ import { STEP_STATUSES } from './tabConstants';
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
+// Pastille du select statut : mêmes couleurs que les dots des StatusBadge.
+const STATUS_DOT: Record<string, string> = {
+  upcoming: 'bg-[var(--ps-fg-muted)]',
+  in_progress: 'bg-[var(--ps-primary)]',
+  completed: 'bg-[var(--ps-success)]',
+  blocked: 'bg-[var(--ps-danger)]',
+};
+
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -62,28 +70,39 @@ export function AdminProjectStepForm({ open, onOpenChange, initial, onSubmit }: 
       submitting={submitting}
       submitLabel={initial ? 'Enregistrer' : 'Créer'}
     >
-      <AdminFormField label="Libellé">
-        <Input value={label} onChange={e => setLabel(e.target.value)} placeholder="Ex. Maquettes validées" />
+      <AdminFormField label="Libellé" htmlFor="step-label">
+        <Input id="step-label" value={label} onChange={e => setLabel(e.target.value)} placeholder="Ex. Maquettes validées" />
       </AdminFormField>
-      <AdminFormField label="Statut">
-        <AdminSelect options={STEP_STATUSES} value={status} onChange={e => setStatus(e.target.value)} />
+      <AdminFormField
+        label="Statut"
+        htmlFor="step-status"
+        hint="Passer à « Terminé » pré-remplit la date de fin réelle."
+      >
+        <div className="relative">
+          <span
+            aria-hidden="true"
+            className={`pointer-events-none absolute left-3 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full ${STATUS_DOT[status] ?? STATUS_DOT.upcoming}`}
+          />
+          <AdminSelect id="step-status" className="pl-7" options={STEP_STATUSES} value={status} onChange={e => setStatus(e.target.value)} />
+        </div>
       </AdminFormField>
-      <AdminFormField label="Description">
-        <Input value={description} onChange={e => setDescription(e.target.value)} />
+      <AdminFormField label="Description" htmlFor="step-description">
+        <Input id="step-description" value={description} onChange={e => setDescription(e.target.value)} placeholder="Optionnel — détail affiché sous le jalon" />
       </AdminFormField>
-      <div className="grid grid-cols-3 gap-2">
-        <AdminFormField label="Début">
-          <Input type="date" value={dateStart} onChange={e => setDateStart(e.target.value)} />
+      <div className="grid grid-cols-3 gap-3">
+        <AdminFormField label="Début" htmlFor="step-date-start">
+          <Input id="step-date-start" type="date" value={dateStart} onChange={e => setDateStart(e.target.value)} />
         </AdminFormField>
-        <AdminFormField label="Prévu">
-          <Input type="date" value={datePlannedEnd} onChange={e => setDatePlannedEnd(e.target.value)} />
+        <AdminFormField label="Fin prévue" htmlFor="step-date-planned">
+          <Input id="step-date-planned" type="date" value={datePlannedEnd} onChange={e => setDatePlannedEnd(e.target.value)} />
         </AdminFormField>
-        <AdminFormField label="Réel">
-          <Input type="date" value={dateActualEnd} onChange={e => setDateActualEnd(e.target.value)} />
+        <AdminFormField label="Fin réelle" htmlFor="step-date-actual">
+          <Input id="step-date-actual" type="date" value={dateActualEnd} onChange={e => setDateActualEnd(e.target.value)} />
         </AdminFormField>
       </div>
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" checked={visible} onChange={e => setVisible(e.target.checked)} /> Visible par le client
+      <label className="flex items-center gap-2.5 text-sm text-foreground">
+        <input type="checkbox" className="h-4 w-4 accent-primary" checked={visible} onChange={e => setVisible(e.target.checked)} />
+        Visible par le client
       </label>
     </AdminFormDialog>
   );

@@ -14,23 +14,23 @@ const TABS: { key: string; label: string; icon: LucideIcon }[] = [
 ];
 
 type KpiKind = 'neutral' | 'rose' | 'amber';
+// Cellule KPI compacte (strip segmenté) : libellé en eyebrow, valeur en
+// Space Grotesk tabular-nums. Les états d'alerte ne colorent que la valeur.
 function Kpi({ short, value, kind }: { short: string; value: string; kind: KpiKind }) {
-  const chip = kind === 'rose'
-    ? 'border-rose-500/30 bg-rose-500/10 text-rose-300'
-    : kind === 'amber'
-      ? 'border-amber-500/30 bg-amber-500/10 text-amber-300'
-      : 'border-border bg-surface-2 text-muted-foreground';
   const val = kind === 'rose' ? 'text-rose-300' : kind === 'amber' ? 'text-amber-300' : 'text-foreground';
   return (
-    <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] ${chip}`}>
-      {short}
-      <span className={`font-semibold tabular-nums ${val}`}>{value}</span>
-    </span>
+    <div className="flex min-w-[64px] flex-col items-center justify-center gap-0.5 px-3 py-1.5">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{short}</span>
+      <span className={`ps-num whitespace-nowrap font-[family-name:var(--ps-font-display)] text-[13.5px] font-semibold leading-none ${val}`}>
+        {value}
+      </span>
+    </div>
   );
 }
 
-// En-tête unifié et collant du client (DA Atelier · variante V5) : identité (étage 1),
-// puis onglets routés + KPI (étage 2). Reste collé en haut quand on scrolle le panneau.
+// En-tête unifié et collant du client (inspiré fiche projet V3 du CRM) :
+// identité en grand + statut + KPI strip + action rapide (étage 1), puis
+// onglets routés soulignés (étage 2). Reste collé en haut au scroll du panneau.
 export function CockpitClientHeader({ client }: { client: AdminClientHealth | null }) {
   const { basePath } = useAdminBasePath();
   if (!client) return null;
@@ -41,54 +41,59 @@ export function CockpitClientHeader({ client }: { client: AdminClientHealth | nu
   const base = `${basePath}/clients/${client.project_id}`;
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-surface-1/95 backdrop-blur">
-      {/* Étage 1 — identité */}
-      <div className="flex items-center gap-3 px-4 pb-2.5 pt-3">
-        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-base font-semibold ${clientAvatarTone(client.project_id)}`}>
-          {clientInitials(client)}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="truncate text-lg font-semibold leading-tight text-foreground">{title}</h1>
-            <Badge tone={s.tone}>{s.label}</Badge>
+    <header className="sticky top-0 z-20 border-b border-border bg-surface-1">
+      {/* Étage 1 — identité (gauche) + KPI strip + action rapide (droite) */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5 px-4 pb-2.5 pt-3.5">
+        <div className="flex min-w-0 flex-1 basis-64 items-center gap-3">
+          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-base font-semibold ${clientAvatarTone(client.project_id)}`}>
+            {clientInitials(client)}
           </div>
-          <p className="flex items-center gap-1.5 truncate text-sm text-muted-foreground">
-            <span className="truncate">{client.project_name}</span>
-            <Mail className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate">{client.portal_client_email ?? '—'}</span>
-          </p>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2.5">
+              <h1 className="truncate font-[family-name:var(--ps-font-display)] text-xl font-semibold leading-tight tracking-tight text-foreground">
+                {title}
+              </h1>
+              <Badge tone={s.tone}>{s.label}</Badge>
+            </div>
+            <p className="mt-0.5 flex items-center gap-1.5 truncate text-[13px] text-muted-foreground">
+              <span className="truncate">{client.project_name}</span>
+              <Mail className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">{client.portal_client_email ?? '—'}</span>
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex divide-x divide-border overflow-hidden rounded-lg border border-border bg-surface-2">
+            <Kpi short="Impayés" value={String(overdue)} kind={overdue > 0 ? 'rose' : 'neutral'} />
+            <Kpi short="Signat." value={String(signatures)} kind={signatures > 0 ? 'amber' : 'neutral'} />
+            <Kpi short="Docs" value={String(client.documents_count)} kind="neutral" />
+            <Kpi short="Vu" value={formatLastActivity(client.last_client_login_at)} kind="neutral" />
+          </div>
+          <Link
+            to={`${base}/apercu-client`}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-3 py-2 text-[12.5px] font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-surface-3"
+          >
+            <Eye className="h-3.5 w-3.5 text-primary" /> Voir comme le client
+          </Link>
         </div>
       </div>
 
-      {/* Étage 2 — onglets routés + KPI */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle px-4 py-2">
-        <nav className="flex flex-wrap gap-1">
-          {TABS.map(({ key, label, icon: Icon }) => (
-            <NavLink
-              key={key}
-              end={key === ''}
-              to={key ? `${base}/${key}` : base}
-              className={({ isActive }) =>
-                `inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[13px] font-medium transition-colors ${isActive ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:bg-surface-2 hover:text-foreground'}`
-              }
-            >
-              <Icon className="h-4 w-4" /> {label}
-            </NavLink>
-          ))}
-        </nav>
-        <div className="flex flex-wrap items-center gap-1.5">
-          <Link
-            to={`${base}/apercu-client`}
-            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface-2 px-2.5 py-1.5 text-[12px] font-medium text-foreground transition-colors hover:bg-surface-3"
+      {/* Étage 2 — onglets routés soulignés (l'actif s'aligne sur le border-b du header) */}
+      <nav className="flex gap-1 overflow-x-auto px-3">
+        {TABS.map(({ key, label, icon: Icon }) => (
+          <NavLink
+            key={key}
+            end={key === ''}
+            to={key ? `${base}/${key}` : base}
+            className={({ isActive }) =>
+              `inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 px-2.5 pb-2 pt-1 text-[13px] font-medium transition-colors ${isActive ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground'}`
+            }
           >
-            <Eye className="h-3.5 w-3.5" /> Voir comme le client
-          </Link>
-          <Kpi short="Impayés" value={String(overdue)} kind={overdue > 0 ? 'rose' : 'neutral'} />
-          <Kpi short="Signat." value={String(signatures)} kind={signatures > 0 ? 'amber' : 'neutral'} />
-          <Kpi short="Docs" value={String(client.documents_count)} kind="neutral" />
-          <Kpi short="Vu" value={formatLastActivity(client.last_client_login_at)} kind="neutral" />
-        </div>
-      </div>
+            <Icon className="h-4 w-4" /> {label}
+          </NavLink>
+        ))}
+      </nav>
     </header>
   );
 }

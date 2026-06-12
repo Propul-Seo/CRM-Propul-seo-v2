@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, FileText } from 'lucide-react';
 import { InvoicePreviewDialog } from '@/modules/EspaceClient/shared/components';
-import { AdminEmptyState } from '@/modules/EspaceClient/admin/components/kit';
+import { AdminEmptyState, AdminSectionHeader } from '@/modules/EspaceClient/admin/components/kit';
 import { useAdminInvoices, type AdminInvoice } from '../hooks/useAdminInvoices';
 import { AdminInvoiceForm } from './AdminInvoiceForm';
 import { CancelInvoiceDialog } from './CancelInvoiceDialog';
@@ -46,27 +46,22 @@ export function InvoicesTab({ projectId, clientEmail }: { projectId: string; cli
 
   return (
     <div className="space-y-5 py-2">
-      <header className="flex items-end justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">Factures</h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            {invoices.length} document{invoices.length > 1 ? 's' : ''} de facturation
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setFormOpen(true)}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-glow transition-colors hover:bg-primary/85"
-        >
-          <Plus className="h-4 w-4" /> Nouvelle facture
-        </button>
-      </header>
+      <AdminSectionHeader
+        title="Factures"
+        subtitle={`${invoices.length} document${invoices.length > 1 ? 's' : ''} de facturation`}
+        action={{ label: 'Nouvelle facture', icon: Plus, onClick: () => setFormOpen(true) }}
+      />
 
       {error && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</p>}
       {actionError && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{actionError}</p>}
 
       {loading ? (
-        <div className="py-10 text-center text-sm text-muted-foreground">Chargement…</div>
+        // Squelettes au format des cartes facture (cf. .ps-skeleton du thème).
+        <div className="space-y-4" aria-busy="true" aria-label="Chargement des factures">
+          <div className="ps-skeleton h-28" />
+          <div className="ps-skeleton h-28" />
+          <div className="ps-skeleton h-28" />
+        </div>
       ) : invoices.length === 0 ? (
         <AdminEmptyState
           icon={FileText}

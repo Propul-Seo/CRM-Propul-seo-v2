@@ -1,6 +1,6 @@
-import { Building2, Mail, Phone, Sparkles } from 'lucide-react';
+import { Building2, CalendarDays, Layers, Mail, Megaphone, Phone, Sparkles } from 'lucide-react';
 import { StatusBadge } from '@/modules/EspaceClient/shared/components';
-import { SECTORS, BUDGET_RANGES } from '@/modules/EspaceClient/qualification/constants';
+import { SECTORS, BUDGET_RANGES, PROJECT_TYPES } from '@/modules/EspaceClient/qualification/constants';
 import type { QualificationLeadRow } from '../hooks/useQualificationLeads';
 
 interface LeadCardProps {
@@ -19,6 +19,7 @@ function formatDate(iso: string): string {
 }
 
 export function LeadCard({ lead, onClick }: LeadCardProps) {
+  const projectType = lead.project_type;
   return (
     <button
       type="button"
@@ -32,7 +33,7 @@ export function LeadCard({ lead, onClick }: LeadCardProps) {
               {lead.full_name}
             </h3>
             {lead.quality_score != null && (
-              <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10.5px] font-bold text-amber-300">
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-[var(--ps-warning-subtle)] px-1.5 py-0.5 text-[10.5px] font-bold text-[var(--ps-warning-text)]">
                 <Sparkles className="h-2.5 w-2.5" strokeWidth={2.5} />
                 {lead.quality_score}
               </span>
@@ -60,14 +61,29 @@ export function LeadCard({ lead, onClick }: LeadCardProps) {
       </dl>
 
       <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px]">
+        {projectType && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--ps-bg-subtle)] px-2 py-0.5 font-medium text-[var(--ps-fg-secondary)]">
+            <Layers className="h-3 w-3 text-[var(--ps-fg-muted)]" />
+            {labelOf(PROJECT_TYPES, projectType)}
+          </span>
+        )}
         <span className="rounded-full bg-[var(--ps-bg-subtle)] px-2 py-0.5 font-medium text-[var(--ps-fg-secondary)]">
           {labelOf(SECTORS, lead.business_sector)}
         </span>
         <span className="rounded-full bg-[var(--ps-primary-subtle)] px-2 py-0.5 font-semibold text-[var(--ps-primary-text)]">
           {labelOf(BUDGET_RANGES, lead.budget_range)}
         </span>
-        <span className="ml-auto text-[var(--ps-fg-muted)]">
-          {formatDate(lead.submitted_at ?? lead.created_at)}
+        <span className="ml-auto inline-flex items-center gap-2.5 text-[var(--ps-fg-muted)]">
+          {lead.source && (
+            <span className="inline-flex items-center gap-1">
+              <Megaphone className="h-3 w-3" />
+              {lead.source}
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1">
+            <CalendarDays className="h-3 w-3" />
+            {formatDate(lead.submitted_at ?? lead.created_at)}
+          </span>
         </span>
       </div>
     </button>

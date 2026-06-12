@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { Plus, ChevronUp, ChevronDown, Pencil, Trash2, ListChecks, Loader2, EyeOff } from 'lucide-react';
-import { StatusBadge } from '@/modules/EspaceClient/shared/components';
+import { StatusBadge, Skeleton } from '@/modules/EspaceClient/shared/components';
 import { AdminEmptyState } from '@/modules/EspaceClient/admin/components/kit';
 import { AdminProjectStepForm } from './AdminProjectStepForm';
 import { STEP_STATUSES } from './tabConstants';
@@ -9,12 +9,12 @@ import type { PortalProjectStep } from '@/modules/EspaceClient/client/hooks/useP
 
 const fmtDate = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
 
-// Pastille de statut (DA Atelier).
-const DOT: Record<string, string> = {
-  upcoming: 'bg-surface-3',
-  in_progress: 'bg-primary',
-  completed: 'bg-emerald-500',
-  blocked: 'bg-red-500',
+// Pastille numérotée : couleur alignée sur les tons des StatusBadge.
+const NUM_CHIP: Record<string, string> = {
+  upcoming: 'border-border bg-surface-2 text-muted-foreground',
+  in_progress: 'border-primary/40 bg-primary/10 text-primary',
+  completed: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+  blocked: 'border-red-500/30 bg-red-500/10 text-red-300',
 };
 
 const SELECT_CLASS =
@@ -73,9 +73,20 @@ export function ProjectStepsTab({ projectId }: { projectId: string }) {
   return (
     <>
       {loading && (
-        <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Chargement…
-        </div>
+        // Squelette : reproduit la forme des lignes jalon (numéro + titre + dates).
+        <ul className="space-y-2.5 py-2" aria-hidden="true">
+          {[0, 1, 2].map(i => (
+            <li key={i} className="rounded-lg border border-border-subtle bg-surface-1 p-4">
+              <div className="flex items-start gap-3.5">
+                <Skeleton className="h-7 w-7 shrink-0 rounded-lg" />
+                <div className="flex-1 space-y-2 pt-0.5">
+                  <Skeleton className="h-4 w-2/5 rounded-md" />
+                  <Skeleton className="h-3 w-3/5 rounded-md" />
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
       {error && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</p>}
 
@@ -100,7 +111,7 @@ export function ProjectStepsTab({ projectId }: { projectId: string }) {
         <section className="rounded-xl border border-border bg-surface-2 p-5 shadow-glow-sm">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Jalons du projet</p>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Jalons du projet</p>
               <p className="mt-1 text-2xl font-semibold text-foreground tabular-nums">
                 {done}<span className="text-base font-normal text-muted-foreground"> / {steps.length} terminés</span>
               </p>
@@ -114,8 +125,14 @@ export function ProjectStepsTab({ projectId }: { projectId: string }) {
             </button>
           </div>
 
-          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface-0">
-            <div className="h-full rounded-full bg-primary transition-all" style={{ width: pct + '%' }} />
+          <div className="mt-3 flex items-center gap-3">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-0">
+              <div
+                className="ps-progress-fill h-full rounded-full bg-primary transition-all"
+                style={{ '--ps-bar-w': `${pct}%` } as CSSProperties}
+              />
+            </div>
+            <span className="shrink-0 text-xs font-semibold tabular-nums text-muted-foreground">{pct} %</span>
           </div>
 
           {actionError && <p className="mt-3 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{actionError}</p>}
@@ -126,8 +143,10 @@ export function ProjectStepsTab({ projectId }: { projectId: string }) {
               return (
                 <li key={step.id} className="group rounded-lg border border-border-subtle bg-surface-1 p-4 transition-colors hover:bg-surface-3">
                   <div className="flex items-start gap-3.5">
-                    <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${DOT[step.status] ?? 'bg-surface-3'}`} />
-                    <div className="min-w-0 flex-1">
+                    <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg border text-xs font-semibold tabular-nums ${NUM_CHIP[step.status] ?? NUM_CHIP.upcoming}`}>
+                      {i + 1}
+                    </span>
+                    <div className="min-w-0 flex-1 pt-0.5">
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="truncate text-sm font-semibold text-foreground">{step.label}</h3>
                         <StatusBadge status={step.status} />
@@ -150,7 +169,7 @@ export function ProjectStepsTab({ projectId }: { projectId: string }) {
                       >
                         {STEP_STATUSES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                       </select>
-                      <div className="flex opacity-0 transition-opacity group-hover:opacity-100">
+                      <div className="flex opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
                         <button type="button" disabled={i === 0 || reordering} onClick={() => move(i, -1)} title="Monter" className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground disabled:opacity-20"><ChevronUp className="h-4 w-4" /></button>
                         <button type="button" disabled={i === steps.length - 1 || reordering} onClick={() => move(i, 1)} title="Descendre" className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground disabled:opacity-20"><ChevronDown className="h-4 w-4" /></button>
                         <button type="button" onClick={() => { setEditing(step); setFormOpen(true); }} title="Modifier" className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"><Pencil className="h-4 w-4" /></button>

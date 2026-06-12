@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import {
-  Lock, Unlock, MoreVertical, RefreshCw, Power, Loader2, Mail, Clock,
-  CheckCircle2, AlertTriangle, XCircle,
+  Lock, Unlock, MoreVertical, RefreshCw, Power, Loader2, Mail,
 } from 'lucide-react'
 import { usePortalState, type PortalState } from '../hooks/usePortalState'
 import { AdminCard, AdminEmptyState } from '@/modules/EspaceClient/admin/components/kit'
@@ -41,36 +40,31 @@ interface Props {
 }
 
 // Métadonnées d'affichage par état (5 états croisant projects_v2 + auth.users).
-// Tokens CRM sombres uniquement (pas de --ps-*).
+// Tokens CRM sombres uniquement (pas de --ps-*). Statut = dot + libellé FR (DA).
 interface StateDisplay {
   label: string
-  Icon: typeof CheckCircle2
-  badgeClass: string
+  dotClass: string
   description?: string
 }
 
 const STATE_DISPLAY: Record<Exclude<PortalState, 'inactive'>, StateDisplay> = {
   active: {
     label: 'Actif',
-    Icon: CheckCircle2,
-    badgeClass: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
+    dotClass: 'bg-emerald-400',
   },
   invited: {
     label: 'Invité',
-    Icon: Clock,
-    badgeClass: 'bg-blue-500/10 text-blue-300 border-blue-500/30',
+    dotClass: 'bg-blue-400',
     description: 'Invitation envoyée. En attente de la première connexion du client.',
   },
   orphan: {
     label: 'À régulariser',
-    Icon: AlertTriangle,
-    badgeClass: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
+    dotClass: 'bg-amber-400',
     description: "Email saisi sans envoi d'invitation officielle. Désactivez puis réactivez pour envoyer le lien magique.",
   },
   broken: {
     label: 'Compte supprimé',
-    Icon: XCircle,
-    badgeClass: 'bg-red-500/10 text-red-300 border-red-500/30',
+    dotClass: 'bg-red-400',
     description: 'Invitation envoyée mais le compte a été supprimé. Désactivez puis réactivez pour recréer un compte.',
   },
 }
@@ -87,7 +81,7 @@ function formatRelative(iso: string | null | undefined): string | null {
 
 // Section admin "Portail client" (thème CRM sombre, KIT partagé).
 // Inactif → état vide de marque + CTA "Activer le portail".
-// Actif   → carte d'état lisible : badge visible + email + dernière connexion + menu d'actions.
+// Actif   → carte d'état lisible : dot + libellé + email + dernière connexion + actions.
 // Visible uniquement pour les admins (la garde DB existe via le trigger SQL).
 export function PortalStatusSection({ project, isAdmin, suggestedEmail, primaryContactName, onRefresh, onCreateContact }: Props) {
   const [activateOpen, setActivateOpen] = useState(false)
@@ -204,7 +198,7 @@ export function PortalStatusSection({ project, isAdmin, suggestedEmail, primaryC
             <button
               type="button"
               onClick={() => setActivateOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-primary to-fuchsia-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white shadow-glow transition-colors hover:bg-primary/85"
             >
               <Unlock className="h-4 w-4" />
               Activer le portail client
@@ -216,40 +210,32 @@ export function PortalStatusSection({ project, isAdmin, suggestedEmail, primaryC
     )
   }
 
-  // État actif (active/invited/orphan/broken) : carte lisible + menu d'actions.
+  // État actif (active/invited/orphan/broken) : carte lisible, actions hiérarchisées
+  // (renvoi du lien = bouton ghost visible, désactivation = menu kebab).
   return (
     <>
       <AdminCard className="space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[12px] font-semibold ${display.badgeClass}`}
-          >
-            <display.Icon className="h-3.5 w-3.5" />
-            {display.label}
+        {/* État du portail en évidence : dot + libellé FR. */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className={`h-2 w-2 shrink-0 rounded-full ${display.dotClass}`} aria-hidden="true" />
+            <span className="text-sm font-semibold text-foreground">{display.label}</span>
             {lastLogin && (
-              <span className="font-normal opacity-70">· vu {lastLogin}</span>
+              <span className="truncate text-xs text-muted-foreground">· vu {lastLogin}</span>
             )}
-          </span>
+          </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-surface-3 hover:text-foreground"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-surface-3 hover:text-foreground"
                 aria-label="Actions portail"
               >
                 <MoreVertical className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-60">
-              {canResend && (
-                <DropdownMenuItem onClick={handleResend} disabled={isResending}>
-                  {isResending
-                    ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    : <RefreshCw className="mr-2 h-4 w-4" />}
-                  Renvoyer le lien d'accès
-                </DropdownMenuItem>
-              )}
               <DropdownMenuItem
                 onClick={() => setDeactivateOpen(true)}
                 className="text-red-300 focus:bg-red-500/10 focus:text-red-300"
@@ -261,15 +247,31 @@ export function PortalStatusSection({ project, isAdmin, suggestedEmail, primaryC
           </DropdownMenu>
         </div>
 
+        {/* Email du client : zone dédiée, lisible et sélectionnable d'un clic. */}
         {email && (
-          <div className="flex items-center gap-2 text-sm text-foreground">
+          <div className="flex items-center gap-2 rounded-lg border border-border-subtle bg-surface-3 px-3 py-2">
             <Mail className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <span className="truncate">{email}</span>
+            <span className="select-all truncate text-sm font-medium text-foreground">{email}</span>
           </div>
         )}
 
         {display.description && (
           <p className="text-xs leading-relaxed text-muted-foreground">{display.description}</p>
+        )}
+
+        {/* Action secondaire visible (ghost) — le destructif reste dans le menu. */}
+        {canResend && (
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={isResending}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isResending
+              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              : <RefreshCw className="h-3.5 w-3.5" />}
+            Renvoyer le lien d'accès
+          </button>
         )}
       </AdminCard>
       {dialogs}

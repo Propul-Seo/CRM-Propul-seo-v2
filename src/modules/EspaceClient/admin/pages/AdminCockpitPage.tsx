@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import { Navigate, useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, MousePointerClick } from 'lucide-react';
 import { useAdminBasePath } from '@/modules/EspaceClient/admin/AdminBasePathContext';
+import { AdminEmptyState } from '@/modules/EspaceClient/admin/components/kit';
 import { AdminTopNav } from '../components/AdminTopNav';
 import { AdminClientsList } from '../components/cockpit/AdminClientsList';
 import { CockpitClientHeader } from '../components/cockpit/CockpitClientHeader';
@@ -70,9 +71,24 @@ export function AdminCockpitPage() {
               <CockpitClientHeader client={selected} />
               <AdminClientPanel embedded />
             </>
+          ) : loading ? (
+            // Squelette du panneau central (en-tête + chips KPI + contenu).
+            <div className="space-y-4 px-6 py-6" aria-busy="true" aria-label="Chargement du client">
+              <div className="ps-skeleton h-14 w-full max-w-xl" />
+              <div className="flex gap-3">
+                <div className="ps-skeleton h-9 w-32" />
+                <div className="ps-skeleton h-9 w-32" />
+                <div className="ps-skeleton h-9 w-32" />
+              </div>
+              <div className="ps-skeleton h-64 w-full" />
+            </div>
           ) : (
-            <div className="flex h-full items-center justify-center px-6 text-center text-sm text-muted-foreground">
-              {loading ? 'Chargement…' : 'Sélectionnez un client dans la liste.'}
+            <div className="flex h-full items-center justify-center px-6">
+              <AdminEmptyState
+                icon={MousePointerClick}
+                title="Sélectionnez un client"
+                body="Choisissez un client dans la liste de gauche pour ouvrir son cockpit."
+              />
             </div>
           )}
         </main>

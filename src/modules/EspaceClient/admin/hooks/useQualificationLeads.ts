@@ -8,6 +8,8 @@ export interface QualificationLeadRow {
   phone: string;
   company_name: string | null;
   business_sector: string;
+  /** Type de projet (migration 242) : site | site_erp | erp. */
+  project_type: string | null;
   has_existing_site: boolean | null;
   existing_site_url: string | null;
   main_problems: string[] | null;
