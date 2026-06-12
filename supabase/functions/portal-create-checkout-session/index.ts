@@ -160,8 +160,14 @@ serve(async (req) => {
   }
 
   const origin = req.headers.get('origin') ?? Deno.env.get('VITE_PUBLIC_PORTAL_URL') ?? 'https://espace.propulseo-site.com'
-  const returnUrl = `${origin}/espace-client/invoices?paiement=reussi&session_id={CHECKOUT_SESSION_ID}`
-  const cancelUrl = `${origin}/espace-client/invoices?paiement=annule`
+  // Le portail vit à la racine sur espace.* et sous /espace-client ailleurs
+  // (parité avec portalHost.ts côté front) — sinon le retour Stripe tombe en 404.
+  let portalBase = '/espace-client'
+  try {
+    if (new URL(origin).hostname.startsWith('espace.')) portalBase = ''
+  } catch { /* origin malformé → base par défaut */ }
+  const returnUrl = `${origin}${portalBase}/invoices?paiement=reussi&session_id={CHECKOUT_SESSION_ID}`
+  const cancelUrl = `${origin}${portalBase}/invoices?paiement=annule`
 
   // BRANCH 1 : paiement d'une facture entière
   if (body.target === 'invoice') {
