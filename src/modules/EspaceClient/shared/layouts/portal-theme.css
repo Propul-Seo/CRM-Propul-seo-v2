@@ -155,8 +155,11 @@ html.ps-dark-surface #root {
 
 .propulspace-portal * { border-color: var(--ps-border-soft); }
 .propulspace-portal h1, .propulspace-portal h2, .propulspace-portal h3 { letter-spacing: -0.025em; }
-.propulspace-portal a       { color: var(--ps-primary); transition: color var(--ps-dur-base) var(--ps-ease); }
-.propulspace-portal a:hover { color: var(--ps-primary-hover); }
+/* Liens nus uniquement (:not([class])) : un <a> stylé en bouton (bg violet +
+   text-white) garde le contrôle de sa couleur — sinon cette règle (0,1,1)
+   écrasait les utilitaires Tailwind (0,1,0) → texte mauve sur fond mauve. */
+.propulspace-portal a:where(:not([class]))       { color: var(--ps-primary); transition: color var(--ps-dur-base) var(--ps-ease); }
+.propulspace-portal a:where(:not([class])):hover { color: var(--ps-primary-hover); }
 
 /* ─── SEMANTIC TYPE CLASSES ────────────────────────────── */
 .propulspace-portal .ps-display { font-size: 32px; line-height: 40px; font-weight: 700; letter-spacing: -0.025em; }

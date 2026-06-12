@@ -39,6 +39,8 @@ export function PortalShell() {
   const location = useLocation();
   const navigate = useNavigate();
   const activeTab = pathToTab(location.pathname, basePath);
+  // Profil : atteint via le bloc identité (sidebar/avatar), pas un onglet.
+  const profileActive = location.pathname.startsWith(`${basePath}/profile`);
   // Contact WhatsApp = membre Propul'SEO assigné au projet (Aide + FAB).
   const { details } = usePortalProjectDetails();
   const whatsappNumber = resolveTeamWhatsapp(details?.assigned_name);
@@ -52,6 +54,8 @@ export function PortalShell() {
       onTabChange={tab => navigate(tabToPath(basePath, tab))}
       clientName={clientName}
       projectName={project.name ?? undefined}
+      profileActive={profileActive}
+      onProfile={() => navigate(`${basePath}/profile`)}
       whatsappNumber={whatsappNumber}
       onLogout={async () => {
         await signOut();
