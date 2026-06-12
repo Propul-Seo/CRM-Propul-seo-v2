@@ -15,8 +15,8 @@ interface StatusPageProps {
 }
 
 const ICON_BUBBLE: Record<StatusTone, string> = {
-  violet: 'ps-brand-gradient text-white shadow-[0_12px_30px_-8px_rgba(124,58,237,0.5)]',
-  green:  'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-[0_12px_30px_-8px_rgba(16,163,74,0.45)]',
+  violet: 'ps-brand-gradient text-white shadow-[var(--ps-shadow-brand)]',
+  green:  'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-[var(--ps-shadow-success)]',
   orange: 'bg-[var(--ps-warning-subtle)] text-orange-800',
   red:    'bg-[var(--ps-danger-subtle)] text-red-800',
   gray:   'bg-[var(--ps-bg-subtle)] text-[var(--ps-fg-secondary)]',
@@ -44,7 +44,7 @@ export function StatusPage({
           <div className={`mx-auto mb-5 flex h-[72px] w-[72px] items-center justify-center rounded-full ${ICON_BUBBLE[tone]}`}>
             <Icon className="h-[30px] w-[30px]" strokeWidth={strokeWidth} />
           </div>
-          <h1 className="ps-gradient-text text-[28px] font-bold leading-tight tracking-tight">
+          <h1 className="text-[28px] font-bold leading-tight tracking-tight text-[var(--ps-fg)]">
             {title}
           </h1>
           {subtitle && (

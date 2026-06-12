@@ -48,7 +48,7 @@ export function PortalContactFab({ projectName, whatsappNumber }: PortalContactF
       </SheetTrigger>
       <SheetContent
         side="bottom"
-        className="propulspace-portal rounded-t-2xl border-t border-[var(--ps-border-soft)] bg-white"
+        className="propulspace-portal rounded-t-2xl border-t border-[var(--ps-border-soft)] bg-[var(--ps-bg-elevated)]"
       >
         <SheetHeader className="text-left">
           <SheetTitle className="text-[var(--ps-fg)]">
@@ -60,10 +60,12 @@ export function PortalContactFab({ projectName, whatsappNumber }: PortalContactF
         </SheetHeader>
         <div className="mt-6 flex flex-col gap-3 pb-4">
           {whatsappHref && (
+            /* Vert WhatsApp ramené sur les tokens sémantiques succès
+               (pas de hex hors palette dans la DA Aurora). */
             <Button
               asChild
               size="lg"
-              className="h-14 justify-start gap-3 rounded-xl bg-[#25D366] text-white shadow-sm hover:bg-[#1da851]"
+              className="h-14 justify-start gap-3 rounded-xl bg-[var(--ps-success)] text-white shadow-sm hover:brightness-110"
             >
               <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
                 <MessageSquare className="h-5 w-5" />

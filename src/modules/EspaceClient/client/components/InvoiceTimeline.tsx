@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { Check, Clock, FileText, Wallet } from 'lucide-react';
 import type { PortalInstallment } from '../hooks/usePortalData';
 
@@ -84,8 +85,8 @@ export function InvoiceTimeline({
       {/* Rail de fond + remplissage violet */}
       <div className="absolute left-[14px] right-[14px] top-[14px] h-0.5 bg-[var(--ps-border-strong)]" />
       <div
-        className="absolute left-[14px] top-[14px] h-0.5 rounded-full bg-[var(--ps-primary)]"
-        style={{ width: `calc((100% - 28px) * ${fillPct / 100})` }}
+        className="ps-progress-fill absolute left-[14px] top-[14px] h-0.5 rounded-full bg-[var(--ps-primary)]"
+        style={{ '--ps-bar-w': `calc((100% - 28px) * ${fillPct / 100})` } as CSSProperties}
       />
 
       <ol className="relative flex items-start">

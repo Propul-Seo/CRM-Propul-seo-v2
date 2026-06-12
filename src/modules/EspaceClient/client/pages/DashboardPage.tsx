@@ -129,14 +129,19 @@ export function DashboardPage() {
         <div className="space-y-5">
           {/* Hero + action prioritaire intégrée */}
           <section className="ps-surface relative overflow-hidden">
+            {/* Halo décoratif : opacité réduite et noyau reculé dans le coin clippé,
+                sinon le violet transparaît à travers le header frosted (saturate 180%)
+                et crée un « overlay violet » près du header en thème clair. */}
             <div
               aria-hidden
-              className="ps-hero-glow pointer-events-none absolute -right-10 -top-10 h-52 w-52 rounded-full opacity-70 blur-3xl"
+              className="ps-hero-glow pointer-events-none absolute -right-16 -top-16 h-52 w-52 rounded-full opacity-40 blur-3xl"
             />
             <div className="flex items-start justify-between gap-6 p-7 md:p-9">
               <div className="min-w-0 max-w-md">
                 <p className="ps-eyebrow">Bonjour, {firstName}</p>
-                <h1 className="ps-h1 mt-2 text-[24px] leading-tight md:text-[28px]">
+                {/* Titre en encre pleine (.ps-h1 impose taille/graisse/marge : les
+                    overrides Tailwind mono-classe étaient inertes, on les retire). */}
+                <h1 className="ps-h1 pt-2">
                   Votre projet est à{' '}
                   <span className="ps-num text-[var(--ps-primary)]">{stats.progressPct} %</span>
                   {' — '}{headlineTail}
@@ -167,7 +172,7 @@ export function DashboardPage() {
                   <span className="block text-[10.5px] font-semibold uppercase tracking-[0.08em] text-white/60">
                     Action prioritaire
                   </span>
-                  <span className="mt-0.5 block truncate text-[16px] font-bold tracking-tight" style={{ fontFamily: 'var(--ps-font-display)' }}>
+                  <span className="ps-h3 block truncate pt-0.5">
                     {priority.title}
                   </span>
                   <span className="mt-0.5 block text-[12px] text-white/70">{priority.meta}</span>
@@ -317,8 +322,7 @@ function SideKpi({ label, value, sub, badge, accent, valueSmall }: SideKpiProps)
   return (
     <div className={`ps-surface p-5 ${accent ? 'border-l-[3px] border-l-[var(--ps-primary)]' : ''}`}>
       <p className="ps-eyebrow ps-eyebrow-muted">{label}</p>
-      <p className={`ps-num mt-1.5 font-bold tracking-tight text-[var(--ps-fg)] ${valueSmall ? 'truncate text-[16px]' : 'ps-metric'}`}
-         style={valueSmall ? { fontFamily: 'var(--ps-font-display)' } : undefined}>
+      <p className={`ps-num pt-1.5 text-[var(--ps-fg)] ${valueSmall ? 'ps-h3 truncate' : 'ps-metric'}`}>
         {value}
       </p>
       {sub && <p className="mt-1 text-[11.5px] text-[var(--ps-fg-muted)]">{sub}</p>}

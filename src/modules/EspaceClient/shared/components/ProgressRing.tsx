@@ -56,7 +56,7 @@ export function ProgressRing({
         y={label ? '46%' : '52%'}
         textAnchor="middle"
         dominantBaseline="middle"
-        style={{ fontFamily: 'var(--ps-font-display)', fontVariantNumeric: 'tabular-nums' }}
+        className="ps-num font-[family-name:var(--ps-font-display)]"
         fontSize={fontSize}
         fontWeight={700}
         fill="var(--ps-fg)"
@@ -69,7 +69,7 @@ export function ProgressRing({
           y="64%"
           textAnchor="middle"
           dominantBaseline="middle"
-          style={{ fontFamily: 'var(--ps-font-sans)' }}
+          className="font-[family-name:var(--ps-font-sans)]"
           fontSize={Math.round(size * 0.083)}
           fill="var(--ps-fg-muted)"
         >

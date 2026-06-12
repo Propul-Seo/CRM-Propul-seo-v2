@@ -1,4 +1,5 @@
-import { FileText, FileImage, FileArchive, FileSpreadsheet, FileVideo, File } from 'lucide-react';
+import { FileText, FileImage, FileArchive, FileSpreadsheet, FileVideo, File, type LucideIcon } from 'lucide-react';
+import { DOC_TONE_STYLE, type DocTone } from './DocumentTypeIcon';
 
 type FileKind = 'pdf' | 'image' | 'zip' | 'sheet' | 'video' | 'other';
 
@@ -19,21 +20,22 @@ function detectKind(ext?: string, mime?: string): FileKind {
   return 'other';
 }
 
-const KIND_STYLE: Record<FileKind, { Icon: typeof FileText; bg: string; fg: string }> = {
-  pdf:   { Icon: FileText,        bg: 'bg-red-50',      fg: 'text-red-700' },
-  image: { Icon: FileImage,       bg: 'bg-blue-50',     fg: 'text-blue-700' },
-  zip:   { Icon: FileArchive,     bg: 'bg-[var(--ps-primary-subtle)]', fg: 'text-[var(--ps-primary-text)]' },
-  sheet: { Icon: FileSpreadsheet, bg: 'bg-emerald-50',  fg: 'text-emerald-700' },
-  video: { Icon: FileVideo,       bg: 'bg-amber-50',    fg: 'text-amber-700' },
-  other: { Icon: File,            bg: 'bg-zinc-100',    fg: 'text-zinc-600' },
+// Teintes alignées sur la map partagée DOC_TONE_STYLE (source unique avec
+// DocumentTypeIcon) — cohérence pdf/docs entre portail client et admin.
+const KIND_META: Record<FileKind, { Icon: LucideIcon; tone: DocTone }> = {
+  pdf:   { Icon: FileText,        tone: 'brand' },
+  image: { Icon: FileImage,       tone: 'neutral' },
+  zip:   { Icon: FileArchive,     tone: 'warning' },
+  sheet: { Icon: FileSpreadsheet, tone: 'success' },
+  video: { Icon: FileVideo,       tone: 'neutral' },
+  other: { Icon: File,            tone: 'neutral' },
 };
 
 export function FileIcon({ ext, mime, className = 'h-10 w-10' }: FileIconProps) {
-  const kind = detectKind(ext, mime);
-  const style = KIND_STYLE[kind];
-  const Icon = style.Icon;
+  const { Icon, tone } = KIND_META[detectKind(ext, mime)];
+  const t = DOC_TONE_STYLE[tone];
   return (
-    <span className={`flex shrink-0 items-center justify-center rounded-lg ${style.bg} ${style.fg} ${className}`}>
+    <span className={`flex shrink-0 items-center justify-center rounded-lg ${t.bg} ${t.fg} ${className}`}>
       <Icon className="h-[55%] w-[55%]" strokeWidth={2} />
     </span>
   );

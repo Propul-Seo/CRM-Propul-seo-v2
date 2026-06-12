@@ -180,7 +180,7 @@ export function ClientLoginPage() {
             <div className="mb-6 flex flex-col items-center gap-3 text-center">
               <BrandPill size="lg" />
               <p className="ps-eyebrow ps-eyebrow-muted">Vérification</p>
-              <h1 className="ps-gradient-text text-[26px] font-bold leading-tight tracking-tight">Entrez votre code</h1>
+              <h1 className="ps-h1 text-[var(--ps-fg)]">Entrez votre code</h1>
               <p className="max-w-[320px] text-[13.5px] leading-relaxed text-[var(--ps-fg-secondary)]">
                 Un code à 6 chiffres a été envoyé à <strong className="text-[var(--ps-fg)]">{form.email}</strong>. Saisissez-le ci-dessous pour accéder à votre espace.
               </p>
@@ -207,7 +207,7 @@ export function ClientLoginPage() {
               </Button>
 
               {verifyError && (
-                <p className="rounded-md bg-red-50 px-3 py-2 text-[12.5px] text-red-700">{verifyError}</p>
+                <p className="rounded-md bg-[var(--ps-danger-subtle)] px-3 py-2 text-[12.5px] text-[var(--ps-danger-text)]">{verifyError}</p>
               )}
 
               <div className="flex items-center justify-between pt-1 text-[12px]">
@@ -265,7 +265,7 @@ export function ClientLoginPage() {
         <div className="relative">
           {/* Toast confirmation reset password réussi */}
           {resetToast && (
-            <div className="mb-4 flex items-start gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12.5px] text-emerald-800">
+            <div className="mb-4 flex items-start gap-2 rounded-md bg-[var(--ps-success-subtle)] px-3 py-2 text-[12.5px] text-[var(--ps-success-text)]">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
               <span>Mot de passe modifié avec succès. Connectez-vous avec votre nouveau mot de passe.</span>
             </div>
@@ -274,7 +274,7 @@ export function ClientLoginPage() {
           <div className="mb-6 flex flex-col items-center gap-3 text-center">
             <BrandPill size="lg" />
             <p className="ps-eyebrow ps-eyebrow-muted">Espace client</p>
-            <h1 className="ps-gradient-text text-[26px] font-bold leading-tight tracking-tight">
+            <h1 className="ps-h1 text-[var(--ps-fg)]">
               {mode === 'forgot' ? 'Mot de passe oublié' : 'Connexion sécurisée'}
             </h1>
             <p className="max-w-[300px] text-[13.5px] leading-relaxed text-[var(--ps-fg-secondary)]">
@@ -324,7 +324,7 @@ export function ClientLoginPage() {
               </Button>
 
               {form.kind === 'error' && (
-                <p className="rounded-md bg-red-50 px-3 py-2 text-[12.5px] text-red-700">
+                <p className="rounded-md bg-[var(--ps-danger-subtle)] px-3 py-2 text-[12.5px] text-[var(--ps-danger-text)]">
                   {form.message}
                 </p>
               )}
@@ -352,7 +352,7 @@ export function ClientLoginPage() {
                   type="button"
                   onClick={onDemoLogin}
                   disabled={submitting}
-                  className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-[var(--ps-fg-muted)]/40 px-3 py-2 text-[12px] text-[var(--ps-fg-muted)] transition hover:bg-black/5 disabled:opacity-60"
+                  className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-[var(--ps-border-strong)] px-3 py-2 text-[12px] text-[var(--ps-fg-muted)] transition hover:bg-[var(--ps-bg-subtle)] disabled:opacity-60"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
                   Connexion démo (Boulangerie Dupont)
@@ -386,7 +386,7 @@ export function ClientLoginPage() {
               </Button>
 
               {form.kind === 'error' && (
-                <p className="rounded-md bg-red-50 px-3 py-2 text-[12.5px] text-red-700">
+                <p className="rounded-md bg-[var(--ps-danger-subtle)] px-3 py-2 text-[12.5px] text-[var(--ps-danger-text)]">
                   {form.message}
                 </p>
               )}
@@ -427,7 +427,7 @@ export function ClientLoginPage() {
               </Button>
 
               {form.kind === 'error' && (
-                <p className="rounded-md bg-red-50 px-3 py-2 text-[12.5px] text-red-700">
+                <p className="rounded-md bg-[var(--ps-danger-subtle)] px-3 py-2 text-[12.5px] text-[var(--ps-danger-text)]">
                   {form.message}
                 </p>
               )}

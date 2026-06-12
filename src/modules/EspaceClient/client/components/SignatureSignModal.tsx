@@ -24,6 +24,16 @@ const tabClass = (active: boolean) =>
       : 'text-[var(--ps-fg-muted)] hover:bg-[var(--ps-bg-subtle)] hover:text-[var(--ps-fg)]'
   }`;
 
+// Encre de la signature : lue depuis le token --ps-fg au runtime plutôt qu'un
+// hex figé. Le token n'est défini que sous .propulspace-portal, donc on le lit
+// depuis un élément du portail (le canvas) et non document.documentElement.
+// Fallback sur l'encre du thème clair si le token n'est pas résolu.
+function inkColor(el: Element | null): string {
+  const scope = el?.closest('.propulspace-portal') ?? el;
+  const ink = scope ? getComputedStyle(scope).getPropertyValue('--ps-fg').trim() : '';
+  return ink || '#18181B';
+}
+
 export function SignatureSignModal({ open, onOpenChange, signature, signerDefaultName, onSigned }: Props) {
   const [mode, setMode] = useState<Mode>('draw');
   const [typedName, setTypedName] = useState('');
@@ -49,7 +59,7 @@ export function SignatureSignModal({ open, onOpenChange, signature, signerDefaul
   function down(e: RPointerEvent<HTMLCanvasElement>) {
     drawing.current = true; const { x, y } = at(e);
     const ctx = canvasRef.current!.getContext('2d')!;
-    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.strokeStyle = '#18181B';
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.strokeStyle = inkColor(canvasRef.current);
   }
   function move(e: RPointerEvent<HTMLCanvasElement>) {
     if (!drawing.current) return; const { x, y } = at(e);
@@ -65,7 +75,7 @@ export function SignatureSignModal({ open, onOpenChange, signature, signerDefaul
     const name = typedName.trim(); if (!name) return null;
     const c = document.createElement('canvas'); c.width = 600; c.height = 200;
     const ctx = c.getContext('2d'); if (!ctx) return null;
-    ctx.fillStyle = '#18181B'; ctx.font = '64px "Segoe Script", "Brush Script MT", cursive';
+    ctx.fillStyle = inkColor(canvasRef.current); ctx.font = '64px "Segoe Script", "Brush Script MT", cursive';
     ctx.textBaseline = 'middle'; ctx.fillText(name, 20, 100);
     return c.toDataURL('image/png');
   }

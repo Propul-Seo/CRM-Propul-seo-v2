@@ -51,7 +51,7 @@ export function SignaturesPage() {
       {/* En-tête — titre encre pleine (pas de gradient) */}
       <header>
         <p className="ps-eyebrow">Signatures</p>
-        <h1 className="ps-h1 mt-1.5 text-[26px] leading-tight text-[var(--ps-fg)] md:text-[30px]">
+        <h1 className="ps-h1 pt-1.5 text-[var(--ps-fg)]">
           Vos documents à signer
         </h1>
         <p className="mt-2 max-w-xl text-[14px] leading-relaxed text-[var(--ps-fg-secondary)]">

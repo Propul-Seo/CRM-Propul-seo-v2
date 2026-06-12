@@ -1,19 +1,13 @@
 import { Gem } from 'lucide-react';
 import type { QualificationLead } from '../useWelcomeWizard';
 
-const TINT_BG: Record<string, { bg: string; text: string }> = {
-  blue:   { bg: 'from-sky-50 to-sky-100/60',         text: 'text-sky-700' },
-  green:  { bg: 'from-violet-50 to-violet-100/60',   text: 'text-violet-700' },
-  orange: { bg: 'from-orange-50 to-orange-100/60',   text: 'text-orange-700' },
-  violet: { bg: 'from-pink-50 to-pink-100/60',       text: 'text-pink-700' },
-};
-
-function MiniCard({ label, value, tint }: { label: string; value: string; tint: keyof typeof TINT_BG }) {
-  const t = TINT_BG[tint];
+// Déclinaison monochrome (DA Aurora : un seul accent violet) — la hiérarchie
+// passe par le contraste neutre/violet, plus par la teinte.
+function MiniCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className={`rounded-2xl bg-gradient-to-br ${t.bg} p-2.5`}>
-      <p className={`text-[9.5px] font-bold uppercase tracking-widest ${t.text}`}>{label}</p>
-      <p className="mt-1 truncate text-[12.5px] font-semibold text-stone-900">{value}</p>
+    <div className="rounded-2xl bg-[var(--ps-bg-subtle)] p-2.5">
+      <p className="text-[9.5px] font-bold uppercase tracking-widest text-[var(--ps-primary-text)]">{label}</p>
+      <p className="mt-1 truncate text-[12.5px] font-semibold text-[var(--ps-fg)]">{value}</p>
     </div>
   );
 }
@@ -23,38 +17,37 @@ interface Step1QualifRecapProps { qualif: QualificationLead }
 export function Step1QualifRecap({ qualif }: Step1QualifRecapProps) {
   const features = qualif.desired_features ?? [];
   return (
-    <div className="flex h-full flex-col gap-3 rounded-3xl bg-white p-6"
-      style={{ boxShadow: '0 30px 60px -15px rgba(192,38,211,0.20), 0 0 0 1px rgba(192,38,211,0.06)' }}
-    >
+    <div className="flex h-full flex-col gap-3 rounded-3xl border border-[var(--ps-border-soft)] bg-[var(--ps-bg-elevated)] p-6 shadow-[var(--ps-shadow-floating)]">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-sky-600">Votre projet</p>
-        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9.5px] font-bold text-emerald-700 ring-1 ring-emerald-200">
-          ✓ PRÉ-REMPLI
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--ps-primary-text)]">Votre projet</p>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-success-subtle)] px-2 py-0.5 text-[9.5px] font-bold text-[var(--ps-success-text)]">
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--ps-success)]" aria-hidden />
+          Pré-rempli
         </span>
       </div>
 
       <div>
-        <h2 className="text-[22px] font-semibold leading-tight text-stone-900">
+        <h2 className="text-[22px] font-semibold leading-tight text-[var(--ps-fg)]">
           {qualif.company_name ?? '—'}
         </h2>
         {qualif.business_sector && (
-          <p className="mt-0.5 flex items-center gap-1.5 text-[12px] text-stone-500">
+          <p className="mt-0.5 flex items-center gap-1.5 text-[12px] text-[var(--ps-fg-muted)]">
             <Gem className="h-3 w-3" />{qualif.business_sector}
           </p>
         )}
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        <MiniCard label="Objectif" value={qualif.main_goal ?? '—'} tint="blue" />
-        <MiniCard label="Budget"   value={qualif.budget_range ?? '—'} tint="green" />
-        <MiniCard label="Délai"    value={qualif.desired_timeline ?? '—'} tint="orange" />
-        <MiniCard label="Modules"  value={`${features.length} à construire`} tint="violet" />
+        <MiniCard label="Objectif" value={qualif.main_goal ?? '—'} />
+        <MiniCard label="Budget"   value={qualif.budget_range ?? '—'} />
+        <MiniCard label="Délai"    value={qualif.desired_timeline ?? '—'} />
+        <MiniCard label="Modules"  value={`${features.length} à construire`} />
       </div>
 
       {features.length > 0 && (
         <div className="mt-auto flex flex-wrap gap-1.5">
           {features.slice(0, 6).map(f => (
-            <span key={f} className="rounded-full bg-gradient-to-r from-sky-100 via-violet-100 to-pink-100 px-2.5 py-0.5 text-[11px] font-medium text-violet-800 ring-1 ring-violet-200/50">
+            <span key={f} className="rounded-full bg-[var(--ps-primary-subtle)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--ps-primary-text)]">
               {f}
             </span>
           ))}

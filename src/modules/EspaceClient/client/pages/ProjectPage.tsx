@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 import {
   Calendar, Clock, Check, Loader2, Lock, AlertCircle, FolderKanban,
   Download, ArrowRight, Mail, FileText, Radio,
@@ -89,7 +89,7 @@ export function ProjectPage() {
   if (steps.error) {
     return (
       <div className="ps-fade-in">
-        <p className="rounded-md bg-red-50 px-3 py-2 text-[13px] text-red-700">{steps.error}</p>
+        <p className="rounded-md bg-[var(--ps-danger-subtle)] px-3 py-2 text-[13px] text-[var(--ps-danger-text)]">{steps.error}</p>
       </div>
     )
   }
@@ -106,11 +106,11 @@ export function ProjectPage() {
         />
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-primary-subtle)] px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-[var(--ps-primary-text)]">
+            <span className="ps-eyebrow inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-primary-subtle)] px-2.5 py-1">
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--ps-primary)]" />
               {prestaLabel}
             </span>
-            <h1 className="ps-h1 mt-3 text-[24px] leading-tight text-[var(--ps-fg)] md:text-[28px]">
+            <h1 className="ps-h1 pt-3 text-[var(--ps-fg)]">
               {project.name ?? 'Mon projet'}
             </h1>
             <p className="ps-small mt-2">
@@ -138,8 +138,8 @@ export function ProjectPage() {
           <div className="mt-7">
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--ps-border)]">
               <div
-                className="h-full rounded-full bg-[var(--ps-primary)] transition-[width] duration-700"
-                style={{ width: `${stats.progressPct}%` }}
+                className="ps-progress-fill h-full rounded-full bg-[var(--ps-primary)] transition-[width] duration-700"
+                style={{ '--ps-bar-w': `${stats.progressPct}%` } as CSSProperties}
               />
             </div>
             <p className="mt-2 text-[11.5px] text-[var(--ps-fg-muted)]">
@@ -181,7 +181,7 @@ export function ProjectPage() {
           <section>
             <div className="mb-4 flex items-center gap-2.5">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-primary-subtle)] px-3 py-1 text-[11.5px] font-semibold text-[var(--ps-primary-text)]">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ps-primary)]" />
+                <span className="ps-pulse h-1.5 w-1.5 rounded-full bg-[var(--ps-primary)]" />
                 Phase active
               </span>
               <h2 className="ps-h2 text-[var(--ps-fg)]">{stats.current?.label ?? 'Projet terminé'}</h2>
@@ -283,7 +283,7 @@ function StepperNode({
           'relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
           done ? 'bg-[var(--ps-primary)] text-white'
             : active ? 'bg-[var(--ps-bg-elevated)] text-[var(--ps-primary)] ring-[3px] ring-[var(--ps-primary-subtle)] border-2 border-[var(--ps-primary)]'
-            : blocked ? 'bg-red-500 text-white'
+            : blocked ? 'bg-[var(--ps-danger)] text-white'
             : 'bg-[var(--ps-bg-elevated)] text-[var(--ps-fg-muted)] border-2 border-[var(--ps-border)]',
         ].join(' ')}
       >
@@ -313,7 +313,7 @@ function Legend() {
     { cls: 'bg-[var(--ps-primary)]', label: 'Terminé' },
     { cls: 'border-2 border-[var(--ps-primary)] bg-[var(--ps-bg-elevated)]', label: 'En cours' },
     { cls: 'border-2 border-[var(--ps-border)] bg-[var(--ps-bg-elevated)]', label: 'À venir' },
-    { cls: 'bg-red-500', label: 'Bloqué' },
+    { cls: 'bg-[var(--ps-danger)]', label: 'Bloqué' },
   ]
   return (
     <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-[var(--ps-border-soft)] pt-4">
@@ -331,7 +331,7 @@ function Legend() {
 const ROW_DOT: Record<ProjectStepStatus, { node: string; icon: typeof Check }> = {
   completed:   { node: 'bg-[var(--ps-primary)] text-white', icon: Check },
   in_progress: { node: 'ps-brand-gradient text-white', icon: Loader2 },
-  blocked:     { node: 'bg-red-500 text-white', icon: AlertCircle },
+  blocked:     { node: 'bg-[var(--ps-danger)] text-white', icon: AlertCircle },
   upcoming:    { node: 'bg-[var(--ps-bg-subtle)] text-[var(--ps-fg-muted)]', icon: Lock },
 }
 
@@ -444,7 +444,10 @@ function NextStepCard({ current }: { current: PortalProjectStep | null }) {
       : null
 
   return (
-    <div className="ps-surface flex flex-1 flex-col rounded-[var(--ps-radius-card)] border-l-[3px] border-l-[var(--ps-primary)] bg-[var(--ps-primary-subtle)] p-6">
+    <div className="ps-surface relative flex flex-1 flex-col overflow-hidden p-6">
+      {/* Accent violet en élément dédié : pas de conflit de spécificité avec le
+          fond opaque de .ps-surface (cause du bloc violet incohérent). */}
+      <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-[var(--ps-primary)]" />
       <p className="ps-eyebrow flex items-center gap-1.5">
         <Clock className="h-3 w-3" strokeWidth={2.5} />
         {blocked ? 'Action attendue' : 'Étape en cours'}
@@ -479,7 +482,7 @@ function NextStepCard({ current }: { current: PortalProjectStep | null }) {
 function ReferentCard({ name }: { name: string }) {
   return (
     <div className="ps-surface flex items-center gap-3.5 p-5">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-[var(--ps-primary-subtle)] bg-[var(--ps-primary-subtle)] text-[12px] font-bold text-[var(--ps-primary-text)]" style={{ fontFamily: 'var(--ps-font-display)' }}>
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-[var(--ps-primary-subtle)] bg-[var(--ps-primary-subtle)] text-[12px] font-bold text-[var(--ps-primary-text)]">
         {initials(name)}
       </span>
       <div className="min-w-0 flex-1">

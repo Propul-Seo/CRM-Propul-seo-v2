@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Clock, X, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Clock, X, CheckCircle2, Sparkles } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -45,69 +45,61 @@ export function WelcomeWizard({ onCompleted }: WelcomeWizardProps) {
     <Dialog open={isOpen} onOpenChange={(o) => { if (!o) void handleDismiss(); else openWizard(); }}>
       <DialogContent
         className={cn(
-          'max-w-[820px] gap-0 overflow-hidden border-0 p-0',
+          // Scope Aurora clair : rend les tokens --ps-* et classes .ps-* dispo
+          // dans le portal Radix (rendu hors de l'arbre .propulspace-portal).
+          'propulspace-portal !min-h-0 max-w-[820px] gap-0 overflow-hidden border-0 p-0',
+          'bg-[var(--ps-bg)] text-[var(--ps-fg)] shadow-[var(--ps-shadow-floating)]',
           'max-sm:h-[100dvh] max-sm:max-w-full max-sm:rounded-none',
           '[&>button]:hidden', // masque le X automatique de shadcn
         )}
-        style={{
-          backgroundColor: '#ffffff',
-          backgroundImage: 'linear-gradient(135deg, #f0f9ff 0%, #faf5ff 50%, #fff7ed 100%)',
-          color: '#1c1917', // stone-900 — force texte foncé contre theme dark CRM
-          fontFamily: 'Inter, system-ui, sans-serif',
-          boxShadow: '0 40px 80px -20px rgba(139,92,246,0.30), inset 0 1px 0 rgba(255,255,255,0.5)',
-        }}
       >
         <DialogTitle className="sr-only">Bienvenue dans votre Propul'Space — étape {currentStep} sur 5</DialogTitle>
         <DialogDescription className="sr-only">
           Quelques minutes pour vérifier vos informations, caler vos préférences, et démarrer votre projet.
         </DialogDescription>
 
-        {/* Auroras diagonales partagées */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-[10%] top-[5%] h-[400px] w-[600px] -rotate-12 rounded-full opacity-45 blur-3xl"
-            style={{ background: 'radial-gradient(ellipse, #7dd3fc 0%, transparent 60%)' }} />
-          <div className="absolute right-[5%] top-[20%] h-[400px] w-[500px] rotate-12 rounded-full opacity-40 blur-3xl"
-            style={{ background: 'radial-gradient(ellipse, #c4b5fd 0%, transparent 60%)' }} />
-          <div className="absolute left-[30%] bottom-[0%] h-[300px] w-[500px] rounded-full opacity-45 blur-3xl"
-            style={{ background: 'radial-gradient(ellipse, #fed7aa 0%, transparent 60%)' }} />
+        {/* Halos violets diffus partagés (un seul accent — DA Aurora) */}
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          <div className="ps-hero-glow absolute -left-[10%] top-[5%] h-[400px] w-[600px] rounded-full opacity-70 blur-3xl" />
+          <div className="ps-hero-glow absolute -right-[5%] bottom-[0%] h-[320px] w-[500px] rounded-full opacity-50 blur-3xl" />
         </div>
 
         {/* Header */}
-        <div className="relative z-10 flex items-center justify-between border-b border-white/40 bg-white/50 px-6 py-2 backdrop-blur-md">
+        <div className="ps-frosted relative z-10 flex items-center justify-between border-b border-[var(--ps-border-soft)] px-6 py-2">
           <div className="flex items-center gap-3">
-            <div className="inline-flex h-7 items-center gap-1.5 rounded-full bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 px-3 text-[11px] font-bold text-white shadow-sm">
-              ✨ Propul'SEO
+            <div className="ps-brand-gradient inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-[11px] font-bold text-white shadow-sm">
+              <Sparkles className="h-3 w-3" />Propul'SEO
             </div>
             <span
               role="status" aria-live="polite"
-              className="rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-medium text-stone-600 ring-1 ring-stone-200/60"
+              className="rounded-full bg-[var(--ps-bg-subtle)] px-2.5 py-1 text-[11px] font-medium text-[var(--ps-fg-secondary)] ring-1 ring-[var(--ps-border)]"
             >
-              Onboarding <span className="font-mono tabular-nums text-stone-900">{currentStep}</span>
+              Onboarding <span className="font-mono tabular-nums text-[var(--ps-fg)]">{currentStep}</span>
               <span className="opacity-40">/</span><span className="font-mono opacity-60">5</span>
             </span>
           </div>
           <Button
             type="button" variant="outline" size="sm"
             onClick={() => { void handleDismiss(); }}
-            className="h-8 gap-1.5 border-stone-200 bg-white text-[12px] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900"
+            className="h-8 gap-1.5 border-[var(--ps-border)] bg-[var(--ps-bg-elevated)] text-[12px] font-medium text-[var(--ps-fg-secondary)] hover:bg-[var(--ps-bg-subtle)] hover:text-[var(--ps-fg)]"
           >
             <X className="h-3.5 w-3.5" />Terminer plus tard
           </Button>
         </div>
 
         {/* Progress dots */}
-        <div className="relative z-10 flex items-center gap-1.5 bg-white/30 px-6 py-2 backdrop-blur-sm"
+        <div className="relative z-10 flex items-center gap-1.5 px-6 py-2"
           role="progressbar" aria-valuemin={1} aria-valuemax={5} aria-valuenow={currentStep}>
           {STEPS.map(s => {
             const isActive = s.num === currentStep;
             const isPast = s.num < currentStep;
             return (
-              <div key={s.num} className="relative h-[5px] flex-1 overflow-hidden rounded-full bg-white/60" aria-hidden="true">
+              <div key={s.num} className="relative h-[5px] flex-1 overflow-hidden rounded-full bg-[var(--ps-bg-subtle)]" aria-hidden="true">
                 <motion.div
                   className={cn(
                     'absolute inset-y-0 left-0 rounded-full',
-                    isActive && 'bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 shadow-sm shadow-violet-500/30',
-                    isPast && 'bg-violet-500',
+                    isActive && 'ps-brand-gradient',
+                    isPast && 'bg-[var(--ps-primary)]',
                   )}
                   initial={false}
                   animate={{ width: isActive || isPast ? '100%' : '0%' }}
@@ -121,8 +113,18 @@ export function WelcomeWizard({ onCompleted }: WelcomeWizardProps) {
         {/* Content */}
         <div className="relative z-10 min-h-[380px] px-6 py-4 max-sm:px-5 max-sm:py-5">
           {loading ? (
-            <div className="flex h-[340px] items-center justify-center text-sm text-stone-500">
-              Chargement de votre espace…
+            <div className="grid h-[340px] content-center gap-4 md:grid-cols-2" role="status" aria-label="Chargement de votre espace">
+              <div className="space-y-3">
+                <div className="ps-skeleton h-11 w-11 !rounded-2xl" />
+                <div className="ps-skeleton h-9 w-3/4" />
+                <div className="ps-skeleton h-4 w-full" />
+                <div className="ps-skeleton h-4 w-2/3" />
+              </div>
+              <div className="space-y-3">
+                <div className="ps-skeleton h-6 w-1/2" />
+                <div className="ps-skeleton h-20 w-full" />
+                <div className="ps-skeleton h-20 w-full" />
+              </div>
             </div>
           ) : (
             <AnimatePresence mode="wait">
@@ -144,27 +146,27 @@ export function WelcomeWizard({ onCompleted }: WelcomeWizardProps) {
         </div>
 
         {/* Footer */}
-        <div className="relative z-10 flex items-center justify-between border-t border-white/40 bg-white/50 px-6 py-2 backdrop-blur-md">
+        <div className="relative z-10 flex items-center justify-between border-t border-[var(--ps-border-soft)] bg-[var(--ps-bg-elevated)] px-6 py-2">
           {currentStep > 1 ? (
             <Button variant="ghost" size="sm" onClick={handlePrev}
-              className="h-9 gap-1.5 text-stone-500 hover:bg-transparent hover:text-stone-900">
+              className="h-9 gap-1.5 text-[var(--ps-fg-muted)] hover:bg-transparent hover:text-[var(--ps-fg)]">
               <ArrowLeft className="h-3.5 w-3.5" />Précédent
             </Button>
           ) : <span />}
           <div className="flex items-center gap-3">
             {!isLast && stepMeta.minutesLeft > 0 && (
-              <span className="flex items-center gap-1 rounded-full bg-white/80 px-2 py-0.5 text-[11px] font-mono tabular-nums text-stone-500">
+              <span className="flex items-center gap-1 rounded-full bg-[var(--ps-bg-subtle)] px-2 py-0.5 text-[11px] font-mono tabular-nums text-[var(--ps-fg-muted)]">
                 <Clock className="h-3 w-3" />~ {stepMeta.minutesLeft} min
               </span>
             )}
             {isLast ? (
               <Button onClick={handleComplete}
-                className="h-9 gap-1.5 rounded-full bg-stone-900 px-5 text-[12.5px] font-semibold text-white shadow-lg hover:bg-stone-800">
+                className="ps-brand-gradient ps-glow-violet-soft ps-tap h-9 gap-1.5 rounded-full px-5 text-[12.5px] font-semibold text-white">
                 <CheckCircle2 className="h-4 w-4" />Accéder à mon espace
               </Button>
             ) : (
               <Button onClick={handleNext}
-                className="h-9 gap-1.5 rounded-full bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 px-5 text-[12.5px] font-semibold text-white shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50">
+                className="ps-brand-gradient ps-glow-violet-soft ps-tap h-9 gap-1.5 rounded-full px-5 text-[12.5px] font-semibold text-white">
                 Suivant <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             )}

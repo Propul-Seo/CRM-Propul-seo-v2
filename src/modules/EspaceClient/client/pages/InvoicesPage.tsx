@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import {
   Receipt, Loader2, CreditCard, Download, CheckCircle2, AlertCircle,
   Search, Eye, MessageSquare, Clock,
@@ -220,9 +220,7 @@ export function InvoicesPage() {
       </div>
 
       {rows.length === 0 ? (
-        <section className="ps-surface p-6">
-          <EmptyState icon={Receipt} title="Aucune facture" body="Vos factures apparaîtront ici dès qu'elles seront émises." />
-        </section>
+        <EmptyState icon={Receipt} title="Aucune facture" body="Vos factures apparaîtront ici dès qu'elles seront émises." />
       ) : (
         <div className="grid items-stretch gap-4 lg:grid-cols-[360px_minmax(0,1fr)]">
           {/* ── MASTER : liste des factures ── */}
@@ -263,10 +261,7 @@ export function InvoicesPage() {
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span
-                          className="truncate text-[13px] font-semibold text-[var(--ps-fg)]"
-                          style={{ fontFamily: 'var(--ps-font-display)' }}
-                        >
+                        <span className="ps-num truncate text-[13px] font-semibold text-[var(--ps-fg)] [font-family:var(--ps-font-display)]">
                           {inv.invoice_number ?? 'Brouillon'}
                         </span>
                         <span className="ps-num shrink-0 text-[13px] font-semibold text-[var(--ps-fg)]">
@@ -283,8 +278,8 @@ export function InvoicesPage() {
                       </div>
                       <div className="mt-0.5 h-[3px] overflow-hidden rounded-full bg-[var(--ps-primary-subtle)]">
                         <div
-                          className={`h-full rounded-full ${pct >= 100 ? 'bg-[var(--ps-success)]' : 'bg-[var(--ps-primary)]'}`}
-                          style={{ width: `${pct}%` }}
+                          className={`ps-progress-fill h-full rounded-full ${pct >= 100 ? 'bg-[var(--ps-success)]' : 'bg-[var(--ps-primary)]'}`}
+                          style={{ '--ps-bar-w': `${pct}%` } as CSSProperties}
                         />
                       </div>
                     </button>
@@ -398,7 +393,7 @@ function InvoiceDetail({ invoice, installments, payingId, onPay, onDownload, onP
         </div>
         <div className="text-right">
           <p className="text-[12px] text-[var(--ps-fg-muted)]">Montant total TTC</p>
-          <p className="ps-num mt-0.5 text-[28px] font-bold tracking-tight text-[var(--ps-fg)]" style={{ fontFamily: 'var(--ps-font-display)' }}>
+          <p className="ps-metric mt-1.5 text-[var(--ps-fg)]">
             {fmtMoney(invoice.amount_total)}
           </p>
           {!isPaid && !isCancelled && (
@@ -448,8 +443,8 @@ function InvoiceDetail({ invoice, installments, payingId, onPay, onDownload, onP
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--ps-primary-subtle)]">
             <div
-              className={`h-full rounded-full ${pct >= 100 ? 'bg-[var(--ps-success)]' : 'bg-[var(--ps-primary)]'}`}
-              style={{ width: `${pct}%` }}
+              className={`ps-progress-fill h-full rounded-full ${pct >= 100 ? 'bg-[var(--ps-success)]' : 'bg-[var(--ps-primary)]'}`}
+              style={{ '--ps-bar-w': `${pct}%` } as CSSProperties}
             />
           </div>
           <p className="ps-num mt-1.5 text-right text-[12px] text-[var(--ps-fg-muted)]">
@@ -552,7 +547,7 @@ function MetaCell({ label, value, tone }: { label: string; value: string; tone?:
   return (
     <div className="rounded-lg border border-[var(--ps-border-soft)] bg-[var(--ps-bg-subtle)] px-3.5 py-3">
       <p className="ps-eyebrow ps-eyebrow-muted">{label}</p>
-      <p className={`ps-num mt-1 text-[13.5px] font-semibold ${color}`} style={{ fontFamily: 'var(--ps-font-display)' }}>
+      <p className={`ps-num mt-1 text-[13.5px] font-semibold [font-family:var(--ps-font-display)] ${color}`}>
         {value}
       </p>
     </div>

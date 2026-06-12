@@ -77,7 +77,7 @@ export function PortalLayout({
               )}
             </div>
             <Avatar
-              className="h-9 w-9 ring-2 ring-[var(--ps-primary-subtle)] ring-offset-2 ring-offset-white transition-transform duration-200 [transition-timing-function:var(--ps-ease)] hover:scale-105"
+              className="h-9 w-9 ring-2 ring-[var(--ps-primary-subtle)] ring-offset-2 ring-offset-[color:var(--ps-bg-elevated)] transition-transform duration-200 [transition-timing-function:var(--ps-ease)] hover:scale-105"
             >
               <AvatarFallback
                 className="ps-brand-gradient text-[12px] font-bold text-white"

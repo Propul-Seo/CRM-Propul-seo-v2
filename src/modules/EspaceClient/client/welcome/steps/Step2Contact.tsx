@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { User, Mail, Phone, Building2, Pencil, Lock, CheckCircle2 } from 'lucide-react';
+import { User, Mail, Phone, Building2, Pencil, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext';
 import type { UseWelcomeWizardResult, WelcomeField } from '../useWelcomeWizard';
@@ -32,9 +32,9 @@ function EditableRow({ icon: Icon, label, value, placeholder, onChange, type = '
   };
 
   return (
-    <div className="grid grid-cols-[26px_110px_1fr_24px] items-center gap-3 px-4 py-2.5 transition-colors hover:bg-sky-50/40">
-      <Icon className="h-4 w-4 text-stone-400" />
-      <span className="text-[12.5px] text-stone-500">{label}</span>
+    <div className="grid grid-cols-[26px_110px_1fr_24px] items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--ps-bg-subtle)]">
+      <Icon className="h-4 w-4 text-[var(--ps-fg-muted)]" />
+      <span className="text-[12.5px] text-[var(--ps-fg-secondary)]">{label}</span>
       {editing ? (
         <input
           ref={inputRef} type={type} value={draft}
@@ -42,20 +42,20 @@ function EditableRow({ icon: Icon, label, value, placeholder, onChange, type = '
           onBlur={commit}
           onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setDraft(value ?? ''); setEditing(false); } }}
           placeholder={placeholder}
-          className="w-full rounded-md border border-violet-400 bg-white px-2 py-1 text-[13.5px] font-semibold text-stone-900 outline-none ring-2 ring-violet-300/30"
+          className="w-full rounded-md border border-[var(--ps-primary)] bg-[var(--ps-bg-elevated)] px-2 py-1 text-[13.5px] font-semibold text-[var(--ps-fg)] outline-none ring-2 ring-[var(--ps-primary-subtle)]"
         />
       ) : (
         <button type="button" onClick={() => setEditing(true)}
           className={cn(
             'text-left text-[13.5px] font-semibold tabular-nums',
-            value ? 'text-stone-900' : 'text-stone-400 italic hover:text-violet-600',
+            value ? 'text-[var(--ps-fg)]' : 'italic text-[var(--ps-fg-muted)] hover:text-[var(--ps-primary)]',
           )}
         >
           {value || `+ ${placeholder}`}
         </button>
       )}
       <button type="button" onClick={() => setEditing(true)} aria-label={`Modifier ${label.toLowerCase()}`}
-        className="flex h-6 w-6 items-center justify-center rounded-md text-stone-400 hover:bg-violet-100 hover:text-violet-600"
+        className="flex h-6 w-6 items-center justify-center rounded-md text-[var(--ps-fg-muted)] hover:bg-[var(--ps-primary-subtle)] hover:text-[var(--ps-primary-text)]"
       >
         <Pencil className="h-3.5 w-3.5" />
       </button>
@@ -66,17 +66,17 @@ function EditableRow({ icon: Icon, label, value, placeholder, onChange, type = '
 function ReadOnlyRow({ icon: Icon, label, value, hint }: { icon: LucideIcon; label: string; value: string; hint?: string }) {
   return (
     <div className="grid grid-cols-[26px_110px_1fr_24px] items-center gap-3 px-4 py-2.5" aria-describedby="email-readonly-hint">
-      <Icon className="h-4 w-4 text-stone-400" />
-      <span className="text-[12.5px] text-stone-500">{label}</span>
-      <span className="flex min-w-0 items-center gap-2 truncate text-[13.5px] font-semibold tabular-nums text-stone-900">
+      <Icon className="h-4 w-4 text-[var(--ps-fg-muted)]" />
+      <span className="text-[12.5px] text-[var(--ps-fg-secondary)]">{label}</span>
+      <span className="flex min-w-0 items-center gap-2 truncate text-[13.5px] font-semibold tabular-nums text-[var(--ps-fg)]">
         <span className="truncate">{value}</span>
         {hint && (
-          <span className="shrink-0 rounded-full bg-stone-100 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-widest text-stone-500 ring-1 ring-stone-200">
+          <span className="shrink-0 rounded-full bg-[var(--ps-bg-subtle)] px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-widest text-[var(--ps-fg-muted)] ring-1 ring-[var(--ps-border)]">
             {hint}
           </span>
         )}
       </span>
-      <Lock className="h-3.5 w-3.5 text-stone-400" />
+      <Lock className="h-3.5 w-3.5 text-[var(--ps-fg-muted)]" />
     </div>
   );
 }
@@ -99,27 +99,23 @@ export function Step2Contact({ wizard }: Step2ContactProps) {
 
   return (
     <div className="mx-auto w-full max-w-[600px] space-y-3">
-      <div className="overflow-hidden rounded-3xl bg-white"
-        style={{ boxShadow: '0 30px 60px -15px rgba(139,92,246,0.20), 0 0 0 1px rgba(139,92,246,0.06)' }}
-      >
-        <div className="h-[2px] bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500" />
+      <div className="overflow-hidden rounded-3xl border border-[var(--ps-border-soft)] bg-[var(--ps-bg-elevated)] shadow-[var(--ps-shadow-floating)]">
+        <div className="ps-brand-gradient h-[2px]" />
 
-        <div className="flex items-center gap-3 bg-gradient-to-br from-sky-50/50 via-violet-50/50 to-pink-50/30 px-5 py-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 via-violet-600 to-pink-500 text-[14px] font-bold tracking-wider text-white"
-            style={{ boxShadow: '0 10px 25px -5px rgba(139,92,246,0.5)' }}
-          >
+        <div className="flex items-center gap-3 bg-[var(--ps-bg-subtle)] px-5 py-3">
+          <div className="ps-brand-gradient ps-glow-violet-soft flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-[14px] font-bold tracking-wider text-white">
             {initials(fullName)}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[16px] font-bold text-stone-900">{fullName}</p>
-            {company && <p className="truncate text-[12.5px] text-stone-500">{company}</p>}
+            <p className="truncate text-[16px] font-bold text-[var(--ps-fg)]">{fullName}</p>
+            {company && <p className="truncate text-[12.5px] text-[var(--ps-fg-muted)]">{company}</p>}
           </div>
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10.5px] font-medium text-emerald-700 ring-1 ring-emerald-200">
-            <CheckCircle2 className="h-3 w-3" />Pré-rempli
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ps-success-subtle)] px-2 py-0.5 text-[10.5px] font-medium text-[var(--ps-success-text)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--ps-success)]" aria-hidden />Pré-rempli
           </span>
         </div>
 
-        <div className="divide-y divide-stone-100">
+        <div className="divide-y divide-[var(--ps-border-soft)]">
           <EditableRow icon={User} label="Prénom" value={firstName} placeholder="Votre prénom" onChange={handleSet('welcome_first_name')} />
           <EditableRow icon={User} label="Nom" value={lastName} placeholder="Votre nom" onChange={handleSet('welcome_last_name')} />
           <ReadOnlyRow icon={Mail} label="Email" value={email} hint="Login" />
@@ -128,7 +124,7 @@ export function Step2Contact({ wizard }: Step2ContactProps) {
         </div>
       </div>
 
-      <p id="email-readonly-hint" className="px-1 text-[11.5px] text-stone-500">
+      <p id="email-readonly-hint" className="px-1 text-[11.5px] text-[var(--ps-fg-secondary)]">
         Email non modifiable — c'est votre identifiant de connexion. Pour le changer, contactez votre AE.
       </p>
     </div>

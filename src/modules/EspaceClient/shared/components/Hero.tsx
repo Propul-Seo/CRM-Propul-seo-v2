@@ -13,12 +13,12 @@ export function Hero({ eyebrow, title, subtitle, phasePill }: HeroProps) {
     <section className="ps-surface relative overflow-hidden p-7 md:p-9">
       <div
         aria-hidden
-        className="ps-hero-glow pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full opacity-60 blur-3xl"
+        className="ps-hero-glow pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full opacity-40 blur-3xl"
       />
       {eyebrow && (
         <p className="ps-eyebrow">{eyebrow}</p>
       )}
-      <h1 className="ps-h1 mt-1.5 text-[28px] leading-tight md:text-[34px] text-[var(--ps-fg)]">
+      <h1 className="ps-h1 pt-1.5 text-[var(--ps-fg)]">
         {title}
       </h1>
       {subtitle && (
