@@ -3,6 +3,7 @@
  * Route dev-only /portail-preview (cf. App.tsx). À SUPPRIMER après arbitrage.
  */
 import { useState } from 'react';
+import '@/modules/EspaceClient/shared/layouts/portal-theme.css';
 import { useForceLightTheme } from '@/modules/EspaceClient/shared/hooks/useForceLightTheme';
 import { BENCH_DATA } from './fixtures';
 import { AccueilA } from './variants/a/Accueil';
