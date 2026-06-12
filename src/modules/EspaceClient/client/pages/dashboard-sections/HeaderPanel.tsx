@@ -1,112 +1,160 @@
-import { Mail } from 'lucide-react';
-import { ProgressRing } from '@/modules/EspaceClient/shared/components';
+import { Link } from 'react-router-dom';
+import { ArrowRight, LogOut, Mail, ReceiptEuro, Signature } from 'lucide-react';
 import { CONTACT_EMAIL } from '@/modules/EspaceClient/shared/constants';
-import { EUR } from './lib';
+import type { DashboardAction } from './lib';
 
-// Panneau d'en-tête porteur (direction B « Matière & panneaux ») : identité
-// projet + anneau d'avancement + interlocuteur dédié + bandeau d'indicateurs.
+// Hero d'accueil « nuit encre » compact (variante V3 « barre de statut ») :
+// état du projet + 3 chiffres en puces + interlocuteur, accès profil/déconnexion
+// en haut à droite, et les actions attendues intégrées au pied de l'encadré.
+
+const ACTION_ICON = { signature: Signature, invoice: ReceiptEuro } as const;
+
+export interface HeaderStat {
+  label: string;
+  value: string;
+}
 
 interface HeaderPanelProps {
   firstName: string;
   progressPct: number;
-  /** Fin de la phrase d'état du titre (après « Votre projet est à X % — »). */
+  /** Fin de la phrase d'état (après « Votre projet est à X % — »). */
   tail: string;
   /** Nom du projet · type de prestation. */
   projectLine: string;
-  /** « Démarré le … · livraison estimée le … » (null si aucune date connue). */
+  /** « Démarré le … · livraison estimée le … » (null si aucune date). */
   scheduleLine: string | null;
   /** Membre Propul'SEO assigné (null → équipe générique). */
   referentName: string | null;
-  dueTotal: number;
-  dueCount: number;
-  documentsCount: number;
-  /** Dernier document partagé (« Dernier : nom · date »), null si aucun. */
-  lastDocLine: string | null;
-  pendingSignatures: number;
+  /** Initiales du client connecté, pour l'avatar de profil. */
+  clientInitials: string;
+  /** 3 chiffres clés (étape, livraison, documents). */
+  stats: HeaderStat[];
+  /** Actions attendues, triées par urgence (jusqu'à 4). */
+  actions: DashboardAction[];
+  onProfile: () => void;
+  onLogout: () => void;
 }
 
 export function HeaderPanel({
   firstName, progressPct, tail, projectLine, scheduleLine, referentName,
-  dueTotal, dueCount, documentsCount, lastDocLine, pendingSignatures,
+  clientInitials, stats, actions, onProfile, onLogout,
 }: HeaderPanelProps) {
   const refName = referentName ?? "Équipe Propul'SEO";
-  const refInitials = refName.trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('') || 'PS';
   const writeLabel = referentName ? `Écrire à ${referentName.trim().split(/\s+/)[0]}` : "Écrire à l'équipe";
+  const refInitials = refName.trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('') || 'PS';
 
   return (
-    <section className="ps-surface p-6 md:px-8 md:py-7">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-        <div className="min-w-0 flex-1">
-          <p className="ps-eyebrow">Bonjour, {firstName}</p>
-          <h1 className="ps-h1 pt-2">
-            Votre projet est à{' '}
-            <span className="ps-num text-[var(--ps-primary)]">{progressPct} %</span>
-            {' — '}{tail}
-          </h1>
-          <p className="ps-small mt-2">{projectLine}</p>
-          {scheduleLine && (
-            <p className="ps-small ps-num mt-1 text-[var(--ps-fg-secondary)]">{scheduleLine}</p>
-          )}
+    <section className="ps-surface relative overflow-hidden">
+      <span className="ps-hero-glow pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full opacity-70" aria-hidden />
 
-          {/* Interlocuteur dédié — rapatrié de l'ancien rail droit */}
-          <div className="mt-5 flex flex-wrap items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--ps-primary-subtle)] font-[family-name:var(--ps-font-display)] text-[12px] font-semibold text-[var(--ps-primary-text)]">
-              {refInitials}
+      <div className="relative p-4 md:px-6 md:py-5">
+        {/* Rangée haute : état + accès profil / déconnexion */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <p className="ps-eyebrow">Bonjour, {firstName}</p>
+            <h1 className="ps-h1 pt-2 text-[var(--ps-fg)]">
+              Votre projet est à <span className="ps-num text-[var(--ps-primary-text)]">{progressPct} %</span>
+              {' — '}{tail}
+            </h1>
+          </div>
+          {/* Profil + déconnexion (desktop/tablette ; le header mobile fixe les porte déjà) */}
+          <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
+            <button
+              type="button"
+              onClick={onProfile}
+              aria-label="Mon profil"
+              className="ps-tap ps-brand-gradient flex h-10 w-10 items-center justify-center rounded-full text-[12px] font-bold text-white ring-2 ring-[var(--ps-primary-subtle)] ring-offset-2 ring-offset-[var(--ps-bg-elevated)] transition-transform duration-200 hover:scale-105 active:scale-95"
+            >
+              {clientInitials}
+            </button>
+            <button
+              type="button"
+              onClick={onLogout}
+              aria-label="Se déconnecter"
+              className="ps-tap flex h-9 w-9 items-center justify-center rounded-full text-[var(--ps-fg-muted)] transition-colors duration-200 hover:bg-[var(--ps-bg-subtle)] hover:text-[var(--ps-fg)]"
+            >
+              <LogOut className="h-[15px] w-[15px]" strokeWidth={2} />
+            </button>
+          </div>
+        </div>
+
+        <p className="ps-small ps-num mt-1.5">
+          {projectLine}{scheduleLine ? ` · ${scheduleLine}` : ''}
+        </p>
+
+        {/* 3 chiffres en puces inline + interlocuteur dédié */}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {stats.map(s => (
+            <span
+              key={s.label}
+              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--ps-border-soft)] bg-[var(--ps-bg-subtle)] px-3 py-1 text-[12px]"
+            >
+              <span className="text-[var(--ps-fg-secondary)]">{s.label}</span>
+              <span className="ps-num font-semibold text-[var(--ps-fg)]">{s.value}</span>
             </span>
-            <span className="min-w-0">
-              <span className="block text-[13px] font-semibold leading-tight text-[var(--ps-fg)]">{refName}</span>
-              <span className="ps-small block text-[var(--ps-fg-secondary)]">Votre interlocuteur dédié</span>
+          ))}
+          <span className="ml-auto flex items-center gap-2">
+            <span className="flex items-center gap-2">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--ps-primary-subtle)] font-[family-name:var(--ps-font-display)] text-[11px] font-semibold text-[var(--ps-primary-text)]">
+                {refInitials}
+              </span>
+              <span className="ps-small text-[var(--ps-fg-secondary)]">
+                <span className="font-semibold text-[var(--ps-fg)]">{refName}</span> · interlocuteur
+              </span>
             </span>
             <a
               href={`mailto:${CONTACT_EMAIL}`}
-              className="ps-tap inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-[var(--ps-border)] bg-[var(--ps-bg-elevated)] px-3 py-1.5 text-[12.5px] font-semibold text-[var(--ps-fg-secondary)] transition-colors hover:bg-[var(--ps-bg-subtle)] hover:text-[var(--ps-fg)]"
+              className="ps-tap inline-flex min-h-[32px] items-center gap-1.5 rounded-lg border border-[var(--ps-border)] bg-[var(--ps-bg-elevated)] px-2.5 py-1 text-[12px] font-semibold text-[var(--ps-fg-secondary)] transition-colors hover:bg-[var(--ps-bg-subtle)] hover:text-[var(--ps-fg)]"
             >
               <Mail className="h-3.5 w-3.5" strokeWidth={2} />
               {writeLabel}
             </a>
-          </div>
+          </span>
         </div>
 
-        {/* Chiffres clés + anneau — intégrés à l'encadré (ex-bande grise) */}
-        <div className="flex items-center justify-between gap-6 lg:justify-end lg:gap-7">
-          <dl className="grid flex-1 grid-cols-3 gap-4 lg:w-[210px] lg:flex-none lg:grid-cols-1 lg:gap-0 lg:space-y-3.5 lg:border-l lg:border-[var(--ps-border-soft)] lg:pl-6">
-            <HeaderStat
-              label="Reste à régler"
-              value={dueTotal > 0 ? EUR.format(dueTotal) : '0 €'}
-              hint={dueCount > 0
-                ? `${dueCount} facture${dueCount > 1 ? 's' : ''} en attente`
-                : 'Vous êtes à jour'}
-            />
-            <HeaderStat
-              label="Documents partagés"
-              value={String(documentsCount)}
-              hint={lastDocLine ?? 'Dans votre espace'}
-            />
-            <HeaderStat
-              label="Signatures"
-              value={String(pendingSignatures)}
-              hint={pendingSignatures > 0
-                ? `${pendingSignatures > 1 ? 'Documents' : 'Document'} en attente`
-                : 'Tout est signé'}
-            />
-          </dl>
-          <div className="hidden shrink-0 sm:block">
-            <ProgressRing value={progressPct} size={116} />
+        {/* Actions attendues, intégrées au pied de l'encadré */}
+        {actions.length > 0 && (
+          <div className="mt-4 border-t border-[var(--ps-border-soft)] pt-4">
+            <div className="flex items-center gap-2">
+              <p className="text-[12px] font-semibold text-[var(--ps-fg-secondary)]">À faire de votre côté</p>
+              <span className="ps-num inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--ps-primary-subtle)] px-1 text-[11px] font-semibold text-[var(--ps-primary-text)]">
+                {actions.length}
+              </span>
+            </div>
+            <div className="mt-2.5 grid gap-2 sm:grid-cols-2">
+              {actions.map((a, i) => <ActionRow key={a.key} action={a} primary={i === 0} />)}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );
 }
 
-function HeaderStat({ label, value, hint }: { label: string; value: string; hint: string }) {
+function ActionRow({ action, primary }: { action: DashboardAction; primary: boolean }) {
+  const Icon = ACTION_ICON[action.kind];
   return (
-    <div className="min-w-0">
-      <dt className="text-[11px] font-medium text-[var(--ps-fg-secondary)]">{label}</dt>
-      <dd className="ps-num mt-0.5 text-[15px] font-semibold tracking-tight text-[var(--ps-fg)] [font-family:var(--ps-font-display)]">
-        {value}
-      </dd>
-      <dd className="ps-num truncate text-[11px] text-[var(--ps-fg-secondary)]">{hint}</dd>
-    </div>
+    <Link
+      to={action.to}
+      className="group ps-tap flex items-center gap-3 rounded-[10px] border border-[var(--ps-border-soft)] bg-[var(--ps-bg-subtle)] px-3 py-2 transition-colors hover:border-[var(--ps-border-strong)]"
+    >
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--ps-primary-subtle)] text-[var(--ps-primary-text)] ring-1 ring-inset ring-[var(--ps-border-soft)]">
+        <Icon className="h-4 w-4" strokeWidth={1.75} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="ps-num block truncate text-[13px] font-semibold text-[var(--ps-fg)]">{action.title}</span>
+        <span className="ps-num block text-[11.5px] leading-tight text-[var(--ps-fg-secondary)]">{action.meta}</span>
+      </span>
+      {primary ? (
+        <span className="ps-tap inline-flex min-h-[34px] shrink-0 items-center gap-1.5 rounded-lg bg-[var(--ps-primary)] px-3 py-1.5 text-[12px] font-semibold text-white transition-colors group-hover:bg-[var(--ps-primary-hover)]">
+          {action.cta}
+          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
+        </span>
+      ) : (
+        <span className="ps-tap inline-flex min-h-[34px] shrink-0 items-center rounded-lg bg-[var(--ps-primary-subtle)] px-3 py-1.5 text-[12px] font-semibold text-[var(--ps-primary-text)] transition-colors group-hover:bg-[var(--ps-primary)] group-hover:text-white">
+          {action.cta}
+        </span>
+      )}
+    </Link>
   );
 }

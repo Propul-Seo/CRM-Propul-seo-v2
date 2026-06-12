@@ -3,10 +3,9 @@ import { FolderKanban } from 'lucide-react'
 import { EmptyState } from '@/modules/EspaceClient/shared/components'
 import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext'
 import {
-  usePortalProjectSteps, usePortalDocuments, usePortalProjectActivities,
+  usePortalProjectSteps, usePortalDocuments,
 } from '@/modules/EspaceClient/client/hooks/usePortalData'
 import { usePortalProjectDetails } from '@/modules/EspaceClient/client/hooks/usePortalProjectDetails'
-import { ClientActivityTimeline } from '@/modules/EspaceClient/client/components/ClientActivityTimeline'
 import { ProjectHeader } from './project-sections/header'
 import { StepsCard } from './project-sections/steps-card'
 import { DeliverablesSection } from './project-sections/deliverables'
@@ -22,7 +21,6 @@ export function ProjectPage() {
   const { project } = usePortal()
   const steps = usePortalProjectSteps()
   const documents = usePortalDocuments()
-  const activities = usePortalProjectActivities()
   const { details } = usePortalProjectDetails()
 
   const loading = steps.loading || documents.loading
@@ -80,10 +78,7 @@ export function ProjectPage() {
       {hasSteps ? (
         <div className="grid items-start gap-4 lg:grid-cols-2">
           <StepsCard steps={rows} currentId={stats.current?.id ?? null} />
-          <div className="space-y-4">
-            <ClientActivityTimeline activities={activities.rows} loading={activities.loading} />
-            <DeliverablesSection deliverables={deliverables} />
-          </div>
+          <DeliverablesSection deliverables={deliverables} />
         </div>
       ) : (
         <EmptyState

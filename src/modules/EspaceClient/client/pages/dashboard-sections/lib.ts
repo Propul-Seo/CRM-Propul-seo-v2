@@ -1,6 +1,3 @@
-import type { LucideIcon } from 'lucide-react';
-import type { BadgeTone } from '@/modules/EspaceClient/shared/components';
-
 // Helpers et types partagés des sections du tableau de bord portail.
 
 export const EUR = new Intl.NumberFormat('fr-FR', {
@@ -40,13 +37,4 @@ export interface DashboardAction {
   meta: string;
   cta: string;
   to: string;
-}
-
-/** Entrée du fil d'activité récente (fusion docs + factures + signatures). */
-export interface DashboardActivityItem {
-  id: string;
-  date: string;
-  title: string;
-  icon: LucideIcon;
-  tint: BadgeTone;
 }

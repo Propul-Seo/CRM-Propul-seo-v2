@@ -1,29 +1,34 @@
 import { useMemo } from 'react';
-import { FileText, PenLine, Receipt } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext';
+import { portalBase } from '@/modules/EspaceClient/shared/portalHost';
 import {
   usePortalProjectSteps, usePortalInvoices, usePortalSignatures, usePortalDocuments,
 } from '@/modules/EspaceClient/client/hooks/usePortalData';
 import { usePortalProjectDetails } from '@/modules/EspaceClient/client/hooks/usePortalProjectDetails';
 import { WelcomeBanner } from '@/modules/EspaceClient/client/welcome/WelcomeBanner';
-import { HeaderPanel } from './dashboard-sections/HeaderPanel';
-import { ActionBanner, SecondaryActions } from './dashboard-sections/ActionBanner';
+import { HeaderPanel, type HeaderStat } from './dashboard-sections/HeaderPanel';
 import { StepsPanel } from './dashboard-sections/StepsPanel';
-import { ActivityPanel } from './dashboard-sections/ActivityPanel';
 import { DashboardSkeleton } from './dashboard-sections/DashboardSkeleton';
 import {
   EUR, formatShortDate, formatLongDate, prestaLabelOf,
-  type DashboardAction, type DashboardActivityItem,
+  type DashboardAction,
 } from './dashboard-sections/lib';
 
 const UNPAID_STATUSES = new Set(['overdue', 'sent', 'partially_paid']);
 
-// Accueil portail — composition « Matière & panneaux » (variante B) :
-// panneau d'en-tête porteur, bandeau d'action attendue, avancement + activité
-// en colonne principale, rail latéral sticky.
+function initialsOf(name: string): string {
+  return name.trim().split(/\s+/).filter(Boolean).slice(0, 2)
+    .map(w => w[0]?.toUpperCase() ?? '').join('') || '?';
+}
+
+// Accueil portail « nuit encre » : encadré hero compact (état + chiffres +
+// interlocuteur + profil/déconnexion + actions intégrées), avancement, activité.
 export function DashboardPage() {
-  const { email, project, previewMode, basePath } = usePortal();
+  const { email, project, previewMode, basePath, signOut } = usePortal();
+  const navigate = useNavigate();
   const firstName = project.client_name?.split(' ')[0] ?? email.split('@')[0] ?? 'Client';
+  const clientName = project.client_name ?? email.split('@')[0] ?? email;
 
   const steps      = usePortalProjectSteps();
   const invoices   = usePortalInvoices();
@@ -51,8 +56,8 @@ export function DashboardPage() {
     return { progressPct, inProgress, nextStep, startDate, dueCount: due.length, dueTotal, pendingSignatures, lastDoc };
   }, [steps.rows, invoices.rows, signatures.rows, documents.rows]);
 
-  // ── Actions actionnables, triées par urgence (logique préservée) ─
-  const { priority, secondary } = useMemo(() => {
+  // ── Actions actionnables, triées par urgence (jusqu'à 4) ─────────
+  const actions = useMemo(() => {
     const list: DashboardAction[] = [];
 
     invoices.rows
@@ -84,27 +89,8 @@ export function DashboardPage() {
       }));
 
     list.sort((a, b) => a.rank - b.rank);
-    return { priority: list[0] ?? null, secondary: list.slice(1, 4) };
+    return list.slice(0, 4);
   }, [invoices.rows, signatures.rows, basePath]);
-
-  // ── Activité récente : fusion docs + factures + signatures ──────
-  const activity = useMemo(() => {
-    const items: DashboardActivityItem[] = [];
-    documents.rows.slice(0, 5).forEach(d => items.push({
-      id: `doc-${d.id}`, date: d.created_at, title: `Document ajouté · ${d.name}`,
-      icon: FileText, tint: 'violet',
-    }));
-    invoices.rows.slice(0, 5).forEach(i => items.push({
-      id: `inv-${i.id}`, date: i.created_at,
-      title: `Facture ${i.invoice_number ?? i.title ?? ''}`.trim(),
-      icon: Receipt, tint: 'blue',
-    }));
-    signatures.rows.slice(0, 5).forEach(s => items.push({
-      id: `sig-${s.id}`, date: s.created_at, title: `Signature · ${s.name}`,
-      icon: PenLine, tint: 'amber',
-    }));
-    return items.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
-  }, [documents.rows, invoices.rows, signatures.rows]);
 
   if (loading) return <DashboardSkeleton />;
 
@@ -127,6 +113,19 @@ export function DashboardPage() {
     endDate ? `livraison estimée le ${formatLongDate(endDate)}` : null,
   ].filter(Boolean).join(' · ') || null;
 
+  const stepLabel = stats.inProgress?.label ?? stats.nextStep?.label ?? 'À planifier';
+  const heroStats: HeaderStat[] = [
+    { label: 'Étape en cours', value: stepLabel },
+    { label: 'Livraison estimée', value: endDate ? formatShortDate(endDate) : '—' },
+    { label: 'Documents partagés', value: String(documents.rows.length) },
+  ];
+
+  const onProfile = () => navigate(`${basePath}/profile`);
+  const onLogout = async () => {
+    await signOut();
+    if (!previewMode) navigate(`${portalBase()}/login`, { replace: true });
+  };
+
   return (
     <div className="ps-fade-in space-y-5">
       {!previewMode && <WelcomeBanner />}
@@ -140,21 +139,15 @@ export function DashboardPage() {
           projectLine={projectLine}
           scheduleLine={scheduleLine}
           referentName={details?.assigned_name ?? null}
-          dueTotal={stats.dueTotal}
-          dueCount={stats.dueCount}
-          documentsCount={documents.rows.length}
-          lastDocLine={stats.lastDoc
-            ? `Dernier : ${stats.lastDoc.name} · ${formatShortDate(stats.lastDoc.created_at)}`
-            : null}
-          pendingSignatures={stats.pendingSignatures}
+          clientInitials={initialsOf(clientName)}
+          stats={heroStats}
+          actions={actions}
+          onProfile={onProfile}
+          onLogout={onLogout}
         />
       </div>
 
-      {priority && <ActionBanner action={priority} />}
-      {secondary.length > 0 && <SecondaryActions actions={secondary} />}
-
       <StepsPanel steps={steps.rows} basePath={basePath} />
-      <ActivityPanel items={activity} basePath={basePath} />
       <p className="flex items-center gap-2 px-1 text-[11px] text-[var(--ps-fg-muted)]">
         <span className="h-1.5 w-1.5 rounded-full bg-[var(--ps-success)]" />
         Synchronisé avec votre équipe Propul'SEO

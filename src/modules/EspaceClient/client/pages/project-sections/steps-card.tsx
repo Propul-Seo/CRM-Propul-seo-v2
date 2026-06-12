@@ -62,7 +62,7 @@ function StepRow({ step, active }: { step: PortalProjectStep; active: boolean })
           }`}>
             {step.label}
           </p>
-          {active && step.description && (
+          {step.description && (
             <p className="mt-1 text-[12.5px] leading-[18px] text-[var(--ps-fg-secondary)]">
               {step.description}
             </p>

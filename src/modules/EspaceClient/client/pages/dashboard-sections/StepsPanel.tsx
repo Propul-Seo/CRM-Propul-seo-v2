@@ -71,15 +71,18 @@ function stepDateLine(step: PortalProjectStep): string | null {
 function StepRow({ step }: { step: PortalProjectStep }) {
   const dateLine = stepDateLine(step);
   return (
-    <li className="flex min-h-[44px] items-center gap-3.5 px-6 py-3.5">
+    <li className="flex min-h-[44px] items-start gap-3.5 px-6 py-3.5">
       <span
-        className={`h-2 w-2 shrink-0 rounded-full ${DOT[step.status] ?? 'bg-[var(--ps-border-strong)]'} ${step.status === 'in_progress' ? 'ps-pulse' : ''}`}
+        className={`mt-[7px] h-2 w-2 shrink-0 rounded-full ${DOT[step.status] ?? 'bg-[var(--ps-border-strong)]'} ${step.status === 'in_progress' ? 'ps-pulse' : ''}`}
         aria-hidden
       />
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[13.5px] font-semibold text-[var(--ps-fg)]">{step.label}</span>
+        <span className="block text-[13.5px] font-semibold text-[var(--ps-fg)]">{step.label}</span>
+        {step.description && (
+          <span className="mt-0.5 block text-[12.5px] leading-[18px] text-[var(--ps-fg-secondary)]">{step.description}</span>
+        )}
         {dateLine && (
-          <span className="ps-small ps-num block text-[var(--ps-fg-secondary)]">{dateLine}</span>
+          <span className="ps-small ps-num mt-0.5 block text-[var(--ps-fg-secondary)]">{dateLine}</span>
         )}
       </span>
       <StatusBadge status={step.status} />
