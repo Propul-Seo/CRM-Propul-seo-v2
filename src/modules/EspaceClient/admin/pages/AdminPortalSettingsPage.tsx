@@ -11,8 +11,15 @@ import {
 const INPUT_CLASS =
   'w-full rounded-md border border-border bg-surface-1 px-2.5 py-1.5 text-sm text-foreground transition focus:border-primary/50 focus:outline-none disabled:opacity-50';
 
+// Ligne du formulaire : id local stable (les inputs sont contrôlés et la liste
+// se réordonne — une key d'index ferait perdre le focus / recycler les valeurs).
+interface DraftItem extends StepTemplateItem {
+  id: string;
+}
+const toDraft = (i: StepTemplateItem): DraftItem => ({ ...i, id: crypto.randomUUID() });
+
 export function AdminPortalSettingsPage() {
-  const [items, setItems] = useState<StepTemplateItem[]>([]);
+  const [items, setItems] = useState<DraftItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -23,7 +30,7 @@ export function AdminPortalSettingsPage() {
     let alive = true;
     void loadStepTemplate().then(({ items: loaded, error }) => {
       if (!alive) return;
-      setItems(loaded);
+      setItems(loaded.map(toDraft));
       setLoadError(error);
       setLoading(false);
     });
@@ -50,22 +57,22 @@ export function AdminPortalSettingsPage() {
   }
   function add() {
     setSaved(false);
-    setItems(prev => [...prev, { label: '', description: '' }]);
+    setItems(prev => [...prev, toDraft({ label: '', description: '' })]);
   }
   function resetDefaults() {
     setSaved(false);
-    setItems(DEFAULT_STEP_TEMPLATE);
+    setItems(DEFAULT_STEP_TEMPLATE.map(toDraft));
   }
   async function save() {
     setSaving(true);
     setSaveError(null);
     setSaved(false);
-    const { error } = await saveStepTemplate(items);
+    const { error } = await saveStepTemplate(items.map(({ label, description }) => ({ label, description })));
     if (error) setSaveError(error);
     else {
       setSaved(true);
       // Reflète le nettoyage (trim, lignes sans libellé écartées) dans le formulaire.
-      setItems(prev => prev.map(i => ({ label: i.label.trim(), description: i.description.trim() })).filter(i => i.label !== ''));
+      setItems(prev => prev.map(i => ({ ...i, label: i.label.trim(), description: i.description.trim() })).filter(i => i.label !== ''));
     }
     setSaving(false);
   }
@@ -106,7 +113,7 @@ export function AdminPortalSettingsPage() {
             <>
               <ol className="mt-5 space-y-2.5">
                 {items.map((item, i) => (
-                  <li key={i} className="rounded-lg border border-border-subtle bg-surface-1 p-3">
+                  <li key={item.id} className="rounded-lg border border-border-subtle bg-surface-1 p-3">
                     <div className="flex items-start gap-3">
                       <span className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-border bg-surface-2 text-xs font-semibold tabular-nums text-muted-foreground">
                         {i + 1}

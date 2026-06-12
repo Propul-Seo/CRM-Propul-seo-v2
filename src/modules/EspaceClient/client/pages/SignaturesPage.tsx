@@ -95,7 +95,7 @@ export function SignaturesPage() {
             <SignatureDetail
               signature={selected}
               previewMode={previewMode}
-              onSign={() => setSigning(selected)}
+              onSign={() => { if (!previewMode) setSigning(selected); }}
               onDownloadSigned={() => { void downloadSigned(selected); }}
             />
           )}
