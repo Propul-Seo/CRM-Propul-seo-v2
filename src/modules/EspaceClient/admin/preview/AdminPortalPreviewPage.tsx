@@ -1,5 +1,6 @@
 import { Routes, Route, useParams, useLocation, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
+import { useAdminBasePath } from '../AdminBasePathContext'
 import { PortalPreviewProvider } from './PortalPreviewProvider'
 import { PortalShell } from '@/modules/EspaceClient/client/PortalShell'
 import { DashboardPage } from '@/modules/EspaceClient/client/pages/DashboardPage'
@@ -20,6 +21,9 @@ export function AdminPortalPreviewPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const { pathname } = useLocation()
   const navigate = useNavigate()
+  // Monté dans le shell CRM (/portails) : l'encart piège les fixed du portail
+  // (cf. .ps-preview-embedded) pour ne pas recouvrir la sidebar admin.
+  const { mountedInShell } = useAdminBasePath()
   if (!projectId) return null
 
   // Base = chemin jusqu'à /apercu-client inclus (indépendant du point de montage
@@ -29,7 +33,7 @@ export function AdminPortalPreviewPage() {
 
   return (
     <PortalPreviewProvider projectId={projectId} basePath={base} onExit={() => navigate(cockpitPath)}>
-      <div className="propulspace-portal ps-preview-shell min-h-screen">
+      <div className={`propulspace-portal ps-preview-shell min-h-screen${mountedInShell ? ' ps-preview-embedded' : ''}`}>
         <div className="sticky top-0 z-[60] flex h-10 items-center justify-between gap-3 bg-amber-100 px-4 text-[13px] text-amber-900 ring-1 ring-amber-300/70">
           <span>Mode aperçu — vous voyez le portail tel que le client le voit (lecture seule).</span>
           <button
@@ -40,17 +44,19 @@ export function AdminPortalPreviewPage() {
             <ArrowLeft className="h-4 w-4" /> Retour au cockpit
           </button>
         </div>
-        <Routes>
-          <Route element={<PortalShell />}>
-            <Route index element={<DashboardPage />} />
-            <Route path="project" element={<ProjectPage />} />
-            <Route path="documents" element={<DocumentsPage />} />
-            <Route path="invoices" element={<InvoicesPage />} />
-            <Route path="signatures" element={<SignaturesPage />} />
-            <Route path="help" element={<HelpPage />} />
-            <Route path="profile" element={<ProfilePage />} />
-          </Route>
-        </Routes>
+        <div className="ps-preview-scroll">
+          <Routes>
+            <Route element={<PortalShell />}>
+              <Route index element={<DashboardPage />} />
+              <Route path="project" element={<ProjectPage />} />
+              <Route path="documents" element={<DocumentsPage />} />
+              <Route path="invoices" element={<InvoicesPage />} />
+              <Route path="signatures" element={<SignaturesPage />} />
+              <Route path="help" element={<HelpPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+            </Route>
+          </Routes>
+        </div>
       </div>
     </PortalPreviewProvider>
   )

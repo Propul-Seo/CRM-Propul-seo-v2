@@ -457,6 +457,21 @@ html.ps-night-surface #root {
    (cf. PortalLayout), donc aucun impact hors aperçu. */
 .ps-preview-shell { --ps-header-top: 2.5rem; }
 
+/* Aperçu embarqué dans le shell CRM (/portails) : le transform crée un
+   containing block qui piège les position:fixed du portail (sidebar, header
+   mobile, tab bar, FAB) DANS l'encart — sans lui, la sidebar du portail
+   s'ancre au viewport et recouvre la sidebar admin. Le défilement se fait
+   dans .ps-preview-scroll pour garder la sidebar du portail épinglée. */
+.ps-preview-embedded {
+  height: 100vh;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+.ps-preview-embedded .ps-preview-scroll {
+  height: calc(100% - 2.5rem); /* sous le bandeau d'aperçu */
+  overflow-y: auto;
+}
+
 /* ─── WELCOME WIZARD PREMIUM TOKENS (palier polish) ─────── */
 /* Utilities supplémentaires pour le wizard d'accueil. Réutilisables ailleurs.
    Documentés ici pour que les agents de polish s'y conforment plutôt que
