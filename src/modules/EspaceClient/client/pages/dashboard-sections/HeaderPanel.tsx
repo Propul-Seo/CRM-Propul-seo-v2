@@ -34,8 +34,8 @@ export function HeaderPanel({
   const writeLabel = referentName ? `Écrire à ${referentName.trim().split(/\s+/)[0]}` : "Écrire à l'équipe";
 
   return (
-    <section className="ps-surface overflow-hidden">
-      <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between md:px-8 md:py-7">
+    <section className="ps-surface p-6 md:px-8 md:py-7">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0 flex-1">
           <p className="ps-eyebrow">Bonjour, {firstName}</p>
           <h1 className="ps-h1 pt-2">
@@ -45,7 +45,7 @@ export function HeaderPanel({
           </h1>
           <p className="ps-small mt-2">{projectLine}</p>
           {scheduleLine && (
-            <p className="ps-small mt-1 text-[var(--ps-fg-secondary)]">{scheduleLine}</p>
+            <p className="ps-small ps-num mt-1 text-[var(--ps-fg-secondary)]">{scheduleLine}</p>
           )}
 
           {/* Interlocuteur dédié — rapatrié de l'ancien rail droit */}
@@ -66,32 +66,34 @@ export function HeaderPanel({
             </a>
           </div>
         </div>
-        <div className="hidden sm:block">
-          <ProgressRing value={progressPct} size={116} />
-        </div>
-      </div>
 
-      {/* Indicateurs intégrés au panneau — bandeau bg-subtle, pas de tuiles */}
-      <div className="grid grid-cols-1 divide-y divide-[var(--ps-border-soft)] border-t border-[var(--ps-border-soft)] bg-[var(--ps-bg-subtle)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-        <HeaderStat
-          label="Reste à régler"
-          value={dueTotal > 0 ? EUR.format(dueTotal) : '0 €'}
-          hint={dueCount > 0
-            ? `${dueCount} facture${dueCount > 1 ? 's' : ''} en attente`
-            : 'Vous êtes à jour'}
-        />
-        <HeaderStat
-          label="Documents partagés"
-          value={String(documentsCount)}
-          hint={lastDocLine ?? 'Disponibles dans votre espace'}
-        />
-        <HeaderStat
-          label="Signatures"
-          value={String(pendingSignatures)}
-          hint={pendingSignatures > 0
-            ? `Document${pendingSignatures > 1 ? 's' : ''} en attente de votre signature`
-            : 'Tout est signé'}
-        />
+        {/* Chiffres clés + anneau — intégrés à l'encadré (ex-bande grise) */}
+        <div className="flex items-center justify-between gap-6 lg:justify-end lg:gap-7">
+          <dl className="grid flex-1 grid-cols-3 gap-4 lg:w-[210px] lg:flex-none lg:grid-cols-1 lg:gap-0 lg:space-y-3.5 lg:border-l lg:border-[var(--ps-border-soft)] lg:pl-6">
+            <HeaderStat
+              label="Reste à régler"
+              value={dueTotal > 0 ? EUR.format(dueTotal) : '0 €'}
+              hint={dueCount > 0
+                ? `${dueCount} facture${dueCount > 1 ? 's' : ''} en attente`
+                : 'Vous êtes à jour'}
+            />
+            <HeaderStat
+              label="Documents partagés"
+              value={String(documentsCount)}
+              hint={lastDocLine ?? 'Dans votre espace'}
+            />
+            <HeaderStat
+              label="Signatures"
+              value={String(pendingSignatures)}
+              hint={pendingSignatures > 0
+                ? `${pendingSignatures > 1 ? 'Documents' : 'Document'} en attente`
+                : 'Tout est signé'}
+            />
+          </dl>
+          <div className="hidden shrink-0 sm:block">
+            <ProgressRing value={progressPct} size={116} />
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -99,10 +101,12 @@ export function HeaderPanel({
 
 function HeaderStat({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
-    <div className="min-w-0 px-6 py-4 md:px-8">
-      <p className="ps-small text-[var(--ps-fg-secondary)]">{label}</p>
-      <p className="ps-metric ps-num pt-1.5 text-[var(--ps-fg)]">{value}</p>
-      <p className="mt-1 truncate text-[12px] text-[var(--ps-fg-secondary)]">{hint}</p>
+    <div className="min-w-0">
+      <dt className="text-[11px] font-medium text-[var(--ps-fg-secondary)]">{label}</dt>
+      <dd className="ps-num mt-0.5 text-[15px] font-semibold tracking-tight text-[var(--ps-fg)] [font-family:var(--ps-font-display)]">
+        {value}
+      </dd>
+      <dd className="ps-num truncate text-[11px] text-[var(--ps-fg-secondary)]">{hint}</dd>
     </div>
   );
 }

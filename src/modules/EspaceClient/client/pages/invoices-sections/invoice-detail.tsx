@@ -1,8 +1,7 @@
-import { ArrowRight, Download, Eye, Loader2, ShieldCheck } from 'lucide-react';
-import { InvoiceTimeline } from '@/modules/EspaceClient/client/components/InvoiceTimeline';
+import { ArrowRight, Check, Download, Eye, Loader2, ShieldCheck } from 'lucide-react';
 import { usePortal } from '@/modules/EspaceClient/shared/context/PortalContext';
 import type { PortalInvoice, PortalInstallment } from '@/modules/EspaceClient/client/hooks/usePortalData';
-import { formatDate, formatLongDate, money, num, UNPAID } from './invoice-format';
+import { formatLongDate, money, num, UNPAID } from './invoice-format';
 import { StatutFacture } from './invoice-status';
 import { InvoicePayments } from './invoice-payments';
 
@@ -78,31 +77,19 @@ export function InvoiceDetail({ invoice, installments, payingId, onPay, onDownlo
           </div>
         </div>
 
-        {/* Ligne de vie du paiement */}
-        {!isCancelled && (
-          <div className="mt-4 border-t border-[var(--ps-border-soft)] pt-3.5">
-            <p className="ps-tiny mb-3">Ligne de vie du paiement</p>
-            <InvoiceTimeline
-              issueDate={invoice.issue_date}
-              installments={installments}
-              invoiceStatus={invoice.status}
-              paidAt={invoice.paid_at}
-              formatDate={formatDate}
-              formatMoney={fmtMoney}
-            />
-          </div>
+        {/* Échéances payables — uniquement si la facture est découpée en
+            acomptes (garde anti-trop-perçu : pas de bouton facture entière). */}
+        {installments.length > 0 && !isCancelled && (
+          <InvoicePayments
+            invoice={invoice}
+            installments={installments}
+            payingId={payingId}
+            onPay={onPay}
+            fmtMoney={fmtMoney}
+            paidAmount={paidAmount}
+            remaining={remaining}
+          />
         )}
-
-        {/* Progression encaissée + récap + échéances payables */}
-        <InvoicePayments
-          invoice={invoice}
-          installments={installments}
-          payingId={payingId}
-          onPay={onPay}
-          fmtMoney={fmtMoney}
-          paidAmount={paidAmount}
-          remaining={remaining}
-        />
 
         {/* Pied : réassurance + documents + règlement */}
         <div className="mt-4 flex flex-col gap-4 border-t border-[var(--ps-border-soft)] pt-3.5 sm:flex-row sm:items-center sm:justify-between">
@@ -137,15 +124,24 @@ export function InvoiceDetail({ invoice, installments, payingId, onPay, onDownlo
               type="button"
               onClick={() => onPay('invoice', invoice.id)}
               disabled={payingId === invoice.id}
-              className="group ps-tap inline-flex min-h-[44px] w-full shrink-0 items-center justify-center gap-2 rounded-[var(--ps-radius-input)] bg-[var(--ps-primary)] px-5 text-[13px] font-semibold text-white transition-colors duration-200 hover:bg-[var(--ps-primary-hover)] disabled:opacity-60 sm:w-auto"
+              className="group ps-tap inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-[var(--ps-radius-input)] bg-[var(--ps-primary)] px-8 text-[14px] font-semibold text-white transition-colors duration-200 hover:bg-[var(--ps-primary-hover)] disabled:opacity-60 sm:w-auto"
             >
               {payingId === invoice.id
                 ? <><Loader2 className="h-4 w-4 animate-spin" />Redirection…</>
                 : <>
-                    Régler {fmtMoney(remaining)}
+                    Payer la facture · {fmtMoney(remaining)}
                     <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" strokeWidth={2.25} />
                   </>}
             </button>
+          )}
+          {isPaid && (
+            <span
+              aria-disabled="true"
+              className="inline-flex h-12 w-full shrink-0 cursor-default items-center justify-center gap-2 rounded-[var(--ps-radius-input)] bg-[var(--ps-bg-subtle)] px-8 text-[14px] font-semibold text-[var(--ps-fg-muted)] sm:w-auto"
+            >
+              <Check className="h-4 w-4" strokeWidth={2.5} />
+              Facture payée
+            </span>
           )}
         </div>
       </div>
