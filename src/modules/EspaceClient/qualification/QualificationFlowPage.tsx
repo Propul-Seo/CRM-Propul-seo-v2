@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Loader2, Send } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, ArrowRight, Loader2, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
+import { BrandPill } from '@/modules/EspaceClient/shared/components/BrandPill';
 import { useForceLightTheme } from '@/modules/EspaceClient/shared/hooks/useForceLightTheme';
 import '@/modules/EspaceClient/shared/layouts/portal-theme.css';
 
@@ -102,7 +103,7 @@ export function QualificationFlowPage() {
   if (loading) {
     return (
       <div className="propulspace-portal flex min-h-screen items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-violet-600" />
+        <Loader2 className="h-6 w-6 animate-spin text-[var(--ps-primary)]" />
       </div>
     );
   }
@@ -113,11 +114,9 @@ export function QualificationFlowPage() {
     <div
       className="propulspace-portal ps-qualification-page relative min-h-screen"
     >
-      <header className="sticky top-0 z-20 border-b border-white/55 bg-white/72 shadow-[0_10px_40px_-34px_rgba(24,24,27,0.45)] backdrop-blur-xl">
+      <header className="ps-frosted sticky top-0 z-20 border-b border-[var(--ps-border-soft)]">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-4 md:px-6">
-          <div className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 px-4 text-[11px] font-bold text-white shadow-lg shadow-violet-500/20">
-            ✨ Propul'SEO
-          </div>
+          <BrandPill size="md" />
           <SaveIndicator saving={saving} savedJustNow={savedJustNow} currentStep={currentStep + 1} totalSteps={totalSteps} />
         </div>
         <div className="mx-auto max-w-3xl px-4 pb-4 md:px-6">
@@ -128,8 +127,11 @@ export function QualificationFlowPage() {
       <main className="relative mx-auto w-full max-w-3xl px-4 py-8 pb-32 md:px-6 md:py-10 md:pb-36">
         {errors._global && (
           <div role="alert"
-            className="mb-5 rounded-xl border border-red-200 bg-red-50/90 px-4 py-3 text-[13px] text-red-800 shadow-sm backdrop-blur-sm">
-            <p className="font-semibold">⚠️ {errors._global}</p>
+            className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-800 shadow-sm">
+            <p className="flex items-center gap-2 font-semibold">
+              <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+              {errors._global}
+            </p>
           </div>
         )}
         <motion.div key={currentStep}
@@ -143,21 +145,21 @@ export function QualificationFlowPage() {
         </label>
       </main>
 
-      <footer className="sticky bottom-0 z-20 border-t border-white/60 bg-white/78 shadow-[0_-18px_44px_-34px_rgba(24,24,27,0.55)] backdrop-blur-xl">
+      <footer className="ps-frosted sticky bottom-0 z-20 border-t border-[var(--ps-border-soft)]">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-4 md:px-6">
           <Button variant="outline" onClick={goPrev} disabled={currentStep === 0 || submitting}
-            className="h-11 rounded-full border-white/80 bg-white/90 px-5 text-stone-700 shadow-sm hover:bg-white">
+            className="h-11 rounded-full border-[var(--ps-border)] bg-white px-5 text-stone-700 shadow-sm hover:bg-stone-50">
             <ArrowLeft className="mr-1.5 h-4 w-4" />Précédent
           </Button>
 
           {!isLastStep ? (
             <Button onClick={goNext}
-              className="h-12 gap-1.5 rounded-full bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 px-8 font-semibold text-white shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50">
+              className="h-12 gap-1.5 rounded-full bg-[var(--ps-primary)] px-8 font-semibold text-white shadow-sm transition-colors hover:bg-[var(--ps-primary-hover)]">
               Suivant<ArrowRight className="ml-0.5 h-4 w-4" />
             </Button>
           ) : (
             <Button onClick={handleSubmit} disabled={submitting}
-              className="h-12 gap-1.5 rounded-full bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 px-8 font-semibold text-white shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 disabled:opacity-60">
+              className="h-12 gap-1.5 rounded-full bg-[var(--ps-primary)] px-8 font-semibold text-white shadow-sm transition-colors hover:bg-[var(--ps-primary-hover)] disabled:opacity-60">
               {submitting
                 ? <><Loader2 className="mr-1.5 h-4 w-4 animate-spin" />Envoi…</>
                 : <><Send className="mr-1.5 h-4 w-4" />Envoyer mon diagnostic</>}

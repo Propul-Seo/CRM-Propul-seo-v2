@@ -6,13 +6,13 @@ interface StepShellProps {
   children: ReactNode;
 }
 
-// Coque commune aux 7 étapes — DA Sky Aurora (alignée WelcomeWizard palier 9/10).
-// Titre en gradient sky→violet→pink, sous-titre stone-600 sur fond clair.
+// Coque commune aux 7 étapes — DA Aurora clair.
+// Titre en encre pleine, sous-titre stone-600 sur fond clair.
 export function StepShell({ title, subtitle, children }: StepShellProps) {
   return (
     <div className="ps-fade-in space-y-6">
       <header className="max-w-2xl">
-        <h1 className="bg-gradient-to-r from-sky-600 via-violet-600 to-pink-500 bg-clip-text text-[25px] font-bold leading-tight text-transparent md:text-[30px]">
+        <h1 className="text-[25px] font-bold leading-tight text-stone-950 md:text-[30px]">
           {title}
         </h1>
         <p className="mt-2 max-w-xl text-[14px] leading-6 text-stone-600">{subtitle}</p>

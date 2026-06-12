@@ -1,3 +1,5 @@
+import { Blocks, Globe, Settings } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { RadioCard } from '../components/RadioCard';
 import { PROJECT_TYPES } from '../constants';
 import type { QualificationDraft } from '../schema';
@@ -9,11 +11,11 @@ interface Step0Props {
   errors: Record<string, string | undefined>;
 }
 
-// Mapping label → emoji visuel (icônes lucide non utilisables dans RadioCard.emoji)
-const EMOJIS: Record<string, string> = {
-  site:     '🌐',
-  site_erp: '🧩',
-  erp:      '⚙️',
+// Icône Lucide par type de projet.
+const ICONS: Record<string, LucideIcon> = {
+  site:     Globe,
+  site_erp: Blocks,
+  erp:      Settings,
 };
 
 export function Step0ProjectType({ draft, setField, errors }: Step0Props) {
@@ -38,7 +40,7 @@ export function Step0ProjectType({ draft, setField, errors }: Step0Props) {
               onChange={v => setField('project_type', v as QualificationDraft['project_type'])}
               label={opt.label}
               hint={opt.hint}
-              emoji={EMOJIS[opt.value]}
+              icon={ICONS[opt.value]}
             />
           ))}
         </div>

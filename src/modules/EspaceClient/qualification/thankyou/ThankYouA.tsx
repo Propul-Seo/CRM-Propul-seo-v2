@@ -3,25 +3,22 @@ import { CalendarClock, Check, ExternalLink, Mail } from 'lucide-react';
 
 // Variante A — "Confirmation premium silencieuse"
 // Checkmark animé + 1 seul CTA "Réserver un appel maintenant".
+// Surface tokenisée (.propulspace-portal + .ps-qualification-page) : le scope
+// portail définit `a { color: var(--ps-primary) }`, d'où les `!text-*` sur les
+// liens pour conserver leur encre propre.
 export function ThankYouA() {
   return (
-    <div
-      className="relative flex min-h-screen items-center justify-center px-4 py-16"
-      style={{ background: 'linear-gradient(135deg, #f0f9ff 0%, #faf5ff 50%, #fff7ed 100%)' }}
-    >
+    <div className="propulspace-portal ps-qualification-page relative flex min-h-screen items-center justify-center px-4 py-16">
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-        <div className="absolute left-[15%] top-[10%] h-[400px] w-[600px] -rotate-12 rounded-full opacity-40 blur-3xl"
-          style={{ background: 'radial-gradient(ellipse, #7dd3fc 0%, transparent 60%)' }} />
-        <div className="absolute right-[10%] bottom-[10%] h-[400px] w-[500px] rotate-12 rounded-full opacity-35 blur-3xl"
-          style={{ background: 'radial-gradient(ellipse, #fed7aa 0%, transparent 60%)' }} />
+        <div className="ps-hero-glow absolute left-1/2 top-[-120px] h-[360px] w-[560px] -translate-x-1/2 rounded-full" />
       </div>
 
-      <div className="relative z-10 w-full max-w-lg rounded-3xl border border-white/60 bg-white/80 p-10 text-center shadow-2xl shadow-violet-500/10 backdrop-blur-md">
+      <div className="ps-surface relative z-10 w-full max-w-lg p-10 text-center">
         <motion.div
           initial={{ scale: 0, rotate: -30 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', stiffness: 200, damping: 18, delay: 0.1 }}
-          className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 shadow-lg shadow-emerald-500/30"
+          className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--ps-success)] shadow-sm"
         >
           <Check className="h-10 w-10 text-white" strokeWidth={3} />
         </motion.div>
@@ -30,7 +27,7 @@ export function ThankYouA() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.4 }}
-          className="bg-gradient-to-r from-sky-600 via-violet-600 to-pink-500 bg-clip-text text-3xl font-bold text-transparent"
+          className="text-3xl font-bold text-[var(--ps-fg)]"
         >
           Diagnostic enregistré
         </motion.h1>
@@ -51,8 +48,7 @@ export function ThankYouA() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.4 }}
-          style={{ color: '#ffffff' }}
-          className="mt-8 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 px-6 font-semibold shadow-lg shadow-violet-500/40 transition-shadow hover:shadow-violet-500/60"
+          className="mt-8 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--ps-primary)] px-6 font-semibold !text-white shadow-sm transition-colors hover:bg-[var(--ps-primary-hover)]"
         >
           <CalendarClock className="h-5 w-5" />
           Réserver un appel maintenant
@@ -65,7 +61,7 @@ export function ThankYouA() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.72, duration: 0.4 }}
-          className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-stone-300 bg-white px-6 text-[14px] font-semibold text-stone-700 transition-colors hover:bg-stone-50"
+          className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[var(--ps-border)] bg-white px-6 text-[14px] font-semibold !text-stone-700 transition-colors hover:bg-stone-50"
         >
           <ExternalLink className="h-4 w-4" />
           Voir nos accompagnements

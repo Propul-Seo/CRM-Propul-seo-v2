@@ -19,11 +19,11 @@ export function SaveIndicator({ saving, savedJustNow, currentStep, totalSteps = 
       <span className="hidden min-w-[94px] items-center justify-end gap-1.5 sm:inline-flex">
         {saving ? (
           <>
-            <Loader2 className="h-3 w-3 animate-spin text-sky-600" />
+            <Loader2 className="h-3 w-3 animate-spin text-[var(--ps-primary)]" />
             Sauvegarde…
           </>
         ) : savedJustNow ? (
-          <span className="inline-flex items-center gap-1.5 text-emerald-600">
+          <span className="inline-flex items-center gap-1.5 text-[var(--ps-success-text)]">
             <Check className="h-3 w-3" strokeWidth={3} />
             Sauvegardé
           </span>
@@ -31,7 +31,7 @@ export function SaveIndicator({ saving, savedJustNow, currentStep, totalSteps = 
           <span className="opacity-0">Sauvegardé</span>
         )}
       </span>
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/75 px-3 py-1.5 font-medium text-stone-600 shadow-sm backdrop-blur">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--ps-border)] bg-white px-3 py-1.5 font-medium text-stone-600 shadow-sm">
         <Clock className="h-3 w-3" />
         ≈ {remainingMinutes(currentStep, totalSteps)} min restantes
       </span>

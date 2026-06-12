@@ -7,8 +7,8 @@ interface ProgressBarProps {
   totalSteps?: number;     // dynamique selon project_type (default 8 = site)
 }
 
-// DA Sky Aurora : dots gradient sky→violet→pink pour l'étape active,
-// violet plein pour les passées, fond stone pour à venir.
+// DA Aurora : segments remplis en violet de marque (--ps-primary),
+// fond clair neutre pour les étapes à venir.
 export function ProgressBar({
   currentStep,
   completedSteps = Math.max(0, currentStep - 1),
@@ -39,12 +39,12 @@ export function ProgressBar({
             <div
               key={stepNum}
               aria-hidden
-              className="relative h-[6px] flex-1 overflow-hidden rounded-full bg-white/70 shadow-inner shadow-stone-200/80"
+              className="relative h-[6px] flex-1 overflow-hidden rounded-full bg-[var(--ps-bg-subtle)] shadow-inner shadow-stone-200/80"
             >
               <motion.div
                 className={
                   isComplete
-                    ? 'absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 shadow-sm shadow-violet-500/30'
+                    ? 'absolute inset-y-0 left-0 rounded-full bg-[var(--ps-primary)]'
                     : 'absolute inset-y-0 left-0 rounded-full'
                 }
                 initial={false}
