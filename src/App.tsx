@@ -27,6 +27,9 @@ const PropulspaceAdminApp = lazy(() =>
   import('./modules/EspaceClient/admin/PropulspaceAdminApp').then(m => ({ default: m.PropulspaceAdminApp }))
 );
 
+// BANC D'ESSAI JETABLE (dev only) — variantes V3 du portail. À supprimer après arbitrage.
+const PreviewBench = lazy(() => import('./modules/EspaceClient/preview-bench/PreviewBench'));
+
 const ClientBriefPage = lazy(() =>
   import('./modules/ClientBrief/ClientBriefPage').then(m => ({ default: m.ClientBriefPage }))
 );
@@ -168,6 +171,16 @@ function App() {
             </ErrorBoundary>
           }
         />
+        {import.meta.env.DEV && (
+          <Route
+            path="/portail-preview"
+            element={
+              <Suspense fallback={<div className="min-h-screen bg-white" />}>
+                <PreviewBench />
+              </Suspense>
+            }
+          />
+        )}
         <Route path="/portal/:token" element={<PortalPageRoute />} />
         <Route path="/brief/:token" element={<BriefPageRoute />} />
         <Route path="/brief-invite/:token" element={<BriefInvitePageRoute />} />
