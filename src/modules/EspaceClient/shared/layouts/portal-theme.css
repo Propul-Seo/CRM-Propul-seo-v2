@@ -160,6 +160,8 @@ html.ps-dark-surface #root {
 
 /* ─── SEMANTIC TYPE CLASSES ────────────────────────────── */
 .propulspace-portal .ps-display { font-size: 32px; line-height: 40px; font-weight: 700; letter-spacing: -0.025em; }
+/* Display fluide des mastheads éditoriaux (direction A) — phrase d'état en une de revue. */
+.propulspace-portal .ps-display-fluid { font-size: clamp(28px, 4.6vw, 42px); line-height: 1.15; font-weight: 700; letter-spacing: -0.025em; text-wrap: balance; }
 .propulspace-portal .ps-h1      { font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: -0.025em; margin: 0; }
 .propulspace-portal .ps-h2      { font-size: 18px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em; margin: 0; }
 .propulspace-portal .ps-h3      { font-size: 15px; line-height: 22px; font-weight: 600; letter-spacing: -0.005em; margin: 0; }
@@ -170,6 +172,7 @@ html.ps-dark-surface #root {
 .propulspace-portal .ps-eyebrow-muted { color: var(--ps-fg-muted); }
 .propulspace-portal .ps-num     { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
 .propulspace-portal .ps-display,
+.propulspace-portal .ps-display-fluid,
 .propulspace-portal .ps-h1,
 .propulspace-portal .ps-h2,
 .propulspace-portal .ps-h3 { font-family: var(--ps-font-display); }
