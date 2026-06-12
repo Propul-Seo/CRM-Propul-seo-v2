@@ -162,7 +162,7 @@ export function InvoicesPage() {
   }
 
   return (
-    <div className="ps-fade-in mx-auto w-full max-w-[1080px]">
+    <div className="ps-fade-in w-full">
       {banner && (
         <div className="mb-4">
           <PaymentBannerView banner={banner} />

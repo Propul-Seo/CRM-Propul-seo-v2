@@ -109,7 +109,9 @@ export function PortalLayout({
       {/* Colonne de contenu : décalée de la sidebar sur desktop, du header
           fixe (h-14) sur mobile. */}
       <div className="flex min-h-screen flex-col pt-14 lg:pl-[248px] lg:pt-0">
-        <main className="ps-fade-in mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 md:px-8 md:pt-10 lg:pb-14">
+        {/* Pleine largeur : le contenu occupe toute la page (pas de cap centré),
+            seuls les paddings respirent un peu plus sur très grand écran. */}
+        <main className="ps-fade-in w-full flex-1 px-4 pb-28 pt-6 md:px-8 md:pt-10 lg:pb-14 2xl:px-12">
           {children}
         </main>
 

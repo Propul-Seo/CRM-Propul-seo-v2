@@ -5,7 +5,7 @@ import { Skeleton } from '@/modules/EspaceClient/shared/components';
 
 export function InvoicesSkeleton() {
   return (
-    <div className="mx-auto w-full max-w-[1080px]">
+    <div className="w-full">
       <div className="flex items-baseline justify-between gap-6">
         <Skeleton className="h-3.5 w-24 rounded-md" />
         <Skeleton className="h-3.5 w-48 rounded-md" />
