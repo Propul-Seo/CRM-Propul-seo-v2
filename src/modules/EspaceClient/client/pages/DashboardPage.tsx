@@ -10,7 +10,6 @@ import { HeaderPanel } from './dashboard-sections/HeaderPanel';
 import { ActionBanner, SecondaryActions } from './dashboard-sections/ActionBanner';
 import { StepsPanel } from './dashboard-sections/StepsPanel';
 import { ActivityPanel } from './dashboard-sections/ActivityPanel';
-import { SideRail } from './dashboard-sections/SideRail';
 import { DashboardSkeleton } from './dashboard-sections/DashboardSkeleton';
 import {
   EUR, formatShortDate, formatLongDate, prestaLabelOf,
@@ -132,42 +131,34 @@ export function DashboardPage() {
     <div className="ps-fade-in space-y-5">
       {!previewMode && <WelcomeBanner />}
 
-      <HeaderPanel
-        firstName={firstName}
-        progressPct={stats.progressPct}
-        tail={tail}
-        projectLine={projectLine}
-        scheduleLine={scheduleLine}
-        dueTotal={stats.dueTotal}
-        dueCount={stats.dueCount}
-        documentsCount={documents.rows.length}
-        lastDocLine={stats.lastDoc
-          ? `Dernier : ${stats.lastDoc.name} · ${formatShortDate(stats.lastDoc.created_at)}`
-          : null}
-        pendingSignatures={stats.pendingSignatures}
-      />
+      {/* Panneau d'en-tête collant au scroll sur desktop (demande client). */}
+      <div className="lg:sticky lg:top-0 lg:z-20">
+        <HeaderPanel
+          firstName={firstName}
+          progressPct={stats.progressPct}
+          tail={tail}
+          projectLine={projectLine}
+          scheduleLine={scheduleLine}
+          referentName={details?.assigned_name ?? null}
+          dueTotal={stats.dueTotal}
+          dueCount={stats.dueCount}
+          documentsCount={documents.rows.length}
+          lastDocLine={stats.lastDoc
+            ? `Dernier : ${stats.lastDoc.name} · ${formatShortDate(stats.lastDoc.created_at)}`
+            : null}
+          pendingSignatures={stats.pendingSignatures}
+        />
+      </div>
 
       {priority && <ActionBanner action={priority} />}
       {secondary.length > 0 && <SecondaryActions actions={secondary} />}
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="space-y-5">
-          <StepsPanel steps={steps.rows} basePath={basePath} />
-          <ActivityPanel items={activity} basePath={basePath} />
-          <p className="flex items-center gap-2 px-1 text-[11px] text-[var(--ps-fg-muted)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--ps-success)]" />
-            Synchronisé avec votre équipe Propul'SEO
-          </p>
-        </div>
-        <SideRail
-          referentName={details?.assigned_name ?? null}
-          nextStep={stats.nextStep ? { label: stats.nextStep.label, date: stats.nextStep.date_planned_end } : null}
-          dueCount={stats.dueCount}
-          documentsCount={documents.rows.length}
-          pendingSignatures={stats.pendingSignatures}
-          basePath={basePath}
-        />
-      </div>
+      <StepsPanel steps={steps.rows} basePath={basePath} />
+      <ActivityPanel items={activity} basePath={basePath} />
+      <p className="flex items-center gap-2 px-1 text-[11px] text-[var(--ps-fg-muted)]">
+        <span className="h-1.5 w-1.5 rounded-full bg-[var(--ps-success)]" />
+        Synchronisé avec votre équipe Propul'SEO
+      </p>
     </div>
   );
 }
