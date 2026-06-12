@@ -32,7 +32,7 @@ export function SignaturesMasthead({ projectName, stats }: SignaturesMastheadPro
     ? `${projectName ?? 'Votre projet'} — vos contrats et devis apparaîtront ici dès qu'ils seront prêts.`
     : pending > 0
       ? [
-          nextExpiry ? `à signer avant le ${formatLongDateSignature(nextExpiry)}` : null,
+          nextExpiry ? `à signer avant le ${formatDate(nextExpiry)}` : null,
           'signature en ligne sécurisée',
           'deux minutes suffisent',
         ].filter(Boolean).join(' · ')
