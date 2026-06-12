@@ -177,6 +177,15 @@ export interface AdminRpcMap {
       contact_created: boolean;
     };
   };
+  // Réglages clé→jsonb du back-office (mig 300). Valeur typée côté appelant.
+  admin_get_setting: {
+    args: { p_key: string };
+    returns: unknown;           // jsonb (null si clé absente)
+  };
+  admin_set_setting: {
+    args: { p_key: string; p_value: unknown };
+    returns: null;
+  };
 }
 
 export async function adminRpc<K extends keyof AdminRpcMap & string>(

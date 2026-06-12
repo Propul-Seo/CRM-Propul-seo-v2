@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Search, SearchX } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Search, SearchX, Settings } from 'lucide-react';
 import { AdminEmptyState, AdminFilterPills } from '@/modules/EspaceClient/admin/components/kit';
+import { useAdminBasePath } from '@/modules/EspaceClient/admin/AdminBasePathContext';
 import type { AdminClientHealth } from '../../hooks/useAdminClients';
 import { CompactClientRow } from './CompactClientRow';
 import {
@@ -32,6 +34,7 @@ function RowSkeleton() {
 // Colonne gauche du cockpit : recherche + filtres (avec compteurs) puis liste
 // compacte GROUPÉE par palier (Portails actifs / Projets en cours / Autres).
 export function AdminClientsList({ clients, loading, error, selectedId, onSelect }: Props) {
+  const { basePath } = useAdminBasePath();
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<CockpitFilter>('all');
 
@@ -45,15 +48,25 @@ export function AdminClientsList({ clients, loading, error, selectedId, onSelect
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="border-b border-border px-3 py-2.5">
-        <div className="relative mb-2.5">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-          <input
-            value={q}
-            onChange={e => setQ(e.target.value)}
-            placeholder="Rechercher un client…"
-            aria-label="Rechercher un client"
-            className="w-full rounded-md border border-border bg-surface-3 py-1.5 pl-8 pr-3 text-[12.5px] text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none"
-          />
+        <div className="mb-2.5 flex items-center gap-1.5">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={q}
+              onChange={e => setQ(e.target.value)}
+              placeholder="Rechercher un client…"
+              aria-label="Rechercher un client"
+              className="w-full rounded-md border border-border bg-surface-3 py-1.5 pl-8 pr-3 text-[12.5px] text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none"
+            />
+          </div>
+          <Link
+            to={`${basePath}/settings`}
+            title="Réglages du back-office (jalons types…)"
+            aria-label="Réglages du back-office"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-surface-3 text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+          >
+            <Settings className="h-3.5 w-3.5" />
+          </Link>
         </div>
         <AdminFilterPills
           filters={COCKPIT_FILTERS.map(f => ({ label: f.label, value: f.key, count: counts[f.key] }))}

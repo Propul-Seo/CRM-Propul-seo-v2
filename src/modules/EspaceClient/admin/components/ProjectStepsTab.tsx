@@ -1,10 +1,11 @@
 import { useState, type CSSProperties } from 'react';
-import { Plus, ChevronUp, ChevronDown, Pencil, Trash2, ListChecks, Loader2, EyeOff } from 'lucide-react';
+import { Plus, ChevronUp, ChevronDown, Pencil, Trash2, ListChecks, Loader2, EyeOff, Sparkles } from 'lucide-react';
 import { StatusBadge, Skeleton } from '@/modules/EspaceClient/shared/components';
 import { AdminEmptyState } from '@/modules/EspaceClient/admin/components/kit';
 import { AdminProjectStepForm } from './AdminProjectStepForm';
 import { STEP_STATUSES } from './tabConstants';
 import { useAdminProjectSteps } from '../hooks/useAdminProjectSteps';
+import { loadStepTemplate } from '../lib/stepTemplate';
 import type { PortalProjectStep } from '@/modules/EspaceClient/client/hooks/usePortalData';
 
 const fmtDate = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -37,6 +38,25 @@ export function ProjectStepsTab({ projectId }: { projectId: string }) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [reordering, setReordering] = useState(false);
+  const [applyingTemplate, setApplyingTemplate] = useState(false);
+
+  // Insère les jalons types (Réglages du back-office, défauts sinon) :
+  // 1er jalon « en cours », les suivants « à venir », tous visibles client.
+  async function applyTemplate() {
+    setApplyingTemplate(true);
+    setActionError(null);
+    const { items } = await loadStepTemplate();
+    for (const [i, item] of items.entries()) {
+      const { error } = await createStep({
+        label: item.label,
+        description: item.description || null,
+        status: i === 0 ? 'in_progress' : 'upcoming',
+        visibleToClient: true,
+      });
+      if (error) { setActionError(error); break; }
+    }
+    setApplyingTemplate(false);
+  }
 
   async function move(index: number, dir: -1 | 1) {
     const target = index + dir;
@@ -94,17 +114,32 @@ export function ProjectStepsTab({ projectId }: { projectId: string }) {
         <AdminEmptyState
           icon={ListChecks}
           title="Aucun jalon"
-          body="Ajoutez la première étape du projet pour construire la frise."
+          body="Appliquez les jalons types (modifiables dans les Réglages) ou ajoutez la première étape à la main."
           action={
-            <button
-              type="button"
-              onClick={openCreate}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-[13px] font-semibold text-white transition hover:bg-primary/85"
-            >
-              <Plus className="h-4 w-4" /> Ajouter un jalon
-            </button>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                disabled={applyingTemplate}
+                onClick={() => { void applyTemplate(); }}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-[13px] font-semibold text-white transition hover:bg-primary/85 disabled:opacity-60"
+              >
+                {applyingTemplate ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                Ajouter les jalons types
+              </button>
+              <button
+                type="button"
+                disabled={applyingTemplate}
+                onClick={openCreate}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-[13px] font-semibold text-primary transition-colors hover:bg-primary/15 disabled:opacity-60"
+              >
+                <Plus className="h-4 w-4" /> Ajouter un jalon
+              </button>
+            </div>
           }
         />
+      )}
+      {!loading && !error && steps.length === 0 && actionError && (
+        <p className="mt-3 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{actionError}</p>
       )}
 
       {!loading && !error && steps.length > 0 && (

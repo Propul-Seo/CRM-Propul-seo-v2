@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Rocket, Users, Inbox } from 'lucide-react';
+import { Rocket, Users, Inbox, Settings } from 'lucide-react';
 import { useAdminBasePath } from '@/modules/EspaceClient/admin/AdminBasePathContext';
 
 // Barre supérieure du back-office hors shell CRM : marque + fil d'Ariane de
@@ -12,6 +12,7 @@ export function AdminTopNav() {
   const links = [
     { to: `${basePath}/clients`, label: 'Clients', icon: Users },
     { to: `${basePath}/leads`, label: 'Leads', icon: Inbox },
+    { to: `${basePath}/settings`, label: 'Réglages', icon: Settings },
   ];
 
   return (

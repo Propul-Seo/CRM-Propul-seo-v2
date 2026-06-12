@@ -3,6 +3,7 @@ import { AdminBasePathProvider } from './AdminBasePathContext';
 import { PropulspaceAdminGuard } from './PropulspaceAdminGuard';
 import { LeadsQualifiesPage } from './LeadsQualifiesPage';
 import { AdminCockpitPage } from './pages/AdminCockpitPage';
+import { AdminPortalSettingsPage } from './pages/AdminPortalSettingsPage';
 import { AdminPortalPreviewPage } from './preview/AdminPortalPreviewPage';
 
 interface AdminRoutesShellProps {
@@ -27,6 +28,7 @@ export function AdminRoutesShell({ basePath, mountedInShell }: AdminRoutesShellP
           <Route path="clients/:projectId/apercu-client/*" element={<AdminPortalPreviewPage />} />
           <Route path="clients/:projectId/*" element={<AdminCockpitPage />} />
           <Route path="leads" element={<LeadsQualifiesPage />} />
+          <Route path="settings" element={<AdminPortalSettingsPage />} />
         </Routes>
       </PropulspaceAdminGuard>
     </AdminBasePathProvider>
