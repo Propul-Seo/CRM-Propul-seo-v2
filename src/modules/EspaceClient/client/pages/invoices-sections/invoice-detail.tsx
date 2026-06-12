@@ -36,8 +36,9 @@ export function InvoiceDetail({ invoice, installments, payingId, onPay, onDownlo
 
   // On privilégie le paiement échéance par échéance dès qu'il existe des
   // installments (garde anti-trop-perçu : pas de "facture entière" si elle est
-  // découpée en acomptes).
-  const canPayWhole = !previewMode && (invoice.status === 'sent' || invoice.status === 'overdue') && installments.length === 0;
+  // découpée en acomptes). En aperçu admin le bouton reste visible mais
+  // désactivé : l'aperçu doit refléter ce que voit le client.
+  const canPayWhole = (invoice.status === 'sent' || invoice.status === 'overdue') && installments.length === 0;
 
   return (
     <section className="mt-4" aria-label="Détail de la facture sélectionnée">
@@ -123,7 +124,8 @@ export function InvoiceDetail({ invoice, installments, payingId, onPay, onDownlo
             <button
               type="button"
               onClick={() => onPay('invoice', invoice.id)}
-              disabled={payingId === invoice.id}
+              disabled={previewMode || payingId === invoice.id}
+              title={previewMode ? 'Désactivé en aperçu admin' : undefined}
               className="group ps-tap inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-[var(--ps-radius-input)] bg-[var(--ps-primary)] px-8 text-[14px] font-semibold text-white transition-colors duration-200 hover:bg-[var(--ps-primary-hover)] disabled:opacity-60 sm:w-auto"
             >
               {payingId === invoice.id

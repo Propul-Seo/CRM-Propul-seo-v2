@@ -73,7 +73,8 @@ export function InvoicePayments({
           <p className="ps-tiny mb-2.5">Échéances</p>
           <ul className="divide-y divide-[var(--ps-border-soft)] overflow-hidden rounded-[var(--ps-radius-input)] border border-[var(--ps-border-soft)]">
             {installments.map(inst => {
-              const isPayable = !previewMode && !isCancelled && (inst.status === 'pending' || inst.status === 'overdue');
+              // Visible aussi en aperçu admin (désactivé) : parité avec le client.
+              const isPayable = !isCancelled && (inst.status === 'pending' || inst.status === 'overdue');
               return (
                 <li key={inst.id} className="flex min-h-[56px] flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 text-[12.5px]">
                   <div className="min-w-0 flex-1">
@@ -92,7 +93,8 @@ export function InvoicePayments({
                     <button
                       type="button"
                       onClick={() => onPay('installment', inst.id)}
-                      disabled={payingId === inst.id}
+                      disabled={previewMode || payingId === inst.id}
+                      title={previewMode ? 'Désactivé en aperçu admin' : undefined}
                       className="ps-tap inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-[var(--ps-radius-input)] bg-[var(--ps-primary)] px-4 text-[12.5px] font-semibold text-white transition-colors duration-200 hover:bg-[var(--ps-primary-hover)] disabled:opacity-60"
                     >
                       {payingId === inst.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Payer'}

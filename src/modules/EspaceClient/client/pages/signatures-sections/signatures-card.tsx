@@ -51,7 +51,8 @@ interface RowProps {
 
 function SignatureRow({ sig, previewMode, onSign, onDownload }: RowProps) {
   const status = toSignatureStatus(sig.status)
-  const canSign = !previewMode && status === 'pending'
+  // Visible aussi en aperçu admin (désactivé) : parité avec ce que voit le client.
+  const canSign = status === 'pending'
   const hasSignedPdf = status === 'signed' && !!sig.signed_pdf_url
 
   const dateLigne = status === 'signed'
@@ -81,7 +82,9 @@ function SignatureRow({ sig, previewMode, onSign, onDownload }: RowProps) {
         <button
           type="button"
           onClick={onSign}
-          className="ps-tap inline-flex min-h-[44px] shrink-0 items-center justify-center gap-1.5 rounded-[var(--ps-radius-input)] bg-[var(--ps-primary)] px-3.5 text-[12.5px] font-semibold text-white transition-colors duration-200 hover:bg-[var(--ps-primary-hover)]"
+          disabled={previewMode}
+          title={previewMode ? 'Désactivé en aperçu admin' : undefined}
+          className="ps-tap inline-flex min-h-[44px] shrink-0 items-center justify-center gap-1.5 rounded-[var(--ps-radius-input)] bg-[var(--ps-primary)] px-3.5 text-[12.5px] font-semibold text-white transition-colors duration-200 hover:bg-[var(--ps-primary-hover)] disabled:opacity-60"
         >
           <PenLine className="h-3.5 w-3.5" strokeWidth={2.25} />
           Signer
