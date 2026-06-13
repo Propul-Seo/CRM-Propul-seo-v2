@@ -88,69 +88,83 @@ Vous devez voir `=== Tout est OK ===`.
 ## 5. Lancer le serveur (manuel, optionnel)
 
 ```bash
-python -m propulseo_mcp.server
+python run_server.py
 ```
 Le serveur attend sur l'entrée/sortie standard (stdio). En usage normal, c'est
 **Claude qui le lance** automatiquement (voir §6) — inutile de le démarrer à la main.
+
+> `run_server.py` est un lanceur qui ajoute le dossier du projet au `sys.path` :
+> il fonctionne **quel que soit le répertoire courant** (Claude Code/Desktop ne
+> fixent pas le cwd), sans avoir à installer le package ni à définir `PYTHONPATH`.
 
 ---
 
 ## 6. Enregistrer le MCP dans Claude
 
-> Le `.env` est lu via un **chemin absolu** calculé depuis le code : pas besoin de
-> mettre le secret dans la configuration du client. Indiquez simplement le
-> **python du venv** et le module.
+> Le `.env` est lu via un **chemin absolu** calculé depuis le code : **aucun secret
+> à mettre dans la configuration du client**. On indique seulement le **python du
+> venv** + le lanceur `run_server.py` (tous deux en chemins **absolus**, car ni
+> Claude Code ni Claude Desktop ne fixent le répertoire de travail).
 
-Repérez le chemin du python du venv :
-- Windows : `<dossier>\propulseo-mcp\.venv\Scripts\python.exe`
-- Mac/Linux : `<dossier>/propulseo-mcp/.venv/bin/python`
+Chemins à utiliser (adapter `<dossier>` ; ta machine = `C:\Users\etien\Desktop\CRM-Propul-seo-v2-main\propulseo-mcp`) :
+- Python venv — Windows : `<dossier>\.venv\Scripts\python.exe`
+- Python venv — Mac/Linux : `<dossier>/.venv/bin/python`
+- Lanceur : `<dossier>\run_server.py` (Windows) / `<dossier>/run_server.py` (Mac/Linux)
 
 ### A. Claude Code (CLI)
 
-Depuis le dossier `propulseo-mcp` :
-
-**Windows**
 ```powershell
-claude mcp add propulseo-crm -- .\.venv\Scripts\python.exe -m propulseo_mcp.server
+# Windows (ta machine) — une seule ligne :
+claude mcp add --transport stdio propulseo-crm -- "C:\Users\etien\Desktop\CRM-Propul-seo-v2-main\propulseo-mcp\.venv\Scripts\python.exe" "C:\Users\etien\Desktop\CRM-Propul-seo-v2-main\propulseo-mcp\run_server.py"
 ```
-**Mac/Linux**
 ```bash
-claude mcp add propulseo-crm -- ./.venv/bin/python -m propulseo_mcp.server
+# Mac/Linux :
+claude mcp add --transport stdio propulseo-crm -- /chemin/propulseo-mcp/.venv/bin/python /chemin/propulseo-mcp/run_server.py
 ```
-Vérifier : `claude mcp list` (le serveur doit apparaître `connected`).
-Pour le retirer : `claude mcp remove propulseo-crm`.
+- Vérifier : `claude mcp list` puis `claude mcp get propulseo-crm` (doit être `connected`).
+- Retirer : `claude mcp remove propulseo-crm`.
+- Portée : par défaut `local` (privé à toi, ce projet). Ajouter `--scope user` pour
+  l'avoir dans **tous** tes projets, ou `--scope project` pour le partager via un
+  fichier `.mcp.json` versionné.
 
 ### B. Claude Desktop (app Windows & Mac)
 
 Éditer le fichier de configuration (le créer s'il n'existe pas) :
 - **Windows** : `%APPDATA%\Claude\claude_desktop_config.json`
+  (= `C:\Users\<vous>\AppData\Roaming\Claude\claude_desktop_config.json`)
 - **Mac** : `~/Library/Application Support/Claude/claude_desktop_config.json`
 
-Y ajouter (adapter les chemins **absolus** ; sous Windows, **doubler les `\`**) :
-
-```jsonc
+**Windows (ta machine — prêt à coller, `\` doublés) :**
+```json
 {
   "mcpServers": {
     "propulseo-crm": {
-      "command": "C:\\chemin\\propulseo-mcp\\.venv\\Scripts\\python.exe",
-      "args": ["-m", "propulseo_mcp.server"]
+      "type": "stdio",
+      "command": "C:\\Users\\etien\\Desktop\\CRM-Propul-seo-v2-main\\propulseo-mcp\\.venv\\Scripts\\python.exe",
+      "args": ["C:\\Users\\etien\\Desktop\\CRM-Propul-seo-v2-main\\propulseo-mcp\\run_server.py"]
     }
   }
 }
 ```
-Exemple **Mac** :
-```jsonc
+**Mac (exemple) :**
+```json
 {
   "mcpServers": {
     "propulseo-crm": {
+      "type": "stdio",
       "command": "/Users/vous/propulseo-mcp/.venv/bin/python",
-      "args": ["-m", "propulseo_mcp.server"]
+      "args": ["/Users/vous/propulseo-mcp/run_server.py"]
     }
   }
 }
 ```
-Puis **quitter complètement et relancer Claude Desktop**. L'icône outils (🔌)
-doit lister les outils `propulseo-crm`.
+> Si le fichier contient déjà d'autres serveurs, ajoutez seulement l'entrée
+> `"propulseo-crm": { ... }` à l'intérieur de `mcpServers` (ne dupliquez pas la clé).
+
+Puis **quitter complètement** Claude Desktop (Windows : clic droit icône barre des
+tâches → Quitter ; Mac : Cmd+Q) **et le relancer**. Les outils `propulseo-crm`
+doivent apparaître (icône 🔌). En cas d'échec, les logs MCP de Claude Desktop
+indiquent l'erreur de démarrage.
 
 ---
 
@@ -164,10 +178,20 @@ Deux familles d'outils :
 - `describe_table` — colonnes, types, champs obligatoires, valeurs d'enum.
 - `db_select`, `db_get`, `db_insert`, `db_update`, `db_delete` — CRUD universel.
 
-### Outils nommés (section CRM, déjà câblés)
-`crm_list_contacts`, `crm_get_contact`, `crm_create_contact`, `crm_update_contact`,
-`crm_delete_contact`, idem pour `client` et `lead`, plus
-`crm_list_contact_activities` / `crm_log_contact_activity`.
+### Outils nommés par section (~166 outils)
+Préfixe par section, chacun avec list / get / create / update / delete typés :
+- `crm_*` — contacts, clients, leads, activités de contact
+- `projets_*` — projets, checklists, factures, suivis, briefs, contacts projet, activités, documents, accès (RO), archives (RO)
+- `compta_*` — écritures, ventilations, partenaires, transactions, métriques (RO), archives (RO)
+- `procedures_*` — procédures, catégories, révisions
+- `taches_*` — tâches, commentaires, tâches perso, tâches comm, archives (RO)
+- `comm_*` — posts, médias, commentaires, métriques, posts client
+- `portails_*` — accès agence (RO), invitations de brief
+- `parametres_*` — réglages société, utilisateurs, profils, permissions, notifications
+- `dashboard_*` — métriques mensuelles & stats annuelles (RO)
+
+> Astuce : si tu ne connais pas l'outil exact, demande en langage naturel — Claude
+> choisit l'outil ; ou utilise `list_tables` / `describe_table` puis les `db_*`.
 
 ### Exemples de demandes en langage naturel
 - « Liste les 10 derniers contacts au statut *signe*. »
@@ -182,13 +206,22 @@ Deux familles d'outils :
 
 ---
 
-## 8. Installer chez l'associé (autre machine)
+## 8. Installer chez l'associé (autre machine — Windows & Mac)
 
-1. Copier le dossier `propulseo-mcp` (sans le `.env`).
-2. Suivre §1 → §4 (installer Python, créer le venv, `pip install`, créer son
-   propre `.env` avec la clé `service_role`).
-3. Suivre §6 pour brancher Claude Code et/ou Claude Desktop.
-> Chaque poste a son propre `.env` local. La clé n'est jamais transmise par le code.
+1. **Récupérer le dossier** `propulseo-mcp` **sans** le `.env` ni le `.venv`
+   (copie clé USB / zip / `git clone` si versionné). Ne jamais transmettre la clé.
+2. **Installer Python 3.11+** (§1).
+3. **Créer le venv + dépendances** depuis le dossier `propulseo-mcp` :
+   - Windows : `python -m venv .venv` ; `./.venv/Scripts/Activate.ps1` ; `pip install -r requirements.txt`
+   - Mac/Linux : `python3 -m venv .venv` ; `source .venv/bin/activate` ; `pip install -r requirements.txt`
+4. **Créer SON propre `.env`** (§3) avec **sa** clé `sb_secret_…` du projet ERP,
+   `MCP_DRY_RUN=true`.
+5. **Tester** : `python test_connection.py` → `=== Tout est OK ===`.
+6. **Brancher Claude** (§6) en adaptant les chemins absolus à **sa** machine
+   (son dossier, `\.venv\Scripts\python.exe` sous Windows ou `/.venv/bin/python` sous Mac,
+   et `run_server.py`).
+> Chaque poste a son propre `.env` local et sa propre clé. Rien de secret ne circule
+> dans le code ni dans la config Claude.
 
 ---
 
@@ -200,6 +233,16 @@ Deux familles d'outils :
 - Les **uploads de fichiers** (Supabase Storage) ne sont pas gérés : on peut créer
   la *métadonnée* d'un document, pas téléverser le binaire.
 - Les **tables d'archives / métriques** sont en lecture seule.
+- La **création de comptes** utilisateurs passe par les Edge Functions `admin-*`
+  (hors périmètre) : `users` / `user_profiles` / `user_permissions` sont en
+  list/get/update uniquement.
+
+### Volume d'outils
+Le serveur expose **174 outils** (8 génériques + ~166 nommés). Claude Code charge
+les définitions à la demande (aucun souci). Si Claude **Desktop** en montre trop ou
+peine à choisir, vous pouvez réduire la surface : dans
+`propulseo_mcp/sections/__init__.py`, commentez les `register(...)` des sections
+non utilisées (les outils génériques `db_*` continuent de couvrir ces tables).
 
 ## 10. Dépannage
 

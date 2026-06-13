@@ -186,6 +186,11 @@ register_all_sections(mcp)
 
 def main() -> None:
     """Point d'entrée : démarre le serveur MCP en transport stdio."""
+    import logging
+    # Logs MCP/HTTP propres : on garde avertissements et erreurs, on coupe le INFO
+    # (sinon chaque requête PostgREST est journalisée sur stderr → bruit côté client).
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("mcp").setLevel(logging.WARNING)
     mcp.run()
 
 
