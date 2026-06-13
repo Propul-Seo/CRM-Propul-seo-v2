@@ -1,0 +1,9 @@
+# Serveur MCP Propul'SEO CRM — dépendances
+# SDK MCP officiel (fournit FastMCP : from mcp.server.fastmcp import FastMCP)
+mcp[cli]>=1.2.0
+# Client HTTP (appels PostgREST/Supabase, gestion sessions/timeouts)
+httpx>=0.27
+# Validation des entrées des outils
+pydantic>=2.6
+# Chargement des secrets depuis .env
+python-dotenv>=1.0
