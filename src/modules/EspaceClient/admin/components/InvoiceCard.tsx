@@ -2,9 +2,10 @@ import { Eye, FileText, Pencil, Trash2, Bell, Ban, Send, Loader2 } from 'lucide-
 import { StatusBadge, Badge } from '@/modules/EspaceClient/shared/components';
 import type { AdminInvoice } from '../hooks/useAdminInvoices';
 import type { PortalInstallment } from '@/modules/EspaceClient/client/hooks/usePortalData';
+import { formatCurrency } from '@/lib/utils';
 
 const money = (a: string | number, c = 'EUR') =>
-  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: c }).format(typeof a === 'string' ? parseFloat(a) : a);
+  formatCurrency(typeof a === 'string' ? parseFloat(a) : a, c);
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('fr-FR');
 // Comportement SP3 d'origine : relance/annulation sur sent|overdue uniquement.
 // (partially_paid exclu — l'avoir formel est reporté, cf. cycle de vie facture SP3.)

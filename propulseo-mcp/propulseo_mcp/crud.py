@@ -4,7 +4,8 @@ Toutes les fonctions retournent un dict JSON-sérialisable destiné à être ren
 tel quel par un outil MCP. Le champ `status` indique l'issue :
   - "ok"           : opération de lecture/écriture réellement effectuée
   - "dry_run"      : écriture simulée (MCP_DRY_RUN=true) — rien n'a été modifié
-  - "confirm_required" : suppression en attente de confirm=true
+  - "confirm_required" : modification (update) ou suppression (delete) en attente
+                         de confirm=true — un aperçu/diff est renvoyé, rien n'est écrit
   - "error"        : opération refusée (validation/opération non autorisée)
 """
 from __future__ import annotations
@@ -182,19 +183,54 @@ def op_create(client: SupabaseRestClient, settings: Settings, table: str,
             "row": rows[0] if rows else None}
 
 
+def _build_diff(current: dict[str, Any], payload: dict[str, Any]) -> dict[str, Any]:
+    """Diff avant/après limité aux colonnes réellement modifiées par le payload."""
+    return {
+        col: {"avant": current.get(col), "apres": new_val}
+        for col, new_val in payload.items()
+        if current.get(col) != new_val
+    }
+
+
 def op_update(client: SupabaseRestClient, settings: Settings, table: str,
-              row_id: str, data: dict[str, Any]) -> dict[str, Any]:
+              row_id: str, data: dict[str, Any], *, confirm: bool = False) -> dict[str, Any]:
     spec = get_spec(table)
     _ensure_op(spec, "update")
     payload = validate_payload(spec, data, partial=True)
+
+    # 1) On récupère TOUJOURS la ligne ciblée pour produire un aperçu + diff
+    #    (lecture seule — ne modifie rien).
+    rows, _ = client.select(table, columns=spec.select_clause,
+                            filters={"id": f"eq.{row_id}"}, limit=1)
+    if not rows:
+        return {"status": "error", "error": f"Aucun(e) {spec.label} avec id={row_id}."}
+    current = rows[0]
+    diff = _build_diff(current, payload)
+
+    if not diff:
+        return {"status": "ok", "action": "update", "table": table, "id": row_id,
+                "row": current, "diff": {},
+                "message": "Aucun changement : les valeurs fournies sont déjà en place."}
+
+    # 2) Garde « confirmation » : sans confirm=true, on montre le diff sans rien écrire.
+    if not confirm:
+        return {"status": "confirm_required", "action": "update", "table": table,
+                "id": row_id, "diff": diff,
+                "message": "Modification NON exécutée. Vérifiez le diff (avant/après) puis "
+                           "rappelez l'outil avec confirm=true pour appliquer."}
+
+    # 3) Garde globale « dry-run » : même confirmé, rien n'est écrit si dry-run actif.
     if settings.dry_run:
         return {"status": "dry_run", "action": "update", "table": table, "id": row_id,
-                "would_update": payload,
-                "message": "Dry-run actif : rien n'a été modifié. Passez MCP_DRY_RUN=false pour exécuter."}
-    rows = client.update(table, {"id": f"eq.{row_id}"}, payload)
-    if not rows:
+                "would_update": payload, "diff": diff,
+                "message": "Dry-run actif : rien n'a été modifié malgré confirm=true. "
+                           "Passez MCP_DRY_RUN=false pour exécuter réellement."}
+
+    # 4) Exécution réelle.
+    updated = client.update(table, {"id": f"eq.{row_id}"}, payload)
+    if not updated:
         return {"status": "error", "error": f"Aucun(e) {spec.label} avec id={row_id} (rien modifié)."}
-    return {"status": "ok", "action": "update", "table": table, "row": rows[0]}
+    return {"status": "ok", "action": "update", "table": table, "row": updated[0], "diff": diff}
 
 
 def op_delete(client: SupabaseRestClient, settings: Settings, table: str,

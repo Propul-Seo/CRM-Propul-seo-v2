@@ -8,13 +8,13 @@ from __future__ import annotations
 
 from mcp.server.fastmcp import FastMCP
 
-from . import crm
+from . import crm, projets
 
 
 def register_all_sections(mcp: FastMCP) -> None:
     crm.register(mcp)
+    projets.register(mcp)
     # Sections suivantes (à brancher au fil de l'eau) :
-    # projets.register(mcp)
     # comptabilite.register(mcp)
     # procedures.register(mcp)
     # taches.register(mcp)

@@ -1,4 +1,5 @@
 import type { PortalInvoice, PortalInstallment } from '@/modules/EspaceClient/client/hooks/usePortalData';
+import { formatCurrency } from '@/lib/utils';
 
 // « Document papier » d'une facture, reconstruit depuis les données (A3 / E2).
 // Présentationnel pur, couleurs fixes (bg-white / text-slate-*) → lisible dans le
@@ -6,7 +7,7 @@ import type { PortalInvoice, PortalInstallment } from '@/modules/EspaceClient/cl
 
 const money = (a: string | number | null | undefined, c = 'EUR') => {
   const n = a == null ? 0 : typeof a === 'string' ? parseFloat(a) : a;
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: c || 'EUR' }).format(isNaN(n) ? 0 : n);
+  return formatCurrency(isNaN(n) ? 0 : n, c || 'EUR');
 };
 const fmtDate = (iso: string | null | undefined) =>
   iso ? new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';

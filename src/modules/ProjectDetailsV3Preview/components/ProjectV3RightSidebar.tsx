@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { User, Plus, Pencil, Receipt } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrency } from '@/lib/utils'
 import type { ProjectV2, ProjectStatusV2 } from '@/types/project-v2'
 import {
   PIPELINE_STEP_ORDER,
@@ -143,7 +143,7 @@ export function ProjectV3RightSidebar({ project, users, onContactSaved, onAssign
                   <span className="text-xs font-semibold text-[#ede9fe]">{inv.invoice_number}</span>
                   <span className="text-[10px] text-[#9ca3af]">
                     {inv.amount_total != null
-                      ? new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(inv.amount_total)
+                      ? formatCurrency(inv.amount_total)
                       : '—'}
                   </span>
                 </div>

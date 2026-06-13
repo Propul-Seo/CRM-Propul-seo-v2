@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Folder, Calendar, Tag, Wallet, Target, ChevronDown, Building2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { cn } from '@/lib/utils'
+import { cn, formatCurrencyRounded } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import type { ProjectV2, ProjectStatusV2 } from '@/types/project-v2'
 import { formatPresta } from '../statusConfig'
@@ -131,7 +131,7 @@ const formatDate = (iso: string | null | undefined): string | null => {
 
 const formatBudget = (amount: number | null | undefined): string | null => {
   if (amount === null || amount === undefined) return null
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(amount)
+  return formatCurrencyRounded(amount)
 }
 
 const formatSiret = (siret: string | null | undefined): string | null => {

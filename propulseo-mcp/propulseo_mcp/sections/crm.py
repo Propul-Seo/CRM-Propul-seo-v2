@@ -84,14 +84,20 @@ def register(mcp: FastMCP) -> None:
                            lead_score: int | None = None, project_price: float | None = None,
                            tags: list[str] | None = None, notes: list[str] | None = None,
                            assigned_to: str | None = None,
-                           next_activity_date: str | None = None) -> dict[str, Any]:
-        """Modifie un contact (seuls les champs fournis sont mis à jour). Respecte le dry-run."""
+                           next_activity_date: str | None = None,
+                           confirm: bool = False) -> dict[str, Any]:
+        """Modifie un contact (seuls les champs fournis sont mis à jour).
+
+        Sans confirm=true : renvoie le diff avant/après (confirm_required) sans écrire.
+        Avec confirm=true : applique — sauf si MCP_DRY_RUN actif (simulation).
+        """
         ctx = get_context()
         data = _compact(name=name, email=email, phone=phone, company=company, sector=sector,
                         status=status, source=source, website=website, lead_score=lead_score,
                         project_price=project_price, tags=tags, notes=notes,
                         assigned_to=assigned_to, next_activity_date=next_activity_date)
-        return crud.safe_call(crud.op_update, ctx.client, ctx.settings, "contacts", contact_id, data)
+        return crud.safe_call(crud.op_update, ctx.client, ctx.settings, "contacts",
+                              contact_id, data, confirm=confirm)
 
     @mcp.tool()
     def crm_delete_contact(contact_id: str, confirm: bool = False) -> dict[str, Any]:
@@ -139,12 +145,18 @@ def register(mcp: FastMCP) -> None:
                           phone: str | None = None, address: str | None = None,
                           sector: str | None = None, status: ContactStatus | None = None,
                           total_revenue: float | None = None,
-                          assigned_to: str | None = None) -> dict[str, Any]:
-        """Modifie un client (champs fournis seulement). Respecte le dry-run."""
+                          assigned_to: str | None = None,
+                          confirm: bool = False) -> dict[str, Any]:
+        """Modifie un client (champs fournis seulement).
+
+        Sans confirm=true : renvoie le diff avant/après (confirm_required) sans écrire.
+        Avec confirm=true : applique — sauf si MCP_DRY_RUN actif (simulation).
+        """
         ctx = get_context()
         data = _compact(name=name, email=email, phone=phone, address=address, sector=sector,
                         status=status, total_revenue=total_revenue, assigned_to=assigned_to)
-        return crud.safe_call(crud.op_update, ctx.client, ctx.settings, "clients", client_id, data)
+        return crud.safe_call(crud.op_update, ctx.client, ctx.settings, "clients",
+                              client_id, data, confirm=confirm)
 
     @mcp.tool()
     def crm_delete_client(client_id: str, confirm: bool = False) -> dict[str, Any]:
@@ -193,13 +205,18 @@ def register(mcp: FastMCP) -> None:
                         contact_name: str | None = None, email: str | None = None,
                         phone: str | None = None, source: str | None = None,
                         status: str | None = None, assignee_id: str | None = None,
-                        notes: str | None = None) -> dict[str, Any]:
-        """Modifie un lead CRM ERP (champs fournis seulement). Respecte le dry-run."""
+                        notes: str | None = None, confirm: bool = False) -> dict[str, Any]:
+        """Modifie un lead CRM ERP (champs fournis seulement).
+
+        Sans confirm=true : renvoie le diff avant/après (confirm_required) sans écrire.
+        Avec confirm=true : applique — sauf si MCP_DRY_RUN actif (simulation).
+        """
         ctx = get_context()
         data = _compact(company_name=company_name, contact_name=contact_name, email=email,
                         phone=phone, source=source, status=status, assignee_id=assignee_id,
                         notes=notes)
-        return crud.safe_call(crud.op_update, ctx.client, ctx.settings, "crmerp_leads", lead_id, data)
+        return crud.safe_call(crud.op_update, ctx.client, ctx.settings, "crmerp_leads",
+                              lead_id, data, confirm=confirm)
 
     @mcp.tool()
     def crm_delete_lead(lead_id: str, confirm: bool = False) -> dict[str, Any]:

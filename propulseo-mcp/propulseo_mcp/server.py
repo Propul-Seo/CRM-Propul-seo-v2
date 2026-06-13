@@ -150,10 +150,18 @@ def db_insert(table: str, data: dict[str, Any]) -> dict[str, Any]:
 
 
 @mcp.tool()
-def db_update(table: str, id: str, data: dict[str, Any]) -> dict[str, Any]:
-    """Modifie une ligne par id. Respecte MCP_DRY_RUN (simulation si actif)."""
+def db_update(table: str, id: str, data: dict[str, Any], confirm: bool = False) -> dict[str, Any]:
+    """Modifie une ligne par id, avec garde-fous.
+
+    Sécurité (même logique que db_delete) :
+      - sans `confirm=true` : renvoie le **diff avant/après** (status="confirm_required")
+        sans rien écrire ;
+      - avec `confirm=true` : applique la modification — SAUF si MCP_DRY_RUN est actif,
+        auquel cas l'opération reste simulée (status="dry_run").
+    `data` = {colonne: valeur} ; seules les colonnes fournies sont modifiées.
+    """
     ctx = get_context()
-    return crud.safe_call(crud.op_update, ctx.client, ctx.settings, table, id, data)
+    return crud.safe_call(crud.op_update, ctx.client, ctx.settings, table, id, data, confirm=confirm)
 
 
 @mcp.tool()

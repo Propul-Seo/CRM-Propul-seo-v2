@@ -8,6 +8,7 @@ import { useProjectActivitiesV3 } from '../hooks/useProjectActivitiesV3'
 import { useIsProjectV3Admin } from '../hooks/useIsProjectV3Admin'
 import { PROJECT_V3_ACTIONS, PROJECT_V3_ALL_ACTIONS, PROJECT_V3_TIMELINE_STYLES } from '../activityConfig'
 import type { ProjectV2, ActivityType } from '@/types/project-v2'
+import { formatCurrencyRounded } from '@/lib/utils'
 
 interface Props {
   project: ProjectV2
@@ -18,7 +19,7 @@ interface Props {
 
 const formatBudget = (amount: number | null | undefined): string => {
   if (amount === null || amount === undefined) return '—'
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(amount)
+  return formatCurrencyRounded(amount)
 }
 
 const formatDate = (iso: string | null | undefined): string => {

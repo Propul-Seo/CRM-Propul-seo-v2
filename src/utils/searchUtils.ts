@@ -16,21 +16,3 @@ export const getNestedValue = (obj: Record<string, unknown>, path: string): unkn
     return undefined;
   }, obj as unknown);
 };
-
-// Tests de la fonction (pour développement)
-export const testAccentRemoval = () => {
-  const testCases = [
-    { input: "Jérôme", expected: "jerome" },
-    { input: "Éloïse", expected: "eloise" },
-    { input: "François", expected: "francois" },
-    { input: "Noël", expected: "noel" },
-    { input: "André", expected: "andre" },
-    { input: "René", expected: "rene" },
-    { input: "Céline", expected: "celine" }
-  ];
-  
-  testCases.forEach(({ input, expected }) => {
-    const result = removeAccents(input);
-    console.log(`${input} → ${result} (expected: ${expected})`);
-  });
-};

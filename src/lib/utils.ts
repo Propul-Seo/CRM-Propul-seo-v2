@@ -58,6 +58,20 @@ export function formatCurrency(amount: number, currency: string = 'EUR'): string
 }
 
 /**
+ * Formate un montant arrondi, sans décimales (ex. « 1 234 € »).
+ * @param amount Montant à formater
+ * @param currency Devise (EUR par défaut)
+ * @returns Montant arrondi formaté
+ */
+export function formatCurrencyRounded(amount: number, currency: string = 'EUR'): string {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+/**
  * Calcule le temps écoulé depuis une date
  * @param date Date de référence
  * @returns Temps écoulé en format lisible
