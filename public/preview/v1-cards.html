@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V1 — Cards empilées</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #020205; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; font-size: 13px; }
+
+  /* Layout 3 colonnes */
+  .layout { display: flex; height: 100vh; }
+  .sidebar-left { width: 260px; background: #070512; border-right: 1px solid rgba(139,92,246,0.18); padding: 20px 16px; overflow-y: auto; flex-shrink: 0; transition: width 0.3s, padding 0.3s; }
+  .sidebar-left.collapsed { width: 40px; padding: 20px 8px; overflow: hidden; }
+  .sidebar-right { width: 280px; background: #070512; border-left: 1px solid rgba(139,92,246,0.18); padding: 20px 16px; overflow-y: auto; flex-shrink: 0; transition: width 0.3s, padding 0.3s; }
+  .sidebar-right.collapsed { width: 40px; padding: 20px 8px; overflow: hidden; }
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Toggle sidebar */
+  .toggle-btn { background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.25); color: #a78bfa; width: 24px; height: 24px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-bottom: 16px; }
+  .toggle-btn:hover { background: rgba(139,92,246,0.3); }
+  .collapsed .sidebar-content { display: none; }
+
+  /* Breadcrumb */
+  .breadcrumb { padding: 12px 24px; border-bottom: 1px solid rgba(139,92,246,0.12); display: flex; align-items: center; gap: 8px; font-size: 12px; color: #94a3b8; }
+  .breadcrumb a { color: #a78bfa; text-decoration: none; }
+  .breadcrumb .current { color: #e2e8f0; font-weight: 600; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 2px; padding: 8px 24px; border-bottom: 1px solid rgba(139,92,246,0.12); background: #0a0a12; }
+  .tab { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; color: #94a3b8; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+  .tab:hover { color: #e2e8f0; background: rgba(139,92,246,0.08); }
+  .tab.active { background: #7c3aed; color: white; }
+  .tab-icon { font-size: 14px; }
+
+  /* Content */
+  .content { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* Cards */
+  .card { background: #0f0f1a; border: 1px solid rgba(139,92,246,0.15); border-radius: 12px; overflow: hidden; }
+  .card-header { padding: 12px 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: between; gap: 8px; cursor: pointer; transition: background 0.15s; user-select: none; }
+  .card-header:hover { background: rgba(139,92,246,0.12) !important; }
+  .card-header .chevron { margin-left: auto; transition: transform 0.2s; font-size: 14px; }
+  .card-header .chevron.open { transform: rotate(180deg); }
+  .card-body { padding: 16px; border-top: 1px solid rgba(139,92,246,0.1); }
+
+  /* Métriques */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .metric { background: #12121e; border: 1px solid rgba(139,92,246,0.12); border-radius: 10px; padding: 14px; text-align: center; }
+  .metric-value { font-size: 22px; font-weight: 700; color: #e2e8f0; }
+  .metric-label { font-size: 11px; color: #64748b; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Brief */
+  .brief-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .brief-item { display: flex; flex-direction: column; gap: 2px; }
+  .brief-label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+  .brief-value { font-size: 13px; color: #e2e8f0; }
+
+  /* Accès */
+  .access-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(139,92,246,0.06); }
+  .access-row:last-child { border-bottom: none; }
+  .access-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .access-dot.active { background: #22c55e; }
+  .access-dot.missing { background: #ef4444; }
+  .access-name { flex: 1; }
+  .access-cat { font-size: 10px; color: #64748b; background: rgba(100,116,139,0.15); padding: 2px 6px; border-radius: 4px; }
+
+  /* Activité */
+  .activity { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(139,92,246,0.06); }
+  .activity:last-child { border-bottom: none; }
+  .activity-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .activity-icon.email { background: rgba(59,130,246,0.15); }
+  .activity-icon.meeting { background: rgba(139,92,246,0.15); }
+  .activity-icon.task { background: rgba(16,185,129,0.15); }
+  .activity-icon.invoice { background: rgba(234,179,8,0.15); }
+  .activity-icon.status { background: rgba(249,115,22,0.15); }
+  .activity-text { flex: 1; }
+  .activity-title { font-size: 12px; color: #e2e8f0; }
+  .activity-sub { font-size: 11px; color: #64748b; }
+  .activity-time { font-size: 11px; color: #475569; white-space: nowrap; }
+  .see-all { font-size: 12px; color: #a78bfa; text-align: center; padding: 8px; cursor: pointer; }
+  .see-all:hover { text-decoration: underline; }
+
+  /* Sidebar sections */
+  .sb-section { margin-bottom: 20px; }
+  .sb-title { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .sb-value { font-size: 13px; color: #e2e8f0; margin-bottom: 4px; }
+  .sb-small { font-size: 11px; color: #94a3b8; }
+
+  /* Score donut */
+  .donut-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .donut { width: 56px; height: 56px; border-radius: 50%; background: conic-gradient(#7c3aed 0% 72%, #1e1e2e 72% 100%); display: flex; align-items: center; justify-content: center; }
+  .donut-inner { width: 40px; height: 40px; border-radius: 50%; background: #070512; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #a78bfa; }
+
+  /* Progress bar */
+  .progress-bar { height: 4px; background: #1e1e2e; border-radius: 2px; overflow: hidden; margin-top: 4px; }
+  .progress-fill { height: 100%; background: #7c3aed; border-radius: 2px; }
+
+  /* Status badge */
+  .status-badge { display: inline-flex; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .presta-badge { display: inline-flex; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; background: rgba(59,130,246,0.15); color: #60a5fa; margin-left: 4px; }
+
+  /* AI summary */
+  .ai-block { background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.12); border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+  .ai-label { font-size: 10px; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .ai-text { font-size: 12px; color: #cbd5e1; line-height: 1.4; }
+
+  /* Share buttons */
+  .share-btn { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.2); border-radius: 8px; color: #a78bfa; font-size: 12px; cursor: pointer; margin-bottom: 6px; width: 100%; }
+  .share-btn:hover { background: rgba(139,92,246,0.15); }
+
+  .version-label { position: fixed; top: 12px; right: 12px; background: #7c3aed; color: white; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; z-index: 100; }
+
+  /* Tab content */
+  .tab-content { display: none; flex-direction: column; gap: 16px; }
+
+  /* Production: phases & tasks */
+  .phase-overview { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .phase-mini { text-align: center; }
+  .phase-mini-label { font-size: 10px; color: #64748b; margin-bottom: 4px; }
+  .phase-mini-pct { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .phase-bar { height: 4px; background: #1e1e2e; border-radius: 2px; overflow: hidden; }
+  .phase-fill { height: 100%; border-radius: 2px; }
+  .task-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(139,92,246,0.06); }
+  .task-row:last-child { border-bottom: none; }
+  .task-icon { font-size: 14px; flex-shrink: 0; }
+  .task-title { flex: 1; font-size: 12px; }
+  .task-title.done-text { text-decoration: line-through; color: #64748b; }
+  .task-status { display: inline-flex; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+  .task-status.done { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .task-status.in_progress { background: rgba(124,58,237,0.15); color: #a78bfa; }
+  .task-status.todo { background: rgba(100,116,139,0.15); color: #94a3b8; }
+  .task-assignee { font-size: 11px; color: #64748b; }
+  .task-date { font-size: 11px; color: #475569; }
+  .priority-badge { font-size: 10px; padding: 1px 6px; border-radius: 3px; }
+  .priority-badge.high { background: rgba(239,68,68,0.15); color: #f87171; }
+  .priority-badge.medium { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  .priority-badge.low { background: rgba(100,116,139,0.15); color: #94a3b8; }
+
+  /* Finances */
+  .metrics-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .payment-bar { height: 10px; background: #1e1e2e; border-radius: 5px; overflow: hidden; display: flex; margin: 8px 0; }
+  .payment-segment { height: 100%; }
+  .payment-segment.paid { background: #22c55e; }
+  .payment-segment.sent { background: #f59e0b; }
+  .payment-segment.draft { background: #334155; }
+  .payment-legend { display: flex; gap: 16px; font-size: 11px; color: #94a3b8; }
+  .payment-legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+  .milestone-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(139,92,246,0.06); }
+  .milestone-row:last-child { border-bottom: none; }
+  .milestone-label { flex: 1; font-size: 12px; }
+  .milestone-amount { font-size: 13px; font-weight: 600; min-width: 80px; text-align: right; }
+  .invoice-status { display: inline-flex; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+  .invoice-status.paid { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .invoice-status.sent { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .invoice-status.draft { background: rgba(100,116,139,0.15); color: #94a3b8; }
+  .invoice-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .invoice-table th { text-align: left; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 10px; border-bottom: 1px solid rgba(139,92,246,0.12); }
+  .invoice-table td { padding: 10px; border-bottom: 1px solid rgba(139,92,246,0.06); }
+  .invoice-table tr:hover { background: rgba(139,92,246,0.04); }
+
+  /* Échanges */
+  .quick-actions { display: flex; gap: 8px; margin-bottom: 0; }
+  .quick-action-btn { padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.25); color: #a78bfa; }
+  .quick-action-btn:hover { background: rgba(139,92,246,0.2); }
+  .filter-bar { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-chip { padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.15); color: #94a3b8; transition: all 0.15s; }
+  .filter-chip:hover, .filter-chip.active { background: rgba(139,92,246,0.2); color: #e2e8f0; border-color: rgba(139,92,246,0.4); }
+  .type-badge { display: inline-flex; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-right: 6px; }
+  .type-badge.email { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .type-badge.appel { background: rgba(16,185,129,0.15); color: #34d399; }
+  .type-badge.rdv { background: rgba(139,92,246,0.15); color: #a78bfa; }
+  .type-badge.decision { background: rgba(234,179,8,0.15); color: #fbbf24; }
+  .type-badge.tache { background: rgba(16,185,129,0.15); color: #22c55e; }
+  .type-badge.facture { background: rgba(249,115,22,0.15); color: #fb923c; }
+  .type-badge.systeme { background: rgba(100,116,139,0.15); color: #94a3b8; }
+</style>
+</head>
+<body>
+
+<div class="version-label">V1 — Cards empilées</div>
+
+<div class="layout">
+  <!-- SIDEBAR GAUCHE -->
+  <div class="sidebar-left" id="sidebarLeft">
+    <button class="toggle-btn" onclick="toggleLeft()">«</button>
+    <div class="sidebar-content">
+      <div class="sb-section">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="font-size:15px;font-weight:700;">Boulangerie Dupont</div>
+        </div>
+        <div style="display:flex;gap:4px;margin-bottom:8px;">
+          <span class="status-badge">En production</span>
+          <span class="presta-badge">site_web</span>
+        </div>
+        <div class="sb-small" style="margin-bottom:12px;">Refonte site vitrine + SEO local pour boulangerie artisanale</div>
+      </div>
+
+      <div class="donut-wrap">
+        <div class="donut"><div class="donut-inner">72%</div></div>
+        <div>
+          <div style="font-size:12px;font-weight:600;">Score</div>
+          <div class="sb-small">Complétude projet</div>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-title">Progression générale</div>
+        <div class="sb-value">60%</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-title">Équipe</div>
+        <div class="sb-value">Alice Martin</div>
+        <div class="sb-small">Responsable</div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-title">Priorité</div>
+        <div class="sb-value" style="color:#fb923c;">Haute</div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-title">Budget</div>
+        <div class="sb-value">1 980 €</div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-title">Dates</div>
+        <div class="sb-value">15 mars → 30 avril 2026</div>
+        <div class="sb-small">Dernière activité : il y a 2h</div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-title">Prochaine action</div>
+        <div class="sb-value">Livrer maquette mobile</div>
+        <div class="sb-small" style="color:#f59e0b;">Échéance : 12 avril</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENU CENTRAL -->
+  <div class="main">
+    <div class="breadcrumb">
+      <a href="#">← Site Web & SEO</a>
+      <span>›</span>
+      <span class="current">Site vitrine Boulangerie Dupont</span>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="synthese"><span class="tab-icon">📊</span> Synthèse</div>
+      <div class="tab" data-tab="production"><span class="tab-icon">⚙️</span> Production</div>
+      <div class="tab" data-tab="finances"><span class="tab-icon">💰</span> Finances</div>
+      <div class="tab" data-tab="echanges"><span class="tab-icon">💬</span> Échanges</div>
+    </div>
+
+    <div class="content">
+      <!-- SYNTHÈSE TAB -->
+      <div class="tab-content" data-tab="synthese" style="display:flex;flex-direction:column;gap:16px;">
+        <!-- MÉTRIQUES -->
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-value">1 980 €</div>
+            <div class="metric-label">Budget</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" style="color:#a78bfa;">60%</div>
+            <div class="metric-label">Progression</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" style="color:#22c55e;">72%</div>
+            <div class="metric-label">Score</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" style="color:#f59e0b;">30 avr.</div>
+            <div class="metric-label">Échéance</div>
+          </div>
+        </div>
+
+        <!-- BRIEF -->
+        <div class="card">
+          <div class="card-header" style="background:rgba(139,92,246,0.08); color:#a78bfa;" onclick="toggleCard(this)">
+            📋 Brief client
+            <span class="chevron open">▾</span>
+          </div>
+          <div class="card-body">
+            <div class="brief-grid">
+              <div class="brief-item">
+                <span class="brief-label">Objectif</span>
+                <span class="brief-value">Refonte site vitrine + SEO local</span>
+              </div>
+              <div class="brief-item">
+                <span class="brief-label">Cible</span>
+                <span class="brief-value">Clients de quartier, Google Maps</span>
+              </div>
+              <div class="brief-item">
+                <span class="brief-label">Pack</span>
+                <span class="brief-value">Professionnel (5 pages)</span>
+              </div>
+              <div class="brief-item">
+                <span class="brief-label">Niveau SEO</span>
+                <span class="brief-value">Avancé</span>
+              </div>
+              <div class="brief-item">
+                <span class="brief-label">Plateforme</span>
+                <span class="brief-value">WordPress</span>
+              </div>
+              <div class="brief-item">
+                <span class="brief-label">URL cible</span>
+                <span class="brief-value" style="color:#64748b;">Non défini</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACCÈS -->
+        <div class="card">
+          <div class="card-header" style="background:rgba(234,179,8,0.08); color:#eab308;" onclick="toggleCard(this)">
+            🔐 Accès coffre-fort
+            <span style="margin-left:auto; font-size:11px; opacity:0.7;">5 services</span>
+            <span class="chevron">▾</span>
+          </div>
+          <div class="card-body" style="display:none;">
+            <div class="access-row"><div class="access-dot active"></div><div class="access-name">OVH Hébergement</div><div class="access-cat">hosting</div></div>
+            <div class="access-row"><div class="access-dot active"></div><div class="access-name">WordPress Admin</div><div class="access-cat">cms</div></div>
+            <div class="access-row"><div class="access-dot active"></div><div class="access-name">Google Analytics</div><div class="access-cat">analytics</div></div>
+            <div class="access-row"><div class="access-dot missing"></div><div class="access-name">Google Ads</div><div class="access-cat">tools</div></div>
+            <div class="access-row"><div class="access-dot active"></div><div class="access-name">Canva Pro</div><div class="access-cat">design</div></div>
+          </div>
+        </div>
+
+        <!-- ACTIVITÉ RÉCENTE -->
+        <div class="card">
+          <div class="card-header" style="background:rgba(16,185,129,0.08); color:#10b981;" onclick="toggleCard(this)">
+            ⚡ Activité récente
+            <span class="chevron open">▾</span>
+          </div>
+          <div class="card-body">
+            <div class="activity">
+              <div class="activity-icon email">📧</div>
+              <div class="activity-text">
+                <div class="activity-title">Email reçu — M. Dupont</div>
+                <div class="activity-sub">Validation maquette desktop</div>
+              </div>
+              <div class="activity-time">il y a 2h</div>
+            </div>
+            <div class="activity">
+              <div class="activity-icon meeting">👥</div>
+              <div class="activity-text">
+                <div class="activity-title">RDV planifié — Alice Martin</div>
+                <div class="activity-sub">Point d'avancement hebdomadaire</div>
+              </div>
+              <div class="activity-time">hier</div>
+            </div>
+            <div class="activity">
+              <div class="activity-icon task">✅</div>
+              <div class="activity-text">
+                <div class="activity-title">Tâche terminée — SEO on-page</div>
+                <div class="activity-sub">Meta titles + H1 optimisés (5 pages)</div>
+              </div>
+              <div class="activity-time">lun.</div>
+            </div>
+            <div class="activity">
+              <div class="activity-icon invoice">💰</div>
+              <div class="activity-text">
+                <div class="activity-title">Facture envoyée — Acompte 30%</div>
+                <div class="activity-sub">594 € — Échéance 20 avril</div>
+              </div>
+              <div class="activity-time">ven.</div>
+            </div>
+            <div class="activity">
+              <div class="activity-icon status">⚙️</div>
+              <div class="activity-text">
+                <div class="activity-title">Statut changé → En production</div>
+                <div class="activity-sub">Par Alice Martin</div>
+              </div>
+              <div class="activity-time">jeu.</div>
+            </div>
+            <div class="see-all">▶ Tout voir dans Échanges</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTION TAB -->
+      <div class="tab-content" data-tab="production" style="display:none;">
+        <!-- Phase overview -->
+        <div class="card">
+          <div class="card-header" style="background:rgba(139,92,246,0.08); color:#a78bfa;">
+            📊 Vue d'ensemble des phases
+          </div>
+          <div class="card-body">
+            <div class="phase-overview">
+              <div class="phase-mini">
+                <div class="phase-mini-label">Onboarding</div>
+                <div class="phase-mini-pct" style="color:#22c55e;">100%</div>
+                <div class="phase-bar"><div class="phase-fill" style="width:100%;background:#22c55e;"></div></div>
+              </div>
+              <div class="phase-mini">
+                <div class="phase-mini-label">Conception</div>
+                <div class="phase-mini-pct" style="color:#a78bfa;">66%</div>
+                <div class="phase-bar"><div class="phase-fill" style="width:66%;background:#7c3aed;"></div></div>
+              </div>
+              <div class="phase-mini">
+                <div class="phase-mini-label">Développement</div>
+                <div class="phase-mini-pct" style="color:#a78bfa;">33%</div>
+                <div class="phase-bar"><div class="phase-fill" style="width:33%;background:#7c3aed;"></div></div>
+              </div>
+              <div class="phase-mini">
+                <div class="phase-mini-label">Recette</div>
+                <div class="phase-mini-pct" style="color:#94a3b8;">0%</div>
+                <div class="phase-bar"><div class="phase-fill" style="width:0%;background:#334155;"></div></div>
+              </div>
+              <div class="phase-mini">
+                <div class="phase-mini-label">Post-livraison</div>
+                <div class="phase-mini-pct" style="color:#94a3b8;">0%</div>
+                <div class="phase-bar"><div class="phase-fill" style="width:0%;background:#334155;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Onboarding -->
+        <div class="card">
+          <div class="card-header" style="background:rgba(34,197,94,0.08); color:#22c55e;" onclick="toggleCard(this)">
+            🟢 Onboarding — 3/3
+            <span class="chevron">▾</span>
+          </div>
+          <div class="card-body" style="display:none;">
+            <div class="task-row"><span class="task-icon">✅</span><span class="task-title done-text">Brief validé</span><span class="task-status done">Terminé</span><span class="task-assignee">Alice M.</span><span class="task-date">15 mars</span></div>
+            <div class="task-row"><span class="task-icon">✅</span><span class="task-title done-text">Accès récupérés</span><span class="task-status done">Terminé</span><span class="task-assignee">Alice M.</span><span class="task-date">16 mars</span></div>
+            <div class="task-row"><span class="task-icon">✅</span><span class="task-title done-text">Contrat signé</span><span class="task-status done">Terminé</span><span class="task-assignee">Alice M.</span><span class="task-date">18 mars</span></div>
+          </div>
+        </div>
+
+        <!-- Conception -->
+        <div class="card">
+          <div class="card-header" style="background:rgba(139,92,246,0.08); color:#a78bfa;" onclick="toggleCard(this)">
+            🎨 Conception — 2/3
+            <span class="chevron open">▾</span>
+          </div>
+          <div class="card-body">
+            <div class="task-row"><span class="task-icon">✅</span><span class="task-title done-text">Maquette desktop</span><span class="task-status done">Terminé</span><span class="task-assignee">Alice M.</span><span class="task-date">25 mars</span></div>
+            <div class="task-row"><span class="task-icon">🔄</span><span class="task-title">Maquette mobile</span><span class="task-status in_progress">En cours</span><span class="priority-badge high">Haute</span><span class="task-assignee">Alice M.</span><span class="task-date">12 avr.</span></div>
+            <div class="task-row"><span class="task-icon">✅</span><span class="task-title done-text">Arborescence</span><span class="task-status done">Terminé</span><span class="task-assignee">Alice M.</span><span class="task-date">22 mars</span></div>
+          </div>
+        </div>
+
+        <!-- Développement -->
+        <div class="card">
+          <div class="card-header" style="background:rgba(59,130,246,0.08); color:#60a5fa;" onclick="toggleCard(this)">
+            💻 Développement — 1/3
+            <span class="chevron open">▾</span>
+          </div>
+          <div class="card-body">
+            <div class="task-row"><span class="task-icon">🔄</span><span class="task-title">Intégration HTML</span><span class="task-status in_progress">En cours</span><span class="task-assignee">Alice M.</span><span class="task-date">18 avr.</span></div>
+            <div class="task-row"><span class="task-icon">✅</span><span class="task-title done-text">SEO on-page</span><span class="task-status done">Terminé</span><span class="task-assignee">Alice M.</span><span class="task-date">7 avr.</span></div>
+            <div class="task-row"><span class="task-icon">⬜</span><span class="task-title">Formulaires de contact</span><span class="task-status todo">À faire</span><span class="priority-badge medium">Moyenne</span><span class="task-assignee">—</span><span class="task-date">22 avr.</span></div>
+          </div>
+        </div>
+
+        <!-- Recette -->
+        <div class="card">
+          <div class="card-header" style="background:rgba(245,158,11,0.08); color:#f59e0b;" onclick="toggleCard(this)">
+            🧪 Recette — 0/2
+            <span class="chevron">▾</span>
+          </div>
+          <div class="card-body" style="display:none;">
+            <div class="task-row"><span class="task-icon">⬜</span><span class="task-title">Tests cross-browser</span><span class="task-status todo">À faire</span><span class="task-assignee">—</span><span class="task-date">25 avr.</span></div>
+            <div class="task-row"><span class="task-icon">⬜</span><span class="task-title">Validation client</span><span class="task-status todo">À faire</span><span class="task-assignee">—</span><span class="task-date">28 avr.</span></div>
+          </div>
+        </div>
+
+        <!-- Post-livraison -->
+        <div class="card">
+          <div class="card-header" style="background:rgba(100,116,139,0.08); color:#94a3b8;" onclick="toggleCard(this)">
+            📦 Post-livraison — 0/2
+            <span class="chevron">▾</span>
+          </div>
+          <div class="card-body" style="display:none;">
+            <div class="task-row"><span class="task-icon">⬜</span><span class="task-title">Formation CMS client</span><span class="task-status todo">À faire</span><span class="priority-badge low">Basse</span><span class="task-assignee">—</span><span class="task-date">2 mai</span></div>
+            <div class="task-row"><span class="task-icon">⬜</span><span class="task-title">Suivi 30 jours</span><span class="task-status todo">À faire</span><span class="task-assignee">—</span><span class="task-date">30 mai</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FINANCES TAB -->
+      <div class="tab-content" data-tab="finances" style="display:none;">
+        <!-- Métriques financières -->
+        <div class="metrics-3">
+          <div class="metric">
+            <div class="metric-value">1 980 €</div>
+            <div class="metric-label">Total facturé</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" style="color:#22c55e;">594 €</div>
+            <div class="metric-label">Encaissé</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" style="color:#f59e0b;">1 386 €</div>
+            <div class="metric-label">Restant dû</div>
+          </div>
+        </div>
+
+        <!-- Progression paiement -->
+        <div class="card">
+          <div class="card-header" style="background:rgba(34,197,94,0.08); color:#22c55e;">
+            💳 Progression des paiements
+          </div>
+          <div class="card-body">
+            <div class="payment-bar">
+              <div class="payment-segment paid" style="width:30%;"></div>
+              <div class="payment-segment sent" style="width:50%;"></div>
+              <div class="payment-segment draft" style="width:20%;"></div>
+            </div>
+            <div class="payment-legend">
+              <span><span class="payment-legend-dot" style="background:#22c55e;"></span>Payé (30%)</span>
+              <span><span class="payment-legend-dot" style="background:#f59e0b;"></span>Envoyé (50%)</span>
+              <span><span class="payment-legend-dot" style="background:#334155;"></span>Brouillon (20%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Jalons de paiement -->
+        <div class="card">
+          <div class="card-header" style="background:rgba(139,92,246,0.08); color:#a78bfa;" onclick="toggleCard(this)">
+            🎯 Jalons de paiement
+            <span class="chevron open">▾</span>
+          </div>
+          <div class="card-body">
+            <div class="milestone-row">
+              <span style="font-size:14px;">💚</span>
+              <span class="milestone-label">Acompte 30%</span>
+              <span class="milestone-amount" style="color:#22c55e;">594 €</span>
+              <span class="invoice-status paid">Payé</span>
+              <span class="task-date">20 mars</span>
+            </div>
+            <div class="milestone-row">
+              <span style="font-size:14px;">🟡</span>
+              <span class="milestone-label">Situation 50%</span>
+              <span class="milestone-amount" style="color:#f59e0b;">990 €</span>
+              <span class="invoice-status sent">Envoyé</span>
+              <span class="task-date">10 avr.</span>
+            </div>
+            <div class="milestone-row">
+              <span style="font-size:14px;">⚪</span>
+              <span class="milestone-label">Solde 20%</span>
+              <span class="milestone-amount" style="color:#94a3b8;">396 €</span>
+              <span class="invoice-status draft">Brouillon</span>
+              <span class="task-date">30 avr.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Factures -->
+        <div class="card">
+          <div class="card-header" style="background:rgba(59,130,246,0.08); color:#60a5fa;" onclick="toggleCard(this)">
+            📄 Factures
+            <span class="chevron open">▾</span>
+          </div>
+          <div class="card-body">
+            <table class="invoice-table">
+              <thead>
+                <tr><th>Réf.</th><th>Libellé</th><th>Montant</th><th>Date</th><th>Échéance</th><th>Statut</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="color:#a78bfa;">FAC-2026-041</td>
+                  <td>Acompte 30%</td>
+                  <td style="font-weight:600;">594 €</td>
+                  <td>20 mars</td>
+                  <td>3 avr.</td>
+                  <td><span class="invoice-status paid">Payé</span></td>
+                  <td style="cursor:pointer;color:#a78bfa;">📄</td>
+                </tr>
+                <tr>
+                  <td style="color:#a78bfa;">FAC-2026-058</td>
+                  <td>Situation 50%</td>
+                  <td style="font-weight:600;">990 €</td>
+                  <td>10 avr.</td>
+                  <td>24 avr.</td>
+                  <td><span class="invoice-status sent">Envoyé</span></td>
+                  <td style="cursor:pointer;color:#a78bfa;">📄</td>
+                </tr>
+                <tr>
+                  <td style="color:#64748b;">FAC-2026-xxx</td>
+                  <td>Solde 20%</td>
+                  <td style="font-weight:600;">396 €</td>
+                  <td>—</td>
+                  <td>30 avr.</td>
+                  <td><span class="invoice-status draft">Brouillon</span></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ÉCHANGES TAB -->
+      <div class="tab-content" data-tab="echanges" style="display:none;">
+        <!-- Actions rapides -->
+        <div class="card">
+          <div class="card-header" style="background:rgba(16,185,129,0.08); color:#10b981;">
+            🚀 Actions rapides
+          </div>
+          <div class="card-body">
+            <div class="quick-actions">
+              <button class="quick-action-btn">📅 Nouveau RDV</button>
+              <button class="quick-action-btn">✉️ Envoyer email</button>
+              <button class="quick-action-btn">📝 Ajouter note</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="card">
+          <div class="card-header" style="background:rgba(139,92,246,0.08); color:#a78bfa;">
+            🔍 Filtrer par type
+          </div>
+          <div class="card-body">
+            <div class="filter-bar">
+              <span class="filter-chip active">Tous</span>
+              <span class="filter-chip">📧 Email</span>
+              <span class="filter-chip">📞 Appel</span>
+              <span class="filter-chip">👥 RDV</span>
+              <span class="filter-chip">⚡ Décision</span>
+              <span class="filter-chip">✅ Tâche</span>
+              <span class="filter-chip">💰 Facture</span>
+              <span class="filter-chip">⚙️ Système</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline complète -->
+        <div class="card">
+          <div class="card-header" style="background:rgba(59,130,246,0.08); color:#60a5fa;">
+            📋 Historique complet — 12 événements
+          </div>
+          <div class="card-body">
+            <div class="activity"><div class="activity-icon email">📧</div><div class="activity-text"><div class="activity-title"><span class="type-badge email">Email</span>Email reçu — Validation maquette desktop</div><div class="activity-sub">M. Dupont confirme la maquette desktop. Demande ajustement sur le footer.</div></div><div class="activity-time">il y a 2h</div></div>
+            <div class="activity"><div class="activity-icon meeting">👥</div><div class="activity-text"><div class="activity-title"><span class="type-badge rdv">RDV</span>Point hebdomadaire</div><div class="activity-sub">Alice Martin — Revue avancement, maquette mobile prioritaire.</div></div><div class="activity-time">hier</div></div>
+            <div class="activity"><div class="activity-icon task">✅</div><div class="activity-text"><div class="activity-title"><span class="type-badge tache">Tâche</span>SEO on-page terminé</div><div class="activity-sub">Alice Martin — Meta titles + H1 optimisés sur 5 pages.</div></div><div class="activity-time">lun.</div></div>
+            <div class="activity"><div class="activity-icon invoice">💰</div><div class="activity-text"><div class="activity-title"><span class="type-badge facture">Facture</span>Facture envoyée — Acompte 30%</div><div class="activity-sub">594 € — Échéance 20 avril.</div></div><div class="activity-time">ven.</div></div>
+            <div class="activity"><div class="activity-icon" style="background:rgba(234,179,8,0.15);">⚡</div><div class="activity-text"><div class="activity-title"><span class="type-badge decision">Décision</span>Palette couleurs validée</div><div class="activity-sub">M. Dupont — Choix final : bleu marine + doré.</div></div><div class="activity-time">jeu.</div></div>
+            <div class="activity"><div class="activity-icon status">⚙️</div><div class="activity-text"><div class="activity-title"><span class="type-badge systeme">Système</span>Statut → En production</div><div class="activity-sub">Alice Martin a changé le statut du projet.</div></div><div class="activity-time">jeu.</div></div>
+            <div class="activity"><div class="activity-icon" style="background:rgba(16,185,129,0.15);">📞</div><div class="activity-text"><div class="activity-title"><span class="type-badge appel">Appel</span>Appel de suivi client</div><div class="activity-sub">Alice Martin — Discussion sur les délais et contenu SEO.</div></div><div class="activity-time">mer. dernier</div></div>
+            <div class="activity"><div class="activity-icon email">📧</div><div class="activity-text"><div class="activity-title"><span class="type-badge email">Email</span>Proposition maquette desktop envoyée</div><div class="activity-sub">Alice Martin — Envoi des 3 propositions de design au client.</div></div><div class="activity-time">2 avr.</div></div>
+            <div class="activity"><div class="activity-icon meeting">👥</div><div class="activity-text"><div class="activity-title"><span class="type-badge rdv">RDV</span>Réunion kick-off</div><div class="activity-sub">Alice Martin + M. Dupont — Définition du périmètre et planning.</div></div><div class="activity-time">28 mars</div></div>
+            <div class="activity"><div class="activity-icon task">✅</div><div class="activity-text"><div class="activity-title"><span class="type-badge tache">Tâche</span>Brief validé</div><div class="activity-sub">Alice Martin — Brief client complet, prêt pour conception.</div></div><div class="activity-time">25 mars</div></div>
+            <div class="activity"><div class="activity-icon invoice">💰</div><div class="activity-text"><div class="activity-title"><span class="type-badge facture">Facture</span>Devis signé</div><div class="activity-sub">Devis de 1 980 € accepté par le client.</div></div><div class="activity-time">20 mars</div></div>
+            <div class="activity"><div class="activity-icon status">⚙️</div><div class="activity-text"><div class="activity-title"><span class="type-badge systeme">Système</span>Projet créé</div><div class="activity-sub">Projet « Site vitrine Boulangerie Dupont » initialisé.</div></div><div class="activity-time">15 mars</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR DROITE -->
+  <div class="sidebar-right" id="sidebarRight">
+    <button class="toggle-btn" onclick="toggleRight()">»</button>
+    <div class="sidebar-content">
+      <div class="sb-section">
+        <div class="sb-title">Contact client</div>
+        <div class="sb-value">M. Jean Dupont</div>
+        <div class="sb-small">Boulangerie Dupont</div>
+        <div class="sb-small" style="margin-top:6px;">📞 06 12 34 56 78</div>
+        <div class="sb-small">✉️ dupont@boulangerie.fr</div>
+        <div class="sb-small">📍 12 rue du Pain, 75011 Paris</div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-title">Prochaine action</div>
+        <div style="background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.2); border-radius:8px; padding:10px;">
+          <div class="sb-value">Livrer maquette mobile</div>
+          <div class="sb-small" style="color:#f59e0b;">📅 12 avril 2026</div>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-title">Résumé IA</div>
+        <div class="ai-block">
+          <div class="ai-label">Situation</div>
+          <div class="ai-text">Maquette desktop validée par le client. Phase développement démarrée, intégration responsive en cours.</div>
+        </div>
+        <div class="ai-block">
+          <div class="ai-label">Action en cours</div>
+          <div class="ai-text">Intégration mobile + SEO technique. Alice travaille sur les 5 pages principales.</div>
+        </div>
+        <div class="ai-block">
+          <div class="ai-label">Prochain jalon</div>
+          <div class="ai-text">Livraison recette client prévue le 22 avril. Tests cross-browser à planifier.</div>
+        </div>
+        <div style="text-align:center; margin-top:8px;">
+          <span style="font-size:11px; color:#a78bfa; cursor:pointer;">🔄 Régénérer</span>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="sb-title">Partage</div>
+        <div class="share-btn">🔗 Portail client</div>
+        <div class="share-btn">📄 Formulaire brief</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleCard(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.chevron');
+  if (body.style.display === 'none') {
+    body.style.display = 'block';
+    chevron.classList.add('open');
+  } else {
+    body.style.display = 'none';
+    chevron.classList.remove('open');
+  }
+}
+function toggleLeft() {
+  const sb = document.getElementById('sidebarLeft');
+  sb.classList.toggle('collapsed');
+  sb.querySelector('.toggle-btn').textContent = sb.classList.contains('collapsed') ? '»' : '«';
+}
+function toggleRight() {
+  const sb = document.getElementById('sidebarRight');
+  sb.classList.toggle('collapsed');
+  sb.querySelector('.toggle-btn').textContent = sb.classList.contains('collapsed') ? '«' : '»';
+}
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const target = tab.dataset.tab;
+    document.querySelectorAll('.tab-content').forEach(c => {
+      if (c.dataset.tab === target) {
+        c.style.display = 'flex';
+        c.style.flexDirection = 'column';
+        c.style.gap = '16px';
+      } else {
+        c.style.display = 'none';
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>

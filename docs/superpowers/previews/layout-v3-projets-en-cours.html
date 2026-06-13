@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>V3 — Projets en cours · Layout complet</title>
+<style>
+  :root {
+    --bg-0: #0a0814;
+    --bg-1: #0f0b1e;
+    --bg-2: #1a1430;
+    --bg-3: #070512;
+    --border: rgba(139, 92, 246, 0.18);
+    --border-strong: rgba(139, 92, 246, 0.35);
+    --violet: #8B5CF6;
+    --violet-light: #A78BFA;
+    --violet-soft: rgba(139, 92, 246, 0.08);
+    --text-primary: #ede9fe;
+    --text-muted: #9ca3af;
+    --text-dim: #6b7280;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --pole-comm: #06b6d4;
+    --pole-erp: #f59e0b;
+    --pole-web: #10b981;
+    --col-planif: #8B5CF6;
+    --col-cours: #10b981;
+    --col-pause: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg-0);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 32px;
+  }
+
+  /* ============================== */
+  /* HEADER 2-niveaux                */
+  /* ============================== */
+  .page-header {
+    margin-bottom: 24px;
+  }
+  .header-row-1 {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 20px;
+  }
+  .header-title-block { }
+  .header-eyebrow {
+    font-size: 11px;
+    color: var(--violet-light);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .header-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .header-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-meta .dot { color: var(--text-dim); }
+  .header-meta strong { color: var(--text-primary); font-weight: 600; }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 16px;
+    background: var(--violet);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .btn-primary:hover { background: #7c3aed; }
+  .btn-primary svg { width: 16px; height: 16px; }
+
+  /* Row 2 — filtres */
+  .header-row-2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  .filter-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+
+  .filter-select {
+    height: 32px;
+    padding: 0 32px 0 12px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%239ca3af' d='M2 4l4 4 4-4z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+  .filter-select:hover { border-color: var(--border-strong); }
+
+  /* Pôles toggles */
+  .pole-toggles {
+    display: flex;
+    gap: 6px;
+  }
+  .pole-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    transition: all 0.15s ease;
+  }
+  .pole-toggle::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 currentColor;
+    transition: box-shadow 0.2s ease;
+  }
+  .pole-toggle.comm { color: var(--pole-comm); }
+  .pole-toggle.erp  { color: var(--pole-erp); }
+  .pole-toggle.web  { color: var(--pole-web); }
+
+  .pole-toggle:hover { border-color: currentColor; opacity: 0.7; }
+
+  .pole-toggle.active {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: currentColor;
+    opacity: 1;
+  }
+  .pole-toggle.active::before { box-shadow: 0 0 8px currentColor; }
+  .pole-toggle.active.comm { background: rgba(6, 182, 212, 0.10); }
+  .pole-toggle.active.erp  { background: rgba(245, 158, 11, 0.10); }
+  .pole-toggle.active.web  { background: rgba(16, 185, 129, 0.10); }
+
+  /* Search */
+  .search-wrap {
+    position: relative;
+    margin-left: auto;
+    min-width: 240px;
+  }
+  .search-input {
+    width: 100%;
+    height: 32px;
+    padding: 0 12px 0 34px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 12px;
+    transition: border-color 0.15s ease;
+  }
+  .search-input::placeholder { color: var(--text-dim); }
+  .search-input:focus { outline: none; border-color: var(--violet); }
+  .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    color: var(--text-dim);
+    pointer-events: none;
+  }
+
+  .divider-v {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+  }
+
+  /* ============================== */
+  /* KANBAN                          */
+  /* ============================== */
+  .kanban {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .column {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 14px;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+  }
+  .column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .column-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .column-title .icon {
+    width: 14px;
+    height: 14px;
+  }
+  .column-title .label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .column-count {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    background: var(--bg-3);
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .column .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* ============================== */
+  /* CARTE (Variante C reprise)      */
+  /* ============================== */
+  .card-c {
+    position: relative;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: grab;
+    transition: all 0.18s ease;
+  }
+  .card-c:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+  .card-c:active { cursor: grabbing; transform: scale(1.02); }
+
+  .c-header {
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
+    border-bottom: 1px solid var(--border);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .c-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+  }
+  .c-id {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--violet-light);
+    font-variant-numeric: tabular-nums;
+    background: rgba(139, 92, 246, 0.15);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+  .c-body { padding: 14px; }
+  .c-client {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+  .c-progress-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .c-progress-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .c-progress-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .c-bar {
+    height: 4px;
+    background: var(--bg-2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .c-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--violet), var(--violet-light));
+    border-radius: 2px;
+  }
+  .c-poles {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .c-pole-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+  .c-pole-dot::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .c-pole-dot.comm::before { background: var(--pole-comm); box-shadow: 0 0 6px var(--pole-comm); }
+  .c-pole-dot.erp::before  { background: var(--pole-erp);  box-shadow: 0 0 6px var(--pole-erp); }
+  .c-pole-dot.web::before  { background: var(--pole-web);  box-shadow: 0 0 6px var(--pole-web); }
+
+  /* Empty column state */
+  .column-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 12px;
+    padding: 32px 16px;
+    text-align: center;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    margin-top: 4px;
+  }
+  .column-empty .icon-empty {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 8px;
+    opacity: 0.4;
+  }
+
+  .footnote {
+    margin-top: 48px;
+    padding: 20px;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .footnote strong { color: var(--text-primary); }
+</style>
+</head>
+<body>
+  <div class="page">
+    <!-- HEADER -->
+    <header class="page-header">
+      <div class="header-row-1">
+        <div class="header-title-block">
+          <div class="header-eyebrow">✦ V2 Beta</div>
+          <h1 class="header-title">Projets en cours</h1>
+          <div class="header-meta">
+            <strong>12 projets</strong>
+            <span class="dot">·</span>
+            <span>Glissez-déposez pour changer le statut</span>
+          </div>
+        </div>
+        <button class="btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nouveau projet
+        </button>
+      </div>
+
+      <div class="header-row-2">
+        <span class="filter-label">Responsable</span>
+        <select class="filter-select">
+          <option>Tous</option>
+          <option>Lyes</option>
+          <option>Sarah</option>
+          <option>Marien</option>
+        </select>
+
+        <div class="divider-v"></div>
+
+        <span class="filter-label">Pôles</span>
+        <div class="pole-toggles">
+          <button class="pole-toggle comm active">
+            Comm
+          </button>
+          <button class="pole-toggle erp">
+            ERP
+          </button>
+          <button class="pole-toggle web">
+            SiteWeb
+          </button>
+        </div>
+
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="search-input" type="text" placeholder="Rechercher un projet ou client..." />
+        </div>
+      </div>
+    </header>
+
+    <!-- KANBAN -->
+    <div class="kanban">
+      <!-- Colonne Planification -->
+      <section class="column">
+        <div class="column-header">
+          <div class="column-title">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--col-planif)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span class="label">Planification</span>
+          </div>
+          <span class="column-count">1</span>
+        </div>
+        <div class="cards">
+          <article class="card-c">
+            <div class="c-header">
+              <div class="c-name">Docagora</div>
+              <div class="c-id">#12</div>
+            </div>
+            <div class="c-body">
+              <div class="c-client">Health finder · Sarah</div>
+              <div class="c-progress-row">
+                <span class="c-progress-label">Avancement</span>
+                <span class="c-progress-value">12%</span>
+              </div>
+              <div class="c-bar"><div class="c-bar-fill" style="width: 12%"></div></div>
+              <div class="c-poles">
+                <span class="c-pole-dot web">SiteWeb</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Colonne En cours -->
+      <section class="column">
+        <div class="column-header">
+          <div class="column-title">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--col-cours)" stroke-width="2" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span class="label">En cours</span>
+          </div>
+          <span class="column-count">6</span>
+        </div>
+        <div class="cards">
+          <article class="card-c">
+            <div class="c-header">
+              <div class="c-name">Emeline</div>
+              <div class="c-id">#07</div>
+            </div>
+            <div class="c-body">
+              <div class="c-client">précieuse · Lyes</div>
+              <div class="c-progress-row">
+                <span class="c-progress-label">Avancement</span>
+                <span class="c-progress-value">45%</span>
+              </div>
+              <div class="c-bar"><div class="c-bar-fill" style="width: 45%"></div></div>
+              <div class="c-poles">
+                <span class="c-pole-dot comm">Comm</span>
+                <span class="c-pole-dot erp">ERP</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card-c">
+            <div class="c-header">
+              <div class="c-name">La Maison De Tara</div>
+              <div class="c-id">#04</div>
+            </div>
+            <div class="c-body">
+              <div class="c-client">Ami de Anne Sophie · Marien</div>
+              <div class="c-progress-row">
+                <span class="c-progress-label">Avancement</span>
+                <span class="c-progress-value">62%</span>
+              </div>
+              <div class="c-bar"><div class="c-bar-fill" style="width: 62%"></div></div>
+              <div class="c-poles">
+                <span class="c-pole-dot comm">Comm</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card-c">
+            <div class="c-header">
+              <div class="c-name">La Clé</div>
+              <div class="c-id">#09</div>
+            </div>
+            <div class="c-body">
+              <div class="c-client">Marien</div>
+              <div class="c-progress-row">
+                <span class="c-progress-label">Avancement</span>
+                <span class="c-progress-value">33%</span>
+              </div>
+              <div class="c-bar"><div class="c-bar-fill" style="width: 33%"></div></div>
+              <div class="c-poles">
+                <span class="c-pole-dot erp">ERP</span>
+                <span class="c-pole-dot web">SiteWeb</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Colonne En pause -->
+      <section class="column">
+        <div class="column-header">
+          <div class="column-title">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--col-pause)" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            <span class="label">En pause</span>
+          </div>
+          <span class="column-count">5</span>
+        </div>
+        <div class="cards">
+          <article class="card-c">
+            <div class="c-header">
+              <div class="c-name">Ploméo</div>
+              <div class="c-id">#11</div>
+            </div>
+            <div class="c-body">
+              <div class="c-client">Ayoub</div>
+              <div class="c-progress-row">
+                <span class="c-progress-label">Avancement</span>
+                <span class="c-progress-value">20%</span>
+              </div>
+              <div class="c-bar"><div class="c-bar-fill" style="width: 20%"></div></div>
+              <div class="c-poles">
+                <span class="c-pole-dot web">SiteWeb</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card-c">
+            <div class="c-header">
+              <div class="c-name">CTRP</div>
+              <div class="c-id">#06</div>
+            </div>
+            <div class="c-body">
+              <div class="c-client">CTRP</div>
+              <div class="c-progress-row">
+                <span class="c-progress-label">Avancement</span>
+                <span class="c-progress-value">55%</span>
+              </div>
+              <div class="c-bar"><div class="c-bar-fill" style="width: 55%"></div></div>
+              <div class="c-poles">
+                <span class="c-pole-dot erp">ERP</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="card-c">
+            <div class="c-header">
+              <div class="c-name">ERP PROPUL'SEO</div>
+              <div class="c-id">#03</div>
+            </div>
+            <div class="c-body">
+              <div class="c-client">ERP team · Marien</div>
+              <div class="c-progress-row">
+                <span class="c-progress-label">Avancement</span>
+                <span class="c-progress-value">78%</span>
+              </div>
+              <div class="c-bar"><div class="c-bar-fill" style="width: 78%"></div></div>
+              <div class="c-poles">
+                <span class="c-pole-dot erp">ERP</span>
+                <span class="c-pole-dot web">SiteWeb</span>
+                <span class="c-pole-dot comm">Comm</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <div class="footnote">
+      <strong>Header 2-niveaux :</strong> ligne 1 = titre + count + action principale · ligne 2 = filtres dans une barre dédiée (responsable, pôles, recherche).<br>
+      <strong>Colonnes sobres :</strong> icône colorée par statut (violet/vert/ambre) + label en uppercase + count.<br>
+      <strong>Pôles toggles :</strong> Comm est activé dans cette preview pour montrer l'état actif (fond coloré subtil + glow sur la pastille).<br>
+      <strong>Hover carte :</strong> survole une carte pour voir l'élévation (bordure renforcée + ombre).
+    </div>
+  </div>
+</body>
+</html>

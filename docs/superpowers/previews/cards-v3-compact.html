@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>V3 — Cartes compactes (2 variantes)</title>
+<style>
+  :root {
+    --bg-0: #0a0814;
+    --bg-1: #0f0b1e;
+    --bg-2: #1a1430;
+    --bg-3: #070512;
+    --border: rgba(139, 92, 246, 0.18);
+    --border-strong: rgba(139, 92, 246, 0.35);
+    --violet: #8B5CF6;
+    --violet-light: #A78BFA;
+    --text-primary: #ede9fe;
+    --text-muted: #9ca3af;
+    --text-dim: #6b7280;
+    --pole-comm: #06b6d4;
+    --pole-erp: #f59e0b;
+    --pole-web: #10b981;
+    --col-planif: #8B5CF6;
+    --col-cours: #10b981;
+    --col-pause: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg-0);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1600px; margin: 0 auto; padding: 32px; }
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  .variant {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .variant-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--violet-light);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .variant-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .variant-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  /* Mini kanban dans chaque variante (1 colonne pour démo) */
+  .mini-kanban {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  .mini-col {
+    background: var(--bg-0);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 8px;
+  }
+  .mini-col-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .mini-col-header .label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .mini-col-header .count {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .mini-col.planif .mini-col-header .label { color: var(--col-planif); }
+  .mini-col.cours  .mini-col-header .label { color: var(--col-cours); }
+  .mini-col.pause  .mini-col-header .label { color: var(--col-pause); }
+
+  .cards-stack { display: flex; flex-direction: column; gap: 4px; }
+
+  /* ============================================================ */
+  /* VARIANTE A — Mini-cartouche                                    */
+  /* Garde l'en-tête violet de la variante C, supprime le body      */
+  /* ============================================================ */
+  .card-mini-a {
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .card-mini-a:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+  }
+  .card-mini-a .head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
+    border-bottom: 1px solid var(--border);
+  }
+  .card-mini-a .num {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--violet-light);
+    font-variant-numeric: tabular-nums;
+    background: rgba(139, 92, 246, 0.15);
+    padding: 1px 4px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .card-mini-a .name {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-mini-a .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 8px;
+    gap: 6px;
+  }
+  .card-mini-a .progress-mini {
+    flex: 1;
+    height: 2px;
+    background: var(--bg-2);
+    border-radius: 1px;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .card-mini-a .progress-mini-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--violet), var(--violet-light));
+    border-radius: 1px;
+  }
+  .card-mini-a .poles-mini {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .card-mini-a .pole-dot-mini {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+  }
+  .pole-dot-comm { background: var(--pole-comm); box-shadow: 0 0 4px var(--pole-comm); }
+  .pole-dot-erp  { background: var(--pole-erp);  box-shadow: 0 0 4px var(--pole-erp); }
+  .pole-dot-web  { background: var(--pole-web);  box-shadow: 0 0 4px var(--pole-web); }
+
+  /* ============================================================ */
+  /* VARIANTE B — Ligne plate                                       */
+  /* 1 ligne ultra-dense, border-left coloré, max d'info compressée */
+  /* ============================================================ */
+  .card-mini-b {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px 6px 12px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    overflow: hidden;
+    min-height: 30px;
+  }
+  .card-mini-b:hover {
+    border-color: var(--border-strong);
+    background: var(--bg-2);
+  }
+  .card-mini-b::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--violet);
+  }
+  .card-mini-b.planif::before { background: var(--col-planif); }
+  .card-mini-b.cours::before  { background: var(--col-cours); }
+  .card-mini-b.pause::before  { background: var(--col-pause); }
+
+  .card-mini-b .b-num {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--violet-light);
+    font-variant-numeric: tabular-nums;
+    background: rgba(139, 92, 246, 0.15);
+    padding: 1px 4px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .card-mini-b .b-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-mini-b .b-poles {
+    display: flex;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+  .card-mini-b .b-pct {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+  .footnote {
+    margin-top: 40px;
+    padding: 20px;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .footnote strong { color: var(--text-primary); }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>V3 — Cartes compactes · 2 variantes</h1>
+  <p class="subtitle">Démo avec les 18 projets actifs · même palette V3 · hauteurs réduites pour voir tout d'un coup sans scroll.</p>
+
+  <div class="grid">
+    <!-- =========================================== -->
+    <!-- VARIANTE A — Mini-cartouche                   -->
+    <!-- =========================================== -->
+    <section class="variant">
+      <div class="variant-eyebrow">Variante A</div>
+      <div class="variant-title">Mini-cartouche</div>
+      <div class="variant-desc">Hérite du look "fiche technique" de la variante C : header cartouche violet + nom uppercase. ~52px de hauteur, garde l'identité visuelle V3.</div>
+
+      <div class="mini-kanban">
+        <div class="mini-col planif">
+          <div class="mini-col-header"><span class="label">Planification</span><span class="count">3</span></div>
+          <div class="cards-stack">
+            <article class="card-mini-a"><div class="head"><span class="num">#01</span><span class="name">Bowtyfull Lab</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-web"></span></div></div></article>
+            <article class="card-mini-a"><div class="head"><span class="num">#02</span><span class="name">Servicimmo</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-web"></span></div></div></article>
+            <article class="card-mini-a"><div class="head"><span class="num">#03</span><span class="name">Stern Tech</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-erp"></span></div></div></article>
+          </div>
+        </div>
+
+        <div class="mini-col cours">
+          <div class="mini-col-header"><span class="label">En cours</span><span class="count">13</span></div>
+          <div class="cards-stack">
+            <article class="card-mini-a"><div class="head"><span class="num">#01</span><span class="name">BYW</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-web"></span></div></div></article>
+            <article class="card-mini-a"><div class="head"><span class="num">#02</span><span class="name">CETé</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-web"></span></div></div></article>
+            <article class="card-mini-a"><div class="head"><span class="num">#03</span><span class="name">CoproFlex</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-web"></span></div></div></article>
+            <article class="card-mini-a"><div class="head"><span class="num">#04</span><span class="name">Docagora</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-web"></span></div></div></article>
+            <article class="card-mini-a"><div class="head"><span class="num">#05</span><span class="name">La Clé</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-erp"></span></div></div></article>
+            <article class="card-mini-a"><div class="head"><span class="num">#06</span><span class="name">La Maison De Tara</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-web"></span></div></div></article>
+            <article class="card-mini-a"><div class="head"><span class="num">#07</span><span class="name">Land Act</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-erp"></span></div></div></article>
+            <article class="card-mini-a"><div class="head"><span class="num">#08</span><span class="name">Locagame</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-web"></span></div></div></article>
+            <article class="card-mini-a"><div class="head"><span class="num">#09</span><span class="name">Lolett</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-web"></span></div></div></article>
+            <article class="card-mini-a"><div class="head"><span class="num">#10</span><span class="name">Lutins Farceurs</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-web"></span></div></div></article>
+            <article class="card-mini-a"><div class="head"><span class="num">#11</span><span class="name">Murmure Lisbon</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-web"></span></div></div></article>
+            <article class="card-mini-a"><div class="head"><span class="num">#12</span><span class="name">Ploméo</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-web"></span></div></div></article>
+            <article class="card-mini-a"><div class="head"><span class="num">#13</span><span class="name">Précieuse</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-web"></span></div></div></article>
+          </div>
+        </div>
+
+        <div class="mini-col pause">
+          <div class="mini-col-header"><span class="label">En pause</span><span class="count">2</span></div>
+          <div class="cards-stack">
+            <article class="card-mini-a"><div class="head"><span class="num">#01</span><span class="name">Propul'seo</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-web"></span></div></div></article>
+            <article class="card-mini-a"><div class="head"><span class="num">#02</span><span class="name">Thibault Koh phangan</span></div><div class="footer"><div class="progress-mini"><div class="progress-mini-fill" style="width: 0%"></div></div><div class="poles-mini"><span class="pole-dot-mini pole-dot-web"></span></div></div></article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================== -->
+    <!-- VARIANTE B — Ligne plate                      -->
+    <!-- =========================================== -->
+    <section class="variant">
+      <div class="variant-eyebrow">Variante B</div>
+      <div class="variant-title">Ligne plate</div>
+      <div class="variant-desc">1 ligne ultra-dense, filet vertical coloré par statut. ~30px de hauteur, 2× plus de cartes visibles que la mini-cartouche.</div>
+
+      <div class="mini-kanban">
+        <div class="mini-col planif">
+          <div class="mini-col-header"><span class="label">Planification</span><span class="count">3</span></div>
+          <div class="cards-stack">
+            <article class="card-mini-b planif"><span class="b-num">#01</span><span class="b-name">Bowtyfull Lab</span><div class="b-poles"><span class="pole-dot-mini pole-dot-web"></span></div><span class="b-pct">0%</span></article>
+            <article class="card-mini-b planif"><span class="b-num">#02</span><span class="b-name">Servicimmo</span><div class="b-poles"><span class="pole-dot-mini pole-dot-web"></span></div><span class="b-pct">0%</span></article>
+            <article class="card-mini-b planif"><span class="b-num">#03</span><span class="b-name">Stern Tech</span><div class="b-poles"><span class="pole-dot-mini pole-dot-erp"></span></div><span class="b-pct">0%</span></article>
+          </div>
+        </div>
+
+        <div class="mini-col cours">
+          <div class="mini-col-header"><span class="label">En cours</span><span class="count">13</span></div>
+          <div class="cards-stack">
+            <article class="card-mini-b cours"><span class="b-num">#01</span><span class="b-name">BYW</span><div class="b-poles"><span class="pole-dot-mini pole-dot-web"></span></div><span class="b-pct">0%</span></article>
+            <article class="card-mini-b cours"><span class="b-num">#02</span><span class="b-name">CETé</span><div class="b-poles"><span class="pole-dot-mini pole-dot-web"></span></div><span class="b-pct">0%</span></article>
+            <article class="card-mini-b cours"><span class="b-num">#03</span><span class="b-name">CoproFlex</span><div class="b-poles"><span class="pole-dot-mini pole-dot-web"></span></div><span class="b-pct">0%</span></article>
+            <article class="card-mini-b cours"><span class="b-num">#04</span><span class="b-name">Docagora</span><div class="b-poles"><span class="pole-dot-mini pole-dot-web"></span></div><span class="b-pct">0%</span></article>
+            <article class="card-mini-b cours"><span class="b-num">#05</span><span class="b-name">La Clé</span><div class="b-poles"><span class="pole-dot-mini pole-dot-erp"></span></div><span class="b-pct">0%</span></article>
+            <article class="card-mini-b cours"><span class="b-num">#06</span><span class="b-name">La Maison De Tara</span><div class="b-poles"><span class="pole-dot-mini pole-dot-web"></span></div><span class="b-pct">0%</span></article>
+            <article class="card-mini-b cours"><span class="b-num">#07</span><span class="b-name">Land Act</span><div class="b-poles"><span class="pole-dot-mini pole-dot-erp"></span></div><span class="b-pct">0%</span></article>
+            <article class="card-mini-b cours"><span class="b-num">#08</span><span class="b-name">Locagame</span><div class="b-poles"><span class="pole-dot-mini pole-dot-web"></span></div><span class="b-pct">0%</span></article>
+            <article class="card-mini-b cours"><span class="b-num">#09</span><span class="b-name">Lolett</span><div class="b-poles"><span class="pole-dot-mini pole-dot-web"></span></div><span class="b-pct">0%</span></article>
+            <article class="card-mini-b cours"><span class="b-num">#10</span><span class="b-name">Lutins Farceurs</span><div class="b-poles"><span class="pole-dot-mini pole-dot-web"></span></div><span class="b-pct">0%</span></article>
+            <article class="card-mini-b cours"><span class="b-num">#11</span><span class="b-name">Murmure Lisbon</span><div class="b-poles"><span class="pole-dot-mini pole-dot-web"></span></div><span class="b-pct">0%</span></article>
+            <article class="card-mini-b cours"><span class="b-num">#12</span><span class="b-name">Ploméo</span><div class="b-poles"><span class="pole-dot-mini pole-dot-web"></span></div><span class="b-pct">0%</span></article>
+            <article class="card-mini-b cours"><span class="b-num">#13</span><span class="b-name">Précieuse</span><div class="b-poles"><span class="pole-dot-mini pole-dot-web"></span></div><span class="b-pct">0%</span></article>
+          </div>
+        </div>
+
+        <div class="mini-col pause">
+          <div class="mini-col-header"><span class="label">En pause</span><span class="count">2</span></div>
+          <div class="cards-stack">
+            <article class="card-mini-b pause"><span class="b-num">#01</span><span class="b-name">Propul'seo</span><div class="b-poles"><span class="pole-dot-mini pole-dot-web"></span></div><span class="b-pct">0%</span></article>
+            <article class="card-mini-b pause"><span class="b-num">#02</span><span class="b-name">Thibault Koh phangan</span><div class="b-poles"><span class="pole-dot-mini pole-dot-web"></span></div><span class="b-pct">0%</span></article>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="footnote">
+    <strong>Test fait avec exactement les 18 projets actifs de la BDD.</strong><br>
+    <strong>Variante A — Mini-cartouche</strong> (~52px) : garde l'identité V3 forte (cartouche violet, nom UPPERCASE, numéro projet en pastille), avec barre d'avancement + pastilles pôles en pied. <em>Plus identitaire, mais moins dense.</em><br>
+    <strong>Variante B — Ligne plate</strong> (~30px) : filet vertical coloré par statut, tout sur une ligne (num + nom + pastilles + %). <em>Plus dense — 2× plus de cartes visibles, mais plus "tableau" et moins V3.</em>
+  </div>
+</div>
+</body>
+</html>

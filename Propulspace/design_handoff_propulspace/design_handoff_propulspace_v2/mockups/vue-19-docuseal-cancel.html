@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8"><title>Vue 19 — Signature interrompue</title>
+<link rel="stylesheet" href="../tokens/colors_and_type.css">
+<link rel="stylesheet" href="../tokens/portal.css">
+<link rel="stylesheet" href="../tokens/admin.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+  body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+  .container { max-width: 1340px; margin: 0 auto; }
+  .section-h { margin: 36px auto 16px; max-width: 1340px; }
+  .section-h h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; margin: 0; color: #2a2418; }
+  .section-h p { font-size: 13px; color: #6b6357; margin: 4px 0 0; }
+</style>
+</head>
+<body>
+<div id="head"></div>
+
+    <div class="section-h"><h2>Signature interrompue</h2></div>
+    <div class="container"><div id="s-cancel"></div></div>
+
+<script type="text/babel" src="_lib/primitives.jsx"></script>
+<script type="text/babel" src="_lib/shell.jsx"></script>
+<script type="text/babel" src="_lib/desktop-shell.jsx"></script>
+<script type="text/babel" src="_lib/admin-shell.jsx"></script>
+<script type="text/babel" src="_lib/v2-shared.jsx"></script>
+
+<script type="text/babel">
+function Head() {
+  return <PageHead num="19" title="Retour de DocuSeal — Signature non finalisée" subtitle="Le signataire a quitté DocuSeal sans signer. Ton neutre." />;
+}
+
+function S() {
+  return (
+    <StatusPage
+      shellUrl="espace.propulseo-site.com/signatures/sign/cancel"
+      iconName="alert-circle"
+      iconTone="orange"
+      title="Signature interrompue"
+      subtitle="Vous pouvez revenir signer plus tard. Le document reste disponible dans votre espace tant qu'il n'a pas expiré."
+      details={
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>Document</span>
+            <span style={{ color: "var(--ps-fg)", fontWeight: 500 }}>Avenant SEO mensuel</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>Expire le</span>
+            <span className="ps-num" style={{ color: "var(--ps-fg)", fontWeight: 500 }}>29 mai 2026</span>
+          </div>
+        </div>
+      }
+      primaryCta="Reprendre la signature"
+      primaryHref="/espace-client/signatures"
+      secondaryCta="Retour à mon espace"
+    />
+  );
+}
+ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+ReactDOM.createRoot(document.getElementById("s-cancel")).render(<S />);
+</script>
+</body></html>

@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Servicimmo — D5 Qonto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-2: #f6f6f4;
+    --fg: #0a0f1c;
+    --muted: #6b7280;
+    --muted-2: #4b5563;
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+    --primary: #1a2332;   /* deep navy */
+    --accent: #e4fb58;    /* qonto signature lime */
+    --accent-ink: #14532d;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
+  body {
+    font-family: 'Geist', -apple-system, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+  .mono { font-family: 'Geist Mono', monospace; letter-spacing: 0.02em; }
+
+  /* ─── Header ─── */
+  header.nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+  .logo { font-weight: 600; font-size: 19px; letter-spacing: -0.03em; display:flex; align-items:center; gap: 10px; color: var(--fg); text-decoration:none; }
+  .logo-mark { width: 30px; height: 30px; background: var(--primary); color: var(--accent); border-radius: 8px; display:grid; place-items:center; font-size: 14px; font-weight: 700; }
+  .nav-links { display:flex; align-items:center; gap: 4px; }
+  .nav-links a { color: var(--muted-2); text-decoration: none; font-size: 14px; padding: 8px 14px; border-radius: 8px; font-weight: 500; }
+  .nav-links a:hover { color: var(--fg); background: var(--bg-2); }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 10px; font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.15s; border: 1px solid transparent; cursor: pointer; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: #0d1422; }
+  .btn-outline { background: #fff; color: var(--fg); border-color: var(--border-strong); }
+  .btn-outline:hover { border-color: var(--fg); }
+  .btn-accent { background: var(--accent); color: var(--primary); font-weight: 600; }
+  .btn-accent:hover { background: #ddee44; }
+
+  /* ─── Hero ─── */
+  .hero { padding: 88px 0 100px; border-bottom: 1px solid var(--border); position:relative; }
+  .hero-inner { display: grid; grid-template-columns: 1.3fr 1fr; gap: 80px; align-items: center; }
+  .hero-inner > * { min-width: 0; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--muted-2);
+    letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500;
+    margin-bottom: 28px;
+  }
+  .eyebrow::before {
+    content: ''; display:inline-block; width: 24px; height:1px; background: var(--muted-2);
+  }
+  h1 {
+    font-size: 76px; line-height: 0.98; letter-spacing: -0.04em;
+    font-weight: 600; margin: 0 0 28px;
+    text-wrap: balance;
+  }
+  .hero-lede { font-size: 19px; color: var(--muted-2); max-width: 540px; margin: 0 0 40px; line-height: 1.5; }
+  .hero-ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+  .hero-meta { margin-top: 36px; display: flex; align-items: center; gap: 32px; font-size: 13px; color: var(--muted); font-family: 'Geist Mono', monospace; }
+  .hero-meta .dot { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 0 4px rgba(34,197,94,0.15); }
+  .hero-meta-item { display:flex; align-items:center; gap: 8px; }
+
+  /* Hero right — stat panel */
+  .stat-panel {
+    background: var(--primary); color: #fff;
+    border-radius: 20px; padding: 40px; position: relative; overflow: hidden;
+    aspect-ratio: 4 / 5;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .stat-panel::after {
+    content: ''; position: absolute; top: -50px; right: -50px; width: 200px; height: 200px;
+    background: var(--accent); border-radius: 50%; filter: blur(60px); opacity: 0.2;
+  }
+  .stat-panel-label { font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 16px; }
+  .stat-panel-val { font-size: 88px; line-height: 1; letter-spacing: -0.04em; font-weight: 600; color: var(--accent); }
+  .stat-panel-cap { font-size: 16px; color: rgba(255,255,255,0.7); max-width: 260px; line-height: 1.5; }
+  .stat-panel-rows { display: grid; gap: 1px; background: rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; margin-top: 24px; }
+  .stat-row { background: var(--primary); padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+  .stat-row-key { color: rgba(255,255,255,0.6); font-family: 'Geist Mono', monospace; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .stat-row-val { color: #fff; font-weight: 500; }
+
+  /* ─── Trust ─── */
+  .trust { padding: 32px 0; border-bottom: 1px solid var(--border); background: var(--bg); }
+  .trust-inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
+  .trust-lbl { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+  .trust-list { display: flex; gap: 44px; flex-wrap: wrap; }
+  .trust-item { font-size: 14px; color: var(--muted-2); font-weight: 500; display: inline-flex; align-items: center; gap: 8px; }
+  .trust-item::before { content: ''; display:inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--primary); }
+
+  /* ─── Section base ─── */
+  .sec { padding: 120px 0; border-bottom: 1px solid var(--border); }
+  .sec.alt { background: var(--bg-2); }
+  .sec-head { display: grid; grid-template-columns: auto 1fr; gap: 80px; margin-bottom: 72px; align-items: end; }
+  .sec-index { font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--muted); letter-spacing: 0.08em; }
+  .sec-index b { color: var(--primary); font-weight: 600; }
+  h2 { font-size: 54px; line-height: 1.02; letter-spacing: -0.035em; font-weight: 600; margin: 0; text-wrap: balance; max-width: 780px; }
+  .sec-sub { font-size: 17px; color: var(--muted-2); max-width: 540px; line-height: 1.55; margin: 20px 0 0; }
+
+  /* ─── How it works — row-based ─── */
+  .steps-q {
+    border-top: 1px solid var(--border-strong);
+  }
+  .step-q {
+    display: grid; grid-template-columns: 80px 1.5fr 1fr 140px; gap: 40px;
+    padding: 40px 0; border-bottom: 1px solid var(--border);
+    align-items: start; position: relative;
+  }
+  .step-q-num { font-family: 'Geist Mono', monospace; font-size: 14px; color: var(--muted); letter-spacing: 0.04em; padding-top: 4px; }
+  .step-q-title { font-size: 26px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 500; margin: 0 0 10px; }
+  .step-q-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--muted-2);
+    background: var(--bg-2); padding: 4px 10px; border-radius: 4px; letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .step-q-desc { font-size: 15px; color: var(--muted-2); line-height: 1.6; margin: 0; }
+  .step-q-time { text-align: right; font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--primary); padding-top: 4px; font-weight: 500; }
+  .step-q-time b { display: block; font-size: 28px; letter-spacing: -0.02em; font-family: 'Geist', sans-serif; font-weight: 600; }
+
+  /* ─── Why ─── */
+  .why-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 100px; align-items: start; }
+  .why-story p { font-size: 16px; color: var(--muted-2); line-height: 1.65; margin: 0 0 20px; }
+  .why-story p:first-of-type { font-size: 19px; color: var(--fg); line-height: 1.5; }
+  .why-story-cta { margin-top: 28px; }
+
+  .kpis-q {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--border-strong); border-left: 1px solid var(--border-strong);
+  }
+  .kpi-q {
+    padding: 32px 28px;
+    border-right: 1px solid var(--border-strong); border-bottom: 1px solid var(--border-strong);
+    position: relative;
+  }
+  .kpi-q::before {
+    content: attr(data-n); position: absolute; top: 14px; right: 16px;
+    font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.08em;
+  }
+  .kpi-q-val { font-size: 56px; line-height: 1; letter-spacing: -0.035em; font-weight: 600; margin-bottom: 12px; }
+  .kpi-q-val small { font-size: 20px; font-weight: 500; color: var(--muted-2); margin-left: 4px; letter-spacing: -0.01em; }
+  .kpi-q-lbl { font-size: 13px; color: var(--muted-2); line-height: 1.5; }
+
+  /* ─── CTA ─── */
+  .cta { padding: 140px 0; background: var(--primary); color: #fff; position: relative; overflow: hidden; }
+  .cta::before {
+    content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 800px; height: 800px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(228,251,88,0.15), transparent 60%);
+    pointer-events: none;
+  }
+  .cta-inner { position: relative; max-width: 900px; }
+  .cta .sec-index { color: rgba(255,255,255,0.5); margin-bottom: 24px; display: inline-block; }
+  .cta .sec-index b { color: var(--accent); }
+  .cta h2 { color: #fff; font-size: 72px; max-width: 900px; margin-bottom: 28px; }
+  .cta-sub { font-size: 19px; color: rgba(255,255,255,0.7); max-width: 580px; line-height: 1.55; margin: 0 0 40px; }
+  .cta-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-cta-ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.25); padding: 12px 20px; font-size: 14px; }
+  .btn-cta-ghost:hover { border-color: #fff; background: rgba(255,255,255,0.05); }
+
+  /* ─── Footer ─── */
+  footer { padding: 56px 0; border-top: 1px solid rgba(255,255,255,0.1); background: var(--primary); color: rgba(255,255,255,0.6); font-size: 13px; }
+  .foot-inner { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .foot-links { display: flex; gap: 28px; }
+  .foot-links a { color: rgba(255,255,255,0.75); text-decoration: none; }
+  .foot-links a:hover { color: #fff; }
+
+  @media (max-width: 960px) {
+    .hero-inner, .why-inner { grid-template-columns: 1fr; gap: 56px; }
+    h1 { font-size: 48px; }
+    h2 { font-size: 36px; }
+    .cta h2 { font-size: 44px; }
+    .sec-head { grid-template-columns: 1fr; gap: 24px; }
+    .step-q { grid-template-columns: 48px 1fr; gap: 20px; }
+    .step-q-tag, .step-q-time { grid-column: 2; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a href="#" class="logo">
+      <span class="logo-mark">S</span>
+      Servicimmo
+    </a>
+    <div class="nav-links">
+      <a href="#">Prestations</a>
+      <a href="#">Zones d'intervention</a>
+      <a href="#">Actualités</a>
+      <a href="#">Contact</a>
+    </div>
+    <div style="display:flex; gap: 8px;">
+      <a href="tel:+33247470123" class="btn btn-outline">02 47 47 01 23</a>
+      <a href="#" class="btn btn-accent">Mon devis</a>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div>
+      <div class="eyebrow">Depuis 1998 · Indre-et-Loire</div>
+      <h1>Le diagnostic immobilier<br>sans friction.</h1>
+      <p class="hero-lede">
+        Vente, location, travaux — identifiez les diagnostics obligatoires pour votre bien en 2 minutes et recevez un devis définitif sous 2 h ouvrées.
+      </p>
+      <div class="hero-ctas">
+        <a href="#" class="btn btn-primary">
+          Commencer mon devis
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+        <a href="tel:+33247470123" class="btn btn-outline">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          02 47 47 01 23
+        </a>
+      </div>
+      <div class="hero-meta">
+        <span class="hero-meta-item"><span class="dot"></span> Équipe disponible aujourd'hui</span>
+        <span class="hero-meta-item">Délai moyen · 48 h</span>
+        <span class="hero-meta-item">Sans engagement</span>
+      </div>
+    </div>
+
+    <div class="stat-panel">
+      <div>
+        <div class="stat-panel-label">Depuis 1998</div>
+        <div class="stat-panel-val">10&nbsp;000+</div>
+        <div class="stat-panel-cap">diagnostics réalisés pour des particuliers, syndics et professionnels en Touraine.</div>
+      </div>
+
+      <div class="stat-panel-rows">
+        <div class="stat-row"><span class="stat-row-key">Certification</span><span class="stat-row-val">LCC Qualixpert</span></div>
+        <div class="stat-row"><span class="stat-row-key">Assurance RCP</span><span class="stat-row-val">Allianz</span></div>
+        <div class="stat-row"><span class="stat-row-key">Fédération</span><span class="stat-row-val">FNAIM Diagnostic</span></div>
+        <div class="stat-row"><span class="stat-row-key">Conformité</span><span class="stat-row-val">I.Cert</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ TRUST ═══════════ -->
+<section class="trust">
+  <div class="wrap trust-inner">
+    <span class="trust-lbl">Un cabinet certifié, assuré et fédéré</span>
+    <div class="trust-list">
+      <span class="trust-item">LCC Qualixpert</span>
+      <span class="trust-item">Allianz RCP</span>
+      <span class="trust-item">FNAIM Diagnostic</span>
+      <span class="trust-item">I.Cert</span>
+      <span class="trust-item">SIRET 418 327 551</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ HOW IT WORKS ═══════════ -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-index"><b>01</b> / 03 — Méthode</div>
+      <div>
+        <h2>Un parcours transparent, de la demande à l'intervention.</h2>
+        <p class="sec-sub">Quatre étapes, aucune fausse promesse. Vous gardez la main à chaque moment, nous prenons en charge la partie réglementaire.</p>
+      </div>
+    </div>
+
+    <div class="steps-q">
+      <div class="step-q">
+        <div class="step-q-num">001</div>
+        <div>
+          <h3 class="step-q-title">Questionnaire en ligne</h3>
+          <p class="step-q-desc">Vous décrivez votre projet : type de bien, adresse, surface, date du permis. Le formulaire s'adapte automatiquement à votre situation.</p>
+        </div>
+        <div><span class="step-q-tag">Autonomie totale</span></div>
+        <div class="step-q-time"><b>2 min</b>en ligne</div>
+      </div>
+
+      <div class="step-q">
+        <div class="step-q-num">002</div>
+        <div>
+          <h3 class="step-q-title">Diagnostics identifiés automatiquement</h3>
+          <p class="step-q-desc">Notre moteur applique les règles réglementaires à votre bien (DPE, amiante, plomb, termites, Carrez…) et calcule une estimation tarifaire immédiate.</p>
+        </div>
+        <div><span class="step-q-tag">Calcul immédiat</span></div>
+        <div class="step-q-time"><b>Live</b>pas d'attente</div>
+      </div>
+
+      <div class="step-q">
+        <div class="step-q-num">003</div>
+        <div>
+          <h3 class="step-q-title">Devis définitif, validé par un expert</h3>
+          <p class="step-q-desc">Un diagnostiqueur certifié revoit votre demande et vous renvoie un devis ferme, détaillé ligne par ligne. Prix annoncé = prix payé.</p>
+        </div>
+        <div><span class="step-q-tag">Révision humaine</span></div>
+        <div class="step-q-time"><b>2 h</b>ouvrées</div>
+      </div>
+
+      <div class="step-q">
+        <div class="step-q-num">004</div>
+        <div>
+          <h3 class="step-q-title">Intervention et rapport</h3>
+          <p class="step-q-desc">RDV programmé en Indre-et-Loire. Rapports conformes transmis au notaire, bailleur ou maître d'ouvrage. Dossier archivé 10 ans.</p>
+        </div>
+        <div><span class="step-q-tag">Terrain</span></div>
+        <div class="step-q-time"><b>48 h</b>délai moyen</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ WHY ═══════════ -->
+<section class="sec alt">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-index"><b>02</b> / 03 — Le cabinet</div>
+      <div>
+        <h2>28 ans d'expertise locale, une méthode résolument moderne.</h2>
+      </div>
+    </div>
+
+    <div class="why-inner">
+      <div class="why-story">
+        <p>Cabinet indépendant basé à Tours depuis 1998, nous intervenons en Indre-et-Loire et départements limitrophes.</p>
+        <p>Nous sommes certifiés Qualixpert, assurés Allianz, et membres de la FNAIM Diagnostic. Notre équipe publie une veille réglementaire depuis 2017 et accompagne aussi bien les particuliers que les notaires, syndics et agences immobilières locales.</p>
+        <p>Notre parti-pris : un seul métier, fait sérieusement. Nous ne faisons ni gestion locative, ni transaction, ni travaux.</p>
+        <div class="why-story-cta">
+          <a href="#" class="btn btn-outline">
+            En savoir plus sur le cabinet
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <dl class="kpis-q">
+        <div class="kpi-q" data-n="01">
+          <div class="kpi-q-val">28<small>ans</small></div>
+          <div class="kpi-q-lbl">D'expertise à Tours, depuis 1998.</div>
+        </div>
+        <div class="kpi-q" data-n="02">
+          <div class="kpi-q-val">10&nbsp;000<small>+</small></div>
+          <div class="kpi-q-lbl">Diagnostics réalisés en Touraine.</div>
+        </div>
+        <div class="kpi-q" data-n="03">
+          <div class="kpi-q-val">48<small>h</small></div>
+          <div class="kpi-q-lbl">Délai moyen d'intervention terrain.</div>
+        </div>
+        <div class="kpi-q" data-n="04">
+          <div class="kpi-q-val">100<small>%</small></div>
+          <div class="kpi-q-lbl">Tarifs annoncés à l'avance, sans surprise.</div>
+        </div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FINAL CTA ═══════════ -->
+<section class="cta">
+  <div class="wrap cta-inner">
+    <div class="sec-index"><b>03</b> / 03 — Votre devis</div>
+    <h2>Prêt à démarrer votre demande ?</h2>
+    <p class="cta-sub">En 2 minutes vous saurez exactement ce dont vous avez besoin et à quel prix. Sans engagement, sans création de compte.</p>
+    <div class="cta-ctas">
+      <a href="#" class="btn btn-accent">
+        Lancer mon devis en 2 minutes
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#" class="btn btn-cta-ghost">Poser une question à l'équipe</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <span>© 2026 Servicimmo · Cabinet de diagnostic immobilier · Tours, Indre-et-Loire</span>
+    <div class="foot-links">
+      <a href="#">Mentions légales</a>
+      <a href="#">CGV</a>
+      <a href="#">Politique RGPD</a>
+      <a href="#">Plan du site</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

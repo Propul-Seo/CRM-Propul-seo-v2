@@ -1,0 +1,140 @@
+/**
+ * Propul'Space portal theme — scoped under `.propulspace-portal`.
+ *
+ * Polished pass (Task A3): Linear-inspired. Soft radial backdrop, raised
+ * surfaces, refined typography, smooth motion. Tokens come from the
+ * Phase 2 PRD — DO NOT change values without updating the PRD too.
+ */
+
+.propulspace-portal {
+  /* Surfaces */
+  --ps-background: #FAFAFA;
+  --ps-background-elevated: #FFFFFF;
+  --ps-background-subtle: #F4F4F5;
+
+  /* Text */
+  --ps-text-primary: #18181B;
+  --ps-text-secondary: #52525B;
+  --ps-text-muted: #A1A1AA;
+
+  /* Brand */
+  --ps-primary: #7C3AED;
+  --ps-primary-hover: #6D28D9;
+  --ps-primary-deep: #5B21B6;
+  --ps-primary-subtle: #EDE9FE;
+  --ps-primary-text: #5B21B6;
+
+  /* Semantic */
+  --ps-success: #16A34A;
+  --ps-warning: #EA580C;
+  --ps-danger: #DC2626;
+
+  /* Borders / shadows */
+  --ps-border: #E4E4E7;
+  --ps-border-soft: #F0F0F2;
+  --ps-shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.05);
+  --ps-shadow-raised: 0 4px 12px -2px rgba(91, 33, 182, 0.10), 0 2px 4px -1px rgba(16, 24, 40, 0.06);
+  --ps-shadow-fab: 0 10px 30px -8px rgba(124, 58, 237, 0.45), 0 4px 10px -2px rgba(124, 58, 237, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
+  /* Motion */
+  --ps-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ps-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Radii */
+  --ps-radius-input: 8px;
+  --ps-radius-card: 14px;
+  --ps-radius-pill: 9999px;
+
+  /* Type */
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  letter-spacing: -0.005em;
+  color: var(--ps-text-primary);
+  color-scheme: light;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv11", "ss03", "cv02";
+
+  /* Layered backdrop: soft violet radial up top, then near-white base. */
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(124, 58, 237, 0.07), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(99, 102, 241, 0.05), transparent 50%),
+    var(--ps-background);
+  background-attachment: fixed;
+}
+
+.propulspace-portal * {
+  border-color: var(--ps-border);
+}
+
+.propulspace-portal h1,
+.propulspace-portal h2,
+.propulspace-portal h3 {
+  letter-spacing: -0.025em;
+}
+
+.propulspace-portal a {
+  color: var(--ps-primary);
+  transition: color 200ms var(--ps-ease);
+}
+
+.propulspace-portal a:hover {
+  color: var(--ps-primary-hover);
+}
+
+/* Reusable surface — used on cards. */
+.propulspace-portal .ps-surface {
+  background: var(--ps-background-elevated);
+  border: 1px solid var(--ps-border-soft);
+  border-radius: var(--ps-radius-card);
+  box-shadow: var(--ps-shadow-card);
+  transition: transform 200ms var(--ps-ease), box-shadow 200ms var(--ps-ease);
+}
+
+.propulspace-portal .ps-surface-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--ps-shadow-raised);
+}
+
+/* Gradient text accent — used sparingly on hero titles. */
+.propulspace-portal .ps-gradient-text {
+  background: linear-gradient(135deg, var(--ps-text-primary) 0%, var(--ps-primary-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Subtle entrance animation on page content. */
+@keyframes ps-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.propulspace-portal .ps-fade-in {
+  animation: ps-fade-up 320ms var(--ps-ease-out) both;
+}
+
+/* FAB micro-pulse on mount (once). */
+@keyframes ps-fab-pulse {
+  0%, 100% { box-shadow: var(--ps-shadow-fab); }
+  50%      { box-shadow: var(--ps-shadow-fab), 0 0 0 8px rgba(124, 58, 237, 0.12); }
+}
+
+.propulspace-portal .ps-fab {
+  animation: ps-fab-pulse 2.4s var(--ps-ease) 1s 2;
+}
+
+/* Backdrop-blur frosted surface for bottom bar / sticky header. */
+.propulspace-portal .ps-frosted {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* Safe-area padding for iOS bottom nav. */
+@supports (padding: max(0px)) {
+  .propulspace-portal .ps-safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+  }
+}

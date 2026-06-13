@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8"><title>Vue 24 — Sheet upload doc</title>
+<link rel="stylesheet" href="../tokens/colors_and_type.css">
+<link rel="stylesheet" href="../tokens/portal.css">
+<link rel="stylesheet" href="../tokens/admin.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+  body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+  .container { max-width: 1340px; margin: 0 auto; }
+</style></head>
+<body><div id="head"></div>
+<div class="container"><div id="root"></div></div>
+<script type="text/babel" src="_lib/primitives.jsx"></script>
+<script type="text/babel" src="_lib/shell.jsx"></script>
+<script type="text/babel" src="_lib/desktop-shell.jsx"></script>
+<script type="text/babel" src="_lib/admin-shell.jsx"></script>
+
+<script type="text/babel">
+const DOC_TYPES = [
+  "Devis", "Contrat", "Facture", "Livrable", "Audit", "Rapport",
+  "Asset / Logo", "Asset / Charte", "Asset / Contenu", "Asset / Accès",
+  "Légal", "Autre",
+];
+
+function FileRow({ name, size, ext, defaultType, visible = true }) {
+  const [type, setType] = React.useState(defaultType);
+  const [visibleC, setVisibleC] = React.useState(visible);
+  const icons = {
+    pdf: { icon: "file-text", bg: "rgba(239,68,68,0.15)", fg: "#F87171" },
+    img: { icon: "image", bg: "rgba(59,130,246,0.15)", fg: "#60A5FA" },
+    zip: { icon: "archive", bg: "rgba(139,92,246,0.15)", fg: "#A78BFA" },
+  };
+  const m = icons[ext] || icons.pdf;
+  return (
+    <div style={{ padding: 12, borderRadius: 9, background: "rgba(0,0,0,0.25)", border: "1px solid var(--a-border)", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <span style={{ width: 32, height: 32, borderRadius: 8, background: m.bg, color: m.fg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Icon name={m.icon} size={14} stroke={2.2} />
+        </span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 12.5, fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{name}</div>
+          <div className="ps-num" style={{ fontSize: 10.5, color: "var(--a-fg-muted)" }}>{size}</div>
+        </div>
+        <button style={{ background: "transparent", border: "none", color: "var(--a-fg-muted)", cursor: "pointer", padding: 4 }}>
+          <Icon name="x" size={13} stroke={2} />
+        </button>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 6 }}>
+        <select value={type} onChange={e => setType(e.target.value)} className="a-input" style={{ height: 30, fontSize: 12 }}>
+          {DOC_TYPES.map(t => <option key={t}>{t}</option>)}
+        </select>
+        <button onClick={() => setVisibleC(!visibleC)} style={{ height: 30, padding: "0 10px", borderRadius: 7, border: "1px solid var(--a-border)", background: visibleC ? "rgba(16,185,129,0.12)" : "var(--a-bg-3)", color: visibleC ? "#34D399" : "var(--a-fg-muted)", fontFamily: "var(--ps-font-sans)", fontSize: 11.5, fontWeight: 500, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, justifyContent: "center" }}>
+          <Icon name={visibleC ? "eye" : "eye-off"} size={11} stroke={2.2} />
+          {visibleC ? "Visible client" : "Privé"}
+        </button>
+      </div>
+      <input className="a-input" placeholder="Description courte (optionnel)" style={{ height: 30, fontSize: 12 }} />
+    </div>
+  );
+}
+
+function UploadSheet() {
+  return (
+    <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 480, background: "var(--a-bg-2)", borderLeft: "1px solid var(--a-border-2)", boxShadow: "-20px 0 40px -20px rgba(0,0,0,0.6)", zIndex: 40, overflowY: "auto", color: "var(--a-fg)" }}>
+      <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--a-border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div>
+          <span className="a-eyebrow">Documents</span>
+          <div className="a-h2" style={{ marginTop: 4, fontSize: 16 }}>Uploader des documents</div>
+        </div>
+        <button className="a-btn a-btn-ghost" style={{ padding: "0 8px" }}><Icon name="x" size={14} stroke={2} /></button>
+      </div>
+
+      <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Drop zone */}
+        <div style={{ padding: 24, border: "1.5px dashed var(--a-border-2)", borderRadius: 10, background: "rgba(139,92,246,0.04)", textAlign: "center" }}>
+          <div style={{ width: 40, height: 40, borderRadius: 9999, background: "rgba(139,92,246,0.18)", color: "#A78BFA", margin: "0 auto 10px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Icon name="upload" size={18} stroke={2.2} />
+          </div>
+          <div style={{ fontSize: 13, fontWeight: 500, color: "var(--a-fg)" }}>Glissez-déposez vos fichiers</div>
+          <div style={{ fontSize: 11, color: "var(--a-fg-muted)", marginTop: 4 }}>Multi-fichiers · 25 MB max par fichier</div>
+          <button className="a-btn a-btn-outline" style={{ marginTop: 12 }}><Icon name="folder-open" size={12} stroke={2} />Parcourir</button>
+        </div>
+
+        {/* Pending files */}
+        <div>
+          <div className="a-eyebrow" style={{ color: "var(--a-fg-muted)", marginBottom: 8 }}>3 fichiers en attente</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <FileRow name="Rapport SEO Mai 2026.pdf" size="1.2 MB" ext="pdf" defaultType="Rapport" />
+            <FileRow name="Maquette accueil v2.png" size="3.4 MB" ext="img" defaultType="Livrable" />
+            <FileRow name="Audit technique brouillon.pdf" size="850 KB" ext="pdf" defaultType="Audit" visible={false} />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 6 }}>
+          <button className="a-btn a-btn-ghost">Annuler</button>
+          <button className="a-btn a-btn-primary"><Icon name="upload-cloud" size={13} stroke={2.2} />Uploader 3 documents</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Backdrop({ children }) {
+  return (
+    <AdminWindow>
+      <div style={{ position: "relative" }}>
+        <AdminShell activeKey="portals" title="Précieuse Joaillerie" breadcrumb="Portails clients ›">
+          <div style={{ filter: "blur(1px)", opacity: 0.7 }}>
+            <div className="a-card" style={{ padding: 18, marginBottom: 16, height: 80 }} />
+            <div className="a-card" style={{ padding: 18, height: 240 }} />
+          </div>
+        </AdminShell>
+        {children}
+      </div>
+    </AdminWindow>
+  );
+}
+
+function Head() {
+  return <PageHead num="24" title="Sheet — Uploader des documents client" subtitle="Sheet right 480px. Drop zone + liste fichiers avec type, visibilité et description individuels." />;
+}
+ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+ReactDOM.createRoot(document.getElementById("root")).render(<Backdrop><UploadSheet /></Backdrop>);
+</script>
+</body></html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Vue 4 — Factures</title>
+  <link rel="stylesheet" href="../tokens/colors_and_type.css">
+  <link rel="stylesheet" href="../tokens/portal.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+    body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+    .container { max-width: 1340px; margin: 0 auto; }
+    .section-h { margin: 36px auto 16px; max-width: 1340px; }
+    .section-h h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; margin: 0; color: #2a2418; }
+    .section-h p { font-size: 13px; color: #6b6357; margin: 4px 0 0; }
+  </style>
+</head>
+<body>
+  <div id="head"></div>
+
+  <div class="section-h"><h2>État normal · 4 factures, dont 1 à payer et 1 en retard</h2><p>Table desktop. Le bouton "Payer" est impossible à rater.</p></div>
+  <div class="container"><div id="state-default"></div></div>
+
+  <div class="section-h"><h2>Détail facture · Sheet ouvert (avec échéances multiples)</h2><p>Au clic sur une ligne, le détail s'ouvre dans un Sheet latéral droit.</p></div>
+  <div class="container"><div id="state-detail"></div></div>
+
+  <div class="section-h"><h2>Empty state · aucune facture émise</h2></div>
+  <div class="container"><div id="state-empty"></div></div>
+
+  <script type="text/babel" src="_lib/primitives.jsx"></script>
+  <script type="text/babel" src="_lib/shell.jsx"></script>
+  <script type="text/babel" src="_lib/desktop-shell.jsx"></script>
+
+  <script type="text/babel">
+    const INVOICES = [
+      { num: "PS-1031", date: "15 mai 2026", amount: "5 000,00", status: "due",     dueDate: "15 juin 2026" },
+      { num: "PS-1032", date: "1 avr 2026",  amount: "3 000,00", status: "paid",    paidDate: "5 avr 2026" },
+      { num: "PS-1033", date: "1 mars 2026", amount: "2 500,00", status: "overdue", dueDate: "1 avr 2026" },
+      { num: "PS-1029", date: "15 fév 2026", amount: "5 000,00", status: "paid",    paidDate: "18 fév 2026" },
+    ];
+
+    function InvoicesTable({ onRowClick }) {
+      return (
+        <div>
+          <section>
+            <div className="ps-eyebrow ps-eyebrow-muted">Facturation</div>
+            <h1 className="ps-h1 ps-gradient-text" style={{ fontSize: 32, marginTop: 4 }}>Mes factures</h1>
+            <p style={{ fontSize: 14, color: "var(--ps-fg-secondary)", margin: "6px 0 0" }}>
+              Retrouvez et payez vos factures en un clic.
+            </p>
+          </section>
+
+          {/* KPI strip */}
+          <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginTop: 24 }}>
+            <KpiTile eyebrow="À payer" value="7 500,00 €" delta="2 factures · 1 en retard" icon="alert-triangle" tint="orange" />
+            <KpiTile eyebrow="Payé en 2026" value="8 000,00 €" delta="2 factures réglées" icon="check-circle-2" tint="green" />
+            <KpiTile eyebrow="Total émis" value="15 500,00 €" delta="Sur 4 factures" icon="receipt" tint="violet" />
+          </section>
+
+          {/* Table */}
+          <section className="ps-card" style={{ marginTop: 24, overflow: "hidden" }}>
+            <SectionHead title="Historique" action={
+              <span className="ps-num" style={{ fontSize: 11.5, color: "var(--ps-fg-muted)" }}>{INVOICES.length} factures</span>
+            } />
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ background: "var(--ps-bg)" }}>
+                  <th style={th}>Numéro</th>
+                  <th style={th}>Date</th>
+                  <th style={th}>Montant TTC</th>
+                  <th style={th}>Échéance</th>
+                  <th style={th}>Statut</th>
+                  <th style={{ ...th, textAlign: "right" }}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {INVOICES.map((inv, i) => (
+                  <tr key={inv.num} onClick={() => onRowClick?.(inv)} style={{
+                    borderTop: "1px solid var(--ps-border-soft)",
+                    cursor: "pointer",
+                    transition: "background 150ms",
+                  }} onMouseOver={e => e.currentTarget.style.background = "var(--ps-bg-subtle)"} onMouseOut={e => e.currentTarget.style.background = "transparent"}>
+                    <td style={td}><span style={{ fontFamily: "var(--ps-font-mono)", fontWeight: 500, fontSize: 13 }}>{inv.num}</span></td>
+                    <td style={td}><span className="ps-num" style={{ color: "var(--ps-fg-secondary)" }}>{inv.date}</span></td>
+                    <td style={td}><span className="ps-num" style={{ fontWeight: 600, color: "var(--ps-fg)" }}>{inv.amount} €</span></td>
+                    <td style={td}><span className="ps-num" style={{ color: "var(--ps-fg-secondary)" }}>{inv.status === "paid" ? `Payée ${inv.paidDate}` : inv.dueDate}</span></td>
+                    <td style={td}>
+                      {inv.status === "paid" && <Badge tone="success">Payée</Badge>}
+                      {inv.status === "due" && <Badge tone="violet">À payer</Badge>}
+                      {inv.status === "overdue" && <Badge tone="danger">En retard</Badge>}
+                    </td>
+                    <td style={{ ...td, textAlign: "right" }}>
+                      {inv.status === "due" && <Button variant="primary" size="sm">Payer</Button>}
+                      {inv.status === "overdue" && <Button variant="danger" size="sm" icon="alert-triangle">Payer maintenant</Button>}
+                      {inv.status === "paid" && <Button variant="outline" size="sm" icon="download">PDF</Button>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+
+          {/* Legal */}
+          <div style={{ marginTop: 16, fontSize: 12, color: "var(--ps-fg-muted)", padding: "10px 14px", background: "var(--ps-bg-subtle)", borderRadius: 10, display: "flex", gap: 8, alignItems: "flex-start" }}>
+            <Icon name="info" size={13} stroke={2} style={{ marginTop: 2, flexShrink: 0 }} />
+            <span>TVA non applicable, art. 293 B du CGI. Émis par Propul'SEO (Etienne Guimbard), SIRET 981 086 093 000 11.</span>
+          </div>
+        </div>
+      );
+    }
+
+    const th = { padding: "11px 18px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--ps-fg-muted)", textTransform: "uppercase", letterSpacing: "0.06em" };
+    const td = { padding: "14px 18px", fontSize: 13.5, verticalAlign: "middle" };
+
+    /* Sheet detail (visible inline, anchored right) */
+    function InvoiceSheet({ invoice, onClose }) {
+      return (
+        <div style={{
+          position: "absolute", right: 0, top: 0, bottom: 0,
+          width: 440, background: "#fff",
+          borderLeft: "1px solid var(--ps-border-soft)",
+          boxShadow: "-20px 0 40px -20px rgba(0,0,0,0.08)",
+          zIndex: 40, overflowY: "auto",
+        }}>
+          <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--ps-border-soft)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <div>
+              <div className="ps-eyebrow ps-eyebrow-muted">Facture</div>
+              <div style={{ fontFamily: "var(--ps-font-mono)", fontSize: 18, fontWeight: 600, marginTop: 2 }}>{invoice.num}</div>
+            </div>
+            {invoice.status === "due" && <Badge tone="violet">À payer</Badge>}
+            {invoice.status === "overdue" && <Badge tone="danger">En retard</Badge>}
+            {invoice.status === "paid" && <Badge tone="success">Payée</Badge>}
+            <button onClick={onClose} className="ps-btn ps-btn-ghost ps-btn-icon" aria-label="Fermer">
+              <Icon name="x" size={16} stroke={2} />
+            </button>
+          </div>
+
+          <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 22 }}>
+            {/* Big amount */}
+            <div>
+              <div className="ps-eyebrow ps-eyebrow-muted">Montant total</div>
+              <div className="ps-num ps-gradient-text" style={{ fontSize: 38, fontWeight: 700, letterSpacing: "-0.025em", marginTop: 4, lineHeight: 1 }}>
+                {invoice.amount} €
+              </div>
+              <div className="ps-num" style={{ fontSize: 12.5, color: "var(--ps-fg-muted)", marginTop: 6 }}>
+                {invoice.status === "paid" ? `Réglée le ${invoice.paidDate}` : `Échéance ${invoice.dueDate}`}
+              </div>
+            </div>
+
+            {/* Émetteur */}
+            <div>
+              <div className="ps-eyebrow ps-eyebrow-muted" style={{ marginBottom: 6 }}>Émetteur</div>
+              <div style={{ fontSize: 13.5, lineHeight: 1.55 }}>
+                <div style={{ fontWeight: 600 }}>Propul'SEO — Etienne Guimbard</div>
+                <div style={{ color: "var(--ps-fg-secondary)" }}>SIRET 981 086 093 000 11</div>
+                <div style={{ color: "var(--ps-fg-secondary)" }}>5 avenue des Arrouturous, 64320 Idron</div>
+              </div>
+            </div>
+
+            {/* Client */}
+            <div>
+              <div className="ps-eyebrow ps-eyebrow-muted" style={{ marginBottom: 6 }}>Client</div>
+              <div style={{ fontSize: 13.5, lineHeight: 1.55 }}>
+                <div style={{ fontWeight: 600 }}>Précieuse Joaillerie</div>
+                <div style={{ color: "var(--ps-fg-secondary)" }}>Sophie Martin · 12 rue de la Paix, 75002 Paris</div>
+              </div>
+            </div>
+
+            {/* Lignes */}
+            <div>
+              <div className="ps-eyebrow ps-eyebrow-muted" style={{ marginBottom: 8 }}>Détail</div>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead>
+                  <tr style={{ color: "var(--ps-fg-muted)", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                    <th style={{ textAlign: "left", padding: "8px 0" }}>Description</th>
+                    <th style={{ textAlign: "right", padding: "8px 0", width: 40 }}>Qté</th>
+                    <th style={{ textAlign: "right", padding: "8px 0" }}>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ borderTop: "1px solid var(--ps-border-soft)" }}>
+                    <td style={{ padding: "10px 0" }}>Création site vitrine Précieuse</td>
+                    <td style={{ padding: "10px 0", textAlign: "right" }} className="ps-num">1</td>
+                    <td style={{ padding: "10px 0", textAlign: "right", fontWeight: 500 }} className="ps-num">4 000,00 €</td>
+                  </tr>
+                  <tr style={{ borderTop: "1px solid var(--ps-border-soft)" }}>
+                    <td style={{ padding: "10px 0" }}>Module SEO avancé</td>
+                    <td style={{ padding: "10px 0", textAlign: "right" }} className="ps-num">1</td>
+                    <td style={{ padding: "10px 0", textAlign: "right", fontWeight: 500 }} className="ps-num">1 000,00 €</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Totaux */}
+            <div style={{ background: "var(--ps-bg-subtle)", borderRadius: 10, padding: 14, fontSize: 13 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                <span style={{ color: "var(--ps-fg-secondary)" }}>Sous-total HT</span>
+                <span className="ps-num">5 000,00 €</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                <span style={{ color: "var(--ps-fg-secondary)" }}>TVA 0 %</span>
+                <span className="ps-num">0,00 €</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 8, borderTop: "1px solid var(--ps-border)", marginTop: 8 }}>
+                <span style={{ fontWeight: 600 }}>Total TTC</span>
+                <span className="ps-num" style={{ fontWeight: 700, color: "var(--ps-primary-deep)" }}>5 000,00 €</span>
+              </div>
+            </div>
+
+            {/* Échéances */}
+            <div>
+              <div className="ps-eyebrow ps-eyebrow-muted" style={{ marginBottom: 8 }}>Échéances</div>
+              <div className="ps-card" style={{ padding: 0, overflow: "hidden", boxShadow: "none", border: "1px solid var(--ps-border-soft)" }}>
+                <div style={{ display: "flex", alignItems: "center", padding: "11px 14px", borderBottom: "1px solid var(--ps-border-soft)", fontSize: 13 }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 500 }}>Acompte 30 %</div>
+                    <div className="ps-num" style={{ fontSize: 11.5, color: "var(--ps-fg-muted)" }}>Échéance 15 mai</div>
+                  </div>
+                  <span className="ps-num" style={{ fontWeight: 600, marginRight: 12 }}>1 500,00 €</span>
+                  <Badge tone="success">Payé</Badge>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", padding: "11px 14px", fontSize: 13 }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 500 }}>Solde 70 %</div>
+                    <div className="ps-num" style={{ fontSize: 11.5, color: "var(--ps-fg-muted)" }}>Échéance {invoice.dueDate}</div>
+                  </div>
+                  <span className="ps-num" style={{ fontWeight: 600, marginRight: 12 }}>3 500,00 €</span>
+                  <Badge tone="violet">En attente</Badge>
+                </div>
+              </div>
+            </div>
+
+            {/* Mention */}
+            <div style={{ fontSize: 11.5, color: "var(--ps-fg-muted)", fontStyle: "italic" }}>
+              TVA non applicable, art. 293 B du CGI.
+            </div>
+
+            {/* CTA */}
+            {invoice.status !== "paid" && (
+              <Button variant="primary" size="lg" block iconRight="arrow-up-right">
+                Payer {invoice.amount} € · Stripe
+              </Button>
+            )}
+            {invoice.status === "paid" && (
+              <Button variant="outline" size="lg" block icon="download">Télécharger le PDF</Button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function FacturesEmpty() {
+      return (
+        <div>
+          <div className="ps-eyebrow ps-eyebrow-muted">Facturation</div>
+          <h1 className="ps-h1 ps-gradient-text" style={{ fontSize: 32, marginTop: 4, marginBottom: 24 }}>Mes factures</h1>
+          <EmptyState
+            icon="receipt"
+            title="Aucune facture pour le moment"
+            body="Vos factures apparaîtront ici dès qu'elles seront émises."
+          />
+        </div>
+      );
+    }
+
+    function Head() {
+      return <PageHead num="4" title="Factures — paiement Stripe 1 clic" subtitle="La page qui génère du revenu. Statut bien lisible, bouton 'Payer' impossible à rater, Sheet de détail au clic." />;
+    }
+
+    ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+
+    ReactDOM.createRoot(document.getElementById("state-default")).render(
+      <DesktopWindow activeTab="invoices"><InvoicesTable /></DesktopWindow>
+    );
+
+    ReactDOM.createRoot(document.getElementById("state-detail")).render(
+      <DesktopWindow activeTab="invoices" withFab={false}>
+        <InvoicesTable />
+        <InvoiceSheet invoice={INVOICES[0]} onClose={() => {}} />
+      </DesktopWindow>
+    );
+
+    ReactDOM.createRoot(document.getElementById("state-empty")).render(
+      <DesktopWindow activeTab="invoices" minHeight={520}><FacturesEmpty /></DesktopWindow>
+    );
+  </script>
+</body>
+</html>

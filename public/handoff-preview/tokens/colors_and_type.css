@@ -1,0 +1,266 @@
+/* =====================================================
+   PROPUL'SPACE — Design tokens
+   ─────────────────────────────────────────────────────
+   Source of truth: PRD_PROPULSPACE_v2_EN.md §3.1
+   Mirrors:        ref/portal-theme.css (upstream CRM)
+   
+   Vibe: Linear × Stripe × Notion shared workspace.
+   Mobile-first (375px baseline). Light theme only.
+   ===================================================== */
+
+/* Inter — load from Google Fonts (alternatively self-host from /fonts) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* ─── SURFACES ─────────────────────────────────── */
+  --ps-bg:               #FAFAFA;   /* page background (off-white) */
+  --ps-bg-elevated:      #FFFFFF;   /* cards, modals, sheets */
+  --ps-bg-subtle:        #F4F4F5;   /* secondary chips, hover-rest */
+  --ps-bg-frosted:       rgba(255, 255, 255, 0.82); /* sticky header + bottom nav */
+
+  /* ─── TEXT ─────────────────────────────────────── */
+  --ps-fg:               #18181B;   /* primary, near-black */
+  --ps-fg-secondary:     #52525B;   /* body, support text */
+  --ps-fg-muted:         #A1A1AA;   /* timestamps, metadata, placeholder */
+
+  /* ─── BRAND VIOLET ─────────────────────────────── */
+  --ps-primary:          #7C3AED;   /* the one accent */
+  --ps-primary-hover:    #6D28D9;
+  --ps-primary-deep:     #5B21B6;
+  --ps-primary-text:     #5B21B6;   /* violet text on light surfaces */
+  --ps-primary-subtle:   #EDE9FE;   /* selected pills, soft chip backgrounds */
+
+  /* ─── SEMANTIC ─────────────────────────────────── */
+  --ps-success:          #16A34A;
+  --ps-success-subtle:   #DCFCE7;
+  --ps-warning:          #EA580C;
+  --ps-warning-subtle:   #FFEDD5;
+  --ps-danger:           #DC2626;
+  --ps-danger-subtle:    #FEE2E2;
+  --ps-info:             #2563EB;
+  --ps-info-subtle:      #DBEAFE;
+
+  /* ─── BORDERS ──────────────────────────────────── */
+  --ps-border:           #E4E4E7;
+  --ps-border-soft:      #F0F0F2;   /* card outlines, table rows */
+  --ps-border-strong:    #D4D4D8;
+
+  /* ─── SHADOWS ──────────────────────────────────── */
+  --ps-shadow-card:    0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.05);
+  --ps-shadow-raised:  0 4px 12px -2px rgba(91, 33, 182, 0.10), 0 2px 4px -1px rgba(16, 24, 40, 0.06);
+  --ps-shadow-floating: 0 10px 25px rgba(124, 58, 237, 0.08);
+  --ps-shadow-fab:     0 10px 30px -8px rgba(124, 58, 237, 0.45), 0 4px 10px -2px rgba(124, 58, 237, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
+  /* ─── RADII ────────────────────────────────────── */
+  --ps-radius-input:     8px;       /* form fields, small buttons */
+  --ps-radius-card:      14px;      /* cards (12px in PRD, 14px upstream — we follow upstream) */
+  --ps-radius-modal:     16px;      /* dialogs, sheets, bottom-sheet */
+  --ps-radius-pill:      9999px;    /* badges, capsule buttons */
+
+  /* ─── SPACING SCALE (4px base) ─────────────────── */
+  --ps-space-1:  4px;
+  --ps-space-2:  8px;
+  --ps-space-3:  12px;
+  --ps-space-4:  16px;
+  --ps-space-5:  20px;
+  --ps-space-6:  24px;
+  --ps-space-8:  32px;
+  --ps-space-10: 40px;
+  --ps-space-12: 48px;
+  --ps-space-16: 64px;
+
+  /* ─── MOTION ───────────────────────────────────── */
+  --ps-ease:        cubic-bezier(0.4, 0, 0.2, 1);   /* standard */
+  --ps-ease-out:    cubic-bezier(0.16, 1, 0.3, 1);  /* entrance, decel */
+  --ps-dur-fast:    150ms;
+  --ps-dur-base:    200ms;
+  --ps-dur-slow:    300ms;
+  /* Never > 300ms. Never bounce on production UI. */
+
+  /* ─── TOUCH ────────────────────────────────────── */
+  --ps-touch:       44px;           /* iOS minimum hit target */
+
+  /* ─── TYPE ─────────────────────────────────────── */
+  --ps-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ps-font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Type scale — PRD §3.1 typography */
+  --ps-text-display:   32px;        /* hero, line-height 40px, weight 600 */
+  --ps-text-display-lh: 40px;
+  --ps-text-h1:        24px;        /* page title, lh 32px, w 600 */
+  --ps-text-h1-lh:     32px;
+  --ps-text-h2:        18px;        /* section title, lh 28px, w 600 */
+  --ps-text-h2-lh:     28px;
+  --ps-text-body:      15px;        /* default body, lh 24px, w 400 */
+  --ps-text-body-lh:   24px;
+  --ps-text-small:     13px;        /* support, lh 20px, w 400 */
+  --ps-text-small-lh:  20px;
+  --ps-text-tiny:      12px;        /* labels, lh 16px, w 500 */
+  --ps-text-tiny-lh:   16px;
+  --ps-text-eyebrow:   10.5px;      /* uppercase eyebrows */
+}
+
+/* =====================================================
+   SEMANTIC TYPE STYLES
+   Drop these classes anywhere inside .propulspace-portal
+   ===================================================== */
+
+.propulspace-portal {
+  font-family: var(--ps-font-sans);
+  font-size: var(--ps-text-body);
+  line-height: var(--ps-text-body-lh);
+  color: var(--ps-fg);
+  letter-spacing: -0.005em;
+  font-feature-settings: "cv11", "ss03", "cv02";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(124, 58, 237, 0.07), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(99, 102, 241, 0.05), transparent 50%),
+    var(--ps-bg);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+.ps-display {
+  font-size: var(--ps-text-display);
+  line-height: var(--ps-text-display-lh);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--ps-fg);
+}
+
+.ps-h1 {
+  font-size: var(--ps-text-h1);
+  line-height: var(--ps-text-h1-lh);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.ps-h2 {
+  font-size: var(--ps-text-h2);
+  line-height: var(--ps-text-h2-lh);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.ps-body {
+  font-size: var(--ps-text-body);
+  line-height: var(--ps-text-body-lh);
+  font-weight: 400;
+  color: var(--ps-fg-secondary);
+}
+
+.ps-small {
+  font-size: var(--ps-text-small);
+  line-height: var(--ps-text-small-lh);
+  font-weight: 400;
+  color: var(--ps-fg-secondary);
+}
+
+.ps-tiny {
+  font-size: var(--ps-text-tiny);
+  line-height: var(--ps-text-tiny-lh);
+  font-weight: 500;
+  color: var(--ps-fg-muted);
+}
+
+.ps-eyebrow {
+  font-size: var(--ps-text-eyebrow);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ps-primary-text);
+}
+
+.ps-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* =====================================================
+   SURFACES & EFFECTS
+   ===================================================== */
+
+.ps-surface {
+  background: var(--ps-bg-elevated);
+  border: 1px solid var(--ps-border-soft);
+  border-radius: var(--ps-radius-card);
+  box-shadow: var(--ps-shadow-card);
+  transition: transform var(--ps-dur-base) var(--ps-ease),
+              box-shadow var(--ps-dur-base) var(--ps-ease);
+}
+
+.ps-surface-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--ps-shadow-raised);
+}
+
+.ps-frosted {
+  background: var(--ps-bg-frosted);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+.ps-gradient-text {
+  background: linear-gradient(135deg, var(--ps-fg) 0%, var(--ps-primary-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.ps-brand-gradient {
+  background: linear-gradient(135deg, var(--ps-primary) 0%, var(--ps-primary-deep) 100%);
+}
+
+/* =====================================================
+   MOTION PRIMITIVES
+   ===================================================== */
+
+@keyframes ps-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ps-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+
+@keyframes ps-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.ps-fade-in { animation: ps-fade-up 320ms var(--ps-ease-out) both; }
+.ps-pulse   { animation: ps-pulse 2s var(--ps-ease) infinite; }
+
+.ps-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(124, 58, 237, 0.04) 25%,
+    rgba(124, 58, 237, 0.10) 50%,
+    rgba(124, 58, 237, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: ps-shimmer 1.5s infinite;
+  border-radius: var(--ps-radius-input);
+}
+
+/* =====================================================
+   FOCUS — accessible violet ring
+   ===================================================== */
+
+.ps-focus:focus-visible,
+.propulspace-portal :focus-visible {
+  outline: 2px solid var(--ps-primary);
+  outline-offset: 2px;
+  border-radius: var(--ps-radius-input);
+}
+
+/* iOS safe-area passthrough for sticky bottom nav */
+@supports (padding: max(0px)) {
+  .ps-safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
+  .ps-safe-top    { padding-top: max(env(safe-area-inset-top), 0px); }
+}

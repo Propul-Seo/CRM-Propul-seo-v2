@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Preview CRM ERP — Lolett</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --surface-0: #020205;
+      --surface-1: #070512;
+      --surface-2: #0f0b1e;
+      --surface-3: #171030;
+      --border: rgba(139, 92, 246, 0.18);
+      --border-subtle: rgba(139, 92, 246, 0.10);
+      --neon: #8B5CF6;
+      --neon-light: #A78BFA;
+      --neon-glow: #C4B5FD;
+      --neon-deep: #6D28D9;
+      --muted-fg: #9ca3af;
+      --fg: #ede9fe;
+      --fg-dim: #c4b5fd;
+      --glow: rgba(139, 92, 246, 0.35);
+      --green: #10b981;
+      --amber: #f59e0b;
+      --blue: #3b82f6;
+      --violet: #8b5cf6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--surface-0);
+      color: var(--fg);
+      min-height: 100vh;
+    }
+
+    /* ─── HEADER ─── */
+    .lead-header {
+      background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 50%, #6d28d9 100%);
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 24px rgba(139,92,246,0.3);
+    }
+    .lead-header-left { display: flex; align-items: center; gap: 16px; }
+    .back-btn {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: rgba(255,255,255,0.12); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; color: white;
+      font-size: 18px; transition: background 0.15s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.2); }
+    .lead-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: rgba(255,255,255,0.15); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .lead-title { font-size: 18px; font-weight: 700; color: white; }
+    .lead-sub { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+    .lead-sub span { font-size: 13px; color: rgba(255,255,255,0.7); }
+    .status-badge {
+      font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+      background: rgba(16,185,129,0.25); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3);
+    }
+    .edit-btn {
+      background: white; color: #5b21b6; border: none; cursor: pointer;
+      font-size: 13px; font-weight: 600; padding: 8px 18px; border-radius: 10px;
+      display: flex; align-items: center; gap: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .edit-btn:hover { background: #f5f3ff; }
+
+    /* ─── LAYOUT ─── */
+    .page-body { padding: 24px 28px; display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+    .card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 14px 16px 10px;
+      font-size: 12px; font-weight: 600; color: var(--fg-dim);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .card-body { padding: 14px 16px; }
+
+    .info-row { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
+    .info-row:last-child { margin-bottom: 0; }
+    .info-label { font-size: 11px; color: var(--muted-fg); font-weight: 500; }
+    .info-value { font-size: 13px; color: var(--fg); font-weight: 500; }
+    .info-value.empty { color: var(--muted-fg); font-style: italic; }
+
+    .source-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+      background: rgba(139,92,246,0.15); color: var(--neon-light);
+      border: 1px solid rgba(139,92,246,0.25);
+    }
+
+    .assign-btn {
+      width: 100%; padding: 9px 14px; border-radius: 10px;
+      background: rgba(139,92,246,0.12); border: 1px dashed rgba(139,92,246,0.3);
+      color: var(--neon-light); font-size: 13px; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: all 0.15s;
+    }
+    .assign-btn:hover { background: rgba(139,92,246,0.2); border-color: var(--neon); }
+
+    /* ─── ACTIVITIES ─── */
+    .activities-col {}
+
+    /* Filter toolbar — inspiré du design Figma */
+    .activity-toolbar {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 14px 14px 0 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-bottom: none;
+    }
+
+    .toolbar-row-1 {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+
+    .search-box {
+      flex: 1; display: flex; align-items: center; gap: 8px;
+      background: var(--surface-3); border: 1px solid var(--border);
+      border-radius: 8px; padding: 7px 12px; max-width: 260px;
+    }
+    .search-box input {
+      background: none; border: none; outline: none;
+      font-size: 13px; color: var(--fg); width: 100%;
+      font-family: inherit;
+    }
+    .search-box input::placeholder { color: var(--muted-fg); }
+    .search-icon { color: var(--muted-fg); font-size: 14px; }
+
+    .collapse-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 12px; font-weight: 600; color: var(--neon-light);
+      display: flex; align-items: center; gap: 4px; white-space: nowrap;
+    }
+    .collapse-btn:hover { color: var(--neon-glow); }
+
+    .toolbar-row-2 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .filter-group {
+      display: flex; align-items: center; gap: 0;
+      background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.2);
+      border-radius: 8px; overflow: hidden;
+    }
+    .filter-btn {
+      background: none; border: none; cursor: pointer;
+      padding: 7px 12px; font-size: 12px; font-weight: 600; color: var(--neon-light);
+      display: flex; align-items: center; gap: 5px; white-space: nowrap;
+      transition: background 0.12s;
+    }
+    .filter-btn:hover { background: rgba(139,92,246,0.15); }
+    .filter-btn .count {
+      font-size: 10px; background: rgba(139,92,246,0.25); color: var(--neon-glow);
+      padding: 1px 5px; border-radius: 4px; font-weight: 700;
+    }
+    .filter-sep { width: 1px; background: rgba(139,92,246,0.2); align-self: stretch; }
+
+    .filter-standalone {
+      background: none; border: 1px solid var(--border-subtle); border-radius: 8px;
+      cursor: pointer; padding: 7px 12px; font-size: 12px; font-weight: 600;
+      color: var(--neon-light); display: flex; align-items: center; gap: 5px;
+      transition: all 0.12s; white-space: nowrap;
+    }
+    .filter-standalone:hover { border-color: var(--neon); background: rgba(139,92,246,0.08); }
+
+    .delete-all-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 12px; font-weight: 600; color: #f87171;
+      padding: 7px 12px; border-radius: 8px;
+      transition: background 0.12s; white-space: nowrap;
+    }
+    .delete-all-btn:hover { background: rgba(248,113,113,0.08); }
+
+    .caret { font-size: 9px; opacity: 0.7; }
+
+    /* ─── ACTIVITY LIST ─── */
+    .activity-list {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 0 0 14px 14px; border-top: 1px solid var(--border-subtle);
+    }
+
+    .add-activity-bar {
+      padding: 12px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .add-activity-bar .label { font-size: 13px; font-weight: 600; color: var(--fg); }
+    .add-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--neon); color: white; border: none; cursor: pointer;
+      font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: 8px;
+      transition: background 0.12s;
+    }
+    .add-btn:hover { background: var(--neon-deep); }
+
+    .activity-item {
+      display: flex; gap: 12px; padding: 14px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background 0.12s;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-item:hover { background: rgba(139,92,246,0.04); }
+
+    .activity-avatar {
+      width: 34px; height: 34px; border-radius: 999px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; margin-top: 2px;
+    }
+    .activity-avatar.call    { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.25); }
+    .activity-avatar.email   { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.25); }
+    .activity-avatar.meeting { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.25); }
+    .activity-avatar.note    { background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.25); }
+    .activity-avatar.task    { background: rgba(20,184,166,0.15); border: 1px solid rgba(20,184,166,0.25); }
+
+    .activity-body { flex: 1; min-width: 0; }
+    .activity-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+
+    .type-badge {
+      font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .type-badge.call    { background: rgba(59,130,246,0.18); color: #93c5fd; }
+    .type-badge.email   { background: rgba(16,185,129,0.18); color: #6ee7b7; }
+    .type-badge.meeting { background: rgba(245,158,11,0.18); color: #fcd34d; }
+    .type-badge.note    { background: rgba(139,92,246,0.18); color: #c4b5fd; }
+    .type-badge.task    { background: rgba(20,184,166,0.18); color: #5eead4; }
+
+    .activity-time { font-size: 11px; color: var(--muted-fg); }
+    .activity-content { font-size: 13px; color: var(--fg); line-height: 1.5; }
+    .activity-author { font-size: 11px; color: var(--muted-fg); margin-top: 4px; }
+
+    .activity-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.12s; }
+    .activity-item:hover .activity-actions { opacity: 1; }
+    .act-btn {
+      width: 28px; height: 28px; border-radius: 7px; border: none; cursor: pointer;
+      background: var(--surface-3); color: var(--muted-fg); display: flex;
+      align-items: center; justify-content: center; font-size: 13px;
+      transition: all 0.12s;
+    }
+    .act-btn:hover { background: rgba(139,92,246,0.15); color: var(--neon-light); }
+    .act-btn.del:hover { background: rgba(248,113,113,0.12); color: #f87171; }
+
+    /* ─── EMPTY STATE ─── */
+    .empty { text-align: center; padding: 40px 16px; color: var(--muted-fg); font-size: 13px; }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--surface-1); }
+    ::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.3); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="lead-header">
+    <div class="lead-header-left">
+      <button class="back-btn">←</button>
+      <div class="lead-icon">🌸</div>
+      <div>
+        <div class="lead-title">Lolett</div>
+        <div class="lead-sub">
+          <span>lolett.fr</span>
+          <span class="status-badge">En cours</span>
+        </div>
+      </div>
+    </div>
+    <button class="edit-btn">✏️ Modifier</button>
+  </div>
+
+  <!-- BODY -->
+  <div class="page-body">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+      <!-- Infos -->
+      <div class="card">
+        <div class="card-header">Informations</div>
+        <div class="card-body">
+          <div class="info-row">
+            <div class="info-label">Contact</div>
+            <div class="info-value">Équipe Lolett</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Email</div>
+            <div class="info-value">contact@lolett.fr</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Téléphone</div>
+            <div class="info-value empty">Non renseigné</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Source</div>
+            <div class="info-value"><span class="source-pill">🔗 Referral</span></div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Créé le</div>
+            <div class="info-value">5 avril 2026</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Dernière activité</div>
+            <div class="info-value">il y a 2 heures</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assignation -->
+      <div class="card">
+        <div class="card-header">Responsable</div>
+        <div class="card-body">
+          <button class="assign-btn">+ Assigner un membre</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ACTIVITIES COLUMN -->
+    <div class="activities-col">
+
+      <!-- Toolbar Figma-inspired -->
+      <div class="activity-toolbar">
+
+        <!-- Ligne 1 : search + tout réduire -->
+        <div class="toolbar-row-1">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Rechercher des activités" />
+          </div>
+          <button class="collapse-btn">Tout réduire ▲</button>
+        </div>
+
+        <!-- Ligne 2 : filtres -->
+        <div class="toolbar-row-2">
+
+          <!-- Filtre groupé Activité -->
+          <div class="filter-group">
+            <button class="filter-btn">
+              Activité <span class="count">5/5</span> ▼
+            </button>
+            <div class="filter-sep"></div>
+            <button class="filter-btn" style="padding: 7px 10px;">✕</button>
+          </div>
+
+          <!-- Depuis le début -->
+          <button class="filter-standalone">
+            Depuis le début <span class="caret">▼</span>
+          </button>
+
+          <!-- Activité attribuée à -->
+          <button class="filter-standalone">
+            Activité attribuée à <span class="caret">▼</span>
+          </button>
+
+          <!-- Plus -->
+          <button class="filter-standalone">
+            Plus ↓
+          </button>
+
+          <!-- Tout supprimer -->
+          <button class="delete-all-btn">Tout supprimer</button>
+
+        </div>
+      </div>
+
+      <!-- Liste des activités -->
+      <div class="activity-list">
+
+        <!-- Header liste -->
+        <div class="add-activity-bar">
+          <span class="label">Activités (5)</span>
+          <button class="add-btn">+ Ajouter</button>
+        </div>
+
+        <!-- Activité 1 -->
+        <div class="activity-item">
+          <div class="activity-avatar call">📞</div>
+          <div class="activity-body">
+            <div class="activity-meta">
+              <span class="type-badge call">Appel</span>
+              <span class="activity-time">il y a 2 heures</span>
+            </div>
+            <div class="activity-content">Premier appel de découverte — équipe intéressée par refonte site + stratégie SEO locale. Budget estimé ~3k€. Rappel prévu jeudi pour valider le brief.</div>
+            <div class="activity-author">Par Lyès T.</div>
+          </div>
+          <div class="activity-actions">
+            <button class="act-btn">✏️</button>
+            <button class="act-btn del">🗑</button>
+          </div>
+        </div>
+
+        <!-- Activité 2 -->
+        <div class="activity-item">
+          <div class="activity-avatar email">✉️</div>
+          <div class="activity-body">
+            <div class="activity-meta">
+              <span class="type-badge email">Email</span>
+              <span class="activity-time">hier</span>
+            </div>
+            <div class="activity-content">Envoi du questionnaire de brief + présentation des offres SEO. En attente de retour.</div>
+            <div class="activity-author">Par Lyès T.</div>
+          </div>
+          <div class="activity-actions">
+            <button class="act-btn">✏️</button>
+            <button class="act-btn del">🗑</button>
+          </div>
+        </div>
+
+        <!-- Activité 3 -->
+        <div class="activity-item">
+          <div class="activity-avatar meeting">📅</div>
+          <div class="activity-body">
+            <div class="activity-meta">
+              <span class="type-badge meeting">Réunion</span>
+              <span class="activity-time">3 avril 2026</span>
+            </div>
+            <div class="activity-content">Visio de présentation de l'agence — 45 min. Bon feeling. Besoin fort en visibilité locale (Paris 11e). Cible principale : 25-40 ans.</div>
+            <div class="activity-author">Par Lyès T.</div>
+          </div>
+          <div class="activity-actions">
+            <button class="act-btn">✏️</button>
+            <button class="act-btn del">🗑</button>
+          </div>
+        </div>
+
+        <!-- Activité 4 -->
+        <div class="activity-item">
+          <div class="activity-avatar note">📝</div>
+          <div class="activity-body">
+            <div class="activity-meta">
+              <span class="type-badge note">Note</span>
+              <span class="activity-time">2 avril 2026</span>
+            </div>
+            <div class="activity-content">⚠️ Concurrent cité : Agence Bloom. Ont déjà un site sur Wix — veulent passer WordPress ou custom. Décision finale avant fin avril.</div>
+            <div class="activity-author">Par Lyès T.</div>
+          </div>
+          <div class="activity-actions">
+            <button class="act-btn">✏️</button>
+            <button class="act-btn del">🗑</button>
+          </div>
+        </div>
+
+        <!-- Activité 5 -->
+        <div class="activity-item">
+          <div class="activity-avatar task">✅</div>
+          <div class="activity-body">
+            <div class="activity-meta">
+              <span class="type-badge task">Tâche</span>
+              <span class="activity-time">1er avril 2026</span>
+            </div>
+            <div class="activity-content">Envoyer devis SEO local + audit de visibilité gratuit avant le 10 avril.</div>
+            <div class="activity-author">Par Lyès T.</div>
+          </div>
+          <div class="activity-actions">
+            <button class="act-btn">✏️</button>
+            <button class="act-btn del">🗑</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

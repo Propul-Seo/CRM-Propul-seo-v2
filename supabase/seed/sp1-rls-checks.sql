@@ -1,0 +1,107 @@
+-- ============================================================================
+-- SP1 — Vérifications d'isolation RLS sur public.project_contacts
+-- ============================================================================
+-- À JOUER À LA MAIN dans le SQL Editor Supabase, APRÈS la migration 286.
+-- Réf : docs/superpowers/specs/2026-06-08-sp1-identite-client-design.md (§7)
+--
+-- But : prouver que le durcissement RLS de la migration 286 cloisonne bien le
+-- portail client, sans casser l'équipe interne.
+--   - Un client portail ne voit QUE les lignes project_contacts de SON projet.
+--   - Un INSERT/UPDATE/DELETE portail est REFUSÉ (FOR ALL réservé à l'équipe).
+--   - L'équipe interne lit ET écrit normalement.
+--
+-- ⚠️ Ce script n'est PAS un seed de données : il ne fait qu'observer/tester.
+-- Il NE modifie rien de façon persistante (les blocs d'écriture sont en
+-- ROLLBACK ou attendus en échec). À exécuter bloc par bloc.
+--
+-- Pré-requis :
+--   - Un projet test avec un contact 'primary' lié dans project_contacts.
+--   - Le portail activé pour ce projet (projects_v2.portal_client_email
+--     renseigné + utilisateur auth.users correspondant).
+--   - Récupérer un JWT client test (cf. ci-dessous, méthode A ou B).
+-- ============================================================================
+
+
+-- ----------------------------------------------------------------------------
+-- 0. Repérage : identifiants du projet/contact de test
+-- ----------------------------------------------------------------------------
+-- Remplacer l'email par celui de votre projet portail de test.
+--
+-- SELECT p.id AS project_id, p.portal_client_email, pc.contact_id, pc.role
+-- FROM public.projects_v2 p
+-- JOIN public.project_contacts pc ON pc.project_id = p.id
+-- WHERE p.portal_client_email = 'client-test@example.com';
+
+
+-- ----------------------------------------------------------------------------
+-- A. Simulation du contexte client portail (sans vrai JWT, en SQL Editor)
+-- ----------------------------------------------------------------------------
+-- Le rôle `authenticated` + un claim `sub` = auth_user_id du client suffisent à
+-- déclencher portal_project_id() / is_team_member() comme en condition réelle.
+-- On les force le temps d'une transaction puis on ROLLBACK.
+--
+-- Remplacer <AUTH_USER_ID_CLIENT> par le auth.users.id du client test.
+--
+-- BEGIN;
+--   SET LOCAL role authenticated;
+--   SET LOCAL request.jwt.claims = '{"sub":"<AUTH_USER_ID_CLIENT>","role":"authenticated"}';
+--
+--   -- A.1 — is_team_member() doit être FALSE pour un client portail
+--   SELECT public.is_team_member() AS should_be_false;
+--
+--   -- A.2 — portal_project_id() doit renvoyer l'UUID du projet du client
+--   SELECT propulspace.portal_project_id() AS my_project_id;
+--
+--   -- A.3 — ISOLATION LECTURE : ne voit QUE les lignes de SON projet.
+--   --        Le COUNT doit égaler le nombre de project_contacts de son projet,
+--   --        et JAMAIS le total global de la table.
+--   SELECT count(*) AS rows_visible_to_client
+--   FROM public.project_contacts;
+--
+--   --        Vérif négative : 0 ligne d'un AUTRE projet n'est visible.
+--   --        Remplacer <AUTRE_PROJECT_ID> par un projet qui n'est PAS le sien.
+--   SELECT count(*) AS rows_other_project_should_be_0
+--   FROM public.project_contacts
+--   WHERE project_id = '<AUTRE_PROJECT_ID>';
+--
+--   -- A.4 — ÉCRITURE REFUSÉE : un INSERT portail doit échouer (RLS write_team).
+--   --        Attendu : "new row violates row-level security policy".
+--   INSERT INTO public.project_contacts (project_id, contact_id, role)
+--   VALUES (propulspace.portal_project_id(),
+--           (SELECT contact_id FROM public.project_contacts
+--            WHERE project_id = propulspace.portal_project_id() LIMIT 1),
+--           'other');
+-- ROLLBACK;
+
+
+-- ----------------------------------------------------------------------------
+-- B. Simulation du contexte équipe interne (admin/sales/marketing…)
+-- ----------------------------------------------------------------------------
+-- Remplacer <AUTH_USER_ID_TEAM> par le auth.users.id d'un membre interne
+-- (présent dans public.users avec un role non-NULL).
+--
+-- BEGIN;
+--   SET LOCAL role authenticated;
+--   SET LOCAL request.jwt.claims = '{"sub":"<AUTH_USER_ID_TEAM>","role":"authenticated"}';
+--
+--   -- B.1 — is_team_member() doit être TRUE
+--   SELECT public.is_team_member() AS should_be_true;
+--
+--   -- B.2 — LECTURE GLOBALE : l'équipe voit toutes les lignes (pas de filtre projet).
+--   SELECT count(*) AS rows_visible_to_team
+--   FROM public.project_contacts;
+--
+--   -- B.3 — ÉCRITURE AUTORISÉE : un INSERT équipe doit réussir (puis ROLLBACK).
+--   --        Choisir un (project_id, contact_id) non déjà liés (contrainte UNIQUE).
+--   -- INSERT INTO public.project_contacts (project_id, contact_id, role)
+--   -- VALUES ('<PROJECT_ID>', '<CONTACT_ID>', 'other');
+-- ROLLBACK;
+
+
+-- ----------------------------------------------------------------------------
+-- C. Vérif ACL de la vue client_unified_v2 (anon doit être révoqué)
+-- ----------------------------------------------------------------------------
+-- SELECT has_table_privilege('anon',          'public.client_unified_v2', 'SELECT')
+--          AS anon_should_be_false;
+-- SELECT has_table_privilege('authenticated', 'public.client_unified_v2', 'SELECT')
+--          AS authenticated_should_be_true;

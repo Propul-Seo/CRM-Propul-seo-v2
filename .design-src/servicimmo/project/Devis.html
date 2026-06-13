@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Servicimmo · Devis — 3 variantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Fraunces:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+  html, body { margin:0; padding:0; height:100%; font-family:'Geist', system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  #app { height:100vh; }
+  .mockup-desktop { width: 1280px; height: 900px; overflow: auto; }
+  .mockup-mobile  { width: 390px;  height: 780px; overflow: auto; border-radius: 28px; }
+  .mockup-desktop::-webkit-scrollbar,
+  .mockup-mobile::-webkit-scrollbar { width: 6px; height: 6px; }
+  .mockup-desktop::-webkit-scrollbar-thumb,
+  .mockup-mobile::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); border-radius: 3px; }
+
+  .v-swatch { display:inline-flex; gap: 4px; margin-left: 10px; vertical-align: -1px; }
+  .v-swatch span { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.08); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="devis/shared.jsx"></script>
+<script type="text/babel" src="devis/v1-sobre.jsx"></script>
+<script type="text/babel" src="devis/v2-chaleureux.jsx"></script>
+<script type="text/babel" src="devis/v3-premium.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+  function Swatch({ colors }) {
+    return <span className="v-swatch">
+      {colors.map((c,i)=><span key={i} style={{ background: c }}/>)}
+    </span>;
+  }
+
+  // Each variant has 4 screens; each screen rendered at desktop + mobile.
+  // We also expose a live "Clickable demo" artboard: click a branch card to navigate to recap.
+  function LiveDemo({ variant }) {
+    const [branch, setBranch] = React.useState(null);
+    const [screen, setScreen] = React.useState('entry'); // entry | filled | recap | thanks
+
+    // Clicking a branch card auto-advances to recap (demo)
+    const pick = (key) => {
+      setBranch(key);
+      setTimeout(() => setScreen('recap'), 320);
+    };
+
+    const goto = (s) => setScreen(s);
+
+    const renderScreen = () => {
+      if (variant === 1) {
+        if (screen==='entry')  return <V1ScreenEntry selected={branch||'sale'} onPick={pick}/>;
+        if (screen==='filled') return <V1ScreenFilled/>;
+        if (screen==='recap')  return <V1ScreenRecap/>;
+        if (screen==='thanks') return <V1ScreenThanks/>;
+      }
+      if (variant === 2) {
+        if (screen==='entry')  return <V2ScreenEntry selected={branch||'sale'} onPick={pick}/>;
+        if (screen==='filled') return <V2ScreenFilled/>;
+        if (screen==='recap')  return <V2ScreenRecap/>;
+        if (screen==='thanks') return <V2ScreenThanks/>;
+      }
+      if (variant === 3) {
+        if (screen==='entry')  return <V3ScreenEntry selected={branch||'sale'} onPick={pick}/>;
+        if (screen==='filled') return <V3ScreenFilled/>;
+        if (screen==='recap')  return <V3ScreenRecap/>;
+        if (screen==='thanks') return <V3ScreenThanks/>;
+      }
+    };
+
+    const nav = ['entry','filled','recap','thanks'];
+    const navLabels = { entry:'Entrée', filled:'Rempli', recap:'Récap', thanks:'Merci' };
+
+    return (
+      <div style={{ position:'relative' }}>
+        {/* Floating nav pill */}
+        <div style={{
+          position:'absolute', top: -44, right: 0, zIndex: 10,
+          display:'flex', gap: 4, background:'#fff', border:'1px solid rgba(0,0,0,.1)',
+          borderRadius: 100, padding: 4, boxShadow:'0 2px 6px rgba(0,0,0,.08)',
+        }}>
+          {nav.map(s => (
+            <button key={s} onClick={()=>goto(s)} style={{
+              padding:'5px 12px', fontSize: 11.5, border:'none', cursor:'pointer',
+              borderRadius: 100, fontFamily: 'Geist, sans-serif', fontWeight: 500,
+              background: screen===s ? '#111' : 'transparent',
+              color: screen===s ? '#fff' : 'rgba(0,0,0,.6)',
+            }}>{navLabels[s]}</button>
+          ))}
+        </div>
+
+        <div className="mockup-desktop" style={{ width: 1280, height: 840, background:'#fff' }}>
+          {renderScreen()}
+        </div>
+      </div>
+    );
+  }
+
+  function Screen({ variant, screen, mobile }) {
+    const Mapping = {
+      1: { entry: V1ScreenEntry, filled: V1ScreenFilled, recap: V1ScreenRecap, thanks: V1ScreenThanks },
+      2: { entry: V2ScreenEntry, filled: V2ScreenFilled, recap: V2ScreenRecap, thanks: V2ScreenThanks },
+      3: { entry: V3ScreenEntry, filled: V3ScreenFilled, recap: V3ScreenRecap, thanks: V3ScreenThanks },
+    };
+    const Cmp = Mapping[variant][screen];
+    return <Cmp mobile={mobile}/>;
+  }
+
+  function VariantRow({ variant, title, subtitle, swatch, layout, children }) {
+    return (
+      <DCSection
+        title={<>{title}<Swatch colors={swatch}/></>}
+        subtitle={subtitle}
+      >
+        {children}
+      </DCSection>
+    );
+  }
+
+  function Artboard({ label, width, height, children }) {
+    return (
+      <DCArtboard label={label} width={width} height={height}>
+        <div style={{ width:'100%', height:'100%', overflow:'auto' }}>
+          {children}
+        </div>
+      </DCArtboard>
+    );
+  }
+
+  function App() {
+    const DW = 1280, DH = 900, MW = 390, MH = 780;
+
+    return (
+      <DesignCanvas>
+        {/* ── Title board ── */}
+        <div style={{ padding:'0 60px 40px', maxWidth: 860 }}>
+          <div style={{ fontSize: 11.5, letterSpacing:'.14em', textTransform:'uppercase',
+                        fontWeight: 500, color:'rgba(40,30,20,.55)', fontFamily:'Geist Mono, monospace' }}>
+            Servicimmo · Nouveau parcours devis · 3 variantes
+          </div>
+          <h1 style={{ fontSize: 38, fontWeight: 600, letterSpacing:'-0.03em', margin:'10px 0 12px',
+                       color:'rgba(20,15,5,.92)' }}>
+            Remplacer le formulaire 6 étapes par un parcours 1–2 pages.
+          </h1>
+          <p style={{ fontSize: 15, lineHeight: 1.55, color:'rgba(40,30,20,.65)', margin: 0 }}>
+            3 directions visuelles, chacune déclinée sur 4 écrans (entrée 5 cards · état rempli · récap surprise · merci),
+            desktop + mobile. Palette dérivée du site actuel : <strong>teal</strong> + <strong>lime</strong> + <strong>navy</strong>.
+            Chaque rangée est cliquable — choisissez un projet dans la démo pour voir le récap s'animer.
+          </p>
+
+          <div style={{ marginTop: 20, display:'flex', gap: 24, flexWrap:'wrap' }}>
+            {[
+              ['V1 · Sobre éditorial',       'Single-page · noir/blanc + teal · Geist pure',       ['#0a0a0a','#fafafa','#1E6B6E']],
+              ['V2 · Chaleureux illustré',   'Single-page accordéon · cream + sage · Fraunces',    ['#2d2a24','#faf5e9','#7a9b6e','#c17453']],
+              ['V3 · Éditorial premium',     '2 pages · gradient navy + gold · grand tracking',    ['#0a0f1c','#f4f6fb','#1E6B6E','#c79339']],
+            ].map(([t,s,cs],i)=>
+              <div key={i} style={{ flex:'1 1 220px', padding:'14px 16px',
+                                    border:'1px solid rgba(0,0,0,.08)', borderRadius: 8, background:'#fff' }}>
+                <Swatch colors={cs}/>
+                <div style={{ fontSize: 13, fontWeight: 600, marginTop: 8 }}>{t}</div>
+                <div style={{ fontSize: 12.5, color:'rgba(40,30,20,.6)', marginTop: 2 }}>{s}</div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ═══ V1 ═══ */}
+        <DCSection
+          title={<>Variante 1 — Sobre éditorial<Swatch colors={['#0a0a0a','#fafafa','#1E6B6E']}/></>}
+          subtitle="Single-page · monochrome + teal · focus clarté · mobile-first"
+        >
+          <DCArtboard label="V1 · Entrée — 5 cards bifurcation" width={DW} height={DH}>
+            <div className="mockup-desktop" style={{ width: DW, height: DH }}>
+              <LiveDemo variant={1}/>
+            </div>
+          </DCArtboard>
+          <DCArtboard label="V1 · Mobile · Entrée" width={MW} height={MH}>
+            <div className="mockup-mobile" style={{ width: MW, height: MH }}>
+              <Screen variant={1} screen="entry" mobile/>
+            </div>
+          </DCArtboard>
+          <DCArtboard label="V1 · Mobile · État rempli" width={MW} height={MH}>
+            <div className="mockup-mobile" style={{ width: MW, height: MH }}>
+              <Screen variant={1} screen="filled" mobile/>
+            </div>
+          </DCArtboard>
+          <DCArtboard label="V1 · Mobile · Récap (surprise)" width={MW} height={MH}>
+            <div className="mockup-mobile" style={{ width: MW, height: MH }}>
+              <Screen variant={1} screen="recap" mobile/>
+            </div>
+          </DCArtboard>
+          <DCArtboard label="V1 · Mobile · Merci" width={MW} height={MH}>
+            <div className="mockup-mobile" style={{ width: MW, height: MH }}>
+              <Screen variant={1} screen="thanks" mobile/>
+            </div>
+          </DCArtboard>
+        </DCSection>
+
+        {/* ═══ V2 ═══ */}
+        <DCSection
+          title={<>Variante 2 — Chaleureux illustré<Swatch colors={['#2d2a24','#faf5e9','#7a9b6e','#c17453']}/></>}
+          subtitle="Single-page accordéon · cream + sage · Fraunces pour titres · senior-friendly · illustrations flat"
+        >
+          <DCArtboard label="V2 · Entrée · Illustrations plates" width={DW} height={DH}>
+            <div className="mockup-desktop" style={{ width: DW, height: DH }}>
+              <LiveDemo variant={2}/>
+            </div>
+          </DCArtboard>
+          <DCArtboard label="V2 · Mobile · Entrée" width={MW} height={MH}>
+            <div className="mockup-mobile" style={{ width: MW, height: MH }}>
+              <Screen variant={2} screen="entry" mobile/>
+            </div>
+          </DCArtboard>
+          <DCArtboard label="V2 · Mobile · Accordéon (section 2 ouverte)" width={MW} height={MH}>
+            <div className="mockup-mobile" style={{ width: MW, height: MH }}>
+              <Screen variant={2} screen="filled" mobile/>
+            </div>
+          </DCArtboard>
+          <DCArtboard label="V2 · Mobile · Récap" width={MW} height={MH}>
+            <div className="mockup-mobile" style={{ width: MW, height: MH }}>
+              <Screen variant={2} screen="recap" mobile/>
+            </div>
+          </DCArtboard>
+          <DCArtboard label="V2 · Mobile · Merci" width={MW} height={MH}>
+            <div className="mockup-mobile" style={{ width: MW, height: MH }}>
+              <Screen variant={2} screen="thanks" mobile/>
+            </div>
+          </DCArtboard>
+        </DCSection>
+
+        {/* ═══ V3 ═══ */}
+        <DCSection
+          title={<>Variante 3 — Éditorial premium<Swatch colors={['#0a0f1c','#f4f6fb','#1E6B6E','#c79339']}/></>}
+          subtitle="2 pages · navy deep + accent teal/gold · gradient subtil · micro-interactions · prescripteur B2B"
+        >
+          <DCArtboard label="V3 · Page 1 · Entrée + bien" width={DW} height={DH}>
+            <div className="mockup-desktop" style={{ width: DW, height: DH }}>
+              <LiveDemo variant={3}/>
+            </div>
+          </DCArtboard>
+          <DCArtboard label="V3 · Mobile · Entrée" width={MW} height={MH}>
+            <div className="mockup-mobile" style={{ width: MW, height: MH }}>
+              <Screen variant={3} screen="entry" mobile/>
+            </div>
+          </DCArtboard>
+          <DCArtboard label="V3 · Mobile · Page 1 rempli" width={MW} height={MH}>
+            <div className="mockup-mobile" style={{ width: MW, height: MH }}>
+              <Screen variant={3} screen="filled" mobile/>
+            </div>
+          </DCArtboard>
+          <DCArtboard label="V3 · Mobile · Page 2 (récap)" width={MW} height={MH}>
+            <div className="mockup-mobile" style={{ width: MW, height: MH }}>
+              <Screen variant={3} screen="recap" mobile/>
+            </div>
+          </DCArtboard>
+          <DCArtboard label="V3 · Mobile · Merci" width={MW} height={MH}>
+            <div className="mockup-mobile" style={{ width: MW, height: MH }}>
+              <Screen variant={3} screen="thanks" mobile/>
+            </div>
+          </DCArtboard>
+        </DCSection>
+
+        <DCPostIt top={230} left={900} rotate={-3}>
+          Les 3 desktop sont <strong>cliquables</strong> — sélectionnez un projet pour voir le récap.
+          Pill en haut à droite pour switcher d'écran.
+        </DCPostIt>
+
+        <div style={{ padding:'20px 60px 40px', maxWidth: 860, color:'rgba(40,30,20,.6)', fontSize: 13, lineHeight: 1.6 }}>
+          <strong style={{ color:'rgba(20,15,5,.85)' }}>Notes prod.</strong> Les blocs suivent le mapping du brief
+          (sale / rental / works / coownership / other) ; les diagnostics + la fourchette de prix sont calculés
+          côté JS (miroir du <code>POST /api/calculate</code>). Copy FR = verbatim du brief.
+          Aucune dépendance Framer Motion pour ce canevas : le but est la revue visuelle, les micro-interactions
+          seront branchées côté Next/RHF à l'export.
+        </div>
+      </DesignCanvas>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('app')).render(<App/>);
+</script>
+</body>
+</html>

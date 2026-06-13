@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Vue 1 — Login</title>
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="portal.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+    body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+    .page-head { max-width: 1340px; margin: 0 auto 32px; }
+    .crumb { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--ps-primary-deep); }
+    .page-head h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.025em; margin: 6px 0 6px; color: #2a2418; }
+    .page-head p { font-size: 14px; color: #6b6357; margin: 0; max-width: 760px; line-height: 1.55; }
+
+    .section-h { max-width: 1340px; margin: 36px auto 16px; }
+    .section-h h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.015em; margin: 0; color: #2a2418; }
+    .section-h p { font-size: 13px; color: #6b6357; margin: 4px 0 0; }
+
+    .row { display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; max-width: 1340px; margin: 0 auto; }
+    .col { display: flex; flex-direction: column; align-items: center; }
+    .frame-wrap { padding: 12px; background: #fff; border-radius: 24px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 24px 48px -16px rgba(0,0,0,0.08); }
+    .col-label { margin-top: 14px; font-size: 12.5px; color: #6b6357; font-weight: 600; letter-spacing: -0.005em; }
+    .col-label .state {
+      display: inline-block; padding: 2px 8px; border-radius: 9999px;
+      background: rgba(124,58,237,0.10); color: var(--ps-primary-deep);
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      margin-right: 8px;
+    }
+    .desktop-frame {
+      max-width: 1340px; margin: 0 auto;
+      border-radius: 16px; overflow: hidden;
+      box-shadow: 0 30px 60px -20px rgba(0,0,0,0.16), 0 0 0 1px rgba(0,0,0,0.06);
+      background: #fff;
+    }
+    .win-bar { height: 36px; background: #f7f4ef; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; padding: 0 14px; gap: 8px; }
+    .win-dot { width: 11px; height: 11px; border-radius: 9999px; }
+    .win-dot.r { background: #FF5F57; } .win-dot.y { background: #FEBC2E; } .win-dot.g { background: #28C840; }
+    .win-bar .url { flex: 1; text-align: center; font-size: 12px; color: #8a8478; font-family: var(--ps-font-sans); }
+  </style>
+</head>
+<body>
+  <div class="page-head">
+    <div class="crumb">Vue 1 / 12</div>
+    <h1>Login client — magic-link</h1>
+    <p>Première impression du client. Pas de header, pas de navigation. Une carte centrée verticalement. Magic-link uniquement (pas de mot de passe). <strong>Mobile en priorité</strong> — c'est là que 80% des clients arrivent.</p>
+  </div>
+
+  <div class="section-h">
+    <h2>Mobile · 375 × 812 — 3 états</h2>
+    <p>De gauche à droite : état initial, état pendant l'envoi, état de succès après réception du lien.</p>
+  </div>
+  <div id="mobile-row" class="row"></div>
+
+  <div class="section-h">
+    <h2>Desktop · 1280-wide — état initial</h2>
+    <p>Même carte, dimensions identiques (max-width 380px). Le fond off-white avec le radial violet remplit l'écran.</p>
+  </div>
+  <div id="desktop-frame"></div>
+
+  <script type="text/babel" src="ios-frame.jsx"></script>
+  <script type="text/babel" src="primitives.jsx"></script>
+  <script type="text/babel" src="screens/login.jsx"></script>
+
+  <script type="text/babel">
+    function MobileShell({ state, email }) {
+      return (
+        <IOSDevice width={375} height={812}>
+          <div className="ps-portal" style={{ height: "100%", width: "100%" }}>
+            <div style={{ height: 40 }} />
+            <LoginScreen forceState={state} initialEmail={email || ""} />
+          </div>
+        </IOSDevice>
+      );
+    }
+
+    function DesktopShell() {
+      return (
+        <div className="desktop-frame">
+          <div className="win-bar">
+            <span className="win-dot r" /><span className="win-dot y" /><span className="win-dot g" />
+            <span className="url">espace.propulseo-site.com/login</span>
+            <span style={{ width: 40 }} />
+          </div>
+          <div className="ps-portal" style={{ minHeight: 720 }}>
+            <LoginScreen />
+          </div>
+        </div>
+      );
+    }
+
+    function MobileRow() {
+      const states = [
+        { state: "initial", label: "Initial", email: "" },
+        { state: "loading", label: "Loading", email: "sophie@precieuse-joaillerie.fr" },
+        { state: "success", label: "Success", email: "sophie@precieuse-joaillerie.fr" },
+      ];
+      return (
+        <>
+          {states.map((s, i) => (
+            <div key={i} className="col">
+              <div className="frame-wrap"><MobileShell state={s.state} email={s.email} /></div>
+              <div className="col-label"><span className="state">{s.label}</span></div>
+            </div>
+          ))}
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("mobile-row")).render(<MobileRow />);
+    ReactDOM.createRoot(document.getElementById("desktop-frame")).render(<DesktopShell />);
+  </script>
+</body>
+</html>

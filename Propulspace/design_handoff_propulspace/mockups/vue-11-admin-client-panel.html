@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"><title>Vue 11 — Admin panel par client</title>
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="portal.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+    body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+    .container { max-width: 1340px; margin: 0 auto; }
+    .section-h { margin: 36px auto 14px; max-width: 1340px; }
+    .section-h h2 { font-size: 16px; font-weight: 700; letter-spacing: -0.015em; margin: 0; color: #2a2418; }
+    .section-h p { font-size: 13px; color: #6b6357; margin: 4px 0 0; }
+  </style>
+</head>
+<body>
+  <div id="head"></div>
+
+  <div class="section-h"><h2>Tab Overview · statut, URL portail, contrôles</h2></div>
+  <div class="container"><div id="t-overview"></div></div>
+
+  <div class="section-h"><h2>Tab Factures · liste + bouton "Créer une facture" (Sheet ouvert)</h2></div>
+  <div class="container"><div id="t-factures"></div></div>
+
+  <div class="section-h"><h2>Tab Analytics · usage du portail par le client</h2></div>
+  <div class="container"><div id="t-analytics"></div></div>
+
+  <script type="text/babel" src="primitives.jsx"></script>
+  <script type="text/babel" src="desktop-shell.jsx"></script>
+  <script type="text/babel" src="admin-shell.jsx"></script>
+
+  <script type="text/babel">
+    const TABS = [
+      { key: "overview",  label: "Overview",  icon: "layout-grid" },
+      { key: "documents", label: "Documents", icon: "file-text" },
+      { key: "factures",  label: "Factures",  icon: "receipt" },
+      { key: "signatures", label: "Signatures", icon: "pen-line" },
+      { key: "activite",  label: "Activité",  icon: "activity" },
+      { key: "analytics", label: "Analytics", icon: "bar-chart-3" },
+    ];
+
+    function ClientHeader() {
+      return (
+        <div className="a-card" style={{ padding: 18, marginBottom: 16, display: "flex", alignItems: "center", gap: 16 }}>
+          <span style={{
+            width: 52, height: 52, borderRadius: 12,
+            background: "linear-gradient(135deg, #d4a574, #8a6d3b)", color: "#fff",
+            fontSize: 18, fontWeight: 700,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 6px 16px -4px rgba(212,165,116,0.45)",
+          }}>EL</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <h1 className="a-h1" style={{ fontSize: 19 }}>Précieuse Joaillerie</h1>
+              <span className="a-badge a-badge-green">Portail actif</span>
+            </div>
+            <div className="ps-num" style={{ fontSize: 12, color: "var(--a-fg-muted)", marginTop: 4, display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <span>Eméline Le Ray · sophie@precieuse.fr</span>
+              <span>·</span>
+              <span style={{ fontFamily: "var(--ps-font-mono)", color: "var(--a-neon-light)" }}>espace.propulseo-site.com/precieuse</span>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button className="a-btn a-btn-outline"><Icon name="external-link" size={13} stroke={2} />Voir le portail</button>
+            <button className="a-btn a-btn-ghost" style={{ color: "#F87171" }}><Icon name="power" size={13} stroke={2.2} />Désactiver</button>
+          </div>
+        </div>
+      );
+    }
+
+    function TabBar({ active }) {
+      return (
+        <div style={{ display: "flex", gap: 4, marginBottom: 16, borderBottom: "1px solid var(--a-border)", paddingBottom: 0 }}>
+          {TABS.map(t => (
+            <button key={t.key} className={"a-tab" + (t.key === active ? " active" : "")} style={{ borderRadius: "8px 8px 0 0", marginBottom: -1 }}>
+              <Icon name={t.icon} size={13} stroke={t.key === active ? 2.4 : 1.9} />
+              {t.label}
+              {t.key === "signatures" && <span className="a-badge a-badge-amber" style={{ marginLeft: 4 }}>1</span>}
+            </button>
+          ))}
+        </div>
+      );
+    }
+
+    /* ============== Overview tab ============== */
+    function OverviewTab() {
+      return (
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+            <InfoCard label="Statut du portail" value="Actif" tone="green" sub="Activé le 8 mai 2026" />
+            <InfoCard label="Dernière connexion" value="Aujourd'hui" tone="violet" sub="à 09:42 · iPhone Safari" mono />
+            <InfoCard label="Phase actuelle" value="Phase 7" tone="violet" sub="Projet en cours · 65 %" />
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div className="a-card" style={{ padding: 18 }}>
+              <h3 className="a-h2" style={{ marginBottom: 12 }}>Informations portail</h3>
+              <KV label="URL personnalisée" value="espace.propulseo-site.com/precieuse" mono />
+              <KV label="Couleur primaire" value="#7C3AED" mono />
+              <KV label="Activé le" value="8 mai 2026 · 14:22" />
+              <KV label="Activé par" value="Lyes Triki" />
+              <KV label="Démo pré-rempli" value="Non" />
+            </div>
+            <div className="a-card" style={{ padding: 18 }}>
+              <h3 className="a-h2" style={{ marginBottom: 12 }}>Bidirectionnalité — sync</h3>
+              <KV label="Projet CRM lié" value="proj_precieuse_2026" mono />
+              <KV label="Étapes visibles côté client" value="6 / 6" />
+              <KV label="Dernière mise à jour" value="il y a 12 minutes" />
+              <KV label="Conflits non résolus" value="0" tone="green" />
+              <div style={{ marginTop: 12, padding: 10, background: "rgba(16,185,129,0.08)", borderRadius: 8, fontSize: 12, color: "#34D399", display: "flex", gap: 8, alignItems: "center" }}>
+                <Icon name="check-circle-2" size={13} stroke={2.4} />
+                Espace ↔ fiche projet synchronisés
+              </div>
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    function InfoCard({ label, value, sub, tone, mono }) {
+      const tones = { green: "#34D399", violet: "var(--a-neon-light)", amber: "#FCD34D" };
+      return (
+        <div className="a-card" style={{ padding: 16 }}>
+          <span className="a-eyebrow" style={{ color: "var(--a-fg-muted)" }}>{label}</span>
+          <div style={{ marginTop: 8, fontSize: 22, fontWeight: 700, letterSpacing: "-0.025em", color: tones[tone] || "var(--a-fg)", fontFamily: mono ? "var(--ps-font-mono)" : undefined }}>
+            {value}
+          </div>
+          {sub && <div style={{ fontSize: 11.5, color: "var(--a-fg-muted)", marginTop: 4 }} className={mono ? "" : "ps-num"}>{sub}</div>}
+        </div>
+      );
+    }
+
+    function KV({ label, value, mono, tone }) {
+      return (
+        <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--a-border)", fontSize: 12.5 }}>
+          <span style={{ color: "var(--a-fg-muted)" }}>{label}</span>
+          <span style={{ color: tone === "green" ? "#34D399" : "var(--a-fg)", fontWeight: 500, fontFamily: mono ? "var(--ps-font-mono)" : undefined }}>
+            {value}
+          </span>
+        </div>
+      );
+    }
+
+    /* ============== Factures tab (with create sheet) ============== */
+    function FacturesTab() {
+      return (
+        <>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <h2 className="a-h2">Factures du client</h2>
+            <button className="a-btn a-btn-primary"><Icon name="plus" size={13} stroke={2.4} />Créer une facture</button>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 14, alignItems: "flex-start" }}>
+            {/* Existing invoices */}
+            <div className="a-card" style={{ padding: 0, overflow: "hidden" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
+                <thead>
+                  <tr style={{ background: "var(--a-bg-2)" }}>
+                    <th style={th}>N°</th>
+                    <th style={th}>Émise</th>
+                    <th style={th}>TTC</th>
+                    <th style={th}>Statut</th>
+                    <th style={th}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { n: "PS-1031", d: "15 mai", t: "5 000,00", s: "due" },
+                    { n: "PS-1029", d: "15 fév", t: "5 000,00", s: "paid" },
+                  ].map((i, k) => (
+                    <tr key={k} style={{ borderTop: "1px solid var(--a-border)" }}>
+                      <td style={td} className="ps-num"><span style={{ fontFamily: "var(--ps-font-mono)", color: "var(--a-fg)" }}>{i.n}</span></td>
+                      <td style={td} className="ps-num">{i.d}</td>
+                      <td style={td}><span className="ps-num" style={{ color: "var(--a-fg)", fontWeight: 600 }}>{i.t} €</span></td>
+                      <td style={td}>
+                        {i.s === "paid" && <span className="a-badge a-badge-green">Payée</span>}
+                        {i.s === "due" && <span className="a-badge a-badge-violet">À payer</span>}
+                      </td>
+                      <td style={{ ...td, textAlign: "right" }}>
+                        <Icon name="more-horizontal" size={14} stroke={2} style={{ color: "var(--a-fg-muted)" }} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Create invoice sheet (inline) */}
+            <div className="a-card" style={{ padding: 0, overflow: "hidden", borderColor: "rgba(139,92,246,0.3)", boxShadow: "0 4px 24px -4px rgba(139,92,246,0.25)" }}>
+              <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--a-border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <span className="a-eyebrow">Nouvelle facture</span>
+                  <h3 className="a-h2" style={{ marginTop: 4 }}>PS-1032</h3>
+                </div>
+                <button className="a-btn a-btn-ghost" style={{ padding: "0 8px" }}><Icon name="x" size={14} stroke={2} /></button>
+              </div>
+              <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+                <span className="a-eyebrow" style={{ color: "var(--a-fg-muted)" }}>Lignes</span>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <LineRow desc="Refonte page produit · phase 2" qty="1" pu="2 500,00" />
+                  <LineRow desc="SEO sprint mai" qty="1" pu="1 500,00" />
+                  <button style={{ background: "transparent", border: "1px dashed var(--a-border-2)", padding: "8px 12px", borderRadius: 7, color: "var(--a-neon-light)", fontSize: 12, fontWeight: 500, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+                    <Icon name="plus" size={13} stroke={2.2} /> Ajouter une ligne
+                  </button>
+                </div>
+
+                <div style={{ background: "var(--a-bg-2)", borderRadius: 8, padding: 12, fontSize: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ color: "var(--a-fg-muted)" }}>Sous-total HT</span>
+                    <span className="ps-num">4 000,00 €</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ color: "var(--a-fg-muted)" }}>TVA 0 % (franchise)</span>
+                    <span className="ps-num">0,00 €</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 6, borderTop: "1px solid var(--a-border)", marginTop: 6 }}>
+                    <span style={{ fontWeight: 600 }}>Total TTC</span>
+                    <span className="ps-num" style={{ fontWeight: 700, color: "var(--a-neon-light)" }}>4 000,00 €</span>
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                  <input className="a-input" defaultValue="Échéance : 15 juin" />
+                  <button className="a-btn a-btn-outline" style={{ justifyContent: "flex-start" }}><Icon name="calendar-plus" size={12} stroke={2} />Échéances multiples</button>
+                </div>
+
+                <textarea className="a-input" placeholder="Notes internes (non visibles client)" rows="2" style={{ height: "auto", padding: "8px 12px", resize: "none" }} />
+
+                <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 4 }}>
+                  <button className="a-btn a-btn-outline">Brouillon</button>
+                  <button className="a-btn a-btn-primary"><Icon name="send" size={13} stroke={2.2} />Envoyer au client</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    const th = { padding: "10px 14px", textAlign: "left", fontSize: 10.5, fontWeight: 600, color: "var(--a-fg-muted)", textTransform: "uppercase", letterSpacing: "0.07em" };
+    const td = { padding: "12px 14px", verticalAlign: "middle" };
+
+    function LineRow({ desc, qty, pu }) {
+      return (
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <input className="a-input" defaultValue={desc} style={{ flex: 1 }} />
+          <input className="a-input" defaultValue={qty} style={{ width: 50, textAlign: "center" }} />
+          <input className="a-input" defaultValue={pu + " €"} style={{ width: 110, textAlign: "right" }} />
+          <button style={{ width: 30, height: 34, background: "transparent", border: "none", color: "var(--a-fg-muted)", cursor: "pointer" }}>
+            <Icon name="x" size={13} stroke={2} />
+          </button>
+        </div>
+      );
+    }
+
+    /* ============== Analytics tab ============== */
+    function AnalyticsTab() {
+      return (
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+            <AdminKpi label="Jours depuis dernière connexion" value="0 j" sub="Aujourd'hui · 09:42" icon="activity" tone="green" />
+            <AdminKpi label="Total connexions" value="38" sub="Sur 30 derniers jours" icon="log-in" tone="violet" />
+            <AdminKpi label="Documents téléchargés" value="14" sub="100 % consultés" icon="download" tone="violet" />
+            <AdminKpi label="Délai paiement moyen" value="3,5 j" sub="Excellente cadence" icon="zap" tone="green" />
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <div className="a-card" style={{ padding: 18 }}>
+              <h3 className="a-h2" style={{ marginBottom: 14 }}>Engagement hebdomadaire</h3>
+              <FakeChart />
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: 11, color: "var(--a-fg-muted)" }}>
+                <span>S1</span><span>S2</span><span>S3</span><span>S4</span><span>S5</span><span>S6</span>
+              </div>
+            </div>
+            <div className="a-card" style={{ padding: 18 }}>
+              <h3 className="a-h2" style={{ marginBottom: 14 }}>Factures payées · payées / total</h3>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 12 }}>
+                <span className="ps-num" style={{ fontSize: 36, fontWeight: 700, letterSpacing: "-0.025em", color: "#34D399" }}>2/3</span>
+                <span style={{ fontSize: 13, color: "var(--a-fg-muted)" }}>· 8 000 € / 13 000 €</span>
+              </div>
+              <div style={{ height: 8, background: "rgba(255,255,255,0.06)", borderRadius: 9999, overflow: "hidden" }}>
+                <div style={{ width: "62%", height: "100%", background: "linear-gradient(90deg, #16A34A, #34D399)" }} />
+              </div>
+              <div style={{ marginTop: 16, fontSize: 11.5, color: "var(--a-fg-muted)", display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ display: "flex", justifyContent: "space-between" }}><span>PS-1029 · payée en 3 jours</span><Icon name="check-circle-2" size={12} stroke={2.2} style={{ color: "#34D399" }} /></div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}><span>PS-1032 · payée en 4 jours</span><Icon name="check-circle-2" size={12} stroke={2.2} style={{ color: "#34D399" }} /></div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}><span>PS-1031 · en attente (5 000 €)</span><Icon name="clock" size={12} stroke={2.2} style={{ color: "#FCD34D" }} /></div>
+              </div>
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    function FakeChart() {
+      const data = [2, 4, 3, 6, 5, 8];
+      const max = 8;
+      return (
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 100 }}>
+          {data.map((v, i) => (
+            <div key={i} style={{
+              flex: 1,
+              height: `${(v / max) * 100}%`,
+              background: i === data.length - 1
+                ? "linear-gradient(180deg, var(--a-neon), var(--a-neon-deep))"
+                : "rgba(139, 92, 246, 0.25)",
+              borderRadius: "5px 5px 0 0",
+              boxShadow: i === data.length - 1 ? "0 -4px 12px rgba(139, 92, 246, 0.4)" : "none",
+            }} />
+          ))}
+        </div>
+      );
+    }
+
+    function ClientPanel({ active }) {
+      return (
+        <AdminShell activeKey="portals" title="Panel client" breadcrumb="Portails clients › Précieuse Joaillerie">
+          <ClientHeader />
+          <TabBar active={active} />
+          {active === "overview" && <OverviewTab />}
+          {active === "factures" && <FacturesTab />}
+          {active === "analytics" && <AnalyticsTab />}
+        </AdminShell>
+      );
+    }
+
+    function Head() {
+      return <PageHead num="11" title="Admin — Panel par client (6 onglets)" subtitle="Vue détaillée d'un client. 3 onglets clés montrés : Overview, Factures (avec Sheet création ouvert), Analytics." />;
+    }
+
+    ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+    ReactDOM.createRoot(document.getElementById("t-overview")).render(<AdminWindow><ClientPanel active="overview" /></AdminWindow>);
+    ReactDOM.createRoot(document.getElementById("t-factures")).render(<AdminWindow><ClientPanel active="factures" /></AdminWindow>);
+    ReactDOM.createRoot(document.getElementById("t-analytics")).render(<AdminWindow><ClientPanel active="analytics" /></AdminWindow>);
+  </script>
+</body>
+</html>

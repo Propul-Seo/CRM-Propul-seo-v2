@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"><title>Vue 6 — Documents</title>
+  <link rel="stylesheet" href="../tokens/colors_and_type.css">
+  <link rel="stylesheet" href="../tokens/portal.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+    body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+    .container { max-width: 1340px; margin: 0 auto; }
+    .section-h { margin: 36px auto 16px; max-width: 1340px; }
+    .section-h h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; margin: 0; color: #2a2418; }
+    .section-h p { font-size: 13px; color: #6b6357; margin: 4px 0 0; }
+  </style>
+</head>
+<body>
+  <div id="head"></div>
+
+  <div class="section-h"><h2>État normal · 10 documents avec filtres + recherche + zone upload</h2><p>Le "Drive" simplifié de Propul'Space.</p></div>
+  <div class="container"><div id="state-default"></div></div>
+
+  <div class="section-h"><h2>Empty state · aucun document encore</h2></div>
+  <div class="container"><div id="state-empty"></div></div>
+
+  <script type="text/babel" src="_lib/primitives.jsx"></script>
+  <script type="text/babel" src="_lib/shell.jsx"></script>
+  <script type="text/babel" src="_lib/desktop-shell.jsx"></script>
+
+  <script type="text/babel">
+    const DOCS = [
+      { name: "Contrat de prestation.pdf",  type: "Contrat",   date: "1 mai",  size: "450 KB", isNew: false, ext: "pdf" },
+      { name: "Devis Précieuse v2.pdf",     type: "Devis",      date: "28 avr", size: "320 KB", isNew: false, ext: "pdf" },
+      { name: "Rapport SEO Mai 2026.pdf",   type: "Livrable",   date: "15 mai", size: "1.2 MB", isNew: true,  ext: "pdf" },
+      { name: "Maquette accueil v2.png",    type: "Livrable",   date: "14 mai", size: "3.4 MB", isNew: true,  ext: "img" },
+      { name: "Logo Précieuse HD.svg",      type: "Asset",      date: "2 mai",  size: "85 KB",  isNew: false, ext: "img" },
+      { name: "Charte graphique.pdf",       type: "Asset",      date: "2 mai",  size: "2.1 MB", isNew: false, ext: "pdf" },
+      { name: "Brief créatif.pdf",          type: "Livrable",   date: "3 mai",  size: "180 KB", isNew: false, ext: "pdf" },
+      { name: "CGV Propul'SEO.pdf",         type: "Légal",      date: "1 mai",  size: "95 KB",  isNew: false, ext: "pdf" },
+      { name: "Facture PS-1031.pdf",        type: "Facture",    date: "15 mai", size: "120 KB", isNew: true,  ext: "pdf" },
+      { name: "Photos produits lot 1.zip",  type: "Asset",      date: "5 mai",  size: "18 MB",  isNew: false, ext: "zip" },
+    ];
+
+    const FILTERS = ["Tous", "Devis", "Contrats", "Factures", "Livrables", "Assets", "Légal"];
+
+    function DocumentsDesktop() {
+      const [filter, setFilter] = React.useState("Tous");
+      return (
+        <div>
+          <header style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+            <div>
+              <div className="ps-eyebrow ps-eyebrow-muted">Documents</div>
+              <h1 className="ps-h1 ps-gradient-text" style={{ fontSize: 32, marginTop: 4 }}>Mes documents</h1>
+              <p style={{ fontSize: 14, color: "var(--ps-fg-secondary)", margin: "6px 0 0" }}>Tous vos documents en un seul endroit, organisés par type.</p>
+            </div>
+            <div style={{ position: "relative", minWidth: 320 }}>
+              <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--ps-fg-muted)" }}>
+                <Icon name="search" size={16} stroke={2} />
+              </span>
+              <input className="ps-input" placeholder="Rechercher un document..." style={{ paddingLeft: 40 }} />
+            </div>
+          </header>
+
+          {/* Filter chips */}
+          <div style={{ display: "flex", gap: 8, marginTop: 22, flexWrap: "wrap" }}>
+            {FILTERS.map(f => {
+              const active = f === filter;
+              return (
+                <button key={f} onClick={() => setFilter(f)} style={{
+                  padding: "7px 14px", borderRadius: 9999,
+                  border: `1px solid ${active ? "transparent" : "var(--ps-border)"}`,
+                  background: active ? "var(--ps-primary-subtle)" : "#fff",
+                  color: active ? "var(--ps-primary-deep)" : "var(--ps-fg-secondary)",
+                  fontSize: 12.5, fontWeight: active ? 600 : 500,
+                  cursor: "pointer",
+                }}>{f}</button>
+              );
+            })}
+          </div>
+
+          {/* Document table */}
+          <section className="ps-card" style={{ marginTop: 18, overflow: "hidden" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ background: "var(--ps-bg)" }}>
+                  <th style={th}>Nom</th>
+                  <th style={th}>Type</th>
+                  <th style={th}>Date</th>
+                  <th style={th}>Taille</th>
+                  <th style={{ ...th, textAlign: "right" }}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {DOCS.map((d, i) => <DocRow key={i} doc={d} />)}
+              </tbody>
+            </table>
+          </section>
+
+          {/* Upload zone */}
+          <section style={{
+            marginTop: 18, padding: 22, textAlign: "center",
+            background: "transparent",
+            border: "1.5px dashed var(--ps-border)",
+            borderRadius: 14,
+          }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: 9999, margin: "0 auto 12px",
+              background: "var(--ps-primary-subtle)", color: "var(--ps-primary-deep)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <Icon name="upload" size={20} stroke={2.2} />
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--ps-fg)" }}>Déposez vos fichiers ici</div>
+            <div style={{ fontSize: 12.5, color: "var(--ps-fg-muted)", marginTop: 4 }}>
+              Logos, contenus, photos · 25 MB max par fichier
+            </div>
+            <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 14 }}>
+              <Button variant="outline" icon="upload">Parcourir mes fichiers</Button>
+              <select style={{
+                height: 40, padding: "0 12px", borderRadius: 8,
+                border: "1px solid var(--ps-border)", background: "#fff",
+                fontFamily: "var(--ps-font-sans)", fontSize: 13.5, color: "var(--ps-fg)",
+                cursor: "pointer",
+              }}>
+                <option>Type : Asset</option>
+                <option>Type : Contenu</option>
+                <option>Type : Autre</option>
+              </select>
+            </div>
+          </section>
+        </div>
+      );
+    }
+
+    const th = { padding: "11px 18px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "var(--ps-fg-muted)", textTransform: "uppercase", letterSpacing: "0.06em" };
+    const td = { padding: "13px 18px", fontSize: 13.5, verticalAlign: "middle" };
+
+    function DocRow({ doc }) {
+      const icons = {
+        pdf: { icon: "file-text", bg: "#FEE2E2", fg: "#DC2626" },
+        img: { icon: "image",     bg: "#DBEAFE", fg: "#1D4ED8" },
+        zip: { icon: "archive",   bg: "var(--ps-primary-subtle)", fg: "var(--ps-primary-deep)" },
+      };
+      const m = icons[doc.ext] || icons.pdf;
+      return (
+        <tr style={{ borderTop: "1px solid var(--ps-border-soft)", cursor: "pointer" }}
+          onMouseOver={e => e.currentTarget.style.background = "var(--ps-bg-subtle)"}
+          onMouseOut={e => e.currentTarget.style.background = "transparent"}>
+          <td style={td}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={{ width: 34, height: 34, borderRadius: 9, background: m.bg, color: m.fg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Icon name={m.icon} size={15} stroke={2.2} />
+              </span>
+              <span style={{ fontWeight: 500, color: "var(--ps-fg)" }}>{doc.name}</span>
+              {doc.isNew && <Badge tone="warning" dot={false}>Nouveau</Badge>}
+            </div>
+          </td>
+          <td style={td}><span style={{ fontSize: 12.5, color: "var(--ps-fg-secondary)" }}>{doc.type}</span></td>
+          <td style={td}><span className="ps-num" style={{ color: "var(--ps-fg-secondary)" }}>{doc.date}</span></td>
+          <td style={td}><span className="ps-num" style={{ color: "var(--ps-fg-muted)" }}>{doc.size}</span></td>
+          <td style={{ ...td, textAlign: "right" }}>
+            <Button variant="outline" size="sm" icon="download">Télécharger</Button>
+          </td>
+        </tr>
+      );
+    }
+
+    function DocsEmpty() {
+      return (
+        <div>
+          <div className="ps-eyebrow ps-eyebrow-muted">Documents</div>
+          <h1 className="ps-h1 ps-gradient-text" style={{ fontSize: 32, marginTop: 4, marginBottom: 24 }}>Mes documents</h1>
+          <EmptyState
+            icon="file-text"
+            title="Aucun document pour le moment"
+            body="Vos documents apparaîtront ici au fur et à mesure de votre projet."
+          />
+        </div>
+      );
+    }
+
+    function Head() {
+      return <PageHead num="6" title="Documents — GED client" subtitle="Recherche, filtres par catégorie, upload, badge Nouveau. Table sur desktop." />;
+    }
+
+    ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+    ReactDOM.createRoot(document.getElementById("state-default")).render(<DesktopWindow activeTab="documents"><DocumentsDesktop /></DesktopWindow>);
+    ReactDOM.createRoot(document.getElementById("state-empty")).render(<DesktopWindow activeTab="documents" minHeight={520}><DocsEmpty /></DesktopWindow>);
+  </script>
+</body>
+</html>

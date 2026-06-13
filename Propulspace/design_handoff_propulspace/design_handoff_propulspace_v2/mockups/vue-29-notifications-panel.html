@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8"><title>Vue 29 — Notifications panel admin</title>
+<link rel="stylesheet" href="../tokens/colors_and_type.css">
+<link rel="stylesheet" href="../tokens/portal.css">
+<link rel="stylesheet" href="../tokens/admin.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+  body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+  .container { max-width: 1340px; margin: 0 auto; }
+  .section-h { margin: 36px auto 16px; max-width: 1340px; }
+  .section-h h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; margin: 0; color: #2a2418; }
+  .section-h p { font-size: 13px; color: #6b6357; margin: 4px 0 0; }
+</style></head>
+<body><div id="head"></div>
+
+<div class="section-h"><h2>État avec notifications (5 items répartis dans 3 sections)</h2></div>
+<div class="container"><div id="state-default"></div></div>
+
+<div class="section-h"><h2>Empty state (tout est lu)</h2></div>
+<div class="container"><div id="state-empty"></div></div>
+
+<script type="text/babel" src="_lib/primitives.jsx"></script>
+<script type="text/babel" src="_lib/shell.jsx"></script>
+<script type="text/babel" src="_lib/desktop-shell.jsx"></script>
+<script type="text/babel" src="_lib/admin-shell.jsx"></script>
+
+<script type="text/babel">
+function NotifRow({ icon, tint, title, sub, unread, last }) {
+  const tints = {
+    red:    { bg: "rgba(239,68,68,0.15)",  fg: "#F87171" },
+    amber:  { bg: "rgba(245,158,11,0.15)", fg: "#FCD34D" },
+    violet: { bg: "rgba(139,92,246,0.18)", fg: "#A78BFA" },
+    green:  { bg: "rgba(16,185,129,0.15)", fg: "#34D399" },
+    gray:   { bg: "rgba(255,255,255,0.05)", fg: "var(--a-fg-2)" },
+  };
+  const t = tints[tint] || tints.gray;
+  return (
+    <button style={{
+      width: "100%", display: "flex", alignItems: "center", gap: 11,
+      padding: "11px 14px", border: "none",
+      borderBottom: last ? "none" : "1px solid var(--a-border)",
+      background: "transparent", cursor: "pointer", textAlign: "left",
+      transition: "background 150ms", color: "var(--a-fg)",
+      position: "relative",
+    }} onMouseOver={e => e.currentTarget.style.background = "rgba(139,92,246,0.05)"}
+       onMouseOut={e => e.currentTarget.style.background = "transparent"}>
+      {unread && <span style={{ position: "absolute", left: 4, top: "50%", transform: "translateY(-50%)", width: 5, height: 5, borderRadius: 9999, background: "var(--a-neon)" }} />}
+      <span style={{ width: 32, height: 32, borderRadius: 9, background: t.bg, color: t.fg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <Icon name={icon} size={14} stroke={2.2} />
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 12.5, fontWeight: unread ? 600 : 500, color: "var(--a-fg)", letterSpacing: "-0.005em", lineHeight: 1.35 }}>{title}</div>
+        <div className="ps-num" style={{ fontSize: 11, color: "var(--a-fg-muted)", marginTop: 3 }}>{sub}</div>
+      </div>
+      <Icon name="chevron-right" size={13} stroke={2} style={{ color: "var(--a-fg-muted)", flexShrink: 0 }} />
+    </button>
+  );
+}
+
+function NotifSection({ title, tone, children }) {
+  const tones = { red: "#F87171", amber: "#FCD34D", gray: "var(--a-fg-2)" };
+  return (
+    <div>
+      <div style={{
+        padding: "8px 14px", display: "flex", alignItems: "center", justifyContent: "space-between",
+        background: "rgba(0,0,0,0.25)", borderTop: "1px solid var(--a-border)", borderBottom: "1px solid var(--a-border)",
+      }}>
+        <span style={{ fontSize: 10.5, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.12em", color: tones[tone] || "var(--a-fg-muted)" }}>{title}</span>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function NotifPanel({ empty }) {
+  return (
+    <AdminWindow>
+      <div style={{ position: "relative" }}>
+        <AdminShell activeKey="dashboard" title="Dashboard" breadcrumb="Production ›">
+          <div style={{ filter: "blur(1px)", opacity: 0.5 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+              {[0,1,2,3].map(i => <div key={i} className="a-card" style={{ height: 90 }} />)}
+            </div>
+            <div className="a-card" style={{ height: 240 }} />
+          </div>
+        </AdminShell>
+
+        {/* Bell + Popover overlay — positioned over the admin header */}
+        <div style={{ position: "absolute", top: 36, right: 0, padding: "10px 20px", zIndex: 50 }}>
+          {/* Bell button (visual reminder) */}
+          <div style={{
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            width: 36, height: 36, borderRadius: 9999,
+            background: "rgba(139,92,246,0.15)", color: "#A78BFA",
+            border: "1px solid rgba(139,92,246,0.30)",
+            position: "absolute", top: 12, right: 28,
+          }}>
+            <Icon name="bell" size={15} stroke={2.2} />
+            {!empty && (
+              <span style={{
+                position: "absolute", top: -4, right: -4,
+                minWidth: 18, height: 18, borderRadius: 9999,
+                background: "#F87171", color: "#fff",
+                fontSize: 10, fontWeight: 700,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                padding: "0 4px",
+                fontVariantNumeric: "tabular-nums",
+                boxShadow: "0 0 0 2px var(--a-bg-1)",
+              }}>5</span>
+            )}
+          </div>
+
+          {/* Popover */}
+          <div style={{
+            position: "absolute", top: 60, right: 20, width: 400,
+            background: "var(--a-bg-2)", borderRadius: 12,
+            border: "1px solid var(--a-border-2)",
+            boxShadow: "0 20px 50px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.10)",
+            overflow: "hidden", color: "var(--a-fg)",
+          }}>
+            {/* Header */}
+            <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--a-border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div className="a-h2" style={{ fontSize: 14 }}>Notifications</div>
+              {!empty && <a href="#" style={{ fontSize: 11.5, fontWeight: 500 }}>Tout marquer lu</a>}
+            </div>
+
+            {empty ? (
+              <div style={{ padding: "32px 24px", textAlign: "center" }}>
+                <div style={{
+                  width: 44, height: 44, margin: "0 auto 10px", borderRadius: 9999,
+                  background: "rgba(16,185,129,0.12)", color: "#34D399",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <Icon name="check-circle-2" size={20} stroke={2.2} />
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>Tout est à jour</div>
+                <div style={{ fontSize: 11.5, color: "var(--a-fg-muted)", marginTop: 4 }}>
+                  Aucune notification en attente.
+                </div>
+              </div>
+            ) : (
+              <div style={{ maxHeight: 420, overflowY: "auto" }}>
+                <NotifSection title="Actions urgentes · 2" tone="red">
+                  <NotifRow icon="receipt" tint="red" title="Facture PS-1033 en retard de 45 jours" sub="Précieuse Joaillerie · 2 500,00 €" unread />
+                  <NotifRow icon="user-x" tint="red" title="Tech Innov inactif depuis 21 jours" sub="Score d'usage tombé à 22 %" unread last />
+                </NotifSection>
+                <NotifSection title="À traiter · 2" tone="amber">
+                  <NotifRow icon="pen-line" tint="amber" title="Avenant SEO mensuel en attente de signature" sub="Précieuse Joaillerie · envoyé il y a 8 jours" unread />
+                  <NotifRow icon="user-plus" tint="violet" title="Nouveau lead qualifié : Tech Innov" sub="Score 70/70 · il y a 2 h" unread last />
+                </NotifSection>
+                <NotifSection title="Info · 1" tone="gray">
+                  <NotifRow icon="check-circle-2" tint="green" title="Paiement PS-1029 reçu" sub="Dupont Immo · 5 000 € · il y a 5 j" last />
+                </NotifSection>
+              </div>
+            )}
+
+            {/* Footer */}
+            <div style={{ padding: "10px 16px", borderTop: "1px solid var(--a-border)", textAlign: "center", background: "rgba(0,0,0,0.15)" }}>
+              <a href="/admin/notifications" style={{ fontSize: 12, fontWeight: 500 }}>Voir toutes les notifications →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </AdminWindow>
+  );
+}
+
+function Head() {
+  return <PageHead num="29" title="Notifications admin — Bell + Popover" subtitle="Composant header admin. Badge count rouge + popover 400px avec 3 sections (Urgent / À traiter / Info)." />;
+}
+ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+ReactDOM.createRoot(document.getElementById("state-default")).render(<NotifPanel />);
+ReactDOM.createRoot(document.getElementById("state-empty")).render(<NotifPanel empty />);
+</script>
+</body></html>

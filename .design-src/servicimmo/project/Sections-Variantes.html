@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Servicimmo · 6 variantes · Audience / Services / Pourquoi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:#0d1a24; --slate:#1e3a4d; --slate-2:#2a4a60; --white:#fff;
+    --bg:#f5f7f8; --bg-2:#eef2f4; --line:#dde4e8; --line-soft:#e8edef;
+    --muted:#7a8691; --muted-2:#4a5865;
+    --saf:#a4c425; --saf-soft:#e5efba; --saf-dark:#6a8a10; --saf-bg:#f3f7e0;
+  }
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  body{font-family:'Geist',system-ui,sans-serif;color:var(--ink);background:#e9eef1;-webkit-font-smoothing:antialiased;line-height:1.5}
+  .mono{font-family:'Geist Mono',monospace}
+  .page{max-width:1280px;margin:0 auto;padding:40px 32px 80px}
+  .page-head{padding:56px 0 40px;border-bottom:1px solid var(--line)}
+  .page-head h1{font-size:40px;letter-spacing:-0.02em;font-weight:600;margin:0 0 10px}
+  .page-head p{color:var(--muted-2);margin:0;font-size:15px}
+
+  .group{margin-top:56px}
+  .group-head{display:flex;align-items:baseline;gap:16px;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  .group-head h2{font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0}
+  .group-head span{font-family:'Geist Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  .variant{background:var(--white);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 4px 14px -6px rgba(13,26,36,0.06)}
+  .variant-head{display:flex;justify-content:space-between;align-items:baseline;padding:14px 20px;background:#f9fbfb;border-bottom:1px solid var(--line)}
+  .variant-name{font-size:12px;font-family:'Geist Mono',monospace;color:var(--ink);text-transform:uppercase;letter-spacing:0.06em;font-weight:600}
+  .variant-tag{font-size:11px;color:var(--muted);font-family:'Geist Mono',monospace}
+  .variant-body{padding:0;position:relative;min-height:400px}
+
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;color:var(--muted-2);font-family:'Geist Mono',monospace;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px}
+  .eyebrow::before{content:'';width:16px;height:1px;background:var(--muted-2)}
+  em.hl{font-style:normal;background:linear-gradient(transparent 60%,var(--saf-soft) 60%);padding:0 2px}
+
+  /* ══════════════ AUDIENCE VARIANTS ══════════════ */
+  .aud-title{font-size:24px;font-weight:600;letter-spacing:-0.02em;margin:0 0 6px;line-height:1.15}
+  .aud-sub{font-size:13px;color:var(--muted-2);margin:0 0 20px;line-height:1.5}
+
+  /* A1 — Tabs horizontal */
+  .a1{padding:28px}
+  .a1-tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:20px}
+  .a1-tab{padding:10px 16px;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;font-weight:500}
+  .a1-tab.active{color:var(--ink);border-bottom-color:var(--slate)}
+  .a1-body{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+  .a1-body h4{font-size:16px;font-weight:600;margin:0 0 8px;letter-spacing:-0.015em}
+  .a1-body p{font-size:13px;color:var(--muted-2);margin:0 0 14px;line-height:1.5}
+  .a1-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .a1-chip{font-size:11px;padding:4px 10px;background:var(--saf-bg);color:var(--saf-dark);border-radius:4px;font-family:'Geist Mono',monospace;font-weight:600;text-transform:uppercase;letter-spacing:0.04em}
+  .a1-diags{list-style:none;padding:0;margin:0;font-size:12px;color:var(--muted-2)}
+  .a1-diags li{padding:8px 0;border-top:1px solid var(--line-soft);display:flex;justify-content:space-between;gap:12px}
+  .a1-diags li:first-child{border-top:none}
+
+  /* A2 — Liste éditoriale numérotée */
+  .a2{padding:28px}
+  .a2-list{list-style:none;padding:0;margin:0}
+  .a2-item{display:grid;grid-template-columns:40px 1fr auto;gap:16px;padding:16px 0;border-top:1px solid var(--line);align-items:baseline}
+  .a2-item:first-child{border-top:none;padding-top:0}
+  .a2-num{font-family:'Geist Mono',monospace;font-size:12px;color:var(--muted);font-weight:500}
+  .a2-item h4{font-size:16px;font-weight:500;margin:0 0 4px;letter-spacing:-0.015em}
+  .a2-item p{font-size:13px;color:var(--muted-2);margin:0;line-height:1.5}
+  .a2-arrow{color:var(--saf-dark);font-size:14px}
+
+  /* A3 — 4 Cards colorées (visuel) */
+  .a3{padding:20px;background:var(--bg-2)}
+  .a3-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .a3-card{padding:22px;border-radius:12px;position:relative;overflow:hidden;min-height:150px}
+  .a3-card-n{font-family:'Geist Mono',monospace;font-size:10px;opacity:0.6;letter-spacing:0.1em}
+  .a3-card h4{font-size:16px;font-weight:600;margin:8px 0 6px;letter-spacing:-0.015em;line-height:1.2}
+  .a3-card p{font-size:12px;margin:0;line-height:1.45;opacity:0.8}
+  .a3-c1{background:var(--slate);color:var(--white)}
+  .a3-c2{background:var(--saf);color:var(--slate)}
+  .a3-c3{background:var(--white);color:var(--ink);border:1px solid var(--line)}
+  .a3-c4{background:var(--saf-bg);color:var(--ink)}
+
+  /* A4 — Split big visual + list */
+  .a4{display:grid;grid-template-columns:1fr 1.2fr;min-height:400px}
+  .a4-left{background:var(--slate);color:var(--white);padding:28px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+  .a4-left::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:var(--saf);opacity:0.2;filter:blur(40px)}
+  .a4-left-big{font-size:48px;font-weight:600;letter-spacing:-0.035em;line-height:1;position:relative}
+  .a4-left small{font-size:13px;color:rgba(255,255,255,0.6);font-family:'Geist Mono',monospace;display:block;margin-bottom:10px;letter-spacing:0.06em;text-transform:uppercase}
+  .a4-left p{font-size:13px;color:rgba(255,255,255,0.75);margin:12px 0 0;position:relative}
+  .a4-right{padding:28px}
+  .a4-right ul{list-style:none;padding:0;margin:0}
+  .a4-right li{padding:14px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .a4-right li:first-child{border-top:none}
+  .a4-right li h4{font-size:15px;font-weight:500;margin:0 0 2px;letter-spacing:-0.01em}
+  .a4-right li p{font-size:12px;color:var(--muted-2);margin:0}
+  .a4-right li b{font-family:'Geist Mono',monospace;font-size:11px;color:var(--saf-dark);background:var(--saf-bg);padding:4px 8px;border-radius:4px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap}
+
+  /* A5 — Table-style */
+  .a5{padding:28px}
+  .a5-table{width:100%;border-collapse:collapse}
+  .a5-table thead th{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;text-align:left;padding:10px 12px;background:var(--bg-2);font-weight:600;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .a5-table td{padding:16px 12px;border-bottom:1px solid var(--line-soft);vertical-align:top;font-size:13px}
+  .a5-table td b{font-size:15px;font-weight:500;letter-spacing:-0.01em;display:block;margin-bottom:2px;color:var(--ink)}
+  .a5-table td span{color:var(--muted-2)}
+  .a5-table .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px}
+
+  /* A6 — Colonne gauche sticky, chaque audience = bloc */
+  .a6{display:grid;grid-template-columns:180px 1fr}
+  .a6-nav{background:var(--bg-2);padding:28px 20px;border-right:1px solid var(--line)}
+  .a6-nav-lbl{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:14px}
+  .a6-nav-item{padding:10px 0;font-size:13px;color:var(--muted-2);cursor:pointer;border-top:1px solid var(--line)}
+  .a6-nav-item:first-of-type{border-top:none}
+  .a6-nav-item.active{color:var(--ink);font-weight:600}
+  .a6-nav-item.active::before{content:'→ ';color:var(--saf-dark)}
+  .a6-content{padding:32px}
+  .a6-content .eyebrow{color:var(--saf-dark)}
+  .a6-content h4{font-size:22px;font-weight:500;letter-spacing:-0.02em;margin:0 0 10px}
+  .a6-content p{font-size:14px;color:var(--muted-2);margin:0 0 20px;line-height:1.6;max-width:42ch}
+  .a6-content .stats{display:flex;gap:32px}
+  .a6-content .stat b{font-size:24px;font-weight:600;letter-spacing:-0.02em;display:block}
+  .a6-content .stat span{font-size:11px;color:var(--muted);font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:0.06em}
+
+  /* ══════════════ SERVICES VARIANTS ══════════════ */
+
+  /* S1 — Editorial (déjà validé, en rappel) */
+  .s1{padding:28px}
+  .s1 ol{list-style:none;padding:0;margin:0}
+  .s1 li{display:grid;grid-template-columns:40px 80px 1fr auto;gap:16px;padding:14px 0;border-top:1px solid var(--line);align-items:baseline}
+  .s1 li:first-child{border-top:none}
+  .s1-num{font-family:'Geist Mono',monospace;font-size:11px;color:var(--muted)}
+  .s1-tag{font-family:'Geist Mono',monospace;font-size:10px;color:var(--saf-dark);background:var(--saf-bg);padding:3px 8px;border-radius:3px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;justify-self:start}
+  .s1 li h4{font-size:15px;font-weight:500;margin:0 0 2px;letter-spacing:-0.015em}
+  .s1 li p{font-size:12px;color:var(--muted-2);margin:0;line-height:1.5}
+  .s1 li a{font-size:11px;color:var(--saf-dark);font-weight:600;white-space:nowrap;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:0.06em}
+
+  /* S2 — Grid 3×2 cards avec gros numéros */
+  .s2{padding:20px;background:var(--bg-2)}
+  .s2-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .s2-card{background:var(--white);padding:20px;border-radius:10px;position:relative;min-height:150px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--line)}
+  .s2-card-n{position:absolute;top:16px;right:18px;font-family:'Geist Mono',monospace;font-size:32px;font-weight:300;color:var(--line);letter-spacing:-0.02em}
+  .s2-card-tag{font-family:'Geist Mono',monospace;font-size:9px;color:var(--saf-dark);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:8px}
+  .s2-card h4{font-size:14px;font-weight:500;margin:0 0 4px;letter-spacing:-0.01em;line-height:1.2;padding-right:30px}
+  .s2-card p{font-size:11px;color:var(--muted-2);margin:0;line-height:1.4}
+
+  /* S3 — Bento asymétrique */
+  .s3{padding:20px;background:var(--slate);color:var(--white);min-height:400px}
+  .s3-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr;grid-template-rows:auto auto;gap:8px;height:100%}
+  .s3-item{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);padding:18px;border-radius:10px;display:flex;flex-direction:column;justify-content:space-between}
+  .s3-item-featured{grid-row:span 2;background:var(--saf);color:var(--slate);border-color:transparent}
+  .s3-item h4{font-size:14px;font-weight:500;margin:12px 0 4px;letter-spacing:-0.01em;line-height:1.2}
+  .s3-item-featured h4{font-size:22px;line-height:1.1;font-weight:600}
+  .s3-item p{font-size:11px;opacity:0.7;margin:0;line-height:1.4}
+  .s3-item-featured p{opacity:0.8;font-size:13px}
+  .s3-item-tag{font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;opacity:0.6}
+
+  /* S4 — Timeline verticale avec catégories */
+  .s4{padding:28px}
+  .s4-cat{margin-bottom:24px}
+  .s4-cat-head{font-family:'Geist Mono',monospace;font-size:10px;color:var(--saf-dark);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;padding-bottom:8px;border-bottom:1px solid var(--saf-soft);margin-bottom:10px;display:flex;justify-content:space-between}
+  .s4-item{display:flex;gap:12px;padding:8px 0;font-size:13px;align-items:baseline}
+  .s4-item b{font-weight:500;min-width:150px;letter-spacing:-0.01em}
+  .s4-item span{color:var(--muted-2);font-size:12px}
+
+  /* S5 — Compact cards horizontal scroll */
+  .s5{padding:20px;background:var(--bg-2)}
+  .s5-scroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px}
+  .s5-card{flex:0 0 220px;background:var(--white);padding:18px;border-radius:10px;border:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+  .s5-card-top{display:flex;align-items:center;justify-content:space-between}
+  .s5-card-n{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.08em}
+  .s5-card-icon{width:36px;height:36px;background:var(--saf-bg);color:var(--saf-dark);border-radius:8px;display:grid;place-items:center;font-size:16px;font-weight:600;font-family:'Geist Mono',monospace}
+  .s5-card h4{font-size:14px;font-weight:500;margin:6px 0 2px;letter-spacing:-0.01em}
+  .s5-card p{font-size:11px;color:var(--muted-2);margin:0;line-height:1.4}
+  .s5-card-tag{font-size:10px;color:var(--saf-dark);font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:0.06em}
+
+  /* S6 — Tableau réglementaire dense (validé existant) */
+  .s6{padding:20px;background:var(--bg-2)}
+  .s6-table{width:100%;background:var(--white);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:12px}
+  .s6-table thead{background:var(--slate);color:var(--white)}
+  .s6-table thead th{padding:10px 12px;text-align:left;font-family:'Geist Mono',monospace;font-size:9px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase}
+  .s6-table td{padding:10px 12px;border-top:1px solid var(--line-soft);vertical-align:middle}
+  .s6-table td b{font-weight:500;letter-spacing:-0.01em;font-size:13px}
+  .s6-table td small{color:var(--muted);font-size:10px;display:block;margin-top:2px;font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:0.04em}
+  .s6-table td span{color:var(--muted-2);font-size:11px;display:block;margin-top:4px}
+  .s6-table .tag{font-family:'Geist Mono',monospace;font-size:9px;color:var(--saf-dark);background:var(--saf-bg);padding:3px 7px;border-radius:3px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;display:inline-block}
+
+  /* ══════════════ WHY VARIANTS ══════════════ */
+
+  /* W1 — Récit long + 4 stats inline (actuel) */
+  .w1{padding:28px;background:var(--slate);color:var(--white);min-height:400px}
+  .w1 .eyebrow{color:rgba(255,255,255,0.6)}
+  .w1 .eyebrow::before{background:rgba(255,255,255,0.4)}
+  .w1-title{font-size:28px;line-height:1.1;letter-spacing:-0.025em;font-weight:500;margin:0 0 12px}
+  .w1-title em{font-style:normal;color:var(--saf)}
+  .w1-sub{font-size:13px;color:rgba(255,255,255,0.72);max-width:46ch;line-height:1.55;margin:0 0 22px}
+  .w1-stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;border-top:1px solid rgba(255,255,255,0.15);padding-top:18px}
+  .w1-stat b{display:block;font-size:28px;font-weight:600;letter-spacing:-0.025em;color:var(--saf)}
+  .w1-stat span{font-size:10px;color:rgba(255,255,255,0.6);font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:0.06em}
+
+  /* W2 — Manifeste typographique */
+  .w2{padding:36px;background:var(--white)}
+  .w2-kicker{font-family:'Geist Mono',monospace;font-size:10px;color:var(--saf-dark);letter-spacing:0.12em;text-transform:uppercase;font-weight:600;margin-bottom:24px}
+  .w2-manifesto{font-size:24px;font-weight:400;letter-spacing:-0.015em;line-height:1.35;color:var(--ink);margin:0 0 24px;max-width:30ch}
+  .w2-manifesto em{font-style:normal;color:var(--saf-dark);font-weight:500}
+  .w2-manifesto u{text-decoration:none;position:relative}
+  .w2-manifesto u::after{content:'';position:absolute;left:0;right:0;bottom:3px;height:42%;background:var(--saf-soft);z-index:-1}
+  .w2-footer{display:flex;justify-content:space-between;padding-top:20px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);font-family:'Geist Mono',monospace;text-transform:uppercase;letter-spacing:0.06em}
+  .w2-footer b{color:var(--ink);font-weight:600}
+
+  /* W3 — Timeline historique */
+  .w3{padding:28px;background:var(--white)}
+  .w3 h3{font-size:24px;font-weight:500;letter-spacing:-0.02em;margin:0 0 6px}
+  .w3 h3 em{font-style:normal;color:var(--saf-dark)}
+  .w3-sub{font-size:13px;color:var(--muted-2);margin:0 0 24px}
+  .w3-timeline{position:relative;padding-left:24px}
+  .w3-timeline::before{content:'';position:absolute;left:8px;top:12px;bottom:12px;width:2px;background:var(--line)}
+  .w3-event{position:relative;padding:10px 0 16px}
+  .w3-event::before{content:'';position:absolute;left:-21px;top:16px;width:10px;height:10px;border-radius:50%;background:var(--white);border:2px solid var(--saf)}
+  .w3-event:first-child::before{background:var(--saf);border-color:var(--saf-dark)}
+  .w3-event b{font-family:'Geist Mono',monospace;font-size:12px;color:var(--saf-dark);font-weight:600;letter-spacing:0.04em}
+  .w3-event h4{font-size:15px;font-weight:500;margin:2px 0 4px;letter-spacing:-0.01em}
+  .w3-event p{font-size:12px;color:var(--muted-2);margin:0;line-height:1.5}
+
+  /* W4 — 4 piliers icônes + texte */
+  .w4{padding:28px}
+  .w4-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .w4-pillar{display:flex;gap:14px;align-items:flex-start}
+  .w4-pillar-ico{flex-shrink:0;width:42px;height:42px;background:var(--saf-bg);color:var(--saf-dark);border-radius:10px;display:grid;place-items:center;font-size:18px;font-family:'Geist Mono',monospace;font-weight:700}
+  .w4-pillar h4{font-size:14px;font-weight:600;margin:0 0 4px;letter-spacing:-0.01em}
+  .w4-pillar p{font-size:12px;color:var(--muted-2);margin:0;line-height:1.5}
+
+  /* W5 — Split : big number + story */
+  .w5{display:grid;grid-template-columns:1fr 1.3fr;min-height:400px}
+  .w5-left{background:linear-gradient(160deg,var(--saf) 0%,var(--saf-dark) 100%);color:var(--white);padding:32px;display:flex;flex-direction:column;justify-content:space-between}
+  .w5-year{font-size:80px;font-weight:600;letter-spacing:-0.04em;line-height:0.9}
+  .w5-caption{font-size:11px;font-family:'Geist Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;opacity:0.8;margin-top:6px}
+  .w5-mono-stat{padding-top:14px;border-top:1px solid rgba(255,255,255,0.25);font-size:12px}
+  .w5-mono-stat span{font-family:'Geist Mono',monospace;opacity:0.8;text-transform:uppercase;letter-spacing:0.06em;font-size:10px;display:block;margin-bottom:4px}
+  .w5-mono-stat b{font-size:20px;letter-spacing:-0.02em;font-weight:600}
+  .w5-right{padding:32px}
+  .w5-right h3{font-size:22px;font-weight:500;letter-spacing:-0.02em;margin:0 0 14px;line-height:1.2}
+  .w5-right p{font-size:13px;color:var(--muted-2);margin:0 0 14px;line-height:1.6}
+  .w5-right ul{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:8px}
+  .w5-right li{font-size:12px;color:var(--ink);padding-left:16px;position:relative}
+  .w5-right li::before{content:'→';position:absolute;left:0;color:var(--saf-dark);font-weight:600}
+
+  /* W6 — KPIs poster avec gros chiffres */
+  .w6{padding:28px;background:var(--bg-2)}
+  .w6-kicker{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px}
+  .w6-title{font-size:20px;font-weight:500;letter-spacing:-0.02em;margin:0 0 24px;max-width:34ch;line-height:1.25}
+  .w6-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .w6-kpi{background:var(--white);padding:20px}
+  .w6-kpi-n{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px}
+  .w6-kpi-val{font-size:40px;font-weight:600;letter-spacing:-0.035em;line-height:1;margin-bottom:6px}
+  .w6-kpi-val small{font-size:15px;font-weight:500;color:var(--muted-2);margin-left:3px;letter-spacing:-0.01em}
+  .w6-kpi-lbl{font-size:11px;color:var(--muted-2);line-height:1.4}
+
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-head">
+    <h1>3 sections · 6 variantes chacune</h1>
+    <p>Sections qui suivent le hero validé. Le hero D3 n'est pas modifié. Sélectionne tes favorites pour intégration.</p>
+  </div>
+
+  <!-- ══════════════════ AUDIENCE ══════════════════ -->
+  <div class="group">
+    <div class="group-head">
+      <h2>1. À qui nous nous adressons</h2>
+      <span>Audience · Particuliers, Pros, Syndics, MOA</span>
+    </div>
+    <div class="grid">
+
+      <!-- A1 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">A1 · Tabs éditoriales</span><span class="variant-tag">Interactif · compact</span></div>
+        <div class="variant-body a1">
+          <div class="eyebrow">Pour qui</div>
+          <h3 class="aud-title">Un interlocuteur unique, quelque soit votre projet.</h3>
+          <div class="a1-tabs">
+            <div class="a1-tab active">Particuliers</div>
+            <div class="a1-tab">Professionnels</div>
+            <div class="a1-tab">Syndics</div>
+            <div class="a1-tab">MOA / Architectes</div>
+          </div>
+          <div class="a1-body">
+            <div>
+              <h4>Vous vendez ou louez votre bien</h4>
+              <p>On vous guide sur la liste exacte des diagnostics obligatoires pour votre maison, appartement ou local. Devis sous 2 h, RDV sous 48 h.</p>
+              <div class="a1-chips">
+                <span class="a1-chip">Vente</span>
+                <span class="a1-chip">Location</span>
+                <span class="a1-chip">Travaux</span>
+              </div>
+            </div>
+            <ul class="a1-diags">
+              <li><span>DPE</span><b>obligatoire</b></li>
+              <li><span>Amiante</span><b>si &lt; 1997</b></li>
+              <li><span>Plomb (CREP)</span><b>si &lt; 1949</b></li>
+              <li><span>Gaz / Électricité</span><b>si &gt; 15 ans</b></li>
+              <li><span>Termites · ERP · Loi Carrez</span><b>selon cas</b></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- A2 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">A2 · Liste numérotée</span><span class="variant-tag">Éditorial · sobre</span></div>
+        <div class="variant-body a2">
+          <div class="eyebrow">Pour qui</div>
+          <h3 class="aud-title">Quatre publics, <em class="hl">un seul cabinet</em>.</h3>
+          <p class="aud-sub">Nous couvrons l'ensemble des acteurs de l'immobilier en Touraine.</p>
+          <ul class="a2-list">
+            <li class="a2-item"><span class="a2-num">01</span><div><h4>Particuliers</h4><p>Vente, location, travaux de rénovation. Conseil sur votre liste réglementaire.</p></div><span class="a2-arrow">→</span></li>
+            <li class="a2-item"><span class="a2-num">02</span><div><h4>Professionnels</h4><p>Locaux professionnels, commerces, bureaux, ERP. Cession et bail commercial.</p></div><span class="a2-arrow">→</span></li>
+            <li class="a2-item"><span class="a2-num">03</span><div><h4>Syndics de copropriété</h4><p>DPE collectif, DTA, plans pluriannuels de travaux (PPT).</p></div><span class="a2-arrow">→</span></li>
+            <li class="a2-item"><span class="a2-num">04</span><div><h4>Maîtres d'ouvrage & architectes</h4><p>Amiante avant travaux / démolition, mesures d'empoussièrement.</p></div><span class="a2-arrow">→</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- A3 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">A3 · 4 cartes colorées</span><span class="variant-tag">Visuel · varié</span></div>
+        <div class="variant-body a3">
+          <div class="a3-grid">
+            <div class="a3-card a3-c1">
+              <div class="a3-card-n">01 / PARTICULIERS</div>
+              <h4>Vendeurs & bailleurs</h4>
+              <p>Maison, appartement, local. Vente, location, renouvellement.</p>
+            </div>
+            <div class="a3-card a3-c2">
+              <div class="a3-card-n">02 / PROFESSIONNELS</div>
+              <h4>Commerces & bureaux</h4>
+              <p>Cession, bail commercial, exploitation ERP.</p>
+            </div>
+            <div class="a3-card a3-c3">
+              <div class="a3-card-n">03 / SYNDICS</div>
+              <h4>Copropriétés</h4>
+              <p>DPE collectif, DTA, plans pluriannuels.</p>
+            </div>
+            <div class="a3-card a3-c4">
+              <div class="a3-card-n">04 / MOA / ARCHI</div>
+              <h4>Chantiers</h4>
+              <p>Amiante avant travaux / démolition, HAP enrobés.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- A4 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">A4 · Split stat + liste</span><span class="variant-tag">Confiance · impact</span></div>
+        <div class="variant-body a4">
+          <div class="a4-left">
+            <div>
+              <small>Publics accompagnés</small>
+              <div class="a4-left-big">4</div>
+              <p>Une seule équipe, un seul numéro, un seul métier — le diagnostic immobilier. Depuis 1998 en Touraine.</p>
+            </div>
+          </div>
+          <div class="a4-right">
+            <ul>
+              <li><div><h4>Particuliers</h4><p>Vente, location, travaux</p></div><b>~60% vol.</b></li>
+              <li><div><h4>Professionnels</h4><p>Commerces, bureaux, ERP</p></div><b>~15% vol.</b></li>
+              <li><div><h4>Syndics</h4><p>DPE collectif, DTA</p></div><b>~15% vol.</b></li>
+              <li><div><h4>MOA & archi</h4><p>Chantiers amiante / HAP</p></div><b>~10% vol.</b></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- A5 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">A5 · Table réglementaire</span><span class="variant-tag">B2B · pro</span></div>
+        <div class="variant-body a5">
+          <div class="eyebrow">Pour qui</div>
+          <h3 class="aud-title">Nos publics, leurs besoins.</h3>
+          <p class="aud-sub">Un tableau synthétique pour identifier votre cas en un coup d'œil.</p>
+          <table class="a5-table">
+            <thead><tr><th>Profil</th><th>Usage type</th><th>Délai moyen</th></tr></thead>
+            <tbody>
+              <tr><td><span class="dot" style="background:var(--saf)"></span><b>Particuliers</b><span>Vente, location</span></td><td>Diagnostics réglementaires pour maison / appartement</td><td class="mono" style="font-size:12px;color:var(--muted-2)">48 h</td></tr>
+              <tr><td><span class="dot" style="background:var(--slate)"></span><b>Professionnels</b><span>Commerce, ERP</span></td><td>Cession fonds de commerce, bail commercial</td><td class="mono" style="font-size:12px;color:var(--muted-2)">72 h</td></tr>
+              <tr><td><span class="dot" style="background:var(--saf-dark)"></span><b>Syndics</b><span>Copropriétés</span></td><td>DPE collectif, DTA, mise en conformité</td><td class="mono" style="font-size:12px;color:var(--muted-2)">7 j</td></tr>
+              <tr><td><span class="dot" style="background:var(--ink)"></span><b>MOA / Archi</b><span>Chantiers</span></td><td>Amiante / plomb avant travaux ou démolition</td><td class="mono" style="font-size:12px;color:var(--muted-2)">48 h</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- A6 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">A6 · Nav latérale sticky</span><span class="variant-tag">Éditorial · premium</span></div>
+        <div class="variant-body a6">
+          <div class="a6-nav">
+            <div class="a6-nav-lbl">Audience</div>
+            <div class="a6-nav-item active">Particuliers</div>
+            <div class="a6-nav-item">Professionnels</div>
+            <div class="a6-nav-item">Syndics</div>
+            <div class="a6-nav-item">MOA & archi</div>
+          </div>
+          <div class="a6-content">
+            <div class="eyebrow">01 / Particuliers</div>
+            <h4>Vous vendez, louez, ou rénovez.</h4>
+            <p>On vous guide sur la liste exacte des diagnostics obligatoires selon votre projet — vente, location, travaux. Tarif annoncé à l'avance, aucune surprise.</p>
+            <div class="stats">
+              <div class="stat"><b>~60%</b><span>du volume</span></div>
+              <div class="stat"><b>48 h</b><span>délai moyen</span></div>
+              <div class="stat"><b>342</b><span>avis clients</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════ SERVICES ══════════════════ -->
+  <div class="group">
+    <div class="group-head">
+      <h2>2. Nos prestations</h2>
+      <span>Services · 6 interventions phares</span>
+    </div>
+    <div class="grid">
+
+      <!-- S1 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">S1 · Liste éditoriale</span><span class="variant-tag">Sobre · dense</span></div>
+        <div class="variant-body s1">
+          <div class="eyebrow">Nos prestations</div>
+          <h3 class="aud-title" style="margin-bottom:18px">Six expertises, <em class="hl">un seul cabinet</em>.</h3>
+          <ol>
+            <li><span class="s1-num">01</span><span class="s1-tag">Amiante</span><div><h4>DTA</h4><p>Diagnostic Technique Amiante · bâtiments collectifs &lt; 1997.</p></div><a>En savoir plus →</a></li>
+            <li><span class="s1-num">02</span><span class="s1-tag">Amiante</span><div><h4>Avant travaux / démolition</h4><p>Repérage des matériaux susceptibles de contenir de l'amiante.</p></div><a>En savoir plus →</a></li>
+            <li><span class="s1-num">03</span><span class="s1-tag">RT 2012</span><div><h4>Attestation RT 2012</h4><p>Contrôle de conformité joint au dépôt de permis de construire.</p></div><a>En savoir plus →</a></li>
+            <li><span class="s1-num">04</span><span class="s1-tag">Enrobés</span><div><h4>Amiante & HAP sur enrobés</h4><p>Carottages routiers · voiries, parkings, trottoirs.</p></div><a>En savoir plus →</a></li>
+            <li><span class="s1-num">05</span><span class="s1-tag">Tertiaire</span><div><h4>DPE mention tertiaire</h4><p>Performance énergétique des locaux professionnels.</p></div><a>En savoir plus →</a></li>
+            <li><span class="s1-num">06</span><span class="s1-tag">Amiante</span><div><h4>Constat visuel après travaux</h4><p>Vérification visuelle de la bonne exécution des travaux.</p></div><a>En savoir plus →</a></li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- S2 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">S2 · Grille 3×2 chiffrée</span><span class="variant-tag">Visuel · équilibré</span></div>
+        <div class="variant-body s2">
+          <div class="s2-grid">
+            <div class="s2-card"><div class="s2-card-n">01</div><div class="s2-card-tag">Amiante</div><h4>DTA</h4><p>Bâtiments collectifs &lt; 1997</p></div>
+            <div class="s2-card"><div class="s2-card-n">02</div><div class="s2-card-tag">Amiante</div><h4>Avant travaux</h4><p>Repérage sur chantier</p></div>
+            <div class="s2-card"><div class="s2-card-n">03</div><div class="s2-card-tag">RT 2012</div><h4>Attestation RT</h4><p>Joint au permis</p></div>
+            <div class="s2-card"><div class="s2-card-n">04</div><div class="s2-card-tag">Enrobés</div><h4>Amiante & HAP</h4><p>Carottages routiers</p></div>
+            <div class="s2-card"><div class="s2-card-n">05</div><div class="s2-card-tag">Tertiaire</div><h4>DPE tertiaire</h4><p>Locaux professionnels</p></div>
+            <div class="s2-card"><div class="s2-card-n">06</div><div class="s2-card-tag">Amiante</div><h4>Constat visuel</h4><p>Après travaux</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">S3 · Bento asymétrique</span><span class="variant-tag">Impact · premium</span></div>
+        <div class="variant-body s3">
+          <div class="s3-grid">
+            <div class="s3-item s3-item-featured">
+              <span class="s3-item-tag" style="color:var(--slate);opacity:0.7">01 / AMIANTE</span>
+              <div>
+                <h4>Diagnostic Technique Amiante (DTA)</h4>
+                <p>L'intervention la plus demandée en copropriété. Recherche systématique dans les bâtiments collectifs construits avant juillet 1997.</p>
+              </div>
+            </div>
+            <div class="s3-item"><span class="s3-item-tag">02 / Amiante</span><h4>Avant travaux</h4><p>Repérage chantier</p></div>
+            <div class="s3-item"><span class="s3-item-tag">03 / RT 2012</span><h4>Attestation RT</h4><p>Permis construire</p></div>
+            <div class="s3-item"><span class="s3-item-tag">04 / Enrobés</span><h4>Amiante & HAP</h4><p>Carottages routiers</p></div>
+            <div class="s3-item"><span class="s3-item-tag">05 / Tertiaire</span><h4>DPE tertiaire</h4><p>Locaux pros</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S4 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">S4 · Par catégorie métier</span><span class="variant-tag">Organisé · clair</span></div>
+        <div class="variant-body s4">
+          <div class="eyebrow">Nos prestations</div>
+          <h3 class="aud-title" style="margin-bottom:20px">Trois métiers, six expertises.</h3>
+          <div class="s4-cat">
+            <div class="s4-cat-head"><span>Amiante · 3 interventions</span><span>→</span></div>
+            <div class="s4-item"><b>DTA</b><span>Diagnostic technique amiante, bâtiments collectifs &lt; 1997</span></div>
+            <div class="s4-item"><b>Avant travaux / démol.</b><span>Repérage matériaux amiantés</span></div>
+            <div class="s4-item"><b>Constat visuel</b><span>Vérification après chantier</span></div>
+          </div>
+          <div class="s4-cat">
+            <div class="s4-cat-head"><span>Performance énergétique · 1 intervention</span><span>→</span></div>
+            <div class="s4-item"><b>DPE mention tertiaire</b><span>Locaux professionnels & décret tertiaire</span></div>
+          </div>
+          <div class="s4-cat">
+            <div class="s4-cat-head"><span>Chantier & neuf · 2 interventions</span><span>→</span></div>
+            <div class="s4-item"><b>Attestation RT 2012</b><span>Permis de construire</span></div>
+            <div class="s4-item"><b>Amiante & HAP enrobés</b><span>Carottages routiers</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S5 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">S5 · Cartes compactes scroll</span><span class="variant-tag">Mobile-first · léger</span></div>
+        <div class="variant-body s5">
+          <div class="eyebrow">Prestations phares</div>
+          <h3 class="aud-title" style="margin-bottom:16px">Six interventions, une équipe.</h3>
+          <div class="s5-scroll">
+            <div class="s5-card"><div class="s5-card-top"><div class="s5-card-icon">01</div><span class="s5-card-n">AMIANTE</span></div><h4>DTA</h4><p>Diagnostic Technique Amiante, bâtiments collectifs.</p><span class="s5-card-tag">→ détails</span></div>
+            <div class="s5-card"><div class="s5-card-top"><div class="s5-card-icon">02</div><span class="s5-card-n">AMIANTE</span></div><h4>Avant travaux</h4><p>Repérage des matériaux amiantés.</p><span class="s5-card-tag">→ détails</span></div>
+            <div class="s5-card"><div class="s5-card-top"><div class="s5-card-icon">03</div><span class="s5-card-n">RT 2012</span></div><h4>Attestation RT</h4><p>Conformité joint au permis.</p><span class="s5-card-tag">→ détails</span></div>
+            <div class="s5-card"><div class="s5-card-top"><div class="s5-card-icon">04</div><span class="s5-card-n">ENROBÉS</span></div><h4>Amiante & HAP</h4><p>Carottages routiers.</p><span class="s5-card-tag">→ détails</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S6 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">S6 · Table réglementaire</span><span class="variant-tag">Dense · B2B</span></div>
+        <div class="variant-body s6">
+          <table class="s6-table">
+            <thead><tr><th style="width:40px">N°</th><th>Prestation</th><th>Catégorie</th><th>Délai</th></tr></thead>
+            <tbody>
+              <tr><td class="mono" style="color:var(--muted)">01</td><td><b>DTA</b><small>Collectifs &lt; 1997</small></td><td><span class="tag">Amiante</span></td><td class="mono" style="font-size:11px;color:var(--muted-2)">48 h</td></tr>
+              <tr><td class="mono" style="color:var(--muted)">02</td><td><b>Avant travaux</b><small>Repérage chantier</small></td><td><span class="tag">Amiante</span></td><td class="mono" style="font-size:11px;color:var(--muted-2)">48 h</td></tr>
+              <tr><td class="mono" style="color:var(--muted)">03</td><td><b>Attestation RT 2012</b><small>Permis construire</small></td><td><span class="tag">RT 2012</span></td><td class="mono" style="font-size:11px;color:var(--muted-2)">5 j</td></tr>
+              <tr><td class="mono" style="color:var(--muted)">04</td><td><b>Amiante & HAP enrobés</b><small>Carottages routiers</small></td><td><span class="tag">Enrobés</span></td><td class="mono" style="font-size:11px;color:var(--muted-2)">72 h</td></tr>
+              <tr><td class="mono" style="color:var(--muted)">05</td><td><b>DPE tertiaire</b><small>Locaux pros</small></td><td><span class="tag">Tertiaire</span></td><td class="mono" style="font-size:11px;color:var(--muted-2)">48 h</td></tr>
+              <tr><td class="mono" style="color:var(--muted)">06</td><td><b>Constat visuel</b><small>Après travaux</small></td><td><span class="tag">Amiante</span></td><td class="mono" style="font-size:11px;color:var(--muted-2)">24 h</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════ WHY ══════════════════ -->
+  <div class="group">
+    <div class="group-head">
+      <h2>3. Pourquoi Servicimmo</h2>
+      <span>Why · récit, chiffres, arguments</span>
+    </div>
+    <div class="grid">
+
+      <!-- W1 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">W1 · Slate + stats</span><span class="variant-tag">Impact · B2B</span></div>
+        <div class="variant-body w1">
+          <div class="eyebrow">Pourquoi Servicimmo</div>
+          <h3 class="w1-title">Un cabinet qui fait <em>un seul métier</em>, vraiment bien.</h3>
+          <p class="w1-sub">Nous ne faisons ni gestion locative, ni transaction, ni travaux. Uniquement le diagnostic immobilier et le carottage routier, depuis 1998.</p>
+          <div class="w1-stats">
+            <div class="w1-stat"><b>28</b><span>ans d'expertise</span></div>
+            <div class="w1-stat"><b>10k+</b><span>diagnostics</span></div>
+            <div class="w1-stat"><b>48 h</b><span>délai moyen</span></div>
+            <div class="w1-stat"><b>100%</b><span>tarifs annoncés</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- W2 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">W2 · Manifeste typo</span><span class="variant-tag">Éditorial · bold</span></div>
+        <div class="variant-body w2">
+          <div class="w2-kicker">→ Pourquoi Servicimmo</div>
+          <p class="w2-manifesto">Pas un franchisé, pas un sous-traitant. Un cabinet <em>indépendant</em> à Tours, <u>28 ans de terrain</u>, et une veille réglementaire publique depuis 2017.</p>
+          <div class="w2-footer">
+            <span>Cabinet indépendant <b>depuis 1998</b></span>
+            <span>Indre-et-Loire <b>· 37</b></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- W3 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">W3 · Timeline historique</span><span class="variant-tag">Crédibilité · récit</span></div>
+        <div class="variant-body w3">
+          <div class="eyebrow">Pourquoi Servicimmo</div>
+          <h3>Trois décennies, <em>un seul métier</em>.</h3>
+          <p class="w3-sub">Les repères qui nous structurent.</p>
+          <div class="w3-timeline">
+            <div class="w3-event"><b>2026</b><h4>10 000+ diagnostics délivrés</h4><p>Cabinet reconnu en Indre-et-Loire pour son sérieux et ses délais.</p></div>
+            <div class="w3-event"><b>2017</b><h4>Veille réglementaire publique</h4><p>100 articles de fond publiés sur l'évolution du droit du diagnostic.</p></div>
+            <div class="w3-event"><b>2010</b><h4>Certifications Qualixpert & I.Cert</h4><p>Obtention des certifications de référence du métier.</p></div>
+            <div class="w3-event"><b>1998</b><h4>Création à Tours</h4><p>Cabinet indépendant, équipe locale — une identité qui n'a pas bougé.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- W4 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">W4 · 4 piliers icônes</span><span class="variant-tag">Classique · clair</span></div>
+        <div class="variant-body w4">
+          <div class="eyebrow">Pourquoi Servicimmo</div>
+          <h3 class="aud-title" style="margin-bottom:24px">Quatre engagements, <em class="hl">pas un de plus</em>.</h3>
+          <div class="w4-grid">
+            <div class="w4-pillar"><div class="w4-pillar-ico">✓</div><div><h4>Certifiés & assurés</h4><p>LCC Qualixpert, I.Cert, RCP Allianz. Rapports recevables par tous les notaires.</p></div></div>
+            <div class="w4-pillar"><div class="w4-pillar-ico">♥</div><div><h4>Indépendant</h4><p>Ni franchise ni sous-traitance. Le technicien qui intervient signe le rapport.</p></div></div>
+            <div class="w4-pillar"><div class="w4-pillar-ico">◎</div><div><h4>Ancrage 37</h4><p>Tours, Chinon, Amboise, Loches, Azay-le-Rideau — toute l'Indre-et-Loire.</p></div></div>
+            <div class="w4-pillar"><div class="w4-pillar-ico">⚡</div><div><h4>Partenaire projets</h4><p>Particuliers, syndics, MOA, architectes. Un interlocuteur qui vous comprend.</p></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- W5 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">W5 · Big year + récit</span><span class="variant-tag">Éditorial · chaleureux</span></div>
+        <div class="variant-body w5">
+          <div class="w5-left">
+            <div>
+              <div class="w5-year">1998</div>
+              <div class="w5-caption">Cabinet créé à Tours</div>
+            </div>
+            <div class="w5-mono-stat">
+              <span>Aujourd'hui</span>
+              <b>10 000+ diagnostics</b>
+            </div>
+          </div>
+          <div class="w5-right">
+            <div class="eyebrow">Notre histoire</div>
+            <h3>Servicimmo, cabinet indépendant depuis bientôt trente ans.</h3>
+            <p>Basés à Tours depuis 1998, nous intervenons en Indre-et-Loire et départements limitrophes. Certifiés Qualixpert, assurés Allianz, membres de la FNAIM Diagnostic.</p>
+            <ul>
+              <li>Un seul métier, fait sérieusement</li>
+              <li>Veille réglementaire publique depuis 2017</li>
+              <li>Équipe locale, pas de sous-traitance</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- W6 -->
+      <div class="variant">
+        <div class="variant-head"><span class="variant-name">W6 · KPI poster</span><span class="variant-tag">Chiffres · confiance</span></div>
+        <div class="variant-body w6">
+          <div class="w6-kicker">→ Pourquoi Servicimmo</div>
+          <h3 class="w6-title">Les quatre chiffres qui nous résument.</h3>
+          <div class="w6-grid">
+            <div class="w6-kpi"><div class="w6-kpi-n">01 / EXPÉRIENCE</div><div class="w6-kpi-val">28<small>ans</small></div><div class="w6-kpi-lbl">D'expertise à Tours, depuis 1998.</div></div>
+            <div class="w6-kpi"><div class="w6-kpi-n">02 / VOLUME</div><div class="w6-kpi-val">10 000<small>+</small></div><div class="w6-kpi-lbl">Diagnostics réalisés en Touraine.</div></div>
+            <div class="w6-kpi"><div class="w6-kpi-n">03 / RAPIDITÉ</div><div class="w6-kpi-val">48<small>h</small></div><div class="w6-kpi-lbl">Délai moyen d'intervention.</div></div>
+            <div class="w6-kpi"><div class="w6-kpi-n">04 / TRANSPARENCE</div><div class="w6-kpi-val">100<small>%</small></div><div class="w6-kpi-lbl">Tarifs annoncés à l'avance.</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Servicimmo · Diagnostic immobilier en Touraine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="home-d3/styles.css"/>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/babel" src="home-d3/icons.jsx"></script>
+<script type="text/babel" src="home-d3/hero.jsx"></script>
+<script type="text/babel" src="home-d3/sections-1.jsx"></script>
+<script type="text/babel" src="home-d3/sections-2.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": "classic",
+  "density": "medium",
+  "tone": "warm",
+  "servicesVariant": "table"
+}/*EDITMODE-END*/;
+
+const ACCENTS = {
+  saffron:   { saf: '#e8a33d', safSoft: '#fce7b8', safDark: '#a87320', safBg: '#fdf6e5', slate: '#1e3a4d', slate2:'#2a4a60', ink:'#0d1a24' },
+  brick:     { saf: '#c86a4a', safSoft: '#f4d5c9', safDark: '#8a3d22', safBg: '#f9ebe4', slate: '#1e3a4d', slate2:'#2a4a60', ink:'#0d1a24' },
+  emerald:   { saf: '#3fa281', safSoft: '#c2e7da', safDark: '#1f6e55', safBg: '#e3f2ec', slate: '#1e3a4d', slate2:'#2a4a60', ink:'#0d1a24' },
+  copper:    { saf: '#c77d3f', safSoft: '#efd7bd', safDark: '#8a4d1b', safBg: '#f6e8d6', slate: '#1e3a4d', slate2:'#2a4a60', ink:'#0d1a24' },
+  // Inspired by the actual Servicimmo site
+  touraine:  { saf: '#a4c425', safSoft: '#e5efba', safDark: '#6a8a10', safBg: '#f3f7e0', slate: '#0f5555', slate2:'#1a6b6b', ink:'#0a3333' },
+  classic:   { saf: '#a4c425', safSoft: '#e5efba', safDark: '#6a8a10', safBg: '#f3f7e0', slate: '#1e3a5f', slate2:'#2a4f7a', ink:'#0f1e3a' },
+};
+
+function applyAccent(name) {
+  const a = ACCENTS[name] || ACCENTS.saffron;
+  const r = document.documentElement;
+  r.style.setProperty('--saf', a.saf);
+  r.style.setProperty('--saf-soft', a.safSoft);
+  r.style.setProperty('--saf-dark', a.safDark);
+  r.style.setProperty('--saf-bg', a.safBg);
+  r.style.setProperty('--slate', a.slate);
+  r.style.setProperty('--slate-2', a.slate2);
+  r.style.setProperty('--ink', a.ink);
+}
+
+function TweaksPanel({ state, setState, open, setOpen }) {
+  const { X, Sliders } = Icons;
+  return (
+    <>
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          style={{
+            position:'fixed', bottom:24, right:24, zIndex:1000,
+            background:'var(--slate)', color:'var(--saf)',
+            border:'none', cursor:'pointer',
+            width:44, height:44, borderRadius:22,
+            display:'grid', placeItems:'center',
+            boxShadow:'0 10px 30px -10px rgba(0,0,0,0.4)',
+          }}
+          title="Tweaks"
+        ><Sliders/></button>
+      )}
+      <div className={`tweaks-panel ${open ? 'open' : ''}`}>
+        <div className="tweaks-head">
+          <h3 className="tweaks-title">Tweaks · Direction 3</h3>
+          <button className="tweaks-close" onClick={() => setOpen(false)}><X/></button>
+        </div>
+
+        <div className="tweak">
+          <label className="tweak-label">Palette</label>
+          <div className="tweak-swatches">
+            {Object.entries(ACCENTS).map(([k, v]) => (
+              <div key={k}
+                   onClick={() => setState({ ...state, accent: k })}
+                   className={`tweak-swatch ${state.accent === k ? 'active' : ''}`}
+                   style={{ background: `linear-gradient(135deg, ${v.slate} 0 50%, ${v.saf} 50% 100%)` }}
+                   title={k}/>
+            ))}
+          </div>
+          <div style={{marginTop:6, fontSize:11, color:'var(--muted)', fontFamily:'Geist Mono, monospace'}}>
+            {({saffron:'Safran · Slate',brick:'Brick · Slate',emerald:'Émeraude · Slate',copper:'Cuivre · Slate',touraine:'Anis · Teal (site actuel)',classic:'Anis · Bleu marine'})[state.accent]}
+          </div>
+        </div>
+
+        <div className="tweak">
+          <label className="tweak-label">Densité de la carte</label>
+          <div className="tweak-segmented">
+            {['sparse', 'medium', 'dense'].map(d => (
+              <button key={d}
+                      onClick={() => setState({ ...state, density: d })}
+                      className={state.density === d ? 'active' : ''}>
+                {d === 'sparse' ? 'Épuré' : d === 'dense' ? 'Dense' : 'Moyen'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="tweak">
+          <label className="tweak-label">Ton éditorial (hero)</label>
+          <div className="tweak-segmented">
+            {['warm', 'direct', 'calm'].map(t => (
+              <button key={t}
+                      onClick={() => setState({ ...state, tone: t })}
+                      className={state.tone === t ? 'active' : ''}>
+                {t === 'warm' ? 'Chaleureux' : t === 'direct' ? 'Direct' : 'Posé'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="tweak">
+          <label className="tweak-label">Section prestations</label>
+          <div className="tweak-segmented">
+            {[['editorial','Éditorial'],['table','Tableau'],['flow','Flux']].map(([v,l]) => (
+              <button key={v}
+                      onClick={() => setState({ ...state, servicesVariant: v })}
+                      className={state.servicesVariant === v ? 'active' : ''}>
+                {l}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function App() {
+  const [state, setStateRaw] = React.useState(TWEAK_DEFAULTS);
+  const [editMode, setEditMode] = React.useState(false);
+  const [panelOpen, setPanelOpen] = React.useState(false);
+
+  const setState = (next) => {
+    setStateRaw(next);
+    const edits = {};
+    ['accent','density','tone','servicesVariant'].forEach(k => {
+      if (next[k] !== state[k]) edits[k] = next[k];
+    });
+    if (Object.keys(edits).length) {
+      window.parent.postMessage({type: '__edit_mode_set_keys', edits}, '*');
+    }
+  };
+
+  React.useEffect(() => {
+    const handler = (e) => {
+      if (!e.data || typeof e.data !== 'object') return;
+      if (e.data.type === '__activate_edit_mode') { setEditMode(true); setPanelOpen(true); }
+      if (e.data.type === '__deactivate_edit_mode') { setEditMode(false); setPanelOpen(false); }
+    };
+    window.addEventListener('message', handler);
+    window.parent.postMessage({type: '__edit_mode_available'}, '*');
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  React.useEffect(() => { applyAccent(state.accent); }, [state.accent]);
+
+  return (
+    <>
+      <Header/>
+      <Hero density={state.density} tone={state.tone}/>
+      <TrustBar/>
+      <HowItWorks/>
+      <Diagnostics variant={state.servicesVariant}/>
+      <Why/>
+      <Pros/>
+      <Testimonials/>
+      <FAQ/>
+      <FinalCTA/>
+      <Footer/>
+      {editMode && <TweaksPanel state={state} setState={setState} open={panelOpen} setOpen={setPanelOpen}/>}
+    </>
+  );
+}
+
+// Wait for all component scripts to load
+function boot() {
+  if (!window.Header || !window.Hero || !window.TrustBar || !window.Pros || !window.Footer || !window.Icons) {
+    setTimeout(boot, 40);
+    return;
+  }
+  ReactDOM.createRoot(document.getElementById('app')).render(<App/>);
+}
+boot();
+</script>
+
+</body>
+</html>

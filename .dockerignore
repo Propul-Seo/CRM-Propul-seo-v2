@@ -1,0 +1,48 @@
+# Dépendances et builds — réinstallés/rebuild dans le container
+node_modules
+dist
+.vite
+
+# Tests & coverage (pas nécessaires pour build prod)
+coverage
+playwright-report
+test-results
+tests/e2e
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# Git & outils
+.git
+.gitignore
+.gitattributes
+
+# IDE & OS
+.vscode
+.idea
+.DS_Store
+*.swp
+*.swo
+
+# Documentation et fichiers de session locale
+.claude
+.mockups
+.planning
+*.md
+!README.md
+
+# Env locaux (les vraies env vars viennent de Coolify ARG/ENV)
+.env
+.env.local
+.env.test
+.env.development
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+
+# Misc
+temp_files
+next-public

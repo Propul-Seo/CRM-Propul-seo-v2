@@ -1,0 +1,918 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Propul'SEO - 10 previews</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07070d;
+      --panel: #11101b;
+      --panel-2: #171421;
+      --panel-3: #1e1a2b;
+      --line: rgba(255,255,255,.1);
+      --line-2: rgba(255,255,255,.16);
+      --text: #f8f6ff;
+      --muted: #a39bad;
+      --muted-2: #746d82;
+      --green: #34d399;
+      --cyan: #22d3ee;
+      --violet: #a855f7;
+      --purple: #c4b5fd;
+      --amber: #fbbf24;
+      --rose: #fb7185;
+      --radius: 8px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 14% 6%, rgba(34,211,238,.07), transparent 30%),
+        radial-gradient(circle at 70% 0%, rgba(168,85,247,.13), transparent 30%),
+        #07070d;
+      color: var(--text);
+    }
+    button { font: inherit; cursor: pointer; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(7,7,13,.92);
+      backdrop-filter: blur(18px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: max-content;
+      font-weight: 850;
+      letter-spacing: 0;
+    }
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 7px;
+      background: #f7f2ff;
+      color: #100e18;
+      font-size: 13px;
+    }
+    .tabs {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs button {
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.045);
+      color: rgba(255,255,255,.74);
+      white-space: nowrap;
+    }
+    .tabs button.active {
+      border-color: #f7f2ff;
+      background: #f7f2ff;
+      color: #11101a;
+    }
+    main {
+      max-width: 1580px;
+      margin: 0 auto;
+      padding: 20px 16px 56px;
+    }
+    .note {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .note-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.04);
+      padding: 13px 14px;
+    }
+    .note-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .note-card p {
+      margin: 0;
+      color: #cec7de;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .variant { display: none; }
+    .variant.active { display: block; }
+    .screen {
+      position: relative;
+      min-height: 930px;
+      border: 1px solid rgba(168,85,247,.2);
+      border-radius: 16px;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px) 0 0 / 40px 40px,
+        linear-gradient(0deg, rgba(255,255,255,.018) 1px, transparent 1px) 0 0 / 40px 40px,
+        radial-gradient(circle at 12% 10%, rgba(34,211,238,.06), transparent 28%),
+        radial-gradient(circle at 82% 4%, rgba(168,85,247,.12), transparent 30%),
+        #07070d;
+    }
+    .inner {
+      padding: 24px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    .eyebrows {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.11);
+      background: rgba(255,255,255,.045);
+      color: #d8d0e8;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .pill.green { border-color: rgba(52,211,153,.25); background: rgba(52,211,153,.09); color: #6ee7b7; }
+    .dot { width: 8px; height: 8px; border-radius: 99px; background: currentColor; }
+    h1, h2, h3, p { margin: 0; }
+    h1 {
+      font-size: 42px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+    h2 { font-size: 20px; }
+    h3 { font-size: 14px; }
+    .accent { color: #30e7d3; }
+    .sub {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn, .icon-btn {
+      min-height: 40px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.045);
+      color: #f4efff;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 14px;
+      font-weight: 780;
+    }
+    .btn.primary {
+      border-color: rgba(34,211,238,.35);
+      background: linear-gradient(135deg, #34d399, #22d3ee);
+      color: #061112;
+      box-shadow: 0 18px 44px rgba(34,211,238,.16);
+    }
+    .icon-btn {
+      width: 40px;
+      display: grid;
+      place-items: center;
+      color: #d6cde7;
+    }
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+    .kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .layout-8-4 { grid-template-columns: minmax(0, 8fr) minmax(320px, 4fr); }
+    .layout-5-7 { grid-template-columns: minmax(320px, 5fr) minmax(0, 7fr); }
+    .layout-3-6-3 { grid-template-columns: minmax(230px, 3fr) minmax(0, 6fr) minmax(230px, 3fr); }
+    .card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.04);
+      padding: 16px;
+    }
+    .card.soft { background: rgba(255,255,255,.03); }
+    .card.tint {
+      border-color: rgba(168,85,247,.24);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(168,85,247,.12), transparent 36%),
+        rgba(255,255,255,.04);
+    }
+    .card.cyan {
+      border-color: rgba(34,211,238,.24);
+      background:
+        radial-gradient(circle at 14% 0%, rgba(34,211,238,.12), transparent 36%),
+        rgba(255,255,255,.04);
+    }
+    .card.green {
+      border-color: rgba(52,211,153,.22);
+      background:
+        radial-gradient(circle at 14% 0%, rgba(52,211,153,.12), transparent 36%),
+        rgba(255,255,255,.04);
+    }
+    .metric-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+    .metric-value {
+      display: block;
+      margin-top: 10px;
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+    .metric-caption {
+      margin-top: 8px;
+      color: var(--muted-2);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .green-text { color: var(--green); }
+    .cyan-text { color: var(--cyan); }
+    .violet-text { color: #c4b5fd; }
+    .amber-text { color: var(--amber); }
+    .rose-text { color: var(--rose); }
+    .chart {
+      min-height: 330px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px) 0 0 / 112px 100%,
+        linear-gradient(0deg, rgba(255,255,255,.05) 1px, transparent 1px) 0 0 / 100% 68px,
+        rgba(0,0,0,.13);
+      padding: 14px;
+    }
+    .chart svg { width: 100%; height: 100%; min-height: 292px; display: block; }
+    .mini-chart {
+      height: 54px;
+      margin-top: 12px;
+    }
+    .mini-chart svg { width: 100%; height: 100%; }
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+    .line {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+      min-height: 50px;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.032);
+    }
+    .line .icon {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 7px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.05);
+    }
+    .line strong { font-size: 13px; }
+    .line span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .bar {
+      height: 7px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: rgba(255,255,255,.08);
+    }
+    .bar > i {
+      display: block;
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #34d399, #22d3ee);
+    }
+    .objective {
+      display: grid;
+      gap: 8px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .objective:last-child { border-bottom: 0; }
+    .objective-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .big-number {
+      font-size: 56px;
+      line-height: .92;
+      font-weight: 950;
+      letter-spacing: 0;
+    }
+    .hero-panel {
+      min-height: 360px;
+      display: grid;
+      align-content: space-between;
+      border-color: rgba(52,211,153,.22);
+      background:
+        radial-gradient(circle at 14% 0%, rgba(52,211,153,.16), transparent 30%),
+        radial-gradient(circle at 85% 0%, rgba(34,211,238,.14), transparent 30%),
+        rgba(255,255,255,.04);
+    }
+    .workspace-nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .workspace-nav span {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: #d6cee7;
+      background: rgba(255,255,255,.04);
+      font-size: 12px;
+      font-weight: 750;
+    }
+    .workspace-nav span.active {
+      background: #f7f2ff;
+      color: #11101a;
+      border-color: #f7f2ff;
+    }
+    .split-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 12px;
+    }
+    .side-rail {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+    .rail-item {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.035);
+      padding: 12px;
+    }
+    .rail-item strong { display: block; font-size: 14px; }
+    .rail-item span { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; }
+    .kanban {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .lane {
+      min-height: 190px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.028);
+      padding: 12px;
+    }
+    .lane h3 {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: #d8d0e8;
+    }
+    .task {
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.04);
+      padding: 10px;
+      margin-bottom: 8px;
+      color: #e9e2f5;
+      font-size: 12px;
+    }
+    .timeline {
+      position: relative;
+      display: grid;
+      gap: 10px;
+      padding-left: 16px;
+    }
+    .timeline:before {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 8px;
+      bottom: 8px;
+      width: 1px;
+      background: rgba(255,255,255,.12);
+    }
+    .event {
+      position: relative;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.035);
+      padding: 11px;
+    }
+    .event:before {
+      content: "";
+      position: absolute;
+      left: -16px;
+      top: 18px;
+      width: 9px;
+      height: 9px;
+      border-radius: 99px;
+      background: var(--cyan);
+      box-shadow: 0 0 18px rgba(34,211,238,.45);
+    }
+    .event strong { font-size: 13px; }
+    .event span { display:block; color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+    /* Variant-specific composition */
+    .v1 .main { grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr); }
+    .v2 .screen { background: linear-gradient(180deg, rgba(8,9,15,.98), rgba(5,6,10,.98)); }
+    .v2 .inner { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 18px; }
+    .v2 .sidebar {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.035);
+      padding: 16px;
+    }
+    .v2 .sidebar .navline {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 38px;
+      border-radius: var(--radius);
+      padding: 0 10px;
+      color: #cfc6de;
+      font-size: 13px;
+      font-weight: 750;
+    }
+    .v2 .sidebar .navline.active {
+      background: #f7f2ff;
+      color: #11101a;
+    }
+    .v3 .hero-strip {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, .55fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .v3 .hero-strip .card:first-child { min-height: 210px; }
+    .v4 .command {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,.04);
+      padding: 10px;
+      margin-bottom: 14px;
+    }
+    .v4 .command input {
+      min-height: 42px;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      outline: 0;
+      font: inherit;
+    }
+    .v5 .finance-row { grid-template-columns: minmax(0, 1fr) minmax(0, .8fr) minmax(0, .8fr); }
+    .v6 .screen { background: #080a0f; }
+    .v6 .inner { display: block; }
+    .v6 .inner > .grid { grid-template-columns: minmax(300px, 4fr) minmax(0, 8fr); gap: 16px; }
+    .v7 .daily { grid-template-columns: 320px minmax(0, 1fr) 310px; }
+    .v8 .matrix { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .v8 .span-2 { grid-column: span 2; }
+    .v8 .span-3 { grid-column: span 3; }
+    .v8 .span-4 { grid-column: span 4; }
+    .v9 .board-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px 260px;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .v10 .ceo {
+      grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+      align-items: stretch;
+    }
+    .v10 .brief {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    @media (max-width: 1180px) {
+      .note,
+      .kpis,
+      .two,
+      .three,
+      .four,
+      .layout-8-4,
+      .layout-5-7,
+      .layout-3-6-3,
+      .v1 .main,
+      .v2 .inner,
+      .v3 .hero-strip,
+      .v5 .finance-row,
+      .v6 .inner > .grid,
+      .v7 .daily,
+      .v9 .board-head,
+      .v10 .ceo {
+        grid-template-columns: 1fr;
+      }
+      .v8 .matrix { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .v8 .span-2, .v8 .span-3, .v8 .span-4 { grid-column: span 2; }
+      .kanban { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .header { flex-direction: column; }
+      .actions { justify-content: flex-start; }
+    }
+    @media (max-width: 720px) {
+      .topbar { flex-direction: column; align-items: flex-start; }
+      main { padding-inline: 10px; }
+      .inner { padding: 14px; }
+      h1 { font-size: 31px; }
+      .big-number { font-size: 42px; }
+      .kpis, .kanban, .v8 .matrix { grid-template-columns: 1fr; }
+      .v8 .span-2, .v8 .span-3, .v8 .span-4 { grid-column: auto; }
+      .chart { overflow-x: auto; }
+      .chart svg { min-width: 760px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">P</span> Dashboard refonte - 10 previews</div>
+    <nav class="tabs" aria-label="Choisir une variante">
+      <button class="active" data-target="v1">01 Control Room</button>
+      <button data-target="v2">02 Sidebar Ops</button>
+      <button data-target="v3">03 Executive Cards</button>
+      <button data-target="v4">04 Command Center</button>
+      <button data-target="v5">05 Finance First</button>
+      <button data-target="v6">06 CRM Pulse</button>
+      <button data-target="v7">07 Daily Brief</button>
+      <button data-target="v8">08 Metrics Matrix</button>
+      <button data-target="v9">09 Pipeline Board</button>
+      <button data-target="v10">10 CEO Brief</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="note">
+      <div class="note-card"><strong>But</strong><p>Choisir une direction complète avant de toucher au DashboardV3 React.</p></div>
+      <div class="note-card"><strong>Données</strong><p>CA annuel, CRM, projets, tâches, RDV, objectifs, évolution mensuelle.</p></div>
+      <div class="note-card"><strong>Style</strong><p>Clean, simple, premium, cohérent avec la nouvelle comptabilité.</p></div>
+      <div class="note-card"><strong>Reco</strong><p>Je partirais sur 04, 07 ou 10 selon le niveau de densité voulu.</p></div>
+    </div>
+
+    <section id="v1" class="variant v1 active">
+      <div class="screen"><div class="inner">
+        __HEADER__
+        <div class="grid kpis">__KPIS__</div>
+        <div class="grid main" style="margin-top:12px">
+          <div class="card tint">__CHART_TITLE____CHART__</div>
+          <div class="grid">__OBJECTIVES____MEETINGS__</div>
+        </div>
+      </div></div>
+    </section>
+
+    <section id="v2" class="variant v2">
+      <div class="screen"><div class="inner">
+        <aside class="sidebar">
+          <div class="brand" style="margin-bottom:20px"><span class="brand-mark">P</span> Propul'SEO</div>
+          <div class="navline active">⌁ Vue globale</div><div class="navline">€ Comptabilité</div><div class="navline">◉ CRM</div><div class="navline">▦ Projets</div><div class="navline">☷ Objectifs</div>
+          <div class="card green" style="margin-top:18px"><span class="metric-label">Focus</span><strong class="metric-value green-text">+12,5%</strong><p class="metric-caption">CA annuel en progression</p></div>
+        </aside>
+        <div>
+          __HEADER_COMPACT__
+          <div class="grid layout-8-4">
+            <div class="grid">
+              <div class="card green hero-panel">__REVENUE_HERO__</div>
+              <div class="grid three">__CONTACTS_SMALL____PROJECTS_SMALL____TASKS_SMALL__</div>
+            </div>
+            <div class="grid">__MEETINGS____OBJECTIVES__</div>
+          </div>
+        </div>
+      </div></div>
+    </section>
+
+    <section id="v3" class="variant v3">
+      <div class="screen"><div class="inner">
+        __HEADER__
+        <div class="hero-strip">
+          <div class="card green">__REVENUE_HERO__</div>
+          __CONTACTS_SMALL____PROJECTS_SMALL____TASKS_SMALL__
+        </div>
+        <div class="grid layout-8-4">
+          <div class="card">__CHART_TITLE____CHART__</div>
+          <div class="grid">__OBJECTIVES____ACTIONS__</div>
+        </div>
+      </div></div>
+    </section>
+
+    <section id="v4" class="variant v4">
+      <div class="screen"><div class="inner">
+        __HEADER__
+        <div class="command"><input value="Rechercher client, projet, tâche ou action..." readonly><button class="btn primary">⌘ K</button></div>
+        <div class="grid layout-5-7">
+          <div class="grid">__REVENUE_HERO____ACTIONS____OBJECTIVES__</div>
+          <div class="grid">
+            <div class="grid three">__CONTACTS_SMALL____PROJECTS_SMALL____TASKS_SMALL__</div>
+            <div class="card tint">__CHART_TITLE____CHART__</div>
+            __MEETINGS__
+          </div>
+        </div>
+      </div></div>
+    </section>
+
+    <section id="v5" class="variant v5">
+      <div class="screen"><div class="inner">
+        __HEADER__
+        <div class="grid finance-row">
+          <div class="card green hero-panel">__REVENUE_HERO__</div>
+          <div class="grid">__OBJECTIVES____ACTIONS__</div>
+          <div class="grid">__CONTACTS_SMALL____PROJECTS_SMALL____TASKS_SMALL__</div>
+        </div>
+        <div class="card tint" style="margin-top:12px">__CHART_TITLE____CHART__</div>
+      </div></div>
+    </section>
+
+    <section id="v6" class="variant v6">
+      <div class="screen"><div class="inner">
+        <div class="grid">
+          <div class="card green">__REVENUE_HERO__</div>
+          <div>
+            __HEADER_COMPACT__
+            <div class="workspace-nav"><span class="active">CRM</span><span>Projets</span><span>Compta</span><span>RDV</span><span>Objectifs</span></div>
+            <div class="grid three">__CONTACTS_SMALL____PROJECTS_SMALL____TASKS_SMALL__</div>
+            <div class="grid layout-8-4" style="margin-top:12px"><div class="card">__CHART_TITLE____CHART__</div><div class="grid">__MEETINGS____OBJECTIVES__</div></div>
+          </div>
+        </div>
+      </div></div>
+    </section>
+
+    <section id="v7" class="variant v7">
+      <div class="screen"><div class="inner">
+        __HEADER__
+        <div class="grid daily">
+          <div class="grid">__TODAY____MEETINGS__</div>
+          <div class="grid">
+            <div class="grid kpis">__KPIS__</div>
+            <div class="card tint">__CHART_TITLE____CHART__</div>
+          </div>
+          <div class="grid">__OBJECTIVES____ACTIONS__</div>
+        </div>
+      </div></div>
+    </section>
+
+    <section id="v8" class="variant v8">
+      <div class="screen"><div class="inner">
+        __HEADER__
+        <div class="grid matrix">
+          <div class="card green span-3">__REVENUE_HERO__</div>
+          <div class="card span-3">__OBJECTIVES__</div>
+          <div class="card span-2">__CONTACTS_SMALL__</div>
+          <div class="card span-2">__PROJECTS_SMALL__</div>
+          <div class="card span-2">__TASKS_SMALL__</div>
+          <div class="card tint span-4">__CHART_TITLE____CHART__</div>
+          <div class="card span-2">__MEETINGS__</div>
+        </div>
+      </div></div>
+    </section>
+
+    <section id="v9" class="variant v9">
+      <div class="screen"><div class="inner">
+        __HEADER__
+        <div class="board-head"><div class="card green">__REVENUE_HERO__</div>__CONTACTS_SMALL____PROJECTS_SMALL__</div>
+        <div class="grid kanban">
+          <div class="lane"><h3>Leads <span>18</span></h3><div class="task">Audit SEO - Cabinet médical</div><div class="task">Refonte site - Architecte</div></div>
+          <div class="lane"><h3>Devis <span>6</span></h3><div class="task">ERP interne - PME BTP</div><div class="task">Site vitrine premium</div></div>
+          <div class="lane"><h3>Production <span>9</span></h3><div class="task">Tunnel CRM Bot One</div><div class="task">Landing acquisition</div></div>
+          <div class="lane"><h3>À livrer <span>4</span></h3><div class="task">Migration serveur</div><div class="task">Validation client</div></div>
+        </div>
+        <div class="grid layout-8-4" style="margin-top:12px"><div class="card">__CHART_TITLE____CHART__</div><div class="card">__OBJECTIVES__</div></div>
+      </div></div>
+    </section>
+
+    <section id="v10" class="variant v10">
+      <div class="screen"><div class="inner">
+        __HEADER__
+        <div class="grid ceo">
+          <div class="brief">
+            <div class="card green hero-panel">__REVENUE_HERO__</div>
+            <div class="grid two">__CONTACTS_SMALL____PROJECTS_SMALL__</div>
+            __ACTIONS__
+          </div>
+          <div class="grid">
+            <div class="card tint">__CHART_TITLE____CHART__</div>
+            <div class="grid two">__OBJECTIVES____MEETINGS__</div>
+          </div>
+        </div>
+      </div></div>
+    </section>
+  </main>
+
+  <template id="header">
+    <div class="header">
+      <div>
+        <div class="eyebrows"><span class="pill green"><span class="dot"></span>Système opérationnel</span><span class="pill">samedi 30 mai 2026</span></div>
+        <h1>Dashboard <span class="accent">Propul'SEO</span></h1>
+        <p class="sub">Vue claire de l'activité commerciale, financière et opérationnelle.</p>
+      </div>
+      <div class="actions"><button class="btn">Masquer</button><button class="btn primary">Nouvelle action</button></div>
+    </div>
+  </template>
+
+  <template id="header-compact">
+    <div class="header">
+      <div>
+        <div class="eyebrows"><span class="pill green"><span class="dot"></span>Temps réel</span><span class="pill">2026</span></div>
+        <h1>Tableau de bord</h1>
+        <p class="sub">Pilotage quotidien de l'agence.</p>
+      </div>
+      <div class="actions"><button class="icon-btn">◐</button><button class="btn primary">+ Action</button></div>
+    </div>
+  </template>
+
+  <template id="kpis">
+    <div class="card green"><span class="metric-label">CA annuel</span><strong class="metric-value green-text">29 110 €</strong><p class="metric-caption">5 mois actifs · +12,5%</p></div>
+    <div class="card cyan"><span class="metric-label">Contacts CRM</span><strong class="metric-value cyan-text">482</strong><p class="metric-caption">18 leads ouverts</p></div>
+    <div class="card tint"><span class="metric-label">Projets</span><strong class="metric-value violet-text">37</strong><p class="metric-caption">14 projets actifs</p></div>
+    <div class="card"><span class="metric-label">Conversion</span><strong class="metric-value amber-text">24%</strong><p class="metric-caption">8 / 12 projets livrés</p></div>
+  </template>
+
+  <template id="revenue-hero">
+    <div>
+      <span class="metric-label">Chiffre d'affaires</span>
+      <strong class="big-number green-text">29 110 €</strong>
+      <p class="metric-caption">Année 2026 · données comptables temps réel</p>
+    </div>
+    <div class="mini-chart">__SPARKLINE__</div>
+  </template>
+
+  <template id="contacts-small">
+    <div class="card cyan"><span class="metric-label">Contacts CRM</span><strong class="metric-value cyan-text">482</strong><p class="metric-caption">18 leads actifs · base saine</p></div>
+  </template>
+  <template id="projects-small">
+    <div class="card tint"><span class="metric-label">Projets</span><strong class="metric-value violet-text">37</strong><p class="metric-caption">14 actifs · 4 à livrer</p></div>
+  </template>
+  <template id="tasks-small">
+    <div class="card"><span class="metric-label">Activité rapide</span><strong class="metric-value amber-text">24%</strong><p class="metric-caption">Conversion · 8 livrés / 12</p></div>
+  </template>
+
+  <template id="chart-title">
+    <div class="split-card" style="margin-bottom:12px"><div><h2>Évolution du chiffre d'affaires</h2><p class="metric-caption">Comparaison mensuelle et tendance annuelle</p></div><button class="btn">Voir détails</button></div>
+  </template>
+  <template id="chart">
+    <div class="chart">
+      <svg viewBox="0 0 960 300" role="img" aria-label="Courbe de chiffre d'affaires">
+        <defs>
+          <linearGradient id="dashLine" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stop-color="#a855f7"/><stop offset="1" stop-color="#22d3ee"/>
+          </linearGradient>
+          <linearGradient id="dashFill" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color="#a855f7" stop-opacity=".24"/><stop offset="1" stop-color="#a855f7" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <g stroke="rgba(255,255,255,.12)" stroke-dasharray="4 6">
+          <path d="M50 46H920M50 112H920M50 178H920M50 244H920"/>
+          <path d="M50 34V254M170 34V254M290 34V254M410 34V254M530 34V254M650 34V254M770 34V254M890 34V254"/>
+        </g>
+        <path d="M50 210 C120 185 160 180 210 188 C270 198 300 92 360 102 C438 116 452 190 520 172 C590 150 620 84 694 90 C770 98 814 142 920 92 L920 254 L50 254 Z" fill="url(#dashFill)"/>
+        <path d="M50 210 C120 185 160 180 210 188 C270 198 300 92 360 102 C438 116 452 190 520 172 C590 150 620 84 694 90 C770 98 814 142 920 92" fill="none" stroke="url(#dashLine)" stroke-width="5" stroke-linecap="round"/>
+        <g fill="#a855f7" stroke="#100e18" stroke-width="4">
+          <circle cx="50" cy="210" r="6"/><circle cx="210" cy="188" r="6"/><circle cx="360" cy="102" r="6"/><circle cx="520" cy="172" r="6"/><circle cx="694" cy="90" r="6"/><circle cx="920" cy="92" r="6"/>
+        </g>
+        <g fill="rgba(255,255,255,.48)" font-size="13">
+          <text x="48" y="284">janv.</text><text x="202" y="284">mars</text><text x="352" y="284">mai</text><text x="514" y="284">juil.</text><text x="684" y="284">sept.</text><text x="900" y="284">déc.</text>
+        </g>
+      </svg>
+    </div>
+  </template>
+
+  <template id="sparkline">
+    <svg viewBox="0 0 280 70"><path d="M4 54 C36 46 50 48 76 42 C105 35 118 18 148 25 C178 31 188 49 218 34 C242 22 256 18 276 10" fill="none" stroke="#34d399" stroke-width="4" stroke-linecap="round"/><path d="M4 54 C36 46 50 48 76 42 C105 35 118 18 148 25 C178 31 188 49 218 34 C242 22 256 18 276 10 V70 H4 Z" fill="rgba(52,211,153,.12)"/></svg>
+  </template>
+
+  <template id="objectives">
+    <div class="card">
+      <div class="split-card" style="margin-bottom:4px"><h2>Objectifs</h2><button class="icon-btn">⚙</button></div>
+      <div class="objective"><div class="objective-head"><strong>CA annuel</strong><span class="green-text">58%</span></div><div class="bar"><i style="width:58%"></i></div><p class="metric-caption">29 110 € / 50 000 €</p></div>
+      <div class="objective"><div class="objective-head"><strong>Projets actifs</strong><span class="cyan-text">82%</span></div><div class="bar"><i style="width:82%;background:linear-gradient(90deg,#22d3ee,#a855f7)"></i></div><p class="metric-caption">14 / 17 projets</p></div>
+      <div class="objective"><div class="objective-head"><strong>Livraisons</strong><span class="amber-text">66%</span></div><div class="bar"><i style="width:66%;background:linear-gradient(90deg,#fbbf24,#34d399)"></i></div><p class="metric-caption">8 / 12 livrés</p></div>
+    </div>
+  </template>
+
+  <template id="meetings">
+    <div class="card">
+      <div class="split-card" style="margin-bottom:12px"><h2>Prochains rendez-vous</h2><span class="pill">5 à venir</span></div>
+      <div class="list">
+        <div class="line"><div class="icon">30</div><div><strong>Point client ERP</strong><span>Aujourd'hui · 14:30 · Meet</span></div><b class="cyan-text">2 pers.</b></div>
+        <div class="line"><div class="icon">02</div><div><strong>Validation site web</strong><span>Mardi · 10:00 · Client</span></div><b class="green-text">OK</b></div>
+        <div class="line"><div class="icon">05</div><div><strong>Brief acquisition</strong><span>Vendredi · 11:15</span></div><b class="violet-text">Lead</b></div>
+      </div>
+    </div>
+  </template>
+
+  <template id="actions">
+    <div class="card">
+      <h2 style="margin-bottom:12px">Actions prioritaires</h2>
+      <div class="list">
+        <div class="line"><div class="icon">€</div><div><strong>Relancer 2 devis</strong><span>Impact estimé 4 800 €</span></div><b class="amber-text">Aujourd'hui</b></div>
+        <div class="line"><div class="icon">✓</div><div><strong>Finaliser livraison</strong><span>Projet site premium</span></div><b class="green-text">Prêt</b></div>
+        <div class="line"><div class="icon">!</div><div><strong>3 tâches urgentes</strong><span>Non terminées</span></div><b class="rose-text">Risque</b></div>
+      </div>
+    </div>
+  </template>
+
+  <template id="today">
+    <div class="card">
+      <h2 style="margin-bottom:14px">Brief du jour</h2>
+      <div class="timeline">
+        <div class="event"><strong>09:30 · Vérifier encaissements</strong><span>Comptabilité · Mai 2026</span></div>
+        <div class="event"><strong>11:00 · Livraison client</strong><span>Site vitrine · validation finale</span></div>
+        <div class="event"><strong>14:30 · Point ERP</strong><span>Décision sur modules prioritaires</span></div>
+        <div class="event"><strong>17:00 · Revue pipeline</strong><span>Leads chauds et devis ouverts</span></div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    const replacements = {
+      '__HEADER__': document.querySelector('#header').innerHTML,
+      '__HEADER_COMPACT__': document.querySelector('#header-compact').innerHTML,
+      '__KPIS__': document.querySelector('#kpis').innerHTML,
+      '__REVENUE_HERO__': document.querySelector('#revenue-hero').innerHTML,
+      '__CONTACTS_SMALL__': document.querySelector('#contacts-small').innerHTML,
+      '__PROJECTS_SMALL__': document.querySelector('#projects-small').innerHTML,
+      '__TASKS_SMALL__': document.querySelector('#tasks-small').innerHTML,
+      '__CHART_TITLE__': document.querySelector('#chart-title').innerHTML,
+      '__CHART__': document.querySelector('#chart').innerHTML,
+      '__SPARKLINE__': document.querySelector('#sparkline').innerHTML,
+      '__OBJECTIVES__': document.querySelector('#objectives').innerHTML,
+      '__MEETINGS__': document.querySelector('#meetings').innerHTML,
+      '__ACTIONS__': document.querySelector('#actions').innerHTML,
+      '__TODAY__': document.querySelector('#today').innerHTML,
+    };
+    document.querySelectorAll('.variant').forEach((variant) => {
+      let html = variant.innerHTML;
+      for (let pass = 0; pass < 3; pass++) {
+        Object.entries(replacements).forEach(([token, value]) => {
+          html = html.split(token).join(value);
+        });
+      }
+      variant.innerHTML = html;
+    });
+
+    const buttons = document.querySelectorAll('.tabs button');
+    const variants = document.querySelectorAll('.variant');
+    function show(id) {
+      const target = document.getElementById(id) ? id : 'v1';
+      buttons.forEach((button) => button.classList.toggle('active', button.dataset.target === target));
+      variants.forEach((variant) => variant.classList.toggle('active', variant.id === target));
+      history.replaceState(null, '', `#${target}`);
+      const resetScroll = () => window.scrollTo(0, 0);
+      resetScroll();
+      requestAnimationFrame(resetScroll);
+      setTimeout(resetScroll, 80);
+    }
+    buttons.forEach((button) => button.addEventListener('click', () => show(button.dataset.target)));
+    show(location.hash.replace('#', '') || 'v1');
+  </script>
+</body>
+</html>

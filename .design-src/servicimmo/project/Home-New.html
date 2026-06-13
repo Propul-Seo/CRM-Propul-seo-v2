@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Servicimmo · Home — 3 nouvelles directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Geist', -apple-system, system-ui, sans-serif;
+    background: #0b0b0c;
+    color: #0a0a0a;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .switcher {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+    z-index: 9999; background: #0a0a0a; border-radius: 10px; padding: 4px;
+    display: inline-flex; gap: 2px; box-shadow: 0 12px 40px -12px rgba(0,0,0,0.6);
+    font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.04em;
+  }
+  .switcher button {
+    background: transparent; color: rgba(255,255,255,0.5); border: none; padding: 8px 14px;
+    border-radius: 7px; cursor: pointer; font: inherit; text-transform: uppercase; font-weight: 600;
+    transition: all 0.2s;
+  }
+  .switcher button:hover { color: rgba(255,255,255,0.85); }
+  .switcher button.active { background: #fff; color: #0a0a0a; }
+  .variant-frame { display: none; }
+  .variant-frame.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="switcher" id="switcher">
+  <button data-v="d4" class="active">D4 · Alan</button>
+  <button data-v="d5">D5 · Qonto</button>
+  <button data-v="d6">D6 · Doctolib</button>
+</div>
+
+<div id="d4" class="variant-frame active"><iframe src="home-d4/index.html" style="border:0;width:100%;height:100vh;display:block"></iframe></div>
+<div id="d5" class="variant-frame"><iframe src="home-d5/index.html" style="border:0;width:100%;height:100vh;display:block"></iframe></div>
+<div id="d6" class="variant-frame"><iframe src="home-d6/index.html" style="border:0;width:100%;height:100vh;display:block"></iframe></div>
+
+<script>
+  const KEY = 'home_new_variant';
+  const saved = localStorage.getItem(KEY) || 'd4';
+  show(saved);
+  document.querySelectorAll('.switcher button').forEach(btn => {
+    btn.addEventListener('click', () => { show(btn.dataset.v); localStorage.setItem(KEY, btn.dataset.v); });
+  });
+  function show(v) {
+    document.querySelectorAll('.variant-frame').forEach(f => f.classList.toggle('active', f.id === v));
+    document.querySelectorAll('.switcher button').forEach(b => b.classList.toggle('active', b.dataset.v === v));
+  }
+</script>
+
+</body>
+</html>

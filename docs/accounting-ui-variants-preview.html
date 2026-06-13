@@ -1,0 +1,1041 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Propul'SEO CRM - Comptabilite UI Variants</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f7f7f4;
+      --muted: #9aa3af;
+      --line: rgba(255, 255, 255, .11);
+      --green: #22c55e;
+      --red: #f43f5e;
+      --blue: #38bdf8;
+      --gold: #d8a657;
+      --violet: #a78bfa;
+      --panel: rgba(255, 255, 255, .055);
+      --panel-2: rgba(255, 255, 255, .082);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #08090b;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+    button, input, select { font: inherit; }
+    .preview-shell {
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.035), transparent 18rem),
+        #08090b;
+    }
+    .preview-nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 14px 24px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      background: rgba(8, 9, 11, .88);
+      backdrop-filter: blur(18px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 210px;
+      font-weight: 760;
+      letter-spacing: 0;
+    }
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      background: #fff;
+      color: #08090b;
+      font-size: 13px;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav-tabs button {
+      border: 1px solid rgba(255,255,255,.11);
+      color: rgba(255,255,255,.75);
+      background: rgba(255,255,255,.045);
+      border-radius: 8px;
+      padding: 8px 12px;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .nav-tabs button.active {
+      color: #0b0d10;
+      background: #f4f4ef;
+      border-color: #f4f4ef;
+    }
+    .analysis {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 28px 24px 0;
+    }
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .analysis-card {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.045);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .analysis-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .analysis-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .variant {
+      display: none;
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 28px 24px 60px;
+    }
+    .variant.active { display: block; }
+    .page {
+      min-height: 820px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      padding: 28px;
+      border-bottom: 1px solid var(--line);
+    }
+    .title-stack h1 {
+      margin: 0;
+      font-size: 30px;
+      letter-spacing: 0;
+      line-height: 1.08;
+    }
+    .title-stack p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .icon-btn, .text-btn, .input, .select {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.055);
+      color: currentColor;
+    }
+    .icon-btn {
+      width: 38px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .text-btn {
+      padding: 0 14px;
+      cursor: pointer;
+      font-weight: 650;
+    }
+    .primary {
+      background: #f4f4ef;
+      color: #0b0d10;
+      border-color: #f4f4ef;
+    }
+    .input {
+      width: 210px;
+      padding: 0 12px;
+    }
+    .select {
+      padding: 0 12px;
+    }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 16px;
+      min-height: 116px;
+    }
+    .metric-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .metric-value {
+      margin-top: 14px;
+      font-size: 28px;
+      font-weight: 790;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+    .metric-caption {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .positive { color: var(--green); }
+    .negative { color: var(--red); }
+    .blue { color: var(--blue); }
+    .gold { color: var(--gold); }
+    .violet { color: var(--violet); }
+    .content {
+      padding: 20px 28px 28px;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .section-title h2, .panel h2 {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+    .section-title span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(380px, .95fr);
+      gap: 12px;
+    }
+    .three-col {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .chart-bars {
+      height: 235px;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      align-items: end;
+      gap: 8px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .bar {
+      border-radius: 6px 6px 2px 2px;
+      background: linear-gradient(180deg, rgba(34,197,94,.95), rgba(34,197,94,.22));
+      min-height: 22px;
+    }
+    .bar.expense {
+      background: linear-gradient(180deg, rgba(244,63,94,.92), rgba(244,63,94,.22));
+    }
+    .donut {
+      width: 180px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      margin: 12px auto;
+      background: conic-gradient(var(--blue) 0 42%, var(--violet) 42% 74%, var(--gold) 74% 100%);
+      position: relative;
+    }
+    .donut::after {
+      content: "";
+      position: absolute;
+      inset: 36px;
+      border-radius: 50%;
+      background: #101216;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .legend {
+      display: grid;
+      gap: 10px;
+    }
+    .legend-row, .table-row, .ledger-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .legend-row:first-child, .table-row:first-child, .ledger-row:first-child { border-top: 0; }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 8px;
+      background: currentColor;
+    }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    .table-row {
+      grid-template-columns: 88px 1fr 120px 110px;
+      font-size: 13px;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.065);
+      color: rgba(255,255,255,.78);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .mini-line {
+      height: 44px;
+      position: relative;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      overflow: hidden;
+    }
+    .mini-line::before {
+      content: "";
+      position: absolute;
+      inset: 6px 0 0;
+      background:
+        linear-gradient(140deg, transparent 4%, currentColor 4% 6%, transparent 6% 22%, currentColor 22% 24%, transparent 24% 46%, currentColor 46% 48%, transparent 48% 62%, currentColor 62% 64%, transparent 64% 82%, currentColor 82% 84%, transparent 84%);
+      opacity: .8;
+    }
+
+    /* Variant 1 */
+    .v1 .page {
+      background:
+        linear-gradient(135deg, rgba(34,197,94,.10), transparent 26rem),
+        linear-gradient(315deg, rgba(56,189,248,.08), transparent 24rem),
+        #0b0f12;
+    }
+    .v1 .hero-strip {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(320px, .65fr);
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .v1 .cashflow {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: center;
+    }
+    .v1 .cashflow strong {
+      font-size: 42px;
+      letter-spacing: 0;
+    }
+    .v1 .runway {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .v1 .runway div {
+      border-radius: 8px;
+      background: rgba(255,255,255,.055);
+      padding: 10px;
+    }
+    .v1 .revenue-evolution {
+      position: relative;
+      margin-bottom: 12px;
+      padding: 18px;
+      background:
+        radial-gradient(circle at 22% 12%, rgba(147, 51, 234, .14), transparent 32%),
+        linear-gradient(180deg, rgba(20, 14, 38, .96), rgba(10, 12, 18, .98));
+      border-color: rgba(168, 85, 247, .2);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 18px 60px rgba(0,0,0,.22);
+    }
+    .chart-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .chart-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .chart-icon {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: rgba(124, 58, 237, .18);
+      color: #c4b5fd;
+      font-weight: 800;
+    }
+    .chart-heading h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+    .chart-heading p {
+      margin: 2px 0 0;
+      color: #b7aecb;
+      font-size: 13px;
+    }
+    .details-link {
+      border: 0;
+      background: transparent;
+      color: #c6c0d4;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .line-chart-wrap {
+      position: relative;
+      height: 315px;
+      margin-top: 10px;
+    }
+    .line-chart-wrap svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+    .chart-grid-line {
+      stroke: rgba(255,255,255,.2);
+      stroke-dasharray: 4 5;
+    }
+    .chart-axis-text {
+      fill: rgba(255,255,255,.42);
+      font-size: 12px;
+    }
+    .chart-line {
+      fill: none;
+      stroke: #9b35ff;
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 12px rgba(155, 53, 255, .34));
+    }
+    .chart-point {
+      fill: #9b35ff;
+      stroke: #140d23;
+      stroke-width: 3;
+    }
+    .chart-point.active {
+      fill: #fff;
+      stroke: #a855f7;
+      stroke-width: 4;
+    }
+    .chart-cursor {
+      stroke: rgba(255,255,255,.75);
+      stroke-width: 1.5;
+    }
+    .chart-tooltip {
+      position: absolute;
+      left: 122px;
+      top: 128px;
+      width: 290px;
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius: 8px;
+      background: rgba(255,255,255,.96);
+      color: #171321;
+      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+    }
+    .chart-tooltip strong {
+      display: block;
+      color: #d8d0f2;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    .chart-tooltip b {
+      color: #a855f7;
+      font-size: 17px;
+    }
+
+    /* Variant 2 */
+    .v2 { color: #14171a; }
+    .v2 .page {
+      background: #f5f2eb;
+      border-color: rgba(20,23,26,.13);
+    }
+    .v2 .toolbar,
+    .v2 .panel,
+    .v2 .metric,
+    .v2 .icon-btn,
+    .v2 .text-btn,
+    .v2 .input,
+    .v2 .select {
+      border-color: rgba(20,23,26,.12);
+      background: rgba(255,255,255,.68);
+      color: #14171a;
+    }
+    .v2 .primary {
+      background: #111315;
+      color: #fff;
+      border-color: #111315;
+    }
+    .v2 .tag {
+      background: #ebe6dc;
+      color: #4d453a;
+    }
+    .v2 .muted,
+    .v2 .metric-top,
+    .v2 .metric-caption,
+    .v2 .title-stack p,
+    .v2 .section-title span { color: #68717d; }
+    .v2 .ledger {
+      border: 1px solid rgba(20,23,26,.12);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fffdf8;
+    }
+    .v2 .ledger-head,
+    .v2 .ledger-row {
+      display: grid;
+      grid-template-columns: 100px minmax(180px, 1.4fr) 140px 120px 120px;
+      gap: 16px;
+      padding: 13px 16px;
+      border-top: 1px solid rgba(20,23,26,.09);
+      align-items: center;
+    }
+    .v2 .ledger-head {
+      border-top: 0;
+      background: #ebe6dc;
+      color: #6f6658;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .v2 .ledger-row {
+      font-size: 13px;
+    }
+
+    /* Variant 3 */
+    .v3 .page {
+      background: #070707;
+      border-color: rgba(255,255,255,.12);
+    }
+    .v3 .toolbar { background: #0d0d0d; }
+    .v3 .metric,
+    .v3 .panel {
+      background: #111;
+      border-color: rgba(255,255,255,.12);
+    }
+    .v3 .layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 12px;
+    }
+    .v3 .side-stack {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+    .v3 .score {
+      font-size: 54px;
+      line-height: 1;
+      font-weight: 820;
+    }
+    .v3 .compact-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 12px 0;
+      border-top: 1px solid rgba(255,255,255,.09);
+    }
+    .v3 .compact-row:first-child { border-top: 0; }
+
+    /* Variant 4 */
+    .v4 .page {
+      background: #101114;
+    }
+    .v4 .toolbar {
+      background: #15171b;
+    }
+    .v4 .ops-grid {
+      display: grid;
+      grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr) 320px;
+      gap: 12px;
+    }
+    .v4 .timeline {
+      display: grid;
+      gap: 10px;
+    }
+    .v4 .timeline-item {
+      display: grid;
+      grid-template-columns: 72px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 8px;
+      background: rgba(255,255,255,.04);
+    }
+    .v4 .todo {
+      display: grid;
+      gap: 8px;
+    }
+    .v4 .todo label {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 11px 0;
+      border-top: 1px solid rgba(255,255,255,.08);
+      font-size: 13px;
+    }
+    .v4 .todo label:first-child { border-top: 0; }
+    .v4 input[type="checkbox"] {
+      accent-color: var(--green);
+      margin-top: 2px;
+    }
+
+    @media (max-width: 1080px) {
+      .analysis-grid,
+      .metric-grid,
+      .three-col,
+      .v1 .hero-strip,
+      .two-col,
+      .v3 .layout,
+      .v4 .ops-grid {
+        grid-template-columns: 1fr;
+      }
+      .toolbar { flex-direction: column; }
+      .toolbar-actions { justify-content: flex-start; }
+      .v2 .ledger { overflow-x: auto; }
+      .v2 .ledger-head,
+      .v2 .ledger-row { min-width: 760px; }
+    }
+    @media (max-width: 720px) {
+      .preview-nav {
+        align-items: stretch;
+        flex-direction: column;
+        padding: 12px;
+      }
+      .variant,
+      .analysis { padding-left: 12px; padding-right: 12px; }
+      .toolbar,
+      .content { padding: 18px; }
+      .metric-value { font-size: 23px; }
+      .v1 .cashflow strong {
+        display: block;
+        font-size: 32px;
+      }
+      .line-chart-wrap {
+        height: 250px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 4px;
+      }
+      .line-chart-wrap svg {
+        width: 760px;
+      }
+      .chart-title {
+        align-items: flex-start;
+      }
+      .chart-heading h2 {
+        font-size: 15px;
+      }
+      .chart-icon {
+        width: 34px;
+        height: 34px;
+      }
+      .chart-tooltip {
+        left: 76px;
+        top: 104px;
+        width: 205px;
+        padding: 12px;
+      }
+      .chart-tooltip b {
+        font-size: 14px;
+      }
+      .table-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
+      .v4 .timeline-item {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-shell">
+    <nav class="preview-nav">
+      <div class="brand"><span class="brand-mark">P</span> Comptabilite V2 - previews</div>
+      <div class="nav-tabs" aria-label="Choisir une variante">
+        <button class="active" data-target="v1">01 Pilotage clair</button>
+        <button data-target="v2">02 Ledger premium</button>
+        <button data-target="v3">03 Executive dark</button>
+        <button data-target="v4">04 Operations finance</button>
+      </div>
+    </nav>
+
+    <section class="analysis">
+      <div class="section-title">
+        <h2>Analyse rapide</h2>
+        <span>Objectif: moins d'effet decoratif, plus de decision et de lisibilite</span>
+      </div>
+      <div class="analysis-grid">
+        <div class="analysis-card">
+          <strong>Probleme actuel</strong>
+          <p>Beaucoup de cartes similaires, fonds lumineux et hierarchy diffuse. L'utilisateur lit les chiffres, mais decide moins vite.</p>
+        </div>
+        <div class="analysis-card">
+          <strong>Ce qu'on garde</strong>
+          <p>Dark app, donnees annuelles, mois courant, repartition du CA, transactions et gestion rapide.</p>
+        </div>
+        <div class="analysis-card">
+          <strong>Ce qu'on simplifie</strong>
+          <p>Une priorite visuelle par ecran: cashflow, ledger, direction, ou operations. Moins de gradients, rayons a 8px.</p>
+        </div>
+        <div class="analysis-card">
+          <strong>Recommendation</strong>
+          <p>La variante 01 est le meilleur compromis CRM interne: premium, dense, simple, et facile a porter dans React.</p>
+        </div>
+      </div>
+    </section>
+
+    <main>
+      <section id="v1" class="variant v1 active">
+        <div class="page">
+          <header class="toolbar">
+            <div class="title-stack">
+              <h1>Comptabilite</h1>
+              <p>Vue de pilotage finance: resultat, cashflow, repartition du chiffre d'affaires et dernieres transactions.</p>
+            </div>
+            <div class="toolbar-actions">
+              <button class="icon-btn" title="Mois precedent">&lt;</button>
+              <select class="select" aria-label="Mois"><option>Mai 2026</option></select>
+              <button class="icon-btn" title="Mois suivant">&gt;</button>
+              <button class="text-btn">Exporter</button>
+              <button class="text-btn primary">Ajouter</button>
+            </div>
+          </header>
+          <div class="content">
+            <div class="v1 hero-strip">
+              <section class="panel">
+                <div class="cashflow">
+                  <div>
+                    <div class="muted small">Resultat net annuel</div>
+                    <strong class="positive">+86 420 EUR</strong>
+                    <p class="muted">Marge estimee 38,6% sur 224 900 EUR encaisses.</p>
+                  </div>
+                  <div class="tag">Temps reel</div>
+                </div>
+                <div class="runway">
+                  <div><span class="small muted">Revenus</span><br><b>224 900 EUR</b></div>
+                  <div><span class="small muted">Depenses</span><br><b>138 480 EUR</b></div>
+                  <div><span class="small muted">Transactions</span><br><b>146</b></div>
+                </div>
+              </section>
+              <section class="panel">
+                <div class="panel-header"><h2>Sante mensuelle</h2><span class="tag">Mai</span></div>
+                <div class="metric-value positive">+12 840 EUR</div>
+                <div class="mini-line positive" aria-hidden="true"></div>
+                <p class="muted small">Meilleur mois depuis fevrier. Charges stabilisees.</p>
+              </section>
+            </div>
+            <section class="panel revenue-evolution">
+              <div class="chart-title">
+                <div class="chart-heading">
+                  <div class="chart-icon" aria-hidden="true">▥</div>
+                  <div>
+                    <h2>Evolution du chiffre d'affaires</h2>
+                    <p>Comparaison mensuelle</p>
+                  </div>
+                </div>
+                <button class="details-link">Voir details &gt;</button>
+              </div>
+              <div class="line-chart-wrap">
+                <svg viewBox="0 0 1180 330" role="img" aria-label="Evolution mensuelle du chiffre d'affaires">
+                  <line class="chart-grid-line" x1="70" y1="35" x2="1140" y2="35" />
+                  <line class="chart-grid-line" x1="70" y1="115" x2="1140" y2="115" />
+                  <line class="chart-grid-line" x1="70" y1="195" x2="1140" y2="195" />
+                  <line class="chart-grid-line" x1="70" y1="275" x2="1140" y2="275" />
+                  <line class="chart-grid-line" x1="70" y1="35" x2="70" y2="275" />
+                  <line class="chart-grid-line" x1="172" y1="35" x2="172" y2="275" />
+                  <line class="chart-grid-line" x1="274" y1="35" x2="274" y2="275" />
+                  <line class="chart-grid-line" x1="376" y1="35" x2="376" y2="275" />
+                  <line class="chart-grid-line" x1="478" y1="35" x2="478" y2="275" />
+                  <line class="chart-grid-line" x1="580" y1="35" x2="580" y2="275" />
+                  <line class="chart-grid-line" x1="682" y1="35" x2="682" y2="275" />
+                  <line class="chart-grid-line" x1="784" y1="35" x2="784" y2="275" />
+                  <line class="chart-grid-line" x1="886" y1="35" x2="886" y2="275" />
+                  <line class="chart-grid-line" x1="988" y1="35" x2="988" y2="275" />
+                  <line class="chart-grid-line" x1="1090" y1="35" x2="1090" y2="275" />
+                  <text class="chart-axis-text" x="20" y="39">12000€</text>
+                  <text class="chart-axis-text" x="28" y="119">9000€</text>
+                  <text class="chart-axis-text" x="28" y="199">6000€</text>
+                  <text class="chart-axis-text" x="28" y="279">0€</text>
+                  <text class="chart-axis-text" x="50" y="302">janv.</text>
+                  <text class="chart-axis-text" x="153" y="302">fevr.</text>
+                  <text class="chart-axis-text" x="257" y="302">mars</text>
+                  <text class="chart-axis-text" x="362" y="302">avr.</text>
+                  <text class="chart-axis-text" x="466" y="302">mai</text>
+                  <text class="chart-axis-text" x="568" y="302">juin</text>
+                  <text class="chart-axis-text" x="670" y="302">juil.</text>
+                  <text class="chart-axis-text" x="770" y="302">aout</text>
+                  <text class="chart-axis-text" x="872" y="302">sept.</text>
+                  <text class="chart-axis-text" x="977" y="302">oct.</text>
+                  <text class="chart-axis-text" x="1078" y="302">nov.</text>
+                  <line class="chart-cursor" x1="172" y1="35" x2="172" y2="275" />
+                  <path class="chart-line" d="M70 82 C110 80, 140 76, 172 76 C210 78, 220 122, 236 168 C252 215, 306 238, 376 195 C430 160, 452 232, 478 246 C520 270, 548 275, 580 275 C706 276, 830 275, 1140 275" />
+                  <circle class="chart-point" cx="70" cy="82" r="8" />
+                  <circle class="chart-point active" cx="172" cy="76" r="9" />
+                  <circle class="chart-point" cx="376" cy="195" r="8" />
+                  <circle class="chart-point" cx="478" cy="246" r="8" />
+                  <circle class="chart-point" cx="580" cy="275" r="8" />
+                  <circle class="chart-point" cx="682" cy="275" r="8" />
+                  <circle class="chart-point" cx="784" cy="275" r="8" />
+                  <circle class="chart-point" cx="886" cy="275" r="8" />
+                  <circle class="chart-point" cx="988" cy="275" r="8" />
+                  <circle class="chart-point" cx="1090" cy="275" r="8" />
+                  <circle class="chart-point" cx="1140" cy="275" r="8" />
+                </svg>
+                <div class="chart-tooltip">
+                  <strong>fevrier 2026</strong>
+                  <b>Chiffre d'affaires : 10 440€</b>
+                </div>
+              </div>
+            </section>
+            <div class="metric-grid">
+              <div class="metric"><div class="metric-top"><span>Site Internet</span><span>42%</span></div><div class="metric-value blue">94 600 EUR</div><div class="metric-caption">12 projets factures</div></div>
+              <div class="metric"><div class="metric-top"><span>ERP</span><span>32%</span></div><div class="metric-value violet">72 300 EUR</div><div class="metric-caption">5 sprints actifs</div></div>
+              <div class="metric"><div class="metric-top"><span>Communication</span><span>26%</span></div><div class="metric-value gold">58 000 EUR</div><div class="metric-caption">Retainers + ads</div></div>
+              <div class="metric"><div class="metric-top"><span>A surveiller</span><span>3 items</span></div><div class="metric-value negative">18 900 EUR</div><div class="metric-caption">Depenses variables</div></div>
+            </div>
+            <div class="two-col" style="margin-top:12px">
+              <section class="panel">
+                <div class="panel-header"><h2>Evolution annuelle</h2><span class="muted small">Revenus vs depenses</span></div>
+                <div class="chart-bars">
+                  <div class="bar" style="height:48%"></div><div class="bar expense" style="height:32%"></div>
+                  <div class="bar" style="height:58%"></div><div class="bar expense" style="height:39%"></div>
+                  <div class="bar" style="height:66%"></div><div class="bar expense" style="height:44%"></div>
+                  <div class="bar" style="height:72%"></div><div class="bar expense" style="height:46%"></div>
+                  <div class="bar" style="height:84%"></div><div class="bar expense" style="height:49%"></div>
+                  <div class="bar" style="height:76%"></div><div class="bar expense" style="height:43%"></div>
+                </div>
+              </section>
+              <section class="panel">
+                <div class="panel-header"><h2>Dernieres transactions</h2><button class="icon-btn" title="Voir tout">...</button></div>
+                <div class="table-row"><span class="muted">30 mai</span><b>Refonte site Tara</b><span class="tag">Site</span><b class="positive">+7 800 EUR</b></div>
+                <div class="table-row"><span class="muted">28 mai</span><b>Abonnement logiciels</b><span class="tag">Outils</span><b class="negative">-1 240 EUR</b></div>
+                <div class="table-row"><span class="muted">24 mai</span><b>ERP maintenance</b><span class="tag">ERP</span><b class="positive">+5 400 EUR</b></div>
+                <div class="table-row"><span class="muted">21 mai</span><b>Campagne ads client</b><span class="tag">Com</span><b class="positive">+2 950 EUR</b></div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="v2" class="variant v2">
+        <div class="page">
+          <header class="toolbar">
+            <div class="title-stack">
+              <h1>Comptabilite</h1>
+              <p>Approche table-first pour controler, filtrer et corriger les lignes sans friction.</p>
+            </div>
+            <div class="toolbar-actions">
+              <input class="input" value="Rechercher" aria-label="Recherche" />
+              <select class="select" aria-label="Periode"><option>2026</option></select>
+              <button class="text-btn primary">Nouvelle ligne</button>
+            </div>
+          </header>
+          <div class="content">
+            <div class="metric-grid">
+              <div class="metric"><div class="metric-top"><span>Encaisse</span><span>+12%</span></div><div class="metric-value positive">224 900 EUR</div><div class="metric-caption">Exercice 2026</div></div>
+              <div class="metric"><div class="metric-top"><span>Sorties</span><span>-5%</span></div><div class="metric-value negative">138 480 EUR</div><div class="metric-caption">Charges + achats</div></div>
+              <div class="metric"><div class="metric-top"><span>Solde</span><span>38,6%</span></div><div class="metric-value">86 420 EUR</div><div class="metric-caption">Avant arbitrages</div></div>
+              <div class="metric"><div class="metric-top"><span>A classer</span><span>4</span></div><div class="metric-value gold">9 200 EUR</div><div class="metric-caption">Allocation manquante</div></div>
+            </div>
+            <section class="ledger" style="margin-top:14px">
+              <div class="ledger-head"><span>Date</span><span>Description</span><span>Categorie</span><span>Projet</span><span style="text-align:right">Montant</span></div>
+              <div class="ledger-row"><span class="muted">30/05/2026</span><b>Solde projet - Maison de Tara</b><span class="tag">Site Internet</span><span>Tara</span><b class="positive" style="text-align:right">+7 800 EUR</b></div>
+              <div class="ledger-row"><span class="muted">28/05/2026</span><b>Suite Adobe + outils projet</b><span class="tag">Charges</span><span>Interne</span><b class="negative" style="text-align:right">-1 240 EUR</b></div>
+              <div class="ledger-row"><span class="muted">24/05/2026</span><b>Maintenance ERP mensuelle</b><span class="tag">ERP</span><span>Client B</span><b class="positive" style="text-align:right">+5 400 EUR</b></div>
+              <div class="ledger-row"><span class="muted">21/05/2026</span><b>Production social media</b><span class="tag">Communication</span><span>Client C</span><b class="positive" style="text-align:right">+2 950 EUR</b></div>
+              <div class="ledger-row"><span class="muted">18/05/2026</span><b>Freelance integration</b><span class="tag">Sous-traitance</span><span>ERP</span><b class="negative" style="text-align:right">-3 600 EUR</b></div>
+            </section>
+            <div class="three-col" style="margin-top:14px">
+              <section class="panel"><h2>Site Internet</h2><div class="metric-value blue">42%</div><p class="muted small">Part majoritaire du CA, cycle court.</p></section>
+              <section class="panel"><h2>ERP</h2><div class="metric-value violet">32%</div><p class="muted small">Revenus plus concentres, marge haute.</p></section>
+              <section class="panel"><h2>Communication</h2><div class="metric-value gold">26%</div><p class="muted small">Retainers previsibles, volume stable.</p></section>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="v3" class="variant v3">
+        <div class="page">
+          <header class="toolbar">
+            <div class="title-stack">
+              <h1>Executive finance</h1>
+              <p>Une lecture ultra concise pour dirigeant: score, risques et categories rentables.</p>
+            </div>
+            <div class="toolbar-actions">
+              <button class="icon-btn" title="Mois precedent">&lt;</button>
+              <button class="text-btn">Mai 2026</button>
+              <button class="icon-btn" title="Mois suivant">&gt;</button>
+            </div>
+          </header>
+          <div class="content">
+            <div class="v3 layout">
+              <aside class="side-stack">
+                <section class="panel">
+                  <div class="muted small">Score financier</div>
+                  <div class="score positive">86</div>
+                  <p class="muted small">Cashflow sain, charges sous controle, attention aux allocations non classees.</p>
+                </section>
+                <section class="panel">
+                  <h2>Alertes</h2>
+                  <div class="compact-row"><span>Charges variables</span><b class="negative">+8%</b></div>
+                  <div class="compact-row"><span>Lignes non classees</span><b class="gold">4</b></div>
+                  <div class="compact-row"><span>Retards facture</span><b>2</b></div>
+                </section>
+              </aside>
+              <div>
+                <div class="metric-grid">
+                  <div class="metric"><div class="metric-top"><span>Revenus</span><span>YTD</span></div><div class="metric-value positive">224 900</div><div class="metric-caption">EUR</div></div>
+                  <div class="metric"><div class="metric-top"><span>Depenses</span><span>YTD</span></div><div class="metric-value negative">138 480</div><div class="metric-caption">EUR</div></div>
+                  <div class="metric"><div class="metric-top"><span>Resultat</span><span>YTD</span></div><div class="metric-value blue">86 420</div><div class="metric-caption">EUR</div></div>
+                  <div class="metric"><div class="metric-top"><span>Marge</span><span>Net</span></div><div class="metric-value">38,6%</div><div class="metric-caption">objectif 35%</div></div>
+                </div>
+                <div class="two-col" style="margin-top:12px">
+                  <section class="panel">
+                    <div class="panel-header"><h2>Repartition du CA</h2><span class="muted small">2026</span></div>
+                    <div class="donut"></div>
+                    <div class="legend">
+                      <div class="legend-row blue"><span><i class="dot"></i>Site Internet</span><b>94 600 EUR</b></div>
+                      <div class="legend-row violet"><span><i class="dot"></i>ERP</span><b>72 300 EUR</b></div>
+                      <div class="legend-row gold"><span><i class="dot"></i>Communication</span><b>58 000 EUR</b></div>
+                    </div>
+                  </section>
+                  <section class="panel">
+                    <div class="panel-header"><h2>Flux mensuel</h2><span class="tag">Mai</span></div>
+                    <div class="chart-bars">
+                      <div class="bar" style="height:46%"></div><div class="bar" style="height:58%"></div><div class="bar" style="height:49%"></div><div class="bar" style="height:68%"></div>
+                      <div class="bar" style="height:54%"></div><div class="bar" style="height:76%"></div><div class="bar" style="height:71%"></div><div class="bar" style="height:86%"></div>
+                      <div class="bar expense" style="height:42%"></div><div class="bar expense" style="height:36%"></div><div class="bar expense" style="height:45%"></div><div class="bar expense" style="height:39%"></div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="v4" class="variant v4">
+        <div class="page">
+          <header class="toolbar">
+            <div class="title-stack">
+              <h1>Operations finance</h1>
+              <p>Une comptabilite actionnable: prochaine facture, categorisation, priorites et suivi du mois.</p>
+            </div>
+            <div class="toolbar-actions">
+              <button class="text-btn">Importer</button>
+              <button class="text-btn primary">Gerer transactions</button>
+            </div>
+          </header>
+          <div class="content">
+            <div class="metric-grid">
+              <div class="metric"><div class="metric-top"><span>Solde mai</span><span>Net</span></div><div class="metric-value positive">12 840 EUR</div><div class="metric-caption">31 transactions</div></div>
+              <div class="metric"><div class="metric-top"><span>A encaisser</span><span>7 jours</span></div><div class="metric-value blue">18 200 EUR</div><div class="metric-caption">4 factures ouvertes</div></div>
+              <div class="metric"><div class="metric-top"><span>A payer</span><span>7 jours</span></div><div class="metric-value negative">6 100 EUR</div><div class="metric-caption">2 fournisseurs</div></div>
+              <div class="metric"><div class="metric-top"><span>Budget ads</span><span>Restant</span></div><div class="metric-value gold">4 780 EUR</div><div class="metric-caption">72% consomme</div></div>
+            </div>
+            <div class="ops-grid" style="margin-top:12px">
+              <section class="panel">
+                <div class="panel-header"><h2>Timeline du mois</h2><span class="muted small">Mai 2026</span></div>
+                <div class="timeline">
+                  <div class="timeline-item"><span class="muted">30 mai</span><b>Facture Tara encaissee</b><b class="positive">+7 800</b></div>
+                  <div class="timeline-item"><span class="muted">28 mai</span><b>Outils equipe</b><b class="negative">-1 240</b></div>
+                  <div class="timeline-item"><span class="muted">24 mai</span><b>ERP maintenance</b><b class="positive">+5 400</b></div>
+                  <div class="timeline-item"><span class="muted">18 mai</span><b>Sous-traitance dev</b><b class="negative">-3 600</b></div>
+                </div>
+              </section>
+              <section class="panel">
+                <div class="panel-header"><h2>Repartition operationnelle</h2><span class="tag">CA</span></div>
+                <div class="donut"></div>
+                <div class="legend-row blue"><span><i class="dot"></i>Sites</span><b>42%</b></div>
+                <div class="legend-row violet"><span><i class="dot"></i>ERP</span><b>32%</b></div>
+                <div class="legend-row gold"><span><i class="dot"></i>Communication</span><b>26%</b></div>
+              </section>
+              <section class="panel">
+                <h2>Actions</h2>
+                <div class="todo">
+                  <label><input type="checkbox" checked> <span>Verifier 4 lignes non categorisees</span></label>
+                  <label><input type="checkbox"> <span>Relancer facture Client D</span></label>
+                  <label><input type="checkbox"> <span>Valider depense freelance ERP</span></label>
+                  <label><input type="checkbox"> <span>Exporter le reporting mensuel</span></label>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const buttons = document.querySelectorAll('[data-target]');
+    const variants = document.querySelectorAll('.variant');
+
+    function showVariant(id, pushHash = true) {
+      const target = document.getElementById(id);
+      if (!target) return;
+      buttons.forEach((item) => item.classList.toggle('active', item.dataset.target === id));
+      variants.forEach((item) => item.classList.toggle('active', item.id === id));
+      if (pushHash) history.replaceState(null, '', `#${id}`);
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => showVariant(button.dataset.target));
+    });
+
+    showVariant(location.hash.replace('#', '') || 'v1', false);
+    if (location.hash) requestAnimationFrame(() => window.scrollTo(0, 0));
+    window.addEventListener('hashchange', () => showVariant(location.hash.replace('#', '') || 'v1', false));
+  </script>
+</body>
+</html>

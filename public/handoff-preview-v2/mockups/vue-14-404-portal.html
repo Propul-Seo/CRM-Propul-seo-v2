@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8"><title>Vue 14 — 404 portail</title>
+<link rel="stylesheet" href="../tokens/colors_and_type.css">
+<link rel="stylesheet" href="../tokens/portal.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+  body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+  .container { max-width: 1340px; margin: 0 auto; }
+</style></head>
+<body><div id="head"></div>
+<div class="container"><div id="root"></div></div>
+<script type="text/babel" src="_lib/primitives.jsx"></script>
+<script type="text/babel" src="_lib/shell.jsx"></script>
+<script type="text/babel" src="_lib/desktop-shell.jsx"></script>
+
+<script type="text/babel">
+function FourOhFour() {
+  return (
+    <DesktopWindow url="espace.propulseo-site.com/espace-client/cette-page-nexiste-pas" activeTab="dashboard" withFab={false} minHeight={620}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 480, padding: "40px 24px" }}>
+        {/* Big 404 */}
+        <div style={{ position: "relative", marginBottom: 12 }}>
+          <div className="ps-num ps-gradient-text" style={{ fontSize: 120, fontWeight: 800, letterSpacing: "-0.04em", lineHeight: 1, opacity: 0.18 }}>404</div>
+          <div style={{
+            position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)",
+            width: 64, height: 64, borderRadius: 16,
+            background: "var(--ps-primary-subtle)", color: "var(--ps-primary-deep)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 12px 30px -8px rgba(124,58,237,0.3)",
+          }}><Icon name="search-x" size={28} stroke={2.2} /></div>
+        </div>
+        <h1 className="ps-h1 ps-gradient-text" style={{ fontSize: 28, marginBottom: 8 }}>Page introuvable</h1>
+        <p style={{ fontSize: 14.5, color: "var(--ps-fg-secondary)", textAlign: "center", maxWidth: 420, lineHeight: 1.55, margin: "0 0 24px" }}>
+          La page que vous cherchez n'existe pas ou a été déplacée. Pas de panique — votre espace n'a pas bougé.
+        </p>
+        <div style={{ display: "flex", gap: 8 }}>
+          <a href="/espace-client" style={{ textDecoration: "none" }}>
+            <button className="ps-btn ps-btn-primary ps-btn-lg">Retour à mon espace<Icon name="arrow-up-right" size={14} stroke={2.6} /></button>
+          </a>
+          <button className="ps-btn ps-btn-outline ps-btn-lg">Contacter Propul'SEO</button>
+        </div>
+        <div style={{ marginTop: 26, fontSize: 11.5, color: "var(--ps-fg-muted)" }}>
+          Erreur signalée automatiquement à l'équipe.
+        </div>
+      </div>
+    </DesktopWindow>
+  );
+}
+
+function Head() {
+  return <PageHead num="14" title="404 portail client" subtitle="Affichée pour toute URL /espace-client/* non match. Garde le PortalLayout (header + tabs) pour préserver la navigation." />;
+}
+ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+ReactDOM.createRoot(document.getElementById("root")).render(<FourOhFour />);
+</script>
+</body></html>

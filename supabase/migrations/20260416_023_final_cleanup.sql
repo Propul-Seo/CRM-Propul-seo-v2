@@ -1,0 +1,27 @@
+-- Sprint 5 : Suppression finale des tables archivées
+-- ====================================================
+-- À exécuter 30 jours après la migration, une fois la stabilité confirmée.
+--
+-- ⚠️  NE PAS EXÉCUTER AUTOMATIQUEMENT — validation manuelle requise.
+
+-- DROP TABLE IF EXISTS public._archive_projects_v2 CASCADE;
+-- DROP TABLE IF EXISTS public._archive_project_activities_v2 CASCADE;
+-- DROP TABLE IF EXISTS public._archive_project_documents_v2 CASCADE;
+-- DROP TABLE IF EXISTS public._archive_follow_ups_v2 CASCADE;
+-- DROP TABLE IF EXISTS public._archive_checklist_items_v2 CASCADE;
+-- DROP TABLE IF EXISTS public._archive_project_briefs_v2 CASCADE;
+-- DROP TABLE IF EXISTS public._archive_invoices_v2 CASCADE;
+-- DROP TABLE IF EXISTS public._archive_project_accesses_v2 CASCADE;
+-- DROP TABLE IF EXISTS public._archive_comm_tasks_v2 CASCADE;
+
+-- Décommenter les lignes ci-dessus après validation.
+-- Les fichiers mock listés ci-dessous peuvent être supprimés du repo :
+--
+-- src/modules/CommunicationManager/mocks/*
+-- src/modules/CommunicationManager/hooks/useMockCommProjects.ts
+-- src/modules/CommunicationManager/hooks/useMockCommCycles.ts
+-- src/modules/ERPManager/mocks/*
+-- src/modules/ERPManager/hooks/useMockERPProjects.ts
+-- src/modules/SiteWebManager/mocks/*
+-- src/modules/SiteWebManager/hooks/useMockSiteWebProjects.ts
+-- src/modules/ProjectsManagerV2/mocks/*

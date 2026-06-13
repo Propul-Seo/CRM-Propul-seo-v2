@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Preview — Dark Indigo V3</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #07051a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      font-family: Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+    }
+
+    .page-label {
+      color: #6b5fa0;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    /* A4 : 210mm × 297mm → on simule en px avec ratio ~96dpi */
+    .page {
+      width: 794px;
+      min-height: 1123px;
+      background: #0e0b1e;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.7);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────── */
+    .header {
+      background: #16122e;
+      border-bottom: 2px solid #2d2654;
+      padding: 36px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .logo-circle {
+      width: 34px;
+      height: 34px;
+      background: #6366f1;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-circle span {
+      color: #ffffff;
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .header-brand {
+      color: #ede9fe;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+    }
+
+    .header-tagline {
+      color: #a78bfa;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .header-meta {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .meta-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .meta-label {
+      color: #6b5fa0;
+      font-size: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .meta-value {
+      color: #a78bfa;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* ── CONTENT ─────────────────────────────────────────── */
+    .content {
+      padding: 28px 30px;
+      flex: 1;
+    }
+
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      margin: -8px;
+    }
+
+    .bento-box {
+      width: 100%;
+      padding: 8px;
+    }
+
+    .bento-box-half {
+      width: 50%;
+      padding: 8px;
+    }
+
+    .card {
+      background: #16122e;
+      border: 1.5px solid #2d2654;
+      border-radius: 20px;
+      padding: 22px 24px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card.tall {
+      min-height: 160px;
+    }
+
+    .section-label {
+      color: #6b5fa0;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+    }
+
+    .section-value {
+      color: #ede9fe;
+      font-size: 13px;
+      line-height: 1.65;
+      flex: 1;
+    }
+
+    .section-empty {
+      color: #3d3168;
+      font-size: 13px;
+      font-style: italic;
+      flex: 1;
+    }
+
+    /* ── FOOTER ─────────────────────────────────────────── */
+    .footer {
+      background: #16122e;
+      border-top: 1.5px solid #2d2654;
+      padding: 22px 30px;
+      text-align: center;
+    }
+
+    .footer-text {
+      color: #6b5fa0;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+  </style>
+</head>
+<body>
+  <p class="page-label">Dark Indigo V3 — Aperçu PDF Brief Client</p>
+
+  <div class="page">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-left">
+        <div class="logo-row">
+          <div class="logo-circle"><span>P</span></div>
+          <span class="header-brand">PROPULSEO STUDIO</span>
+        </div>
+        <span class="header-tagline">REFONTE SITE E-COMMERCE MAISON LÉON</span>
+      </div>
+      <div class="header-meta">
+        <div class="meta-block">
+          <span class="meta-label">Généré le</span>
+          <span class="meta-value">12/04/2026</span>
+        </div>
+        <div class="meta-block">
+          <span class="meta-label">Brief Reçu le</span>
+          <span class="meta-value">08/04/2026</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+      <div class="grid">
+
+        <!-- 01 — Vision & Objectif (full width) -->
+        <div class="bento-box">
+          <div class="card tall">
+            <div class="section-label">01 — Vision &amp; Objectif</div>
+            <div class="section-value">
+              Maison Léon souhaite refondre entièrement son site e-commerce afin d'offrir une expérience d'achat haut de gamme, cohérente avec son positionnement dans l'épicerie fine et les produits du terroir. L'objectif principal est d'augmenter le taux de conversion de 2,1 % à 4,5 % en six mois, tout en renforçant la fidélisation client via un espace compte personnalisé et un programme de fidélité intégré.
+            </div>
+          </div>
+        </div>
+
+        <!-- 02 — Audience Cible (half) -->
+        <div class="bento-box-half">
+          <div class="card">
+            <div class="section-label">02 — Audience Cible</div>
+            <div class="section-value">
+              Particuliers 35–60 ans, CSP+, sensibles à la qualité et à l'origine des produits. Forte présence en Île-de-France et PACA. Acheteurs occasionnels souhaitant passer à un abonnement mensuel.
+            </div>
+          </div>
+        </div>
+
+        <!-- 03 — Environnement Techno (half) -->
+        <div class="bento-box-half">
+          <div class="card">
+            <div class="section-label">03 — Environnement Techno</div>
+            <div class="section-value">
+              Shopify Plus (migration depuis WooCommerce), intégration Klaviyo pour l'e-mail, Stripe pour le paiement, connexion API ERP Sage pour la gestion des stocks en temps réel.
+            </div>
+          </div>
+        </div>
+
+        <!-- 04 — Structure & Fonctions (full width) -->
+        <div class="bento-box">
+          <div class="card tall">
+            <div class="section-label">04 — Structure &amp; Fonctions</div>
+            <div class="section-value">
+              Pages : Accueil / Collections (Épicerie, Vins, Coffrets) / Fiche produit enrichie avec storytelling / Panier &amp; Checkout optimisé / Espace compte (historique, abonnement, fidélité) / Blog &amp; Actualités / À propos / Contact.<br /><br />
+              Fonctions clés : moteur de recherche avancé avec filtres, module d'abonnement récurrent, programme de points fidélité, chat support en direct, avis vérifiés Trustpilot.
+            </div>
+          </div>
+        </div>
+
+        <!-- 05 — Références Visuelles (half) -->
+        <div class="bento-box-half">
+          <div class="card">
+            <div class="section-label">05 — Références Visuelles</div>
+            <div class="section-value">
+              Inspirations : La Grande Épicerie (paris.fr), Hédiard, Fauchon. Palette : crème, or mat, vert foncé bouteille. Typographie serif élégante + sans-serif moderne pour les prix. Photographie produit sur fond neutre texturé.
+            </div>
+          </div>
+        </div>
+
+        <!-- 06 — Notes Libres (half) -->
+        <div class="bento-box-half">
+          <div class="card">
+            <div class="section-label">06 — Notes Libres</div>
+            <div class="section-value">
+              Budget max : 28 000 € HT. Deadline souhaitée : 15 septembre 2026 (avant les fêtes). Prévoir 3 ateliers de validation à distance. Le client a déjà les visuels produits (plus de 400 photos HD).
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <span class="footer-text">Propulseo Studio · Excellence Digitale</span>
+    </div>
+
+  </div>
+</body>
+</html>

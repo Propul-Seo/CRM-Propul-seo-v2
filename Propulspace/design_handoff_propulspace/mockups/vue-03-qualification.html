@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"><title>Vue 3 — Qualification 7 étapes</title>
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <link rel="stylesheet" href="portal.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+    body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+    .container { max-width: 1340px; margin: 0 auto; }
+    .section-h { margin: 36px auto 14px; max-width: 1340px; }
+    .section-h h2 { font-size: 16px; font-weight: 700; letter-spacing: -0.015em; margin: 0; color: #2a2418; }
+    .section-h p { font-size: 13px; color: #6b6357; margin: 4px 0 0; }
+  </style>
+</head>
+<body>
+  <div id="head"></div>
+
+  <div class="section-h"><h2>Étape 1/7 · "Qui êtes-vous ?"</h2><p>Champ tel avec réassurance cadenas. RadioGroup secteur en grille 2-cols.</p></div>
+  <div class="container"><div id="s1"></div></div>
+
+  <div class="section-h"><h2>Étape 2/7 · "Votre situation actuelle" — logique conditionnelle "Oui, site obsolète"</h2></div>
+  <div class="container"><div id="s2"></div></div>
+
+  <div class="section-h"><h2>Étape 3/7 · "Vos objectifs"</h2></div>
+  <div class="container"><div id="s3"></div></div>
+
+  <div class="section-h"><h2>Étape 4/7 · "Fonctionnalités" — branche e-commerce ouverte</h2></div>
+  <div class="container"><div id="s4"></div></div>
+
+  <div class="section-h"><h2>Étape 5/7 · "Identité visuelle" — cartes radio illustrées</h2></div>
+  <div class="container"><div id="s5"></div></div>
+
+  <div class="section-h"><h2>Étape 6/7 · "Budget &amp; délais" — cartes emoji</h2></div>
+  <div class="container"><div id="s6"></div></div>
+
+  <div class="section-h"><h2>Étape 7/7 · "Pour finaliser" + récap pliable</h2></div>
+  <div class="container"><div id="s7"></div></div>
+
+  <div class="section-h"><h2>Page de remerciement</h2></div>
+  <div class="container"><div id="thanks"></div></div>
+
+  <script type="text/babel" src="primitives.jsx"></script>
+  <script type="text/babel" src="shell.jsx"></script>
+  <script type="text/babel" src="desktop-shell.jsx"></script>
+
+  <script type="text/babel">
+    function QualifShell({ step, total = 7, children }) {
+      const pct = Math.round((step / total) * 100);
+      return (
+        <PublicWindow url="propulseo-site.com/diagnostic" minHeight={780}>
+          {/* Top progress bar */}
+          <div style={{
+            position: "sticky", top: 0, zIndex: 5,
+            background: "rgba(250,250,250,0.85)", backdropFilter: "blur(20px) saturate(180%)",
+            borderBottom: "1px solid var(--ps-border-soft)",
+            padding: "14px 28px",
+          }}>
+            <div style={{ maxWidth: 700, margin: "0 auto" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <span className="ps-brand-pill" style={{ height: 28, padding: "0 11px", fontSize: 11.5 }}>
+                    <Icon name="sparkles" size={12} stroke={2.4} />
+                    Propul'SEO
+                  </span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "var(--ps-fg)", letterSpacing: "-0.005em" }}>
+                    Étape {step} sur {total}
+                  </span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <span style={{ fontSize: 11.5, color: "var(--ps-success)", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    <Icon name="check" size={12} stroke={2.6} />
+                    Sauvegardé
+                  </span>
+                  <span style={{ fontSize: 11.5, color: "var(--ps-fg-muted)" }}>≈ 7 minutes</span>
+                </div>
+              </div>
+              <div className="ps-progress-track" style={{ height: 4 }}>
+                <div className="ps-progress-fill" style={{ width: `${pct}%` }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Form card */}
+          <div style={{ padding: "36px 28px 28px", display: "flex", justifyContent: "center" }}>
+            <div className="ps-card" style={{ width: "100%", maxWidth: 700, padding: "32px 32px 24px" }}>
+              {children}
+              {/* Nav */}
+              <div style={{
+                marginTop: 32, paddingTop: 22, borderTop: "1px solid var(--ps-border-soft)",
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+              }}>
+                {step > 1
+                  ? <Button variant="outline" icon="arrow-left">Précédent</Button>
+                  : <span />}
+                <Button variant="primary" size="lg" iconRight="arrow-right">
+                  {step < total ? "Suivant" : "Envoyer mon diagnostic"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </PublicWindow>
+      );
+    }
+
+    function StepTitle({ step, title, sub }) {
+      return (
+        <div style={{ marginBottom: 26 }}>
+          <span className="ps-eyebrow">Étape {step} sur 7</span>
+          <h1 className="ps-h1 ps-gradient-text" style={{ fontSize: 24, marginTop: 4 }}>{title}</h1>
+          {sub && <p style={{ fontSize: 13.5, color: "var(--ps-fg-secondary)", margin: "6px 0 0" }}>{sub}</p>}
+        </div>
+      );
+    }
+
+    /* ====== Form primitives ====== */
+    function Field({ label, optional, help, children, locked }) {
+      return (
+        <div className="ps-field" style={{ marginBottom: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <label className="ps-label">{label}{!optional && <span style={{ color: "var(--ps-primary)", marginLeft: 3 }}>*</span>}</label>
+            {optional && <span style={{ fontSize: 11.5, color: "var(--ps-fg-muted)" }}>· optionnel</span>}
+            {locked && <Icon name="lock" size={11} stroke={2.2} style={{ color: "var(--ps-fg-muted)" }} />}
+          </div>
+          {children}
+          {help && <div style={{ fontSize: 11.5, color: "var(--ps-fg-muted)", marginTop: 2 }}>{help}</div>}
+        </div>
+      );
+    }
+
+    function Radio({ checked, label, sub, emoji, cards, onClick }) {
+      if (cards) {
+        return (
+          <button onClick={onClick} type="button" style={{
+            padding: "14px 16px", borderRadius: 12, cursor: "pointer",
+            border: `1.5px solid ${checked ? "var(--ps-primary)" : "var(--ps-border)"}`,
+            background: checked ? "var(--ps-primary-subtle)" : "#fff",
+            display: "flex", alignItems: "center", gap: 12,
+            textAlign: "left", width: "100%",
+            transition: "all 200ms",
+          }}>
+            {emoji && <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>{emoji}</span>}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 500, color: "var(--ps-fg)", letterSpacing: "-0.005em" }}>{label}</div>
+              {sub && <div style={{ fontSize: 12, color: "var(--ps-fg-muted)", marginTop: 2 }}>{sub}</div>}
+            </div>
+            <span style={{
+              width: 18, height: 18, borderRadius: 9999, flexShrink: 0,
+              border: `2px solid ${checked ? "var(--ps-primary)" : "var(--ps-border-strong)"}`,
+              background: checked ? "var(--ps-primary)" : "transparent",
+              boxShadow: checked ? "inset 0 0 0 3px #fff" : "none",
+            }} />
+          </button>
+        );
+      }
+      return (
+        <button onClick={onClick} type="button" style={{
+          padding: "10px 14px", borderRadius: 10, cursor: "pointer",
+          border: `1.5px solid ${checked ? "var(--ps-primary)" : "var(--ps-border)"}`,
+          background: checked ? "var(--ps-primary-subtle)" : "#fff",
+          display: "flex", alignItems: "center", gap: 10,
+          textAlign: "left", width: "100%",
+          transition: "all 200ms",
+        }}>
+          <span style={{
+            width: 16, height: 16, borderRadius: 9999, flexShrink: 0,
+            border: `2px solid ${checked ? "var(--ps-primary)" : "var(--ps-border-strong)"}`,
+            background: checked ? "var(--ps-primary)" : "transparent",
+            boxShadow: checked ? "inset 0 0 0 3px #fff" : "none",
+          }} />
+          <span style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ps-fg)", letterSpacing: "-0.005em" }}>{label}</span>
+        </button>
+      );
+    }
+
+    function Check({ checked, label, onClick }) {
+      return (
+        <button onClick={onClick} type="button" style={{
+          padding: "10px 14px", borderRadius: 10, cursor: "pointer",
+          border: `1.5px solid ${checked ? "var(--ps-primary)" : "var(--ps-border)"}`,
+          background: checked ? "var(--ps-primary-subtle)" : "#fff",
+          display: "flex", alignItems: "center", gap: 10,
+          textAlign: "left", width: "100%",
+        }}>
+          <span style={{
+            width: 18, height: 18, borderRadius: 5, flexShrink: 0,
+            border: `2px solid ${checked ? "var(--ps-primary)" : "var(--ps-border-strong)"}`,
+            background: checked ? "var(--ps-primary)" : "transparent",
+            color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
+          }}>{checked && <Icon name="check" size={11} stroke={3} />}</span>
+          <span style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ps-fg)", letterSpacing: "-0.005em" }}>{label}</span>
+        </button>
+      );
+    }
+
+    function ConditionalNote({ children }) {
+      return (
+        <div style={{
+          margin: "10px 0 14px",
+          padding: "10px 12px",
+          background: "var(--ps-primary-subtle)",
+          borderLeft: "3px solid var(--ps-primary)",
+          borderRadius: "0 8px 8px 0",
+          fontSize: 12, color: "var(--ps-primary-deep)",
+          display: "flex", gap: 8, alignItems: "center",
+        }}>
+          <Icon name="git-branch" size={12} stroke={2.2} />
+          {children}
+        </div>
+      );
+    }
+
+    /* ====== STEP 1 ====== */
+    function S1() {
+      const sectors = [
+        "E-commerce", "Restaurant / Hôtellerie", "Joaillerie / Artisanat haut de gamme",
+        "Diagnostic / Audit", "Immobilier / Syndic", "Santé / Bien-être",
+        "Profession libérale", "Startup Tech / SaaS", "Artisan / Commerce local", "Autre",
+      ];
+      return (
+        <QualifShell step={1}>
+          <StepTitle step={1} title="Qui êtes-vous ?" sub="Quelques informations pour personnaliser notre proposition." />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+            <Field label="Nom complet"><input className="ps-input" value="Sophie Martin" /></Field>
+            <Field label="Email professionnel"><input className="ps-input" value="sophie@precieuse.fr" /></Field>
+          </div>
+          <Field label="Téléphone" locked help="Pour vous rappeler sous 24h. Jamais partagé avec des tiers."><input className="ps-input" value="06 12 34 56 78" /></Field>
+          <Field label="Nom de l'entreprise" optional><input className="ps-input" value="Précieuse Joaillerie" /></Field>
+          <div style={{ marginTop: 8 }}>
+            <Field label="Secteur d'activité">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 6 }}>
+                {sectors.map((s, i) => <Radio key={i} label={s} checked={i === 2} />)}
+              </div>
+            </Field>
+          </div>
+        </QualifShell>
+      );
+    }
+
+    /* ====== STEP 2 ====== */
+    function S2() {
+      return (
+        <QualifShell step={2}>
+          <StepTitle step={2} title="Votre situation actuelle" sub="Pour comprendre votre point de départ." />
+          <Field label="Avez-vous déjà un site web ?">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 6 }}>
+              <Radio label="Oui" />
+              <Radio label="Oui, mais obsolète" checked />
+              <Radio label="Non, pas encore" />
+            </div>
+          </Field>
+          <ConditionalNote>Branche conditionnelle : "Oui / obsolète" → URL + captures + trafic + problèmes.</ConditionalNote>
+          <Field label="URL du site actuel"><input className="ps-input" value="https://precieuse-joaillerie.fr" /></Field>
+          <Field label="Captures d'écran du site actuel" optional>
+            <div style={{ padding: 20, border: "1.5px dashed var(--ps-border)", borderRadius: 10, textAlign: "center", marginTop: 4 }}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "var(--ps-fg-secondary)", fontSize: 13 }}>
+                <Icon name="upload" size={14} stroke={2.2} /> Glissez vos fichiers · max 3 · 25 MB chacun
+              </span>
+            </div>
+          </Field>
+          <Field label="Trafic mensuel">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginTop: 6 }}>
+              <Radio label="< 500" />
+              <Radio label="500 – 2 000" checked />
+              <Radio label="> 2 000" />
+              <Radio label="Je ne sais pas" />
+            </div>
+          </Field>
+          <Field label="Problèmes principaux (plusieurs choix possibles)">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 6 }}>
+              <Check label="Design dépassé" checked />
+              <Check label="Pas adapté mobile" checked />
+              <Check label="Trop lent" />
+              <Check label="Mal référencé" checked />
+              <Check label="Autre" />
+            </div>
+          </Field>
+        </QualifShell>
+      );
+    }
+
+    /* ====== STEP 3 ====== */
+    function S3() {
+      return (
+        <QualifShell step={3}>
+          <StepTitle step={3} title="Vos objectifs" sub="Pour cibler la proposition sur ce qui compte vraiment." />
+          <Field label="Objectif principal">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 6 }}>
+              <Radio label="Présenter mes services" />
+              <Radio label="Vendre en ligne" checked />
+              <Radio label="Générer des leads" />
+              <Radio label="Refondre mon image" />
+              <Radio label="Autre" />
+            </div>
+          </Field>
+          <Field label="Public cible">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 6 }}>
+              <Radio label="Particuliers (B2C)" checked />
+              <Radio label="Professionnels (B2B)" />
+              <Radio label="Les deux" />
+            </div>
+          </Field>
+          <Field label="2-3 concurrents ou sites que vous aimez" optional help="Donnez-nous des exemples pour comprendre votre positionnement.">
+            <textarea className="ps-input" rows="3" style={{ height: "auto", padding: "10px 14px" }} defaultValue="messika.com, dinhvan.com, dior.com/joaillerie" />
+          </Field>
+        </QualifShell>
+      );
+    }
+
+    /* ====== STEP 4 ====== */
+    function S4() {
+      const feats = ["Blog / Actualités", "E-commerce (vente en ligne)", "Réservation en ligne", "Espace membre / client", "Chat en ligne", "Multi-langue", "SEO avancé", "Dashboard", "Autre"];
+      return (
+        <QualifShell step={4}>
+          <StepTitle step={4} title="Fonctionnalités souhaitées" sub="Cochez tout ce qui vous intéresse — on affinera ensemble." />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            {feats.map((f, i) => <Check key={i} label={f} checked={i === 1 || i === 6} />)}
+          </div>
+          <ConditionalNote>Branche ouverte : "E-commerce" coché → plateforme + volume produits.</ConditionalNote>
+          <Field label="Plateforme actuelle">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: 8, marginTop: 6 }}>
+              <Radio label="Shopify" />
+              <Radio label="WooCommerce" />
+              <Radio label="PrestaShop" />
+              <Radio label="Aucune" checked />
+              <Radio label="Autre" />
+            </div>
+          </Field>
+          <Field label="Nombre de produits">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 6 }}>
+              <Radio label="< 50" />
+              <Radio label="50 – 500" checked />
+              <Radio label="> 500" />
+            </div>
+          </Field>
+        </QualifShell>
+      );
+    }
+
+    /* ====== STEP 5 ====== */
+    function S5() {
+      return (
+        <QualifShell step={5}>
+          <StepTitle step={5} title="Votre identité visuelle" sub="Logo, charte, ou point de départ vierge ?" />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+            <Radio cards emoji="🎨" label="Charte complète" sub="Logo + couleurs + typo" checked />
+            <Radio cards emoji="🖼️" label="Juste un logo" sub="Pas de charte complète" />
+            <Radio cards emoji="❓" label="Rien du tout" sub="On part de zéro" />
+          </div>
+          <ConditionalNote>Branche : "Charte complète" → upload logo + charte PDF.</ConditionalNote>
+          <Field label="Votre logo">
+            <div style={{ marginTop: 4, display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", border: "1px solid var(--ps-border-soft)", borderRadius: 10, background: "var(--ps-bg-subtle)" }}>
+              <span style={{ width: 40, height: 40, borderRadius: 8, background: "linear-gradient(135deg, #d4a574, #8a6d3b)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>P</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 500 }}>logo-precieuse-hd.svg</div>
+                <div style={{ fontSize: 11.5, color: "var(--ps-fg-muted)" }}>85 KB · uploadé il y a 2 min</div>
+              </div>
+              <button style={{ background: "transparent", border: "none", color: "var(--ps-fg-muted)", cursor: "pointer", padding: 4 }}><Icon name="x" size={14} stroke={2.2} /></button>
+            </div>
+          </Field>
+          <Field label="Charte graphique (PDF)">
+            <div style={{ marginTop: 4, padding: 18, border: "1.5px dashed var(--ps-border)", borderRadius: 10, textAlign: "center", fontSize: 13, color: "var(--ps-fg-secondary)" }}>
+              <Icon name="upload" size={16} stroke={2.2} style={{ marginRight: 6, verticalAlign: -3 }} />
+              Déposer charte-graphique.pdf
+            </div>
+          </Field>
+        </QualifShell>
+      );
+    }
+
+    /* ====== STEP 6 ====== */
+    function S6() {
+      const budgets = [
+        { e: "💡", l: "< 2 000 €" },
+        { e: "🚀", l: "2 000 – 5 000 €" },
+        { e: "⭐", l: "5 000 – 10 000 €" },
+        { e: "💎", l: "10 000 – 20 000 €" },
+        { e: "🏆", l: "> 20 000 €" },
+      ];
+      return (
+        <QualifShell step={6}>
+          <StepTitle step={6} title="Budget et délais" sub="Soyez honnête — on adapte la proposition à votre réalité." />
+          <Field label="Budget envisagé">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 6 }}>
+              {budgets.map((b, i) => <Radio key={i} cards emoji={b.e} label={b.l} checked={i === 2} />)}
+            </div>
+          </Field>
+          <Field label="Délai souhaité">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginTop: 6 }}>
+              <Radio label="< 1 mois" />
+              <Radio label="1 – 3 mois" checked />
+              <Radio label="3 – 6 mois" />
+              <Radio label="Pas de deadline" />
+            </div>
+          </Field>
+        </QualifShell>
+      );
+    }
+
+    /* ====== STEP 7 ====== */
+    function S7() {
+      return (
+        <QualifShell step={7}>
+          <StepTitle step={7} title="Pour finaliser" sub="Dernière ligne droite. Vérifiez votre récap ci-dessous." />
+          <Field label="Êtes-vous la personne qui décide ?">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 6 }}>
+              <Radio label="Je décide seul·e" checked />
+              <Radio label="Avec mes associés" />
+              <Radio label="Je fais remonter" />
+            </div>
+          </Field>
+          <Field label="Comment préférez-vous être contacté·e ?">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 6 }}>
+              <Radio label="Par téléphone" />
+              <Radio label="Par WhatsApp" checked />
+              <Radio label="Par email" />
+            </div>
+          </Field>
+
+          {/* Récap */}
+          <div style={{ marginTop: 18 }}>
+            <div className="ps-eyebrow ps-eyebrow-muted" style={{ marginBottom: 8 }}>Récapitulatif</div>
+            <div className="ps-card" style={{ padding: 0, boxShadow: "none", border: "1px solid var(--ps-border-soft)", overflow: "hidden" }}>
+              <RecapItem step={1} title="Qui êtes-vous ?" sub="Sophie Martin · Précieuse Joaillerie · Joaillerie" open />
+              <RecapItem step={2} title="Situation" sub="Site obsolète · 500-2k visites/mois · Design + mobile + référencement" />
+              <RecapItem step={3} title="Objectifs" sub="Vendre en ligne · B2C · Messika, Dinh Van, Dior" />
+              <RecapItem step={4} title="Fonctionnalités" sub="E-commerce + SEO avancé · 50-500 produits" />
+              <RecapItem step={5} title="Identité visuelle" sub="Charte complète fournie · 2 fichiers uploadés" />
+              <RecapItem step={6} title="Budget &amp; délais" sub="5 000 – 10 000 € · 1 à 3 mois" last />
+            </div>
+          </div>
+
+          {/* CTA secondaire */}
+          <div style={{ marginTop: 16, padding: 12, background: "var(--ps-bg-subtle)", borderRadius: 10, display: "flex", alignItems: "center", gap: 12 }}>
+            <Icon name="calendar" size={15} stroke={2.2} style={{ color: "var(--ps-fg-muted)" }} />
+            <span style={{ fontSize: 13, color: "var(--ps-fg-secondary)", flex: 1 }}>Vous pouvez aussi réserver un RDV 30 min directement.</span>
+            <Button variant="outline" disabled style={{ opacity: 0.5, cursor: "not-allowed" }}>Réserver — bientôt</Button>
+          </div>
+        </QualifShell>
+      );
+    }
+
+    function RecapItem({ step, title, sub, open, last }) {
+      return (
+        <div style={{ borderBottom: last ? "none" : "1px solid var(--ps-border-soft)" }}>
+          <button style={{
+            width: "100%", padding: "12px 16px", display: "flex", alignItems: "center", gap: 12,
+            background: "transparent", border: "none", cursor: "pointer", textAlign: "left",
+          }}>
+            <span style={{ width: 24, height: 24, borderRadius: 9999, background: "var(--ps-primary-subtle)", color: "var(--ps-primary-deep)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{step}</span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: "block", fontSize: 13, fontWeight: 600 }}>{title}</span>
+              <span style={{ display: "block", fontSize: 12, color: "var(--ps-fg-muted)", marginTop: 2 }}>{sub}</span>
+            </span>
+            <Icon name={open ? "chevron-up" : "chevron-down"} size={14} stroke={2.2} style={{ color: "var(--ps-fg-muted)" }} />
+          </button>
+        </div>
+      );
+    }
+
+    /* ====== THANK YOU ====== */
+    function ThankYou() {
+      return (
+        <PublicWindow url="propulseo-site.com/diagnostic/merci" minHeight={780}>
+          <div style={{ padding: "60px 28px", display: "flex", justifyContent: "center" }}>
+            <div className="ps-card" style={{ width: "100%", maxWidth: 580, padding: "40px 36px 32px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+              <span className="ps-hero-blur" style={{ width: 280, height: 280, right: "50%", top: -160, transform: "translateX(50%)" }} />
+              <div style={{ position: "relative" }}>
+                <div style={{
+                  width: 64, height: 64, margin: "0 auto 18px",
+                  borderRadius: 9999, background: "linear-gradient(135deg, var(--ps-primary), var(--ps-primary-deep))",
+                  color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 10px 28px -8px rgba(124,58,237,0.5)",
+                }}>
+                  <Icon name="check" size={28} stroke={2.6} />
+                </div>
+                <h1 className="ps-h1 ps-gradient-text" style={{ fontSize: 32 }}>Merci Sophie !</h1>
+                <p style={{ fontSize: 15, color: "var(--ps-fg-secondary)", margin: "12px auto 6px", maxWidth: 380, lineHeight: 1.55 }}>
+                  Votre diagnostic a bien été reçu.
+                </p>
+                <p style={{ fontSize: 14, color: "var(--ps-fg-muted)", margin: "0 auto", maxWidth: 380, lineHeight: 1.55 }}>
+                  Nous vous recontactons sous 24h par <strong style={{ color: "var(--ps-fg)" }}>WhatsApp</strong>.
+                </p>
+
+                {/* Timeline of next steps */}
+                <div style={{ marginTop: 32, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, position: "relative" }}>
+                  <div style={{ position: "absolute", left: "16%", right: "16%", top: 22, height: 1.5, background: "var(--ps-border)", zIndex: 0 }} />
+                  <NextStep n={1} icon="phone"      label="Appel découverte" />
+                  <NextStep n={2} icon="file-text"  label="Proposition personnalisée" />
+                  <NextStep n={3} icon="rocket"     label="Démarrage du projet" />
+                </div>
+
+                <div style={{ marginTop: 36 }}>
+                  <Button variant="outline" iconRight="arrow-up-right">Retour au site Propul'SEO</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </PublicWindow>
+      );
+    }
+
+    function NextStep({ n, icon, label }) {
+      return (
+        <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+          <span style={{
+            width: 44, height: 44, borderRadius: 9999,
+            background: "#fff", border: "1.5px solid var(--ps-primary-subtle)",
+            color: "var(--ps-primary-deep)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 4px 12px -4px rgba(124,58,237,0.15)",
+          }}><Icon name={icon} size={18} stroke={2.2} /></span>
+          <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ps-fg)", letterSpacing: "-0.005em", textAlign: "center" }}>
+            {n}. {label}
+          </div>
+        </div>
+      );
+    }
+
+    function Head() {
+      return <PageHead num="3" title="Qualification prospect — 7 étapes" subtitle="Porte d'entrée publique. Auto-save, 13 règles conditionnelles, fin = compte Propul'Space créé automatiquement." />;
+    }
+
+    ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+    ReactDOM.createRoot(document.getElementById("s1")).render(<S1 />);
+    ReactDOM.createRoot(document.getElementById("s2")).render(<S2 />);
+    ReactDOM.createRoot(document.getElementById("s3")).render(<S3 />);
+    ReactDOM.createRoot(document.getElementById("s4")).render(<S4 />);
+    ReactDOM.createRoot(document.getElementById("s5")).render(<S5 />);
+    ReactDOM.createRoot(document.getElementById("s6")).render(<S6 />);
+    ReactDOM.createRoot(document.getElementById("s7")).render(<S7 />);
+    ReactDOM.createRoot(document.getElementById("thanks")).render(<ThankYou />);
+  </script>
+</body>
+</html>

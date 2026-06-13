@@ -1,0 +1,100 @@
+# ===== SECURITE - FICHIERS SENSIBLES =====
+.env
+.env.*
+.env.local
+.env.development
+.env.production
+.env.backup
+# Exceptions : templates publics (sans secrets)
+!.env.example
+!.env.test.example
+*.backup
+*.key
+*.pem
+*.secret
+*.p12
+*.crt
+*.pfx
+secrets/
+credentials/
+
+# Documenso self-host (certificat de signature + env rempli — JAMAIS commit)
+documenso/certificate.*
+documenso/private.*
+
+# Supabase
+supabase/.env
+supabase/.temp/
+
+# ===== LOGS =====
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ===== BUILD =====
+node_modules
+dist
+dist-ssr
+build
+.next
+*.local
+
+# ===== IDE =====
+.vscode/*
+!.vscode/extensions.json
+.idea
+.bolt/
+.claude/
+.cursor/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== TEST =====
+coverage/
+.nyc_output/
+
+# ===== CACHE =====
+.cache/
+.parcel-cache/
+.eslintcache
+*.tsbuildinfo
+# Update
+.superpowers/
+.vercel
+
+# Demo admin script (mot de passe en clair — NE JAMAIS COMMIT)
+scripts/create-demo-admin.mjs
+scripts/setup-demo-portal.mjs
+
+# Playwright MCP artefacts
+.playwright-mcp/
+
+# E2E
+.env.test
+playwright-report/
+test-results/
+.mockups/
+.planning/
+
+# Previews / sorties générées
+output/
+
+# Maquettes HTML temporaires (servies par Vite, non versionnées)
+public/mockups/
+
+# tokenade — per-project cache / scaffold flag / dedup refs
+.tokenade/
+
+# tokenade — legacy per-project embedding model cache (now global)
+.fastembed_cache/

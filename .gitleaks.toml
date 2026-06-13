@@ -1,0 +1,83 @@
+# Configuration gitleaks pour CRM Propul'SEO
+# Reference : https://github.com/gitleaks/gitleaks
+#
+# Active automatiquement par le hook pre-commit (.githooks/pre-commit).
+# Skip ponctuel d'un commit : git commit --no-verify (à éviter).
+
+title = "CRM Propul'SEO secret scan"
+
+[extend]
+# On herite des règles par défaut de gitleaks (JWT, AWS, Stripe, GitHub PAT, etc.)
+useDefault = true
+
+# ============================================================================
+# Règles custom pour les clés Supabase (anciennes legacy + nouvelles sb_*)
+# ============================================================================
+
+[[rules]]
+id = "supabase-legacy-jwt"
+description = "Supabase legacy JWT key (anon/service_role) — format eyJhbGci..."
+regex = '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJpc3M[A-Za-z0-9._-]{50,}'''
+tags = ["key", "supabase"]
+
+[[rules]]
+id = "supabase-sb-secret"
+description = "Supabase secret API key (sb_secret_*)"
+regex = '''sb_secret_[A-Za-z0-9_-]{20,}'''
+tags = ["key", "supabase", "secret"]
+
+[[rules]]
+id = "supabase-sb-publishable-hardcoded"
+description = "Supabase publishable key hardcoded outside .env"
+regex = '''sb_publishable_[A-Za-z0-9_-]{20,}'''
+tags = ["key", "supabase"]
+# Note : publishable est censée être publique côté client, mais on alerte
+# pour forcer le passage par import.meta.env (jamais hardcodé).
+
+# ============================================================================
+# Exclusions (faux positifs documentés)
+# ============================================================================
+
+[allowlist]
+description = "Fichiers et chemins à exclure du scan"
+paths = [
+  # Dépendances
+  '''node_modules/''',
+  '''package-lock\.json''',
+
+  # Builds
+  '''dist/''',
+  '''\.vite/''',
+
+  # Templates et docs avec placeholders
+  '''\.env\.test\.example''',
+  '''\.env\.example''',
+  '''next-public/\.env\.example''',
+
+  # Backup git history references dans cette config
+  '''\.gitleaks\.toml''',
+
+  # Tests et fixtures
+  '''tests/e2e/fixtures/''',
+]
+
+# Patterns à exclure (placeholders documentaires)
+regexes = [
+  '''<récupérer depuis Supabase Dashboard''',
+  '''<URL Supabase''',
+  '''<your-anon-key>''',
+  '''<your-service-role-key>''',
+  '''YOUR_SUPABASE_''',
+  '''VITE_SUPABASE_ANON_KEY=your-''',
+]
+
+# Commits à ignorer (vieux commits historiques avec clés déjà rotatées)
+# Note : les anciennes clés legacy sont désormais INVALIDES (rotation effectuée
+# le 2026-05-14). On ignore donc l'historique pré-rotation pour éviter le bruit.
+[allowlist.commits]
+# Commits historiques où l'anon legacy a été ajoutée (clé désormais morte)
+# - af1012d : init du projet
+# - b1784c1 : next-public/lib/supabase-server.ts
+# - e727d85, a5dc628, etc.
+# Pas listés ici car ces commits ne sont jamais re-scannés par le hook
+# (qui ne scanne que le staging area des futurs commits).

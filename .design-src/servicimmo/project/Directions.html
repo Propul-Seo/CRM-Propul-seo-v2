@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Servicimmo — 4 directions visuelles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Fraunces:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+  html, body { margin:0; padding:0; font-family: 'Geist', -apple-system, system-ui, sans-serif; background:#f0eee9; }
+  * { box-sizing: border-box; }
+
+  .board {
+    width: 1280px; background: white;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+  .board-label {
+    position: absolute; bottom: 100%; left: 0; padding-bottom: 10px;
+    font-size: 13px; font-weight: 500; color: rgba(40,30,20,0.85); white-space: nowrap;
+  }
+  .board-label small { color: rgba(60,50,40,0.55); font-weight: 400; margin-left: 8px; }
+  .artboard-wrap { position: relative; flex-shrink: 0; }
+
+  /* Canvas */
+  .canvas {
+    min-height: 100vh; padding: 120px 80px;
+    background-color: #f0eee9;
+    background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M120 0H0v120' fill='none' stroke='rgba(0,0,0,0.06)' stroke-width='1'/%3E%3C/svg%3E");
+    background-size: 120px 120px;
+  }
+  .canvas-title { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 6px; color: rgba(30,20,10,0.9); }
+  .canvas-sub { font-size: 15px; color: rgba(60,50,40,0.65); margin: 0 0 48px; max-width: 60ch; }
+  .grid { display: flex; flex-direction: column; gap: 140px; }
+
+  /* ───────────────────────── SHARED mini components (generic, each dir overrides via class) ───────────────────────── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-weight: 500; font-size: 14px; white-space: nowrap;
+    cursor: pointer; text-decoration: none;
+    transition: opacity .15s;
+  }
+  .icon { width: 16px; height: 16px; flex-shrink: 0; stroke-width: 1.75; }
+
+  /* ═════════════════════════════════════════════════════════
+     DIRECTION 1 — "NOTAIRE MODERNE"
+     Inspirée institut / notariat : bleu marine profond + crème ivoire + serif
+     Elegant, trustworthy, 45-70 ans qui veulent du sérieux
+     ═════════════════════════════════════════════════════════ */
+  .d1 {
+    --d1-ink: #0f1e3a;
+    --d1-ink-2: #1e2f4d;
+    --d1-ivory: #faf7f0;
+    --d1-cream: #f3ede0;
+    --d1-line: #d9cfb8;
+    --d1-gold: #a88a4c;
+    --d1-brick: #a6462e;
+    font-family: 'Geist', sans-serif;
+    color: var(--d1-ink);
+    background: var(--d1-ivory);
+  }
+  .d1 .serif { font-family: 'Fraunces', serif; }
+  .d1-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px; border-bottom: 1px solid var(--d1-line);
+    background: var(--d1-ivory);
+  }
+  .d1-logo { display: flex; align-items: center; gap: 12px; }
+  .d1-logo-mark {
+    width: 34px; height: 34px;
+    background: var(--d1-ink); color: var(--d1-ivory);
+    display: grid; place-items: center;
+    font-family: 'Fraunces', serif; font-weight: 500; font-size: 18px;
+    border-radius: 2px;
+  }
+  .d1-logo-text { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
+  .d1-logo-text small { display: block; font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: 0.25em; color: var(--d1-gold); text-transform: uppercase; margin-top: -2px; }
+  .d1-nav { display: flex; gap: 28px; font-size: 13px; color: var(--d1-ink-2); }
+  .d1-nav a { color: inherit; text-decoration: none; }
+  .d1-cta { background: var(--d1-ink); color: var(--d1-ivory); padding: 10px 18px; border-radius: 2px; font-size: 13px; text-decoration: none; font-weight: 500; letter-spacing: 0.01em; }
+  .d1-phone { font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--d1-ink-2); font-variant-numeric: tabular-nums; }
+
+  .d1-hero { padding: 80px 48px 100px; background: var(--d1-ivory); position: relative; overflow: hidden; }
+  .d1-hero::before {
+    content: ''; position: absolute; top: 40px; right: -120px;
+    width: 500px; height: 500px; border: 1px solid var(--d1-line);
+    border-radius: 50%; pointer-events: none;
+  }
+  .d1-hero::after {
+    content: ''; position: absolute; top: 140px; right: -20px;
+    width: 300px; height: 300px; border: 1px solid var(--d1-line); opacity: .5;
+    border-radius: 50%; pointer-events: none;
+  }
+  .d1-overline {
+    display: inline-flex; align-items: center; gap: 10px; margin-bottom: 28px;
+    font-family: 'Geist Mono', monospace; font-size: 11px;
+    letter-spacing: 0.22em; color: var(--d1-gold);
+    text-transform: uppercase;
+  }
+  .d1-overline::before { content: ''; width: 32px; height: 1px; background: var(--d1-gold); }
+  .d1-h1 {
+    font-family: 'Fraunces', serif; font-weight: 400;
+    font-size: 64px; line-height: 1.05; letter-spacing: -0.025em;
+    margin: 0 0 28px; max-width: 14ch; color: var(--d1-ink);
+  }
+  .d1-h1 em { font-style: italic; color: var(--d1-brick); font-weight: 400; }
+  .d1-sub { font-size: 17px; line-height: 1.6; color: var(--d1-ink-2); max-width: 52ch; margin: 0 0 36px; }
+  .d1-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 56px; }
+  .d1-btn-primary { background: var(--d1-ink); color: var(--d1-ivory); padding: 14px 26px; border-radius: 2px; }
+  .d1-btn-primary:hover { background: var(--d1-ink-2); }
+  .d1-btn-out { border: 1px solid var(--d1-ink); color: var(--d1-ink); padding: 13px 26px; border-radius: 2px; background: transparent; }
+
+  .d1-certs {
+    display: flex; flex-wrap: wrap; gap: 0;
+    border-top: 1px solid var(--d1-line);
+    padding-top: 28px;
+    align-items: center;
+  }
+  .d1-certs-label {
+    font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.25em;
+    text-transform: uppercase; color: var(--d1-ink-2); opacity: .65;
+    padding-right: 32px; border-right: 1px solid var(--d1-line); margin-right: 32px;
+  }
+  .d1-cert {
+    padding: 0 28px; border-right: 1px solid var(--d1-line);
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .d1-cert:last-child { border-right: none; }
+  .d1-cert-name { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 500; letter-spacing: -0.01em; }
+  .d1-cert-role { font-family: 'Geist Mono', monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--d1-gold); }
+
+
+  /* ═════════════════════════════════════════════════════════
+     DIRECTION 2 — "TECH CHALEUREUX" (Alan-like)
+     Ochre + terracotta + off-white, Geist sans-serif, très arrondi
+     ═════════════════════════════════════════════════════════ */
+  .d2 {
+    --d2-ink: #1a1208;
+    --d2-cream: #fcf8f0;
+    --d2-peach: #f9e8d4;
+    --d2-terra: #d47348;
+    --d2-olive: #7a8659;
+    --d2-line: #ebe3d1;
+    font-family: 'Geist', sans-serif;
+    color: var(--d2-ink);
+    background: var(--d2-cream);
+  }
+  .d2-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 40px; background: var(--d2-cream);
+  }
+  .d2-logo { display: flex; align-items: center; gap: 10px; }
+  .d2-logo-mark {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--d2-terra); color: var(--d2-cream);
+    display: grid; place-items: center; font-weight: 600; font-size: 16px;
+    position: relative;
+  }
+  .d2-logo-mark::after {
+    content: ''; position: absolute; inset: 4px; border-radius: 50%;
+    border: 1.5px solid var(--d2-cream);
+  }
+  .d2-logo-text { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+  .d2-nav { display: flex; gap: 24px; font-size: 14px; color: var(--d2-ink); opacity: .75; }
+  .d2-nav a { color: inherit; text-decoration: none; }
+  .d2-cta {
+    background: var(--d2-ink); color: var(--d2-cream);
+    padding: 10px 20px; border-radius: 999px; font-size: 14px;
+    text-decoration: none; font-weight: 500;
+  }
+
+  .d2-hero {
+    margin: 20px; padding: 72px 64px 80px;
+    background: var(--d2-peach);
+    border-radius: 32px;
+    position: relative; overflow: hidden;
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: 48px; align-items: center;
+  }
+  .d2-hero::before {
+    content: ''; position: absolute; top: -80px; right: -80px;
+    width: 260px; height: 260px; border-radius: 50%;
+    background: var(--d2-terra); opacity: .18;
+  }
+  .d2-overline {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--d2-cream); border: 1px solid var(--d2-line);
+    padding: 6px 14px 6px 10px; border-radius: 999px;
+    font-size: 12px; color: var(--d2-ink); margin-bottom: 24px;
+    font-weight: 500;
+  }
+  .d2-overline-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--d2-olive); }
+  .d2-h1 {
+    font-size: 60px; line-height: 1.02; letter-spacing: -0.035em;
+    font-weight: 500; margin: 0 0 24px; max-width: 13ch;
+  }
+  .d2-h1 .hl {
+    background: var(--d2-terra); color: var(--d2-cream);
+    padding: 0 14px; border-radius: 14px;
+    white-space: nowrap; display: inline-block; transform: rotate(-1.5deg);
+  }
+  .d2-sub { font-size: 17px; line-height: 1.55; color: var(--d2-ink); opacity: .72; max-width: 48ch; margin: 0 0 32px; }
+  .d2-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+  .d2-btn-primary { background: var(--d2-ink); color: var(--d2-cream); padding: 14px 26px; border-radius: 999px; }
+  .d2-btn-out { background: var(--d2-cream); color: var(--d2-ink); padding: 14px 24px; border-radius: 999px; border: 1px solid var(--d2-line); }
+
+  .d2-hero-illus {
+    background: var(--d2-cream); border-radius: 20px;
+    padding: 24px; aspect-ratio: 1.05; position: relative;
+    border: 1px solid var(--d2-line);
+  }
+  .d2-illus-card {
+    background: white; border-radius: 12px; padding: 16px;
+    border: 1px solid var(--d2-line);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+
+  .d2-certs {
+    margin: 0 20px; padding: 36px 40px;
+    display: flex; align-items: center; gap: 32px;
+    border-bottom: 1px solid var(--d2-line);
+    flex-wrap: wrap;
+  }
+  .d2-certs-label { font-size: 13px; color: var(--d2-ink); opacity: .55; }
+  .d2-cert-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--d2-cream); border: 1px solid var(--d2-line);
+    padding: 10px 16px; border-radius: 999px;
+    font-size: 13px; font-weight: 500;
+  }
+  .d2-cert-pill .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+
+  /* ═════════════════════════════════════════════════════════
+     DIRECTION 3 — "TOURAINE BLEU ARDOISE"
+     Bleu Loire ardoise + blanc + accent safran. Clin d'œil à la ville
+     ═════════════════════════════════════════════════════════ */
+  .d3 {
+    --d3-ink: #0d1a24;
+    --d3-slate: #1e3a4d;
+    --d3-white: #ffffff;
+    --d3-bg: #f5f7f8;
+    --d3-line: #dde4e8;
+    --d3-saf: #e8a33d;
+    --d3-saf-dark: #a87320;
+    font-family: 'Geist', sans-serif;
+    color: var(--d3-ink);
+    background: var(--d3-bg);
+  }
+  .d3-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 40px; background: var(--d3-white);
+    border-bottom: 1px solid var(--d3-line);
+  }
+  .d3-logo { display: flex; align-items: center; gap: 10px; }
+  .d3-logo-mark {
+    width: 32px; height: 32px; background: var(--d3-slate); color: var(--d3-white);
+    display: grid; place-items: center; font-weight: 700; font-size: 14px;
+    border-radius: 6px; position: relative; overflow: hidden;
+  }
+  .d3-logo-mark::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 30%;
+    background: var(--d3-saf);
+  }
+  .d3-logo-text { font-weight: 600; font-size: 17px; letter-spacing: -0.02em; }
+  .d3-nav { display: flex; gap: 28px; font-size: 14px; color: #4a5865; }
+  .d3-nav a { color: inherit; text-decoration: none; }
+  .d3-cta {
+    background: var(--d3-saf); color: var(--d3-slate);
+    padding: 10px 18px; border-radius: 6px; font-size: 14px;
+    text-decoration: none; font-weight: 600;
+  }
+
+  .d3-hero {
+    background: var(--d3-slate);
+    color: var(--d3-white);
+    padding: 80px 48px 100px;
+    position: relative; overflow: hidden;
+  }
+  .d3-hero::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cpath d='M0 80 Q40 40 80 80 T160 80' fill='none' stroke='%23ffffff' stroke-opacity='0.04' stroke-width='1'/%3E%3Cpath d='M0 100 Q40 60 80 100 T160 100' fill='none' stroke='%23ffffff' stroke-opacity='0.04' stroke-width='1'/%3E%3Cpath d='M0 120 Q40 80 80 120 T160 120' fill='none' stroke='%23ffffff' stroke-opacity='0.04' stroke-width='1'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .d3-overline {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--d3-saf); margin-bottom: 28px; font-weight: 500;
+  }
+  .d3-overline::before { content: ''; width: 24px; height: 2px; background: var(--d3-saf); }
+  .d3-h1 {
+    font-size: 68px; line-height: 1.03; letter-spacing: -0.035em;
+    font-weight: 500; margin: 0 0 24px; max-width: 15ch;
+  }
+  .d3-h1 em { font-style: normal; color: var(--d3-saf); font-weight: 500; }
+  .d3-sub { font-size: 18px; line-height: 1.55; color: rgba(255,255,255,0.75); max-width: 54ch; margin: 0 0 36px; }
+  .d3-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+  .d3-btn-primary { background: var(--d3-saf); color: var(--d3-slate); padding: 14px 26px; border-radius: 6px; font-weight: 600; }
+  .d3-btn-out { border: 1px solid rgba(255,255,255,0.3); color: var(--d3-white); padding: 13px 26px; border-radius: 6px; background: transparent; }
+
+  .d3-certs-strip {
+    background: var(--d3-white);
+    padding: 24px 48px;
+    display: flex; align-items: center; gap: 40px;
+    border-bottom: 1px solid var(--d3-line);
+    overflow: hidden;
+  }
+  .d3-certs-label {
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: #7a8691; font-weight: 500;
+  }
+  .d3-cert-box {
+    display: flex; align-items: center; gap: 10px;
+    border-left: 1px solid var(--d3-line); padding-left: 24px;
+  }
+  .d3-cert-box:first-of-type { border-left: none; padding-left: 0; }
+  .d3-cert-badge {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 2px solid var(--d3-slate);
+    display: grid; place-items: center;
+    font-family: 'Geist Mono', monospace; font-size: 9px; font-weight: 700;
+    color: var(--d3-slate);
+    position: relative;
+  }
+  .d3-cert-badge::after {
+    content: '✓'; position: absolute; bottom: -4px; right: -4px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--d3-saf); color: var(--d3-slate);
+    font-size: 9px; display: grid; place-items: center;
+    border: 1.5px solid var(--d3-white);
+  }
+  .d3-cert-info { display: flex; flex-direction: column; gap: 1px; }
+  .d3-cert-info .n { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+  .d3-cert-info .r { font-size: 11px; color: #7a8691; letter-spacing: 0; }
+
+
+  /* ═════════════════════════════════════════════════════════
+     DIRECTION 4 — "DOCUMENT OFFICIEL"
+     Pur blanc cassé + noir profond + un seul accent vert "conforme"
+     Serre, éditorial, Qonto-like minimalisme clean
+     ═════════════════════════════════════════════════════════ */
+  .d4 {
+    --d4-ink: #121212;
+    --d4-paper: #fafaf7;
+    --d4-line: #e5e3dd;
+    --d4-line-strong: #2a2a2a;
+    --d4-green: #2d6a4f;
+    --d4-green-soft: #d8ebe0;
+    font-family: 'Geist', sans-serif;
+    color: var(--d4-ink);
+    background: var(--d4-paper);
+  }
+  .d4 .mono { font-family: 'Geist Mono', monospace; }
+  .d4-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px;
+    border-bottom: 1px solid var(--d4-line-strong);
+  }
+  .d4-logo { display: flex; align-items: baseline; gap: 8px; font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+  .d4-logo .suffix { font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 400; color: #5a5a5a; }
+  .d4-nav { display: flex; gap: 32px; font-family: 'Geist Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .d4-nav a { color: var(--d4-ink); text-decoration: none; opacity: .7; }
+  .d4-cta {
+    background: var(--d4-ink); color: var(--d4-paper);
+    padding: 10px 18px; font-size: 13px; font-weight: 500;
+    text-decoration: none; border-radius: 0;
+  }
+
+  .d4-hero {
+    padding: 0;
+    border-bottom: 1px solid var(--d4-line-strong);
+    display: grid; grid-template-columns: 1fr 1px 360px;
+  }
+  .d4-hero-main { padding: 72px 48px 72px; border-right: 1px solid var(--d4-line-strong); }
+  .d4-hero-aside { background: var(--d4-ink); color: var(--d4-paper); padding: 48px 36px; display: flex; flex-direction: column; gap: 24px; }
+
+  .d4-ref {
+    font-family: 'Geist Mono', monospace; font-size: 11px; color: #5a5a5a;
+    letter-spacing: 0.05em; margin-bottom: 36px;
+    display: flex; justify-content: space-between; padding-bottom: 12px;
+    border-bottom: 1px solid var(--d4-line);
+  }
+  .d4-h1 {
+    font-family: 'Instrument Serif', 'Fraunces', serif; font-weight: 400;
+    font-size: 84px; line-height: 0.95; letter-spacing: -0.035em;
+    margin: 0 0 24px; max-width: 12ch;
+  }
+  .d4-h1 em { font-style: italic; }
+  .d4-h1 .box {
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 2px solid var(--d4-ink); padding: 0 16px; font-style: normal;
+    font-family: 'Geist', sans-serif; font-weight: 500; font-size: 0.6em;
+    vertical-align: 0.2em;
+  }
+  .d4-sub { font-size: 17px; line-height: 1.5; color: #3a3a3a; max-width: 48ch; margin: 0 0 40px; }
+  .d4-sub .mono { background: var(--d4-green-soft); color: var(--d4-green); padding: 2px 6px; font-size: 13px; }
+  .d4-ctas { display: flex; gap: 16px; align-items: center; }
+  .d4-btn-primary { background: var(--d4-ink); color: var(--d4-paper); padding: 16px 28px; font-size: 14px; font-weight: 500; }
+  .d4-btn-link { color: var(--d4-ink); font-size: 14px; font-weight: 500; text-decoration: underline; text-underline-offset: 4px; }
+
+  .d4-aside-heading { font-family: 'Geist Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: #8a8a8a; }
+  .d4-aside-cert {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.15);
+  }
+  .d4-aside-cert:last-child { border-bottom: none; }
+  .d4-aside-cert-name { font-size: 15px; font-weight: 500; letter-spacing: -0.01em; }
+  .d4-aside-cert-ref { font-family: 'Geist Mono', monospace; font-size: 10px; color: #9a9a9a; display: block; margin-top: 2px; letter-spacing: 0.05em; }
+  .d4-aside-cert-status { color: var(--d4-green-soft); font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+  .d4-aside-cert-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
+
+  /* Certifications detail cards (for zoomed comparison) */
+  .cert-detail-row {
+    display: flex; flex-direction: column; gap: 16px;
+    padding: 24px 32px;
+    background: rgba(255,255,255,0.5);
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+  .cert-detail-row h4 { margin: 0; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(0,0,0,0.5); font-weight: 500; font-family: 'Geist Mono', monospace; }
+
+  /* Note annotations */
+  .note {
+    position: absolute;
+    background: #fef4a8;
+    padding: 12px 14px;
+    font-family: "Comic Sans MS", "Marker Felt", "Segoe Print", cursive;
+    font-size: 12px;
+    line-height: 1.35;
+    color: #5a4a2a;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    max-width: 200px;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+
+<div class="canvas">
+  <h1 class="canvas-title">Servicimmo — 4 directions visuelles</h1>
+  <p class="canvas-sub">Chaque direction propose une identité cohérente : hero, traitement des 4 certifications (texte stylisé uniquement — Qualixpert, Allianz, FNAIM Diagnostic, I.Cert), couleurs et typographie. Inspiré du site actuel (dominante bleu institutionnel) et des référents Alan / Qonto / Doctolib.</p>
+
+  <div class="grid" id="app"></div>
+</div>
+
+<script type="text/babel" data-presets="react">
+
+const Icon = ({ d, size=16, ...r }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" {...r}><path d={d}/></svg>
+);
+const IArrow = (p) => <Icon d="M5 12h14M13 6l6 6-6 6" {...p}/>;
+const IPhone = (p) => <Icon d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" {...p}/>;
+const ICheck = (p) => <Icon d="M20 6 9 17l-5-5" {...p}/>;
+
+function Board({ label, meta, children, height }) {
+  return (
+    <div className="artboard-wrap">
+      <div className="board-label">{label} <small>{meta}</small></div>
+      <div className="board" style={{ height: height || 'auto' }}>{children}</div>
+    </div>
+  );
+}
+
+/* ═══════════ DIRECTION 1 — NOTAIRE MODERNE ═══════════ */
+function Direction1() {
+  return (
+    <div className="d1">
+      <header className="d1-header">
+        <div className="d1-logo">
+          <div className="d1-logo-mark">S</div>
+          <div className="d1-logo-text">
+            Servicimmo
+            <small>Cabinet · Tours · 1998</small>
+          </div>
+        </div>
+        <nav className="d1-nav">
+          <a>Diagnostics</a>
+          <a>Professionnels</a>
+          <a>Amiante</a>
+          <a>Zones</a>
+          <a>Actualités</a>
+        </nav>
+        <div style={{display:'flex', gap:16, alignItems:'center'}}>
+          <span className="d1-phone">02 47 47 01 23</span>
+          <a className="d1-cta">Demander un devis</a>
+        </div>
+      </header>
+
+      <section className="d1-hero">
+        <div className="d1-overline">Cabinet de diagnostic immobilier · Indre-et-Loire</div>
+        <h1 className="d1-h1">
+          Vos diagnostics immobiliers, identifiés en <em>deux minutes</em>.
+        </h1>
+        <p className="d1-sub">
+          Vente, location, travaux, copropriété — notre questionnaire identifie les diagnostics réglementaires applicables à votre bien, et vous transmet un devis définitif sous deux heures ouvrées.
+        </p>
+        <div className="d1-ctas">
+          <a className="btn d1-btn-primary">Commencer mon devis <IArrow/></a>
+          <a className="btn d1-btn-out"><IPhone/> 02 47 47 01 23</a>
+        </div>
+
+        <div className="d1-certs">
+          <span className="d1-certs-label">Certifié & assuré</span>
+          <div className="d1-cert">
+            <span className="d1-cert-role">Organisme certificateur</span>
+            <span className="d1-cert-name serif">Qualixpert</span>
+          </div>
+          <div className="d1-cert">
+            <span className="d1-cert-role">Assurance RCP</span>
+            <span className="d1-cert-name serif">Allianz</span>
+          </div>
+          <div className="d1-cert">
+            <span className="d1-cert-role">Fédération métier</span>
+            <span className="d1-cert-name serif">FNAIM Diagnostic</span>
+          </div>
+          <div className="d1-cert">
+            <span className="d1-cert-role">Certification</span>
+            <span className="d1-cert-name serif">I.Cert</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+/* ═══════════ DIRECTION 2 — TECH CHALEUREUX (Alan-like) ═══════════ */
+function Direction2() {
+  return (
+    <div className="d2">
+      <header className="d2-header">
+        <div className="d2-logo">
+          <div className="d2-logo-mark">S</div>
+          <div className="d2-logo-text">Servicimmo</div>
+        </div>
+        <nav className="d2-nav">
+          <a>Diagnostics</a>
+          <a>Pros</a>
+          <a>Amiante</a>
+          <a>Actualités</a>
+          <a>Contact</a>
+        </nav>
+        <a className="d2-cta">Mon devis</a>
+      </header>
+
+      <section className="d2-hero">
+        <div>
+          <div className="d2-overline">
+            <span className="d2-overline-dot"/>
+            <span>Diagnostic immobilier · Tours depuis 1998</span>
+          </div>
+          <h1 className="d2-h1">
+            Diagnostics identifiés en <span className="hl">2 minutes</span>.
+          </h1>
+          <p className="d2-sub">
+            Vente, location, travaux — décrivez votre projet, on s'occupe du reste. Devis définitif sous 2h ouvrées, intervention en Indre-et-Loire sous 48h.
+          </p>
+          <div className="d2-ctas">
+            <a className="btn d2-btn-primary">Commencer mon devis <IArrow/></a>
+            <a className="btn d2-btn-out"><IPhone/> 02 47 47 01 23</a>
+          </div>
+        </div>
+        <div className="d2-hero-illus">
+          {/* Illustration : formulaire mockup */}
+          <div style={{display:'flex', flexDirection:'column', gap:10}}>
+            <div className="d2-illus-card">
+              <div style={{fontSize:11, fontFamily:'Geist Mono, monospace', color:'#8a7a5a'}}>ÉTAPE 1 / 6</div>
+              <div style={{fontSize:15, fontWeight:500}}>Quel est votre projet ?</div>
+              <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:8}}>
+                <div style={{padding:12, border:'2px solid #d47348', borderRadius:10, background:'#fde8d6', fontSize:13, fontWeight:500}}>Vente</div>
+                <div style={{padding:12, border:'1px solid #ebe3d1', borderRadius:10, fontSize:13, color:'#8a7a5a'}}>Location</div>
+                <div style={{padding:12, border:'1px solid #ebe3d1', borderRadius:10, fontSize:13, color:'#8a7a5a'}}>Travaux</div>
+                <div style={{padding:12, border:'1px solid #ebe3d1', borderRadius:10, fontSize:13, color:'#8a7a5a'}}>Autre</div>
+              </div>
+            </div>
+            <div style={{background:'#1a1208', color:'#fcf8f0', padding:'12px 16px', borderRadius:10, fontSize:12, display:'flex', alignItems:'center', gap:10}}>
+              <div style={{width:28, height:28, borderRadius:'50%', background:'#d47348', display:'grid', placeItems:'center', fontSize:14}}>✓</div>
+              <span>8 diagnostics identifiés · ~ 340€</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="d2-certs">
+        <span className="d2-certs-label">Certifications à jour —</span>
+        <div className="d2-cert-pill"><span className="dot" style={{background:'#d47348'}}/>Qualixpert</div>
+        <div className="d2-cert-pill"><span className="dot" style={{background:'#003781'}}/>Allianz · RCP</div>
+        <div className="d2-cert-pill"><span className="dot" style={{background:'#7a8659'}}/>FNAIM Diagnostic</div>
+        <div className="d2-cert-pill"><span className="dot" style={{background:'#a88a4c'}}/>I.Cert</div>
+      </section>
+    </div>
+  );
+}
+
+/* ═══════════ DIRECTION 3 — TOURAINE BLEU ARDOISE ═══════════ */
+function Direction3() {
+  return (
+    <div className="d3">
+      <header className="d3-header">
+        <div className="d3-logo">
+          <div className="d3-logo-mark">S</div>
+          <div className="d3-logo-text">Servicimmo</div>
+        </div>
+        <nav className="d3-nav">
+          <a>Particuliers</a>
+          <a>Professionnels</a>
+          <a>Amiante</a>
+          <a>Zones d'intervention</a>
+          <a>Actualités</a>
+        </nav>
+        <a className="d3-cta">Mon devis en 2 min</a>
+      </header>
+
+      <section className="d3-hero">
+        <div style={{position:'relative', zIndex:1, maxWidth: 900}}>
+          <div className="d3-overline">Indre-et-Loire · depuis 1998</div>
+          <h1 className="d3-h1">
+            Le diagnostic immobilier qui commence <em>vraiment</em> en 2 minutes.
+          </h1>
+          <p className="d3-sub">
+            Répondez à quelques questions sur votre bien. On identifie précisément les diagnostics obligatoires et vous envoie un devis sous 2h ouvrées. Intervention à Tours et partout en Indre-et-Loire.
+          </p>
+          <div className="d3-ctas">
+            <a className="btn d3-btn-primary">Commencer mon devis <IArrow/></a>
+            <a className="btn d3-btn-out"><IPhone/> 02 47 47 01 23</a>
+          </div>
+        </div>
+      </section>
+
+      <section className="d3-certs-strip">
+        <span className="d3-certs-label">Certifications en vigueur</span>
+
+        <div className="d3-cert-box">
+          <div className="d3-cert-badge">Qx</div>
+          <div className="d3-cert-info">
+            <span className="n">Qualixpert</span>
+            <span className="r">LCC · n° 2025‑0138</span>
+          </div>
+        </div>
+
+        <div className="d3-cert-box">
+          <div className="d3-cert-badge">Az</div>
+          <div className="d3-cert-info">
+            <span className="n">Allianz</span>
+            <span className="r">Assurance RCP</span>
+          </div>
+        </div>
+
+        <div className="d3-cert-box">
+          <div className="d3-cert-badge">Fn</div>
+          <div className="d3-cert-info">
+            <span className="n">FNAIM Diagnostic</span>
+            <span className="r">Membre adhérent</span>
+          </div>
+        </div>
+
+        <div className="d3-cert-box">
+          <div className="d3-cert-badge">iC</div>
+          <div className="d3-cert-info">
+            <span className="n">I.Cert</span>
+            <span className="r">Certification personne</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+/* ═══════════ DIRECTION 4 — DOCUMENT OFFICIEL ═══════════ */
+function Direction4() {
+  return (
+    <div className="d4">
+      <header className="d4-header">
+        <div className="d4-logo">
+          Servicimmo<span className="suffix">· Tours · FR</span>
+        </div>
+        <nav className="d4-nav">
+          <a>Diagnostics</a>
+          <a>Pros</a>
+          <a>Amiante</a>
+          <a>Zones</a>
+        </nav>
+        <a className="d4-cta">Demander un devis →</a>
+      </header>
+
+      <section className="d4-hero">
+        <div className="d4-hero-main">
+          <div className="d4-ref">
+            <span>Réf. Servicimmo · cabinet indépendant</span>
+            <span>Établi le 12.03.1998 · Tours (37)</span>
+          </div>
+          <h1 className="d4-h1">
+            Vos diagnostics <em>immobiliers</em>, <span className="box">identifiés en 2 min</span>.
+          </h1>
+          <p className="d4-sub">
+            Un questionnaire précis qui calcule exactement les diagnostics obligatoires pour votre bien. Réponse tarifaire immédiate, devis définitif sous <span className="mono">2h ouvrées</span>, intervention sous <span className="mono">48h</span>.
+          </p>
+          <div className="d4-ctas">
+            <a className="btn d4-btn-primary">Commencer mon devis <IArrow/></a>
+            <a className="d4-btn-link">ou appeler le 02 47 47 01 23</a>
+          </div>
+        </div>
+        <div/>
+        <aside className="d4-hero-aside">
+          <div className="d4-aside-heading">Certifications en cours</div>
+          <div>
+            <div className="d4-aside-cert">
+              <div>
+                <div className="d4-aside-cert-name">Qualixpert</div>
+                <span className="d4-aside-cert-ref">LCC · certificat n° 2025-0138</span>
+              </div>
+              <span className="d4-aside-cert-status">Actif</span>
+            </div>
+            <div className="d4-aside-cert">
+              <div>
+                <div className="d4-aside-cert-name">I.Cert</div>
+                <span className="d4-aside-cert-ref">Certif. personne · valide jusqu'en 2028</span>
+              </div>
+              <span className="d4-aside-cert-status">Actif</span>
+            </div>
+            <div className="d4-aside-cert">
+              <div>
+                <div className="d4-aside-cert-name">Allianz</div>
+                <span className="d4-aside-cert-ref">Assurance RCP · contrat n° 52‑A</span>
+              </div>
+              <span className="d4-aside-cert-status">Actif</span>
+            </div>
+            <div className="d4-aside-cert">
+              <div>
+                <div className="d4-aside-cert-name">FNAIM Diagnostic</div>
+                <span className="d4-aside-cert-ref">Adhérent n° F‑37‑1120</span>
+              </div>
+              <span className="d4-aside-cert-status">Actif</span>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <>
+      <div style={{position:'relative'}}>
+        <div className="note" style={{ top: -80, right: 80, transform:'rotate(2deg)'}}>
+          <strong>D1 · Notaire moderne</strong><br/>
+          Serif Fraunces + bleu marine + ivoire.<br/>
+          Institutionnel, rassurant. Cible 45-70 ans très traditionnels.<br/>
+          Certifs en row avec rôle explicite.
+        </div>
+        <Board label="Direction 1 · Notaire moderne" meta="— Fraunces serif · bleu marine #0f1e3a · ivoire + gold + brick accent">
+          <Direction1/>
+        </Board>
+      </div>
+
+      <div style={{position:'relative'}}>
+        <div className="note" style={{ top: -80, right: 80, transform:'rotate(-2deg)'}}>
+          <strong>D2 · Tech chaleureux</strong><br/>
+          Alan-like : peach + terracotta, grands rayons, mockup formulaire inline.<br/>
+          Chaleureux, moderne, très accessible.<br/>
+          Certifs en pills avec dot couleur.
+        </div>
+        <Board label="Direction 2 · Tech chaleureux (Alan-like)" meta="— Geist · cream + terracotta + olive">
+          <Direction2/>
+        </Board>
+      </div>
+
+      <div style={{position:'relative'}}>
+        <div className="note" style={{ top: -80, right: 80, transform:'rotate(1.5deg)'}}>
+          <strong>D3 · Touraine bleu ardoise</strong><br/>
+          Hérite du site actuel (bleu institutionnel) + accent safran.<br/>
+          Clin d'œil Loire avec pattern waves dans le hero.<br/>
+          Certifs avec badges monogramme type "cachet officiel".
+        </div>
+        <Board label="Direction 3 · Touraine bleu ardoise" meta="— Geist · slate #1e3a4d + safran #e8a33d">
+          <Direction3/>
+        </Board>
+      </div>
+
+      <div style={{position:'relative'}}>
+        <div className="note" style={{ top: -80, right: 80, transform:'rotate(-1.5deg)'}}>
+          <strong>D4 · Document officiel</strong><br/>
+          Qonto × mentions légales. Typo serif italique, monospace omniprésente.<br/>
+          Certifs listées comme un registre avec numéros & status "actif".<br/>
+          Éditorial, B2B premium. Un peu froid mais très crédible.
+        </div>
+        <Board label="Direction 4 · Document officiel" meta="— Instrument Serif + Geist + Geist Mono · noir #121212 + vert #2d6a4f">
+          <Direction4/>
+        </Board>
+      </div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('app')).render(<App/>);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview — Refonte Fiche Projet</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; }
+  a { color: #a78bfa; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .container { max-width: 900px; margin: 0 auto; padding: 60px 24px; }
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 48px; }
+  .cards { display: flex; flex-direction: column; gap: 20px; }
+  .card { background: #12121a; border: 1px solid #1e1e2e; border-radius: 12px; padding: 24px; transition: border-color 0.2s; }
+  .card:hover { border-color: #7c3aed; }
+  .card h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .card p { color: #94a3b8; font-size: 13px; line-height: 1.5; }
+  .card .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-top: 12px; }
+  .tag-a { background: #7c3aed20; color: #a78bfa; }
+  .tag-b { background: #3b82f620; color: #60a5fa; }
+  .tag-c { background: #10b98120; color: #34d399; }
+  .link { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; padding: 8px 16px; background: #7c3aed; color: white; border-radius: 8px; font-size: 13px; font-weight: 600; transition: background 0.2s; }
+  .link:hover { background: #6d28d9; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Refonte Fiche Projet — 3 Previews</h1>
+  <p class="subtitle">Projet : Site vitrine Boulangerie Dupont &bull; 4 onglets (Synthese / Production / Finances / Echanges) + sidebars repliables</p>
+
+  <div class="cards">
+    <div class="card">
+      <h2>V1 — Cards empilees</h2>
+      <p>Sections en cartes separees avec bordures et headers colores. Style clean, aere. Chaque section est autonome visuellement.</p>
+      <span class="tag tag-a">Aere &bull; Moderne</span>
+      <br>
+      <a href="v1-cards.html" class="link">Ouvrir la preview &rarr;</a>
+    </div>
+
+    <div class="card">
+      <h2>V2 — Sections flush</h2>
+      <p>Pas de cartes, sections separees par des lignes fines. Plus dense, plus d'info visible sans scroller. Style Notion / Linear.</p>
+      <span class="tag tag-b">Dense &bull; Pro</span>
+      <br>
+      <a href="v2-flush.html" class="link">Ouvrir la preview &rarr;</a>
+    </div>
+
+    <div class="card">
+      <h2>V3 — Grille 2 colonnes</h2>
+      <p>Le contenu central est en 2 colonnes. Brief + Acces a gauche, Metriques + Activite a droite. Exploite mieux la largeur d'ecran.</p>
+      <span class="tag tag-c">Large &bull; Dashboard</span>
+      <br>
+      <a href="v3-grid.html" class="link">Ouvrir la preview &rarr;</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

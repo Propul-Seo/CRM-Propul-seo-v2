@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Servicimmo — D6 Doctolib</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f0f7fa;
+    --bg-2: #faf9f6;
+    --fg: #0f172a;
+    --muted: #64748b;
+    --muted-2: #475569;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    /* Doctolib-inspired teal */
+    --primary: #0b5c6e;
+    --primary-2: #0d7283;
+    --primary-soft: #d1ebf0;
+    --accent: #ff7a59;     /* warm coral */
+    --accent-soft: #ffe0d6;
+    --success: #16a34a;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
+  body {
+    font-family: 'Geist', -apple-system, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+  .mono { font-family: 'Geist Mono', monospace; }
+
+  /* ─── Header ─── */
+  header.nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
+  .logo { font-weight: 600; font-size: 19px; letter-spacing: -0.02em; display:flex; align-items:center; gap: 10px; color: var(--fg); text-decoration:none; }
+  .logo-mark { width: 32px; height: 32px; background: var(--primary); color: #fff; border-radius: 10px; display:grid; place-items:center; font-size: 15px; font-weight: 700; }
+  .nav-links a { color: var(--muted-2); text-decoration: none; font-size: 14px; margin-right: 24px; font-weight: 500; }
+  .nav-links a:hover { color: var(--primary); }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.15s; border: 1px solid transparent; cursor: pointer; }
+  .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 1px 2px rgba(11,92,110,0.3); }
+  .btn-primary:hover { background: var(--primary-2); }
+  .btn-accent { background: var(--accent); color: #fff; box-shadow: 0 2px 6px rgba(255,122,89,0.3); }
+  .btn-accent:hover { background: #ff6b47; }
+  .btn-outline { background: #fff; color: var(--primary); border-color: var(--border-strong); }
+  .btn-outline:hover { border-color: var(--primary); }
+  .btn-ghost { background: transparent; color: var(--fg); }
+  .btn-ghost:hover { background: var(--bg-soft); }
+
+  /* ─── Hero ─── */
+  .hero { padding: 72px 0 96px; background: linear-gradient(180deg, var(--bg-soft) 0%, #ffffff 100%); position: relative; overflow: hidden; }
+  .hero::before {
+    content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 1400px; height: 600px;
+    background: radial-gradient(ellipse, rgba(11,92,110,0.06), transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { display: grid; grid-template-columns: 1.05fr 1fr; gap: 64px; align-items: center; position: relative; }
+  .hero-inner > * { min-width: 0; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 8px 14px; background: #fff; border: 1px solid var(--border);
+    border-radius: 999px; font-size: 13px; color: var(--muted-2); font-weight: 500;
+    box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+    margin-bottom: 24px;
+  }
+  .hero-badge-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 0 4px rgba(22,163,74,0.15); }
+  h1 {
+    font-size: 60px; line-height: 1.05; letter-spacing: -0.03em;
+    font-weight: 600; margin: 0 0 24px; text-wrap: balance; color: var(--fg);
+  }
+  h1 em { font-style: normal; color: var(--primary); background: linear-gradient(transparent 65%, var(--accent-soft) 65%); padding: 0 4px; }
+  .hero-lede { font-size: 19px; color: var(--muted-2); max-width: 520px; margin: 0 0 36px; line-height: 1.55; }
+  .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
+
+  .hero-bullets { display: grid; gap: 10px; }
+  .hero-bullet { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--muted-2); }
+  .hero-bullet-ico { flex-shrink: 0; width: 20px; height: 20px; background: var(--primary-soft); color: var(--primary); border-radius: 50%; display: grid; place-items: center; }
+
+  /* Hero right — illustration of the journey */
+  .hero-art { position: relative; }
+  .hero-card {
+    background: #fff; border-radius: 20px; padding: 28px; box-shadow: 0 20px 60px -20px rgba(15,23,42,0.15), 0 0 0 1px var(--border);
+    position: relative;
+  }
+  .hero-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+  .hero-card-title { font-size: 14px; font-weight: 600; color: var(--fg); }
+  .hero-card-step { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+  .hero-card-q { font-size: 18px; font-weight: 500; margin-bottom: 18px; color: var(--fg); letter-spacing: -0.015em; }
+  .hero-options { display: grid; gap: 10px; }
+  .hero-opt { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+  .hero-opt:hover { border-color: var(--primary); background: var(--bg-soft); }
+  .hero-opt.selected { border-color: var(--primary); background: var(--primary-soft); }
+  .hero-opt-ico { width: 36px; height: 36px; border-radius: 10px; background: var(--bg-soft); display: grid; place-items: center; color: var(--primary); flex-shrink: 0; }
+  .hero-opt.selected .hero-opt-ico { background: var(--primary); color: #fff; }
+  .hero-opt-name { font-size: 15px; font-weight: 500; color: var(--fg); }
+  .hero-opt-desc { font-size: 12px; color: var(--muted); }
+  .hero-opt-check { margin-left: auto; color: var(--primary); opacity: 0; transition: opacity 0.2s; }
+  .hero-opt.selected .hero-opt-check { opacity: 1; }
+
+  .hero-progress { display: flex; align-items: center; gap: 10px; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); font-family: 'Geist Mono', monospace; }
+  .hero-progress-bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .hero-progress-fill { width: 20%; height: 100%; background: var(--primary); border-radius: 2px; }
+
+  .hero-float-badge {
+    position: absolute; top: -16px; right: -16px; background: var(--accent); color: #fff;
+    padding: 10px 16px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    box-shadow: 0 8px 24px -6px rgba(255,122,89,0.5);
+    transform: rotate(6deg);
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ─── Trust ─── */
+  .trust { padding: 32px 0; background: var(--bg-2); border-bottom: 1px solid var(--border); }
+  .trust-inner { display: flex; align-items: center; justify-content: center; gap: 48px; flex-wrap: wrap; }
+  .trust-lbl { font-size: 13px; color: var(--muted); font-weight: 500; }
+  .trust-list { display: flex; gap: 36px; flex-wrap: wrap; align-items: center; }
+  .trust-item { font-size: 14px; color: var(--muted-2); font-weight: 500; display: inline-flex; align-items: center; gap: 8px; }
+  .trust-item-ico { width: 16px; height: 16px; color: var(--primary); }
+
+  /* ─── Section base ─── */
+  .sec { padding: 100px 0; }
+  .sec-head { max-width: 720px; margin: 0 auto 64px; text-align: center; }
+  .sec-kicker {
+    display: inline-block; font-size: 13px; color: var(--primary); font-weight: 600;
+    letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 16px;
+    padding: 4px 12px; background: var(--primary-soft); border-radius: 999px;
+  }
+  h2 { font-size: 44px; line-height: 1.1; letter-spacing: -0.025em; font-weight: 600; margin: 0 0 16px; text-wrap: balance; }
+  .sec-sub { font-size: 18px; color: var(--muted-2); line-height: 1.55; margin: 0; }
+
+  /* ─── Steps with connectors ─── */
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; position: relative; }
+  .step { position: relative; text-align: center; padding: 0 8px; }
+  .step-circle {
+    width: 80px; height: 80px; margin: 0 auto 20px; border-radius: 50%;
+    background: #fff; border: 2px solid var(--primary-soft); color: var(--primary);
+    display: grid; place-items: center; position: relative; z-index: 2;
+    box-shadow: 0 6px 20px -8px rgba(11,92,110,0.25);
+  }
+  .step-num {
+    position: absolute; top: -6px; right: -6px;
+    width: 26px; height: 26px; background: var(--accent); color: #fff;
+    border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700;
+    border: 2px solid #fff;
+  }
+  .step-title { font-size: 18px; font-weight: 600; letter-spacing: -0.015em; margin: 0 0 8px; color: var(--fg); }
+  .step-desc { font-size: 14px; color: var(--muted-2); line-height: 1.5; margin: 0 0 14px; }
+  .step-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--primary); background: var(--primary-soft); padding: 4px 10px; border-radius: 999px; font-weight: 600; }
+
+  .step-connectors { position: absolute; top: 40px; left: 12.5%; right: 12.5%; height: 2px; z-index: 1; pointer-events: none; }
+  .step-connectors::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(to right, var(--border-strong) 0 6px, transparent 6px 12px); }
+
+  /* ─── Why — split ─── */
+  .why { background: var(--bg-2); }
+  .why-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
+  .why-story h2 { text-align: left; max-width: 460px; }
+  .why-story p { font-size: 16px; color: var(--muted-2); line-height: 1.65; margin: 0 0 18px; }
+  .why-story p:first-of-type { font-size: 18px; color: var(--fg); }
+
+  .kpis {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  .kpi {
+    background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 28px;
+    box-shadow: 0 2px 6px rgba(15,23,42,0.03);
+    position: relative; overflow: hidden;
+  }
+  .kpi::after {
+    content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 40px; background: var(--primary); border-radius: 0 4px 4px 0;
+  }
+  .kpi:nth-child(2)::after { background: var(--accent); }
+  .kpi:nth-child(3)::after { background: var(--success); }
+  .kpi:nth-child(4)::after { background: #f59e0b; }
+  .kpi-val { font-size: 44px; line-height: 1; letter-spacing: -0.025em; font-weight: 600; margin-bottom: 10px; color: var(--fg); }
+  .kpi-val small { font-size: 18px; font-weight: 500; color: var(--muted-2); margin-left: 4px; letter-spacing: -0.01em; }
+  .kpi-lbl { font-size: 13px; color: var(--muted-2); line-height: 1.5; }
+
+  /* ─── CTA ─── */
+  .cta-wrap { padding: 120px 0; }
+  .cta {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+    color: #fff; border-radius: 32px; padding: 72px 48px; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .cta::before, .cta::after { content: ''; position: absolute; border-radius: 50%; pointer-events: none; }
+  .cta::before { width: 400px; height: 400px; background: var(--accent); filter: blur(100px); opacity: 0.3; top: -100px; right: -80px; }
+  .cta::after { width: 300px; height: 300px; background: #fff; filter: blur(80px); opacity: 0.1; bottom: -60px; left: -40px; }
+  .cta-inner { position: relative; z-index: 2; max-width: 680px; margin: 0 auto; }
+  .cta .sec-kicker { background: rgba(255,255,255,0.15); color: #fff; }
+  .cta h2 { color: #fff; font-size: 48px; margin-bottom: 16px; }
+  .cta-sub { font-size: 18px; color: rgba(255,255,255,0.85); margin: 0 auto 32px; max-width: 560px; line-height: 1.55; }
+  .cta-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-cta-ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+  .btn-cta-ghost:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
+
+  /* ─── Footer ─── */
+  footer { padding: 48px 0; border-top: 1px solid var(--border); background: #fff; }
+  .foot-inner { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+  .foot-links { display: flex; gap: 24px; }
+  .foot-links a { color: var(--muted-2); text-decoration: none; }
+  .foot-links a:hover { color: var(--primary); }
+
+  @media (max-width: 960px) {
+    .hero-inner, .why-inner { grid-template-columns: 1fr; gap: 48px; }
+    h1 { font-size: 42px; }
+    h2 { font-size: 34px; }
+    .cta h2 { font-size: 32px; }
+    .steps { grid-template-columns: 1fr 1fr; gap: 32px; }
+    .step-connectors { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a href="#" class="logo">
+      <span class="logo-mark">S</span>
+      Servicimmo
+    </a>
+    <div class="nav-links">
+      <a href="#">Prestations</a>
+      <a href="#">Comment ça marche</a>
+      <a href="#">Zones</a>
+      <a href="#">Actualités</a>
+      <a href="#">Contact</a>
+    </div>
+    <div style="display:flex; gap: 8px;">
+      <a href="tel:+33247470123" class="btn btn-ghost" style="font-size:13px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        02 47 47 01 23
+      </a>
+      <a href="#" class="btn btn-accent">Mon devis</a>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div>
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Devis en ligne · réponse sous 2 h ouvrées
+      </div>
+      <h1>Vos diagnostics immobiliers, <em>expliqués et chiffrés en 2 minutes</em>.</h1>
+      <p class="hero-lede">
+        Vente, location, travaux — répondez à quelques questions simples. Nous identifions les diagnostics obligatoires pour votre bien et vous donnons une estimation tarifaire immédiate.
+      </p>
+      <div class="hero-ctas">
+        <a href="#" class="btn btn-accent" style="padding: 14px 24px; font-size: 15px;">
+          Commencer mon devis
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#" class="btn btn-outline" style="padding: 14px 20px;">
+          Voir comment ça marche
+        </a>
+      </div>
+      <div class="hero-bullets">
+        <div class="hero-bullet">
+          <span class="hero-bullet-ico"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          Sans engagement, sans création de compte
+        </div>
+        <div class="hero-bullet">
+          <span class="hero-bullet-ico"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          Rappelé par un expert en Indre-et-Loire sous 2 h ouvrées
+        </div>
+        <div class="hero-bullet">
+          <span class="hero-bullet-ico"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          Tarifs annoncés à l'avance, rapport sous 5 jours
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: mini-prévisualisation du questionnaire -->
+    <div class="hero-art">
+      <div class="hero-card">
+        <div class="hero-card-head">
+          <span class="hero-card-title">Votre projet</span>
+          <span class="hero-card-step">Étape 1 / 5</span>
+        </div>
+        <div class="hero-card-q">Quel est votre projet immobilier&nbsp;?</div>
+        <div class="hero-options">
+          <div class="hero-opt selected">
+            <span class="hero-opt-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+            <div>
+              <div class="hero-opt-name">Vente d'un bien</div>
+              <div class="hero-opt-desc">Maison, appartement, local</div>
+            </div>
+            <span class="hero-opt-check"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          </div>
+          <div class="hero-opt">
+            <span class="hero-opt-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>
+            <div>
+              <div class="hero-opt-name">Mise en location</div>
+              <div class="hero-opt-desc">Nouveau bail, renouvellement</div>
+            </div>
+          </div>
+          <div class="hero-opt">
+            <span class="hero-opt-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
+            <div>
+              <div class="hero-opt-name">Travaux / rénovation</div>
+              <div class="hero-opt-desc">Amiante, plomb avant chantier</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-progress">
+          <span>Estimation &nbsp;·&nbsp; 1:48 restant</span>
+          <div class="hero-progress-bar"><div class="hero-progress-fill"></div></div>
+          <span>20%</span>
+        </div>
+      </div>
+      <div class="hero-float-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10l4 2"/><circle cx="12" cy="12" r="10"/></svg>
+        2 min chrono
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ TRUST ═══════════ -->
+<section class="trust">
+  <div class="wrap trust-inner">
+    <span class="trust-lbl">Un cabinet certifié et assuré</span>
+    <div class="trust-list">
+      <span class="trust-item">
+        <svg class="trust-item-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        LCC Qualixpert
+      </span>
+      <span class="trust-item">
+        <svg class="trust-item-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Allianz (RCP)
+      </span>
+      <span class="trust-item">
+        <svg class="trust-item-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+        FNAIM Diagnostic
+      </span>
+      <span class="trust-item">
+        <svg class="trust-item-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        I.Cert
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ HOW IT WORKS ═══════════ -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-kicker">Comment ça marche</div>
+      <h2>De la première question à l'intervention, en 4 étapes.</h2>
+      <p class="sec-sub">On vous guide pas à pas. Rien ne commence sans votre validation. Vous restez maître du calendrier.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step-connectors"></div>
+
+      <div class="step">
+        <div class="step-circle">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="13" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/></svg>
+          <span class="step-num">1</span>
+        </div>
+        <h3 class="step-title">Décrivez votre projet</h3>
+        <p class="step-desc">Type de bien, adresse, surface, date du permis — le questionnaire s'adapte à votre situation.</p>
+        <span class="step-chip">2 minutes</span>
+      </div>
+
+      <div class="step">
+        <div class="step-circle">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/><path d="M12 22a10 10 0 1 1 10-10"/></svg>
+          <span class="step-num">2</span>
+        </div>
+        <h3 class="step-title">Vos diagnostics identifiés</h3>
+        <p class="step-desc">Nous appliquons la réglementation en vigueur à votre bien et affichons la liste personnalisée.</p>
+        <span class="step-chip">Immédiat</span>
+      </div>
+
+      <div class="step">
+        <div class="step-circle">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span class="step-num">3</span>
+        </div>
+        <h3 class="step-title">Devis sous 2 h ouvrées</h3>
+        <p class="step-desc">Un diagnostiqueur expert valide votre estimation et vous envoie un devis ferme par email.</p>
+        <span class="step-chip">2 h ouvrées</span>
+      </div>
+
+      <div class="step">
+        <div class="step-circle">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="12" cy="15" r="2"/></svg>
+          <span class="step-num">4</span>
+        </div>
+        <h3 class="step-title">Intervention sur site</h3>
+        <p class="step-desc">RDV en Indre-et-Loire sous 48 h. Rapport officiel transmis sous 5 jours au plus tard.</p>
+        <span class="step-chip">48 h</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ WHY ═══════════ -->
+<section class="sec why">
+  <div class="wrap">
+    <div class="why-inner">
+      <div class="why-story">
+        <div class="sec-kicker">Pourquoi Servicimmo</div>
+        <h2>28 ans d'expertise locale, une méthode moderne.</h2>
+        <p>Cabinet indépendant basé à Tours depuis 1998, nous intervenons en Indre-et-Loire et départements limitrophes. Nous sommes certifiés Qualixpert, assurés Allianz, et membres de la FNAIM Diagnostic.</p>
+        <p>Notre équipe publie une veille réglementaire depuis 2017 et accompagne aussi bien les particuliers que les notaires, syndics et agences immobilières locales.</p>
+      </div>
+
+      <dl class="kpis">
+        <div class="kpi">
+          <div class="kpi-val">28<small>ans</small></div>
+          <div class="kpi-lbl">D'expertise à Tours, depuis 1998.</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">10&nbsp;000<small>+</small></div>
+          <div class="kpi-lbl">Diagnostics réalisés en Touraine.</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">48<small>h</small></div>
+          <div class="kpi-lbl">Délai moyen d'intervention.</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">100<small>%</small></div>
+          <div class="kpi-lbl">Tarifs annoncés à l'avance.</div>
+        </div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FINAL CTA ═══════════ -->
+<section class="cta-wrap">
+  <div class="wrap">
+    <div class="cta">
+      <div class="cta-inner">
+        <div class="sec-kicker">Prêt à commencer&nbsp;?</div>
+        <h2>Votre devis en 2 minutes, validé par un expert sous 2 h.</h2>
+        <p class="cta-sub">Vous saurez exactement ce dont vous avez besoin et à quel prix. Sans engagement, sans création de compte.</p>
+        <div class="cta-ctas">
+          <a href="#" class="btn btn-accent" style="padding: 14px 24px; font-size: 15px;">
+            Commencer mon devis
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#" class="btn btn-cta-ghost" style="padding: 14px 20px;">Poser une question</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <span>© 2026 Servicimmo — Cabinet de diagnostic immobilier à Tours</span>
+    <div class="foot-links">
+      <a href="#">Mentions légales</a>
+      <a href="#">CGV</a>
+      <a href="#">Politique RGPD</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

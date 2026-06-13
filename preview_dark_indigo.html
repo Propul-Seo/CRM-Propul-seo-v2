@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark Indigo — Brief Bento Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── DARK INDIGO / BRAND-TINTED ──────────────── */
+    /* Background : #0e0b1e (deep purple-black)      */
+    /* Cards      : #16122e                          */
+    /* Border     : #2d2654                          */
+    /* Text       : #ede9fe (violet-100)             */
+    /* Muted      : #6b5fa0                          */
+    /* ─────────────────────────────────────────── */
+
+    body { font-family: 'Outfit', sans-serif; background: #0e0b1e; color: #ede9fe; padding: 48px 24px; }
+    .container { max-width: 960px; margin: 0 auto; }
+
+    header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; border-bottom: 2px solid #2d2654; padding-bottom: 40px; flex-wrap: wrap; gap: 24px; }
+    .briefing-tag { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.3em; margin-bottom: 16px; display: block; }
+    h1 { font-size: clamp(32px, 5vw, 48px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+    .gradient-text { background: linear-gradient(135deg, #a78bfa, #e879f9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .progress-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; color: #6b5fa0; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px; }
+    .progress-track { width: 200px; height: 10px; background: #16122e; border-radius: 99px; overflow: hidden; border: 1px solid #2d2654; margin-left: auto; }
+    .progress-fill { width: 33%; height: 100%; background: linear-gradient(90deg, #7c3aed, #c026d3); border-radius: 99px; }
+
+    .company-card { background: #16122e; border: 1px solid #2d2654; border-radius: 24px; padding: 28px; display: flex; align-items: center; gap: 24px; margin-bottom: 16px; }
+    .company-icon { width: 56px; height: 56px; flex-shrink: 0; background: rgba(124,58,237,0.2); border: 1px solid #4c1d95; border-radius: 16px; display: flex; align-items: center; justify-content: center; }
+    .company-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; color: #6b5fa0; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 6px; }
+    .company-value { font-size: 22px; font-weight: 700; color: #ede9fe; }
+
+    .bento-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .col-2 { grid-column: span 2 / span 2; }
+    .col-1 { grid-column: span 1 / span 1; }
+
+    .bento-card { background: #16122e; border: 1px solid #2d2654; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; min-height: 160px; transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); cursor: text; }
+    .bento-card:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(124,58,237,0.25); border-color: #7c3aed; }
+    .bento-card.focused { background: linear-gradient(135deg, #6366f1, #9333ea); border-color: transparent; box-shadow: 0 20px 40px rgba(124,58,237,0.5); }
+
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+    .card-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; color: #6b5fa0; text-transform: uppercase; letter-spacing: 0.15em; }
+    .focused .card-label { color: rgba(255,255,255,0.55); }
+    .badge { font-size: 10px; background: rgba(124,58,237,0.2); color: #a78bfa; padding: 3px 8px; border-radius: 4px; font-weight: 700; text-transform: uppercase; font-family: 'IBM Plex Mono', monospace; border: 1px solid rgba(124,58,237,0.4); }
+    .focused .badge { background: rgba(255,255,255,0.2); color: #fff; border-color: transparent; }
+    .card-text { font-size: 17px; color: #c4b5fd; line-height: 1.6; font-weight: 500; }
+    .card-placeholder { font-size: 17px; color: #2d2654; line-height: 1.6; }
+    .focused .card-text, .focused .card-placeholder { color: rgba(255,255,255,0.4); }
+
+    .btn-submit { display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%; margin-top: 40px; padding: 28px 40px; background: linear-gradient(135deg, #7c3aed, #c026d3); color: #fff; border: none; border-radius: 28px; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; cursor: pointer; font-family: 'Outfit', sans-serif; transition: all 0.3s; box-shadow: 0 4px 30px rgba(124,58,237,0.4); }
+    .btn-submit:hover { transform: scale(1.015); box-shadow: 0 10px 50px rgba(124,58,237,0.6); }
+    footer { margin-top: 64px; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: #2d2654; text-transform: uppercase; letter-spacing: 0.4em; }
+
+    .version-badge { position: fixed; top: 20px; right: 20px; background: #16122e; color: #a78bfa; border: 1px solid #2d2654; border-radius: 8px; padding: 8px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; }
+
+    @media (max-width: 768px) { .bento-grid { grid-template-columns: 1fr; } .col-2, .col-1 { grid-column: span 1; } header { flex-direction: column; align-items: flex-start; } }
+  </style>
+</head>
+<body>
+  <div class="version-badge">Version 3 — Dark Indigo</div>
+  <div class="container">
+    <header>
+      <div>
+        <div style="margin-bottom: 12px;">
+          <img src="https://lh3.googleusercontent.com/pw/AP1GczN1Fx4MCRF05ZyLZ8eE7yq6l3O04S9H5NUlRQng3NGehC4bVTl4SA0EdX8yJ4cEgMGjbPkELigm1WxcMBR8QCh4QSMgDVikjqv8mizSPn2r-zv-pKbMK10JVMTK4Fo1kd4VUXASX_owtWiT6X6cRao=w590-h423-s-no-gm?authuser=0" alt="Propulseo" width="120" height="86" style="object-fit: contain; display: block; filter: brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(220deg) brightness(1.5);">
+        </div>
+        <span class="briefing-tag">Briefing System v3.0</span>
+        <h1>PARLONS DE VOTRE <span class="gradient-text">PROJET.</span></h1>
+      </div>
+      <div style="text-align: right; flex-shrink: 0;">
+        <div class="progress-label">Complétion : <span style="color:#a78bfa">33%</span></div>
+        <div class="progress-track"><div class="progress-fill"></div></div>
+      </div>
+    </header>
+
+    <div class="company-card">
+      <div class="company-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M8 14h.01"/><path d="M16 14h.01"/></svg>
+      </div>
+      <div>
+        <div class="company-label">Votre Maison / Entreprise</div>
+        <div class="company-value">Acme Corporation</div>
+      </div>
+    </div>
+
+    <div class="bento-grid">
+      <div class="bento-card focused col-2">
+        <div class="card-header"><span class="card-label">01 — Vision & Objectif</span><span class="badge">Requis</span></div>
+        <div class="card-text">Refonte complète de l'identité numérique et du site e-commerce. Doubler le taux de conversion.</div>
+      </div>
+      <div class="bento-card col-1">
+        <div class="card-header"><span class="card-label">02 — Audience Cible</span></div>
+        <div class="card-placeholder">À qui nous adressons-nous ?</div>
+      </div>
+      <div class="bento-card col-2">
+        <div class="card-header"><span class="card-label">03 — Structure & Fonctionnalités</span></div>
+        <div class="card-placeholder">Pages et fonctions clés attendues...</div>
+      </div>
+      <div class="bento-card col-1">
+        <div class="card-header"><span class="card-label">04 — Environnement Techno</span></div>
+        <div class="card-placeholder">Stack technique ou préférences...</div>
+      </div>
+      <div class="bento-card col-1">
+        <div class="card-header"><span class="card-label">05 — Références Visuelles</span></div>
+        <div class="card-placeholder">URLs, sites inspirants...</div>
+      </div>
+      <div class="bento-card col-2">
+        <div class="card-header"><span class="card-label">06 — Notes Libres</span></div>
+        <div class="card-placeholder">Informations supplémentaires...</div>
+      </div>
+    </div>
+
+    <button class="btn-submit">
+      TRANSMETTRE LE BRIEF
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </button>
+
+    <footer>Propulseo Studio · Excellence Digitale</footer>
+  </div>
+</body>
+</html>

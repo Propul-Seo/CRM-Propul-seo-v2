@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8"><title>vue-28-alert-disqualify-lead.html</title>
+<link rel="stylesheet" href="../tokens/colors_and_type.css">
+<link rel="stylesheet" href="../tokens/portal.css">
+<link rel="stylesheet" href="../tokens/admin.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; min-height: 100%; background: #f4f1eb; }
+  body { font-family: var(--ps-font-sans); padding: 28px 24px 64px; }
+  .container { max-width: 1340px; margin: 0 auto; }
+  .section-h { margin: 36px auto 16px; max-width: 1340px; }
+  .section-h h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; margin: 0; color: #2a2418; }
+  .section-h p { font-size: 13px; color: #6b6357; margin: 4px 0 0; }
+</style></head>
+<body><div id="head"></div>
+<div class="container"><div id="root"></div></div>
+<script type="text/babel" src="_lib/primitives.jsx"></script>
+<script type="text/babel" src="_lib/shell.jsx"></script>
+<script type="text/babel" src="_lib/desktop-shell.jsx"></script>
+<script type="text/babel" src="_lib/admin-shell.jsx"></script>
+<script type="text/babel" src="_lib/v2-shared.jsx"></script>
+<script type="text/babel">
+function AdminBg() {
+  return (
+    <AdminWindow>
+      <AdminShell activeKey="leads" title="Précieuse Joaillerie" breadcrumb="Portails clients ›">
+        <div className="a-card" style={{ padding: 18, marginBottom: 16, height: 80 }} />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+          <div className="a-card" style={{ height: 100 }} />
+          <div className="a-card" style={{ height: 100 }} />
+          <div className="a-card" style={{ height: 100 }} />
+        </div>
+        <div className="a-card" style={{ marginTop: 16, height: 240 }} />
+      </AdminShell>
+    </AdminWindow>
+  );
+}
+function Reason() {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="ps-field">
+        <label className="ps-label">Raison</label>
+        <select className="ps-input">
+          <option>Budget trop bas</option>
+          <option selected>Pas le bon décideur</option>
+          <option>Hors cible (secteur, géographie)</option>
+          <option>Concurrence déjà choisie</option>
+          <option>Autre</option>
+        </select>
+      </div>
+      <div className="ps-field">
+        <label className="ps-label">Précisions <span style={{ fontWeight: 400, color: "var(--ps-fg-muted)" }}>· optionnel</span></label>
+        <textarea className="ps-input" rows="2" placeholder="Notes internes..." style={{ height: "auto", padding: "10px 14px", resize: "none" }} defaultValue="Stagiaire qui s'est inscrit, faut attendre que le boss revienne en septembre." />
+      </div>
+    </div>
+  );
+}
+function Head() {
+  return <PageHead num="28" title="Disqualifier le lead" subtitle="Sélecteur raison + précisions optionnelles." />;
+}
+ReactDOM.createRoot(document.getElementById("head")).render(<Head />);
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <AlertDialogPreview
+    iconName="user-x"
+    iconTone="orange"
+    title="Marquer ce lead comme non qualifié ?"
+    description="Le lead reste dans la base mais ne remontera plus dans la liste prioritaire. Il pourra être requalifié plus tard."
+    fields={<Reason />}
+    confirmLabel="Disqualifier"
+    confirmTone="danger"
+    adminMode={true}
+    backgroundShellRender={<AdminBg />}
+  />
+);</script></body></html>

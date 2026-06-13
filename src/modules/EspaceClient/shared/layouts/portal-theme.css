@@ -1,0 +1,567 @@
+/**
+ * Propul'Space portal theme — scoped under `.propulspace-portal`.
+ *
+ * Source of truth: Propulspace/design_handoff_propulspace/tokens/*.css
+ * (Phase 2 design handoff v1). When the handoff changes, mirror here.
+ *
+ * Naming: short form (--ps-bg, --ps-fg) follows the handoff.
+ */
+
+/* Force le chrome de page (html/body/#root) en clair tant qu'un contexte
+   Propul'Space est monté. Le CRM définit son fond sombre dans :root, qui
+   transparaît autour du contenu admin sinon. La classe est posée/retirée par
+   useForcePortalSurface au montage/démontage. */
+html.ps-light-surface,
+html.ps-light-surface body,
+html.ps-light-surface #root {
+  background: #FAFAFA !important;
+}
+
+html.ps-dark-surface,
+html.ps-dark-surface body,
+html.ps-dark-surface #root {
+  background: #0A0A0B !important;
+}
+
+/* Surface « nuit encre » du portail client (distincte du sombre admin zinc) :
+   une encre tiède teintée violet. Posée par useForcePortalSurface('night'). */
+html.ps-night-surface,
+html.ps-night-surface body,
+html.ps-night-surface #root {
+  background: #0B0A0F !important;
+}
+
+.propulspace-portal {
+  /* ─── SURFACES ─────────────────────────────────────────── */
+  --ps-bg: #FAFAFA;
+  --ps-bg-elevated: #FFFFFF;
+  --ps-bg-subtle: #F4F4F5;
+  --ps-bg-frosted: rgba(255, 255, 255, 0.82);
+
+  /* ─── TEXT ─────────────────────────────────────────────── */
+  --ps-fg: #18181B;
+  --ps-fg-secondary: #52525B;
+  --ps-fg-muted: #A1A1AA;
+
+  /* ─── BRAND ────────────────────────────────────────────── */
+  --ps-primary: #7C3AED;
+  --ps-primary-hover: #6D28D9;
+  --ps-primary-deep: #5B21B6;
+  --ps-primary-text: #5B21B6;
+  --ps-primary-subtle: #EDE9FE;
+
+  /* ─── SEMANTIC ─────────────────────────────────────────── */
+  --ps-success: #16A34A;  --ps-success-subtle: #DCFCE7;  --ps-success-text: #15803D;
+  --ps-warning: #EA580C;  --ps-warning-subtle: #FFEDD5;  --ps-warning-text: #B45309;
+  --ps-danger:  #DC2626;  --ps-danger-subtle:  #FEE2E2;  --ps-danger-text:  #B91C1C;
+  --ps-info:    #2563EB;  --ps-info-subtle:    #DBEAFE;  --ps-info-text:    #1D4ED8;
+  --ps-success-gradient: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+
+  /* ─── BORDERS / SHADOWS ────────────────────────────────── */
+  --ps-border: #E4E4E7;
+  --ps-border-soft: #F0F0F2;
+  --ps-border-strong: #D4D4D8;
+  --ps-shadow-card:     0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.05);
+  --ps-shadow-raised:   0 4px 12px -2px rgba(91,33,182,.10), 0 2px 4px -1px rgba(16,24,40,.06);
+  --ps-shadow-floating: 0 10px 25px rgba(124,58,237,.08);
+  --ps-shadow-fab:      0 10px 30px -8px rgba(124,58,237,.45), 0 4px 10px -2px rgba(124,58,237,.25), inset 0 1px 0 rgba(255,255,255,.15);
+  --ps-shadow-brand:    0 12px 30px -8px rgba(124,58,237,.50);
+  --ps-shadow-success:  0 12px 30px -8px rgba(16,163,74,.45);
+
+  /* ─── RADII ────────────────────────────────────────────── */
+  --ps-radius-input: 8px;
+  --ps-radius-card:  14px;
+  --ps-radius-modal: 16px;
+  --ps-radius-pill:  9999px;
+
+  /* ─── SPACING (4px base) ───────────────────────────────── */
+  --ps-space-1:  4px;
+  --ps-space-2:  8px;
+  --ps-space-3:  12px;
+  --ps-space-4:  16px;
+  --ps-space-5:  20px;
+  --ps-space-6:  24px;
+  --ps-space-8:  32px;
+  --ps-space-10: 40px;
+  --ps-space-12: 48px;
+  --ps-space-16: 64px;
+
+  /* ─── MOTION ───────────────────────────────────────────── */
+  --ps-ease:     cubic-bezier(0.4, 0, 0.2, 1);
+  --ps-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ps-dur-fast: 150ms;
+  --ps-dur-base: 200ms;
+  --ps-dur-slow: 300ms;
+
+  /* ─── TOUCH ────────────────────────────────────────────── */
+  --ps-touch: 44px;
+
+  /* ─── TYPE ─────────────────────────────────────────────── */
+  --ps-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --ps-font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --ps-font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  /* ─── ROOT STYLES ──────────────────────────────────────── */
+  font-family: var(--ps-font-sans);
+  font-size: 15px;
+  line-height: 24px;
+  letter-spacing: -0.005em;
+  font-feature-settings: "cv11", "ss03", "cv02";
+  color: var(--ps-fg);
+  color-scheme: light;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(124, 58, 237, 0.07), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(99, 102, 241, 0.05), transparent 50%),
+    var(--ps-bg);
+  background-attachment: fixed;
+}
+
+/* ─── DARK THEME MODIFIER (back-office admin) ──────────────
+   Ne ré-override QUE les valeurs des variables --ps-*. Tous les
+   utilitaires .ps-* (définis sous .propulspace-portal) héritent
+   automatiquement via var(). Appliqué sur la racine admin :
+   <div class="propulspace-portal ps-theme-dark">. */
+.propulspace-portal.ps-theme-dark {
+  --ps-bg: #0A0A0B;
+  --ps-bg-elevated: #161618;
+  --ps-bg-subtle: #202023;
+  --ps-bg-frosted: rgba(22, 22, 24, 0.72);
+
+  --ps-fg: #FAFAFA;
+  --ps-fg-secondary: #A1A1AA;
+  --ps-fg-muted: #8D8D95;
+
+  --ps-primary: #8B5CF6;
+  --ps-primary-hover: #A78BFA;
+  --ps-primary-deep: #6D28D9;
+  --ps-primary-text: #C4B5FD;
+  --ps-primary-subtle: rgba(139, 92, 246, 0.14);
+
+  --ps-success-subtle: rgba(22, 163, 74, 0.16);  --ps-success-text: #4ADE80;
+  --ps-warning-subtle: rgba(234, 88, 12, 0.16);  --ps-warning-text: #FB923C;
+  --ps-danger-subtle:  rgba(220, 38, 38, 0.16);  --ps-danger-text:  #FCA5A5;
+  --ps-info-subtle:    rgba(37, 99, 235, 0.16);  --ps-info-text:    #93C5FD;
+
+  --ps-border: #27272A;
+  --ps-border-soft: #1F1F22;
+  --ps-border-strong: #3F3F46;
+  --ps-shadow-card:     0 1px 2px rgba(0,0,0,.40), 0 1px 3px rgba(0,0,0,.30);
+  --ps-shadow-raised:   0 6px 16px -4px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04);
+  --ps-shadow-floating: 0 18px 44px -12px rgba(0,0,0,.65);
+  --ps-shadow-brand:    0 12px 30px -8px rgba(139,92,246,.45);
+  --ps-shadow-success:  0 12px 30px -8px rgba(34,197,94,.35);
+
+  color-scheme: dark;
+  color: var(--ps-fg);
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(139, 92, 246, 0.10), transparent 60%),
+    var(--ps-bg);
+}
+
+/* ─── NIGHT THEME MODIFIER (portail client « nuit encre ») ──
+   Nuit PROPRE au portail, distincte du sombre admin (.ps-theme-dark) :
+   encre tiède teintée violet (#0B0A0F/#17141F), halo violet plus présent,
+   violet boutons #7B49E8 (texte blanc AA 5.3:1). Mêmes utilitaires .ps-*
+   hérités via var(). Appliqué : <div class="propulspace-portal ps-theme-night">.
+   Tous les contrastes vérifiés WCAG AA (corps ≥4.5:1, accents UI ≥3:1). */
+.propulspace-portal.ps-theme-night {
+  --ps-bg: #0B0A0F;
+  --ps-bg-elevated: #17141F;
+  --ps-bg-subtle: #221D2C;
+  --ps-bg-frosted: rgba(23, 20, 31, 0.72);
+
+  --ps-fg: #F6F4FB;
+  --ps-fg-secondary: #B4ACC2;
+  --ps-fg-muted: #8B8398;
+
+  --ps-primary: #7B49E8;
+  --ps-primary-hover: #8350E8;
+  --ps-primary-deep: #6D28D9;
+  --ps-primary-text: #CBB8FB;
+  --ps-primary-subtle: rgba(157, 124, 247, 0.16);
+
+  --ps-success-subtle: rgba(22, 163, 74, 0.18);  --ps-success-text: #4ADE80;
+  --ps-warning-subtle: rgba(234, 88, 12, 0.18);  --ps-warning-text: #FB923C;
+  --ps-danger-subtle:  rgba(220, 38, 38, 0.18);  --ps-danger-text:  #FCA5A5;
+  --ps-info-subtle:    rgba(37, 99, 235, 0.18);  --ps-info-text:    #93C5FD;
+
+  --ps-border: #2C2640;
+  --ps-border-soft: #221C30;
+  --ps-border-strong: #473A60;
+  --ps-shadow-card:     0 1px 2px rgba(0,0,0,.45), 0 1px 3px rgba(0,0,0,.35);
+  --ps-shadow-raised:   0 8px 20px -6px rgba(0,0,0,.60), 0 0 0 1px rgba(255,255,255,.05);
+  --ps-shadow-floating: 0 20px 48px -14px rgba(0,0,0,.70);
+  --ps-shadow-brand:    0 14px 34px -10px rgba(123,73,232,.55);
+  --ps-shadow-success:  0 12px 30px -8px rgba(34,197,94,.35);
+
+  /* Tokens shadcn → nuit : les primitives héritées du CRM (Dialog, Popover,
+     DropdownMenu rendus dans un portal Radix hors scope) suivent ces valeurs. */
+  --background: 252 20% 5%;
+  --foreground: 257 47% 97%;
+  --card: 256 22% 10%;
+  --card-foreground: 257 47% 97%;
+  --popover: 256 22% 10%;
+  --popover-foreground: 257 47% 97%;
+  --primary: 259 78% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 260 21% 14%;
+  --secondary-foreground: 257 47% 97%;
+  --muted: 260 21% 14%;
+  --muted-foreground: 262 15% 72%;
+  --accent: 260 21% 14%;
+  --accent-foreground: 257 47% 97%;
+  --border: 254 25% 20%;
+  --input: 254 25% 20%;
+  --ring: 259 78% 60%;
+
+  color-scheme: dark;
+  color: var(--ps-fg);
+  /* Aurore nocturne : halos violet/indigo répartis sur tout le viewport
+     (ancrés via background-attachment: fixed → couvrent tout le scroll),
+     pour que le fond ne tombe jamais dans un noir plat en bas de page. */
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -12%, rgba(139, 92, 246, 0.22), transparent 60%),
+    radial-gradient(ellipse 65% 50% at 100% 4%,  rgba(124, 58, 237, 0.14), transparent 55%),
+    radial-gradient(ellipse 60% 55% at 6% 42%,   rgba(99, 102, 241, 0.12), transparent 60%),
+    radial-gradient(ellipse 65% 55% at 94% 78%,  rgba(139, 92, 246, 0.12), transparent 60%),
+    radial-gradient(ellipse 75% 50% at 32% 104%, rgba(124, 58, 237, 0.10), transparent 60%),
+    var(--ps-bg);
+  background-attachment: fixed;
+}
+
+.propulspace-portal * { border-color: var(--ps-border-soft); }
+.propulspace-portal h1, .propulspace-portal h2, .propulspace-portal h3 { letter-spacing: -0.025em; }
+/* Liens nus uniquement (:not([class])) : un <a> stylé en bouton (bg violet +
+   text-white) garde le contrôle de sa couleur — sinon cette règle (0,1,1)
+   écrasait les utilitaires Tailwind (0,1,0) → texte mauve sur fond mauve. */
+.propulspace-portal a:where(:not([class]))       { color: var(--ps-primary); transition: color var(--ps-dur-base) var(--ps-ease); }
+.propulspace-portal a:where(:not([class])):hover { color: var(--ps-primary-hover); }
+
+/* ─── SEMANTIC TYPE CLASSES ────────────────────────────── */
+.propulspace-portal .ps-display { font-size: 32px; line-height: 40px; font-weight: 700; letter-spacing: -0.025em; }
+/* Display fluide des mastheads éditoriaux (direction A) — phrase d'état en une de revue. */
+.propulspace-portal .ps-display-fluid { font-size: clamp(28px, 4.6vw, 42px); line-height: 1.15; font-weight: 700; letter-spacing: -0.025em; text-wrap: balance; }
+.propulspace-portal .ps-h1      { font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: -0.025em; margin: 0; }
+.propulspace-portal .ps-h2      { font-size: 18px; line-height: 28px; font-weight: 600; letter-spacing: -0.015em; margin: 0; }
+.propulspace-portal .ps-h3      { font-size: 15px; line-height: 22px; font-weight: 600; letter-spacing: -0.005em; margin: 0; }
+.propulspace-portal .ps-body    { font-size: 15px; line-height: 24px; font-weight: 400; color: var(--ps-fg-secondary); }
+.propulspace-portal .ps-small   { font-size: 13px; line-height: 20px; font-weight: 400; color: var(--ps-fg-secondary); }
+.propulspace-portal .ps-tiny    { font-size: 12px; line-height: 16px; font-weight: 500; color: var(--ps-fg-muted); }
+.propulspace-portal .ps-eyebrow { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ps-primary-text); }
+.propulspace-portal .ps-eyebrow-muted { color: var(--ps-fg-muted); }
+.propulspace-portal .ps-num     { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+.propulspace-portal .ps-display,
+.propulspace-portal .ps-display-fluid,
+.propulspace-portal .ps-h1,
+.propulspace-portal .ps-h2,
+.propulspace-portal .ps-h3 { font-family: var(--ps-font-display); }
+.propulspace-portal .ps-metric {
+  font-family: var(--ps-font-display);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  font-size: 26px; line-height: 1; font-weight: 600; letter-spacing: -0.02em;
+}
+
+/* ─── SURFACES & EFFECTS ───────────────────────────────── */
+.propulspace-portal .ps-surface {
+  background: var(--ps-bg-elevated);
+  border: 1px solid var(--ps-border-soft);
+  border-radius: var(--ps-radius-card);
+  box-shadow: var(--ps-shadow-card);
+  transition: transform var(--ps-dur-base) var(--ps-ease),
+              box-shadow  var(--ps-dur-base) var(--ps-ease);
+}
+.propulspace-portal .ps-surface-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--ps-shadow-raised);
+}
+.propulspace-portal .ps-frosted {
+  background: var(--ps-bg-frosted);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+.propulspace-portal .ps-gradient-text {
+  background: linear-gradient(135deg, var(--ps-fg) 0%, var(--ps-primary-deep) 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
+}
+.propulspace-portal .ps-brand-gradient {
+  background: linear-gradient(135deg, var(--ps-primary) 0%, var(--ps-primary-deep) 100%);
+}
+.propulspace-portal .ps-hero-blur {
+  pointer-events: none; position: absolute; right: -50px; top: -50px;
+  width: 220px; height: 220px; border-radius: 9999px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.18), transparent 70%);
+}
+.propulspace-portal .ps-hero-glow {
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.18), transparent 70%);
+}
+.propulspace-portal .ps-fab-button {
+  background: linear-gradient(135deg, var(--ps-primary) 0%, var(--ps-primary-deep) 100%);
+  box-shadow: var(--ps-shadow-fab);
+  transition-timing-function: var(--ps-ease);
+}
+
+/* ─── QUALIFICATION QUESTIONNAIRE ─────────────────────── */
+.propulspace-portal.ps-qualification-page {
+  isolation: isolate;
+  overflow-x: hidden;
+  background:
+    radial-gradient(780px 440px at 8% 4%, rgba(56, 189, 248, 0.14), transparent 64%),
+    radial-gradient(720px 440px at 92% 8%, rgba(168, 85, 247, 0.10), transparent 62%),
+    radial-gradient(720px 480px at 50% 100%, rgba(251, 146, 60, 0.08), transparent 60%),
+    linear-gradient(135deg, #fbfdff 0%, #fbf9ff 48%, #fffaf5 100%);
+  background-attachment: fixed;
+}
+.propulspace-portal.ps-qualification-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.42) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.38) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: 0.55;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.42), transparent 70%);
+}
+.propulspace-portal .ps-choice-card {
+  /* DA Aurora : surfaces internes opaques (le blur n'est autorisé que sur le
+     header/footer sticky via .ps-frosted). */
+  background: var(--ps-surface);
+}
+.propulspace-portal .ps-choice-card-active {
+  background-image:
+    linear-gradient(135deg, rgba(240, 249, 255, 0.9), rgba(255, 255, 255, 0.98) 48%, rgba(250, 245, 255, 0.94));
+}
+.propulspace-portal .ps-question-panel {
+  border: 1px solid var(--ps-border-soft);
+  border-radius: 18px;
+  background: var(--ps-surface);
+  box-shadow: 0 18px 50px -42px rgba(24, 24, 27, 0.55);
+}
+.propulspace-portal .ps-branch-panel {
+  border: 1px solid rgba(196, 181, 253, 0.58);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.74), rgba(250,245,255,0.66));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+}
+/* Barre de progression — largeur dynamique via custom prop --ps-bar-w. */
+.propulspace-portal .ps-progress-fill {
+  width: var(--ps-bar-w, 0%);
+}
+
+/* ─── MOTION PRIMITIVES ────────────────────────────────── */
+@keyframes ps-fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ps-pulse   { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@keyframes ps-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes ps-fab-pulse {
+  0%, 100% { box-shadow: var(--ps-shadow-fab); }
+  50%      { box-shadow: var(--ps-shadow-fab), 0 0 0 8px rgba(124, 58, 237, 0.12); }
+}
+@keyframes ps-spin { to { transform: rotate(360deg); } }
+
+.propulspace-portal .ps-fade-in { animation: ps-fade-up 320ms var(--ps-ease-out) both; }
+.propulspace-portal .ps-pulse   { animation: ps-pulse 2s var(--ps-ease) infinite; }
+.propulspace-portal .ps-fab     { animation: ps-fab-pulse 2.4s var(--ps-ease) 1s 2; }
+.propulspace-portal .ps-skeleton {
+  background: linear-gradient(90deg, rgba(124,58,237,0.04) 25%, rgba(124,58,237,0.10) 50%, rgba(124,58,237,0.04) 75%);
+  background-size: 200% 100%;
+  animation: ps-shimmer 1.5s infinite;
+  border-radius: var(--ps-radius-input);
+}
+/* Variante sombre : le dégradé violet ~4-10 % est invisible sur fond sombre,
+   on passe sur un shimmer blanc faible. (admin sombre + portail nuit) */
+.propulspace-portal.ps-theme-dark .ps-skeleton,
+.propulspace-portal.ps-theme-night .ps-skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.05) 75%);
+  background-size: 200% 100%;
+}
+
+/* ─── FORM CONTROLS (override theme dark CRM) ──────────── */
+/* Le CRM admin n'a qu'un theme dark unique au :root. Les <Input>/<Textarea>
+   shadcn héritent donc d'un fond foncé. Scoper le look light au portail. */
+.propulspace-portal input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.propulspace-portal textarea,
+.propulspace-portal select {
+  background-color: var(--ps-bg-elevated);
+  color: var(--ps-fg);
+  border-color: var(--ps-border);
+}
+.propulspace-portal input::placeholder,
+.propulspace-portal textarea::placeholder {
+  color: var(--ps-fg-muted);
+  opacity: 1;
+}
+.propulspace-portal input:focus-visible,
+.propulspace-portal textarea:focus-visible,
+.propulspace-portal select:focus-visible {
+  border-color: var(--ps-primary);
+  box-shadow: 0 0 0 3px var(--ps-primary-subtle);
+}
+
+/* ─── MODALES (DialogContent rescopé portail) ──────────────
+   Le DialogContent de base est figé sur le thème CRM (bg-surface-3,
+   text-foreground). Les modales du portail posent `propulspace-portal
+   ps-theme-night ps-dialog` : ps-dialog force la surface/texte/bordure sur
+   les tokens --ps-* (spécificité 0,2,0 > .bg-surface-3). */
+/* Classes posées sur le MÊME élément (DialogContent rescopé) → combinateur
+   composé (.a.b), pas descendant (.a .b) : le DialogContent n'a pas d'ancêtre
+   .propulspace-portal (rendu dans un portal Radix à la racine du document). */
+.propulspace-portal.ps-dialog {
+  background: var(--ps-bg-elevated) !important;
+  color: var(--ps-fg);
+  border-color: var(--ps-border);
+}
+
+/* ─── FOCUS (accessible violet ring) ───────────────────── */
+.propulspace-portal :focus-visible {
+  outline: 2px solid var(--ps-primary);
+  outline-offset: 2px;
+  border-radius: var(--ps-radius-input);
+}
+
+/* ─── SHADCN TOKENS → CLAIR (override theme dark CRM) ───────
+   Le CRM admin n'a qu'un thème sombre unique au :root (--background,
+   --input, --accent… tous foncés, en triplets HSL). Les primitives shadcn
+   du portail (Button variant=outline → bg-background, Dialog, DropdownMenu…)
+   héritaient donc d'un fond noir. On remappe les tokens shadcn sur les
+   valeurs claires --ps-* — sauf le back-office admin (.ps-theme-dark) et le
+   portail nuit (.ps-theme-night), qui définissent leurs propres tokens shadcn
+   sombres. Format : triplet HSL (consommé via hsl(var(--token))). */
+.propulspace-portal:not(.ps-theme-dark):not(.ps-theme-night) {
+  --background: 0 0% 100%;
+  --foreground: 240 6% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 6% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 6% 10%;
+  --primary: 262 83% 58%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 5% 96%;
+  --secondary-foreground: 240 6% 10%;
+  --muted: 240 5% 96%;
+  --muted-foreground: 240 4% 46%;
+  --accent: 240 5% 96%;
+  --accent-foreground: 240 6% 10%;
+  --border: 240 6% 90%;
+  --input: 240 6% 90%;
+  --ring: 262 83% 58%;
+}
+
+/* Décalage du header portail sous le bandeau d'aperçu admin (lecture seule).
+   En portail réel, --ps-header-top est indéfini → fallback 0px côté header
+   (cf. PortalLayout), donc aucun impact hors aperçu. */
+.ps-preview-shell { --ps-header-top: 2.5rem; }
+
+/* Aperçu embarqué dans le shell CRM (/portails) : le transform crée un
+   containing block qui piège les position:fixed du portail (sidebar, header
+   mobile, tab bar, FAB) DANS l'encart — sans lui, la sidebar du portail
+   s'ancre au viewport et recouvre la sidebar admin. Le défilement se fait
+   dans .ps-preview-scroll pour garder la sidebar du portail épinglée. */
+.ps-preview-embedded {
+  height: 100vh;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+.ps-preview-embedded .ps-preview-scroll {
+  height: calc(100% - 2.5rem); /* sous le bandeau d'aperçu */
+  overflow-y: auto;
+}
+
+/* ─── WELCOME WIZARD PREMIUM TOKENS (palier polish) ─────── */
+/* Utilities supplémentaires pour le wizard d'accueil. Réutilisables ailleurs.
+   Documentés ici pour que les agents de polish s'y conforment plutôt que
+   d'inventer des valeurs magiques inline. */
+
+/* Glow violet diffus pour les tiles importants (icône Sparkles, avatar header). */
+.propulspace-portal .ps-glow-violet {
+  box-shadow:
+    0 8px 24px -4px rgba(124, 58, 237, 0.28),
+    0 2px 6px -1px rgba(124, 58, 237, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.20);
+}
+.propulspace-portal .ps-glow-violet-soft {
+  box-shadow:
+    0 4px 16px -2px rgba(124, 58, 237, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Lift hover générique — translateY + shadow plus marquée. */
+.propulspace-portal .ps-lift {
+  transition: transform var(--ps-dur-base) var(--ps-ease-out),
+              box-shadow  var(--ps-dur-base) var(--ps-ease-out);
+}
+.propulspace-portal .ps-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ps-shadow-raised);
+}
+
+/* Card interactive (cursor + lift + ring violet au focus-visible). */
+.propulspace-portal .ps-card-interactive {
+  cursor: pointer;
+  transition: transform var(--ps-dur-base) var(--ps-ease-out),
+              box-shadow  var(--ps-dur-base) var(--ps-ease-out),
+              border-color var(--ps-dur-fast) var(--ps-ease);
+}
+.propulspace-portal .ps-card-interactive:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--ps-shadow-raised);
+  border-color: var(--ps-border-strong);
+}
+.propulspace-portal .ps-card-interactive:active { transform: translateY(0); }
+
+/* Pill state — fond plein + ring subtil pour les pills actives mutex/check. */
+.propulspace-portal .ps-pill-active {
+  box-shadow:
+    0 1px 2px rgba(91, 33, 182, 0.15),
+    0 2px 8px -2px rgba(124, 58, 237, 0.25);
+}
+
+/* Halo pulsant pour Step 5 Done. Plus marqué que ps-pulse classique. */
+@keyframes ps-halo-pulse {
+  0%, 100% { transform: scale(1);    opacity: 0.65; }
+  50%      { transform: scale(1.18); opacity: 1; }
+}
+.propulspace-portal .ps-halo {
+  animation: ps-halo-pulse 3s var(--ps-ease) infinite;
+  background: radial-gradient(circle,
+    rgba(124, 58, 237, 0.28) 0%,
+    rgba(124, 58, 237, 0.04) 50%,
+    transparent 70%);
+}
+
+/* Sparks — petits dots qui montent en boucle (Step 5 Done). */
+@keyframes ps-spark-rise {
+  0%   { opacity: 0; transform: translateY(20px) scale(0.6); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-60px) scale(1); }
+}
+.propulspace-portal .ps-spark {
+  animation: ps-spark-rise 2.6s var(--ps-ease-out) infinite;
+}
+
+/* Scale feedback au clic (tap state pour boutons/pills). */
+.propulspace-portal .ps-tap { transition: transform var(--ps-dur-fast) var(--ps-ease); }
+.propulspace-portal .ps-tap:active { transform: scale(0.97); }
+
+/* Reduced motion — désactive les animations lourdes. */
+@media (prefers-reduced-motion: reduce) {
+  .propulspace-portal .ps-halo,
+  .propulspace-portal .ps-spark,
+  .propulspace-portal .ps-pulse,
+  .propulspace-portal .ps-fab {
+    animation: none;
+  }
+  .propulspace-portal .ps-lift:hover,
+  .propulspace-portal .ps-card-interactive:hover { transform: none; }
+}
+
+/* ─── SAFE-AREA (iOS bottom nav) ───────────────────────── */
+@supports (padding: max(0px)) {
+  .propulspace-portal .ps-safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
+  .propulspace-portal .ps-safe-top    { padding-top: max(env(safe-area-inset-top), 0px); }
+}

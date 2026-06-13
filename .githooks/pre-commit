@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Pre-commit hook : scan anti-secrets via gitleaks
+# Bloque tout commit contenant une clé API, JWT, AWS, Stripe, Supabase, etc.
+#
+# Setup : git config core.hooksPath .githooks
+# Skip ponctuel : git commit --no-verify (à éviter)
+
+set -e
+
+if ! command -v gitleaks &> /dev/null; then
+  echo "⚠️  gitleaks n'est pas installé. Installation : brew install gitleaks"
+  echo "    Hook ignoré pour ce commit."
+  exit 0
+fi
+
+echo "🔍 Scan anti-secrets (gitleaks)..."
+
+# Mode protect : scan uniquement le staging area (ce qui va être commité)
+gitleaks protect --staged --redact --no-banner --verbose 2>&1
+
+EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ]; then
+  echo ""
+  echo "❌ Commit refusé : des secrets ont été détectés dans tes fichiers stagés."
+  echo "   Retire-les ou utilise une variable d'environnement (process.env.X)."
+  echo "   En cas de faux positif documenté, ajoute la règle dans .gitleaks.toml."
+  exit 1
+fi
+
+echo "✅ Aucun secret détecté."
+exit 0
