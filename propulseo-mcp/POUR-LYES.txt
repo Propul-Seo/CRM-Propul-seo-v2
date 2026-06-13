@@ -1,0 +1,108 @@
+============================================================
+ MCP Propul'SEO CRM — Installation rapide (pour Lyes)
+============================================================
+
+Ce MCP te permet de piloter le CRM (lire/creer/modifier/supprimer)
+directement depuis Claude Code et Claude Desktop.
+
+⚠️ SECURITE
+- Tu utilises une cle SECRETE (sb_secret_...) = acces total a la base.
+  Ne la partage jamais, ne la mets que dans le fichier .env local.
+- Le mode "dry-run" est ACTIF par defaut : toute creation/modif/suppression
+  est SIMULEE (rien n'est ecrit). Tu le desactiveras plus tard si besoin.
+- Les suppressions et modifications demandent une confirmation explicite.
+
+------------------------------------------------------------
+ ETAPE 0 — Ce qu'il te faut
+------------------------------------------------------------
+- Python 3.11+  (https://www.python.org/downloads/
+  -> sous Windows, COCHE "Add python.exe to PATH" a l'installation)
+- Ta cle secrete du projet ERP : demande-la a Etienne
+  (Dashboard Supabase > projet ERP > Project Settings > API Keys >
+   Secret keys ; format sb_secret_...)
+
+------------------------------------------------------------
+ ETAPE 1 — Decompresser
+------------------------------------------------------------
+Decompresse ce zip ou tu veux, par ex. :
+  Windows : C:\Users\<toi>\Documents\propulseo-mcp
+  Mac     : /Users/<toi>/Documents/propulseo-mcp
+
+------------------------------------------------------------
+ ETAPE 2 — Installer (dans le dossier propulseo-mcp)
+------------------------------------------------------------
+WINDOWS (PowerShell) :
+  cd C:\Users\<toi>\Documents\propulseo-mcp
+  python -m venv .venv
+  .\.venv\Scripts\Activate.ps1
+  pip install -r requirements.txt
+  (si PowerShell bloque : Set-ExecutionPolicy -Scope CurrentUser RemoteSigned)
+
+MAC / LINUX (Terminal) :
+  cd /Users/<toi>/Documents/propulseo-mcp
+  python3 -m venv .venv
+  source .venv/bin/activate
+  pip install -r requirements.txt
+
+------------------------------------------------------------
+ ETAPE 3 — Configurer ta cle (.env)
+------------------------------------------------------------
+  Windows : copy .env.example .env
+  Mac/Linux : cp .env.example .env
+
+Ouvre le fichier .env et renseigne :
+  SUPABASE_URL=https://tbuqctfgjjxnevmsvucl.supabase.co
+  SUPABASE_SERVICE_ROLE_KEY=sb_secret_...   <- TA cle
+  MCP_DRY_RUN=true                          <- garder true au depart
+
+------------------------------------------------------------
+ ETAPE 4 — Tester
+------------------------------------------------------------
+  python test_connection.py
+Tu dois voir :  === Tout est OK ===
+
+------------------------------------------------------------
+ ETAPE 5 — Brancher Claude Code  (chemins ABSOLUS, scope user)
+------------------------------------------------------------
+WINDOWS (une seule ligne, adapte le chemin a ton dossier) :
+  claude mcp add --scope user --transport stdio propulseo-crm -- "C:\Users\<toi>\Documents\propulseo-mcp\.venv\Scripts\python.exe" "C:\Users\<toi>\Documents\propulseo-mcp\run_server.py"
+
+MAC / LINUX :
+  claude mcp add --scope user --transport stdio propulseo-crm -- /Users/<toi>/Documents/propulseo-mcp/.venv/bin/python /Users/<toi>/Documents/propulseo-mcp/run_server.py
+
+Verifier :  claude mcp list   (doit afficher "propulseo-crm  ✓ Connected")
+IMPORTANT : ouvre une NOUVELLE session Claude Code, puis tape /mcp
+            (les outils ne se chargent qu'au demarrage d'une session).
+
+------------------------------------------------------------
+ ETAPE 5 bis — Claude Desktop (optionnel)
+------------------------------------------------------------
+Edite le fichier :
+  Windows : %APPDATA%\Claude\claude_desktop_config.json
+  Mac     : ~/Library/Application Support/Claude/claude_desktop_config.json
+
+Ajoute (adapte les chemins ; sous Windows DOUBLE les \) :
+{
+  "mcpServers": {
+    "propulseo-crm": {
+      "type": "stdio",
+      "command": "C:\\Users\\<toi>\\Documents\\propulseo-mcp\\.venv\\Scripts\\python.exe",
+      "args": ["C:\\Users\\<toi>\\Documents\\propulseo-mcp\\run_server.py"]
+    }
+  }
+}
+Puis QUITTER completement Claude Desktop et le relancer.
+
+------------------------------------------------------------
+ UTILISATION
+------------------------------------------------------------
+Demande en langage naturel, par ex. :
+  "Avec propulseo-crm, montre l'etat du serveur"
+  "Liste mes 5 derniers contacts au statut signe"
+  "Cree une ecriture comptable de 1200 EUR pour ..."
+
+Pour passer en ECRITURE REELLE : mettre MCP_DRY_RUN=false dans .env
+puis relancer Claude. (Les confirmations restent demandees.)
+
+Details complets : voir README.md
+============================================================

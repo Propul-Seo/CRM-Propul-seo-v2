@@ -113,19 +113,25 @@ Chemins à utiliser (adapter `<dossier>` ; ta machine = `C:\Users\etien\Desktop\
 
 ### A. Claude Code (CLI)
 
+> **Important — portée :** utilisez **`--scope user`** pour que le serveur soit
+> disponible dans **toutes vos conversations/projets**. Sans ce flag, la portée est
+> `local` et le serveur n'apparaît QUE dans le dossier où vous l'avez ajouté.
+
 ```powershell
 # Windows (ta machine) — une seule ligne :
-claude mcp add --transport stdio propulseo-crm -- "C:\Users\etien\Desktop\CRM-Propul-seo-v2-main\propulseo-mcp\.venv\Scripts\python.exe" "C:\Users\etien\Desktop\CRM-Propul-seo-v2-main\propulseo-mcp\run_server.py"
+claude mcp add --scope user --transport stdio propulseo-crm -- "C:\Users\etien\Desktop\CRM-Propul-seo-v2-main\propulseo-mcp\.venv\Scripts\python.exe" "C:\Users\etien\Desktop\CRM-Propul-seo-v2-main\propulseo-mcp\run_server.py"
 ```
 ```bash
 # Mac/Linux :
-claude mcp add --transport stdio propulseo-crm -- /chemin/propulseo-mcp/.venv/bin/python /chemin/propulseo-mcp/run_server.py
+claude mcp add --scope user --transport stdio propulseo-crm -- /chemin/propulseo-mcp/.venv/bin/python /chemin/propulseo-mcp/run_server.py
 ```
 - Vérifier : `claude mcp list` puis `claude mcp get propulseo-crm` (doit être `connected`).
-- Retirer : `claude mcp remove propulseo-crm`.
-- Portée : par défaut `local` (privé à toi, ce projet). Ajouter `--scope user` pour
-  l'avoir dans **tous** tes projets, ou `--scope project` pour le partager via un
-  fichier `.mcp.json` versionné.
+- Retirer (puis re-ajouter pour changer de portée) : `claude mcp remove propulseo-crm`.
+- **Les outils ne se chargent qu'au démarrage d'une session** : ouvrez une **nouvelle**
+  session après l'ajout, puis `/mcp` pour confirmer. Une discussion déjà ouverte ne
+  verra jamais le serveur ajouté entre-temps.
+- Portées : `local` = ce projet seulement · `user` = tous vos projets (recommandé) ·
+  `project` = partagé via un `.mcp.json` versionné (pratique pour l'associé).
 
 ### B. Claude Desktop (app Windows & Mac)
 
