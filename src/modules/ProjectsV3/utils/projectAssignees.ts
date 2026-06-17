@@ -9,7 +9,7 @@ export const PROJECT_ASSIGNEES = [
   { email: 'lyestriki@yahoo.fr', label: 'Lyes' },
 ] as const
 
-const ASSIGNEE_LABEL_BY_EMAIL = new Map(
+const ASSIGNEE_LABEL_BY_EMAIL = new Map<string, string>(
   PROJECT_ASSIGNEES.map((assignee) => [assignee.email, assignee.label]),
 )
 
@@ -22,13 +22,13 @@ export function getProjectAssigneeLabel(user?: ProjectAssigneeUser | null) {
   return ASSIGNEE_LABEL_BY_EMAIL.get(normalizeEmail(user.email)) ?? user.name
 }
 
-export function getProjectAssignees<T extends ProjectAssigneeUser>(users: T[]) {
-  return PROJECT_ASSIGNEES
-    .map((assignee) => {
-      const user = users.find((candidate) => normalizeEmail(candidate.email) === assignee.email)
-      return user ? { ...user, name: assignee.label } : null
-    })
-    .filter((user): user is T => user !== null)
+export function getProjectAssignees<T extends ProjectAssigneeUser>(users: T[]): T[] {
+  const result: T[] = []
+  for (const assignee of PROJECT_ASSIGNEES) {
+    const user = users.find((candidate) => normalizeEmail(candidate.email) === assignee.email)
+    if (user) result.push({ ...user, name: assignee.label })
+  }
+  return result
 }
 
 export function getProjectAssigneeIds(users: ProjectAssigneeUser[]) {

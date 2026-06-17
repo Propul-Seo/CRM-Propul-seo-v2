@@ -1,4 +1,4 @@
-import { Plus, Search, LayoutGrid, Rows3, List } from 'lucide-react'
+import { Plus, Search, LayoutGrid, Rows3, List, Columns2 } from 'lucide-react'
 import { V3_POLE_ORDER, V3_POLE_LABELS, V3_POLE_COLORS, type V3Pole } from '../utils/poleMapping'
 import { ProjectAssigneeButtons } from './ProjectAssigneeButtons'
 
@@ -7,7 +7,7 @@ interface UserOption {
   name: string
 }
 
-export type V3ViewMode = 'normal' | 'compact' | 'list'
+export type V3ViewMode = 'binome' | 'normal' | 'compact' | 'list'
 
 interface Props {
   projectCount: number
@@ -53,7 +53,7 @@ export function ProjectsV3Header({
                 {projectCount} projet{projectCount !== 1 ? 's' : ''}
                 {viewMode === 'list' ? ' en cours' : ''}
               </strong>
-              {viewMode !== 'list' && (
+              {(viewMode === 'normal' || viewMode === 'compact') && (
                 <>
                   <span className="text-[#6b7280]">·</span>
                   <span>Glissez-déposez pour changer le statut</span>
@@ -122,6 +122,19 @@ export function ProjectsV3Header({
 
         {/* Toggle vue normale / compacte */}
         <div className="ml-auto flex items-center gap-px bg-[#070512] border border-[rgba(139,92,246,0.18)] rounded-md p-px">
+          <button
+            type="button"
+            onClick={() => onViewModeChange('binome')}
+            title="Vue binôme (Etienne / Lyes)"
+            aria-pressed={viewMode === 'binome'}
+            className="h-[28px] w-[30px] flex items-center justify-center rounded transition-colors duration-150"
+            style={{
+              background: viewMode === 'binome' ? 'rgba(139, 92, 246, 0.18)' : 'transparent',
+              color: viewMode === 'binome' ? '#A78BFA' : '#6b7280',
+            }}
+          >
+            <Columns2 className="h-3.5 w-3.5" />
+          </button>
           <button
             type="button"
             onClick={() => onViewModeChange('normal')}

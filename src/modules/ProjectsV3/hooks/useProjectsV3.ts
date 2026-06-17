@@ -69,7 +69,11 @@ export function useProjectsV3(): UseProjectsV3Return {
       .eq('id', id)
       .select()
       .single()
-    if (!error && data) {
+    if (error) {
+      console.error('[updateProject] Supabase error:', error)
+      throw new Error(error.message)
+    }
+    if (data) {
       setProjects(prev => prev.map(p => p.id === id ? data as ProjectV2 : p))
     }
   }, [])

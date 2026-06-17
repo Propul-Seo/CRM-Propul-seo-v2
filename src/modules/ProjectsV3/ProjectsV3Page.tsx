@@ -1,6 +1,7 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import {
   DndContext,
   DragOverlay,
@@ -24,6 +25,7 @@ import { ProjectCardV3Compact } from './components/ProjectCardV3Compact'
 import { SortableProjectCardV3 } from './components/SortableProjectCardV3'
 import { SortableProjectCardV3Compact } from './components/SortableProjectCardV3Compact'
 import { ProjectsV3DetailList } from './components/ProjectsV3DetailList'
+import { ProjectsV3BinomeView } from './components/ProjectsV3BinomeView'
 import { statusToColumn, V3_COLUMN_ORDER, type V3Column } from './utils/statusMapping'
 import { getActivePoles, type V3Pole } from './utils/poleMapping'
 import { useProjectDragDropV3 } from './hooks/useProjectDragDropV3'
@@ -34,12 +36,12 @@ import { getProjectAssigneeIds, getProjectAssignees } from './utils/projectAssig
 const VIEW_MODE_STORAGE_KEY = 'propulseo:projects-v3:view-mode'
 
 function loadViewMode(): V3ViewMode {
-  // Vue par défaut = « Liste détaillée » (projets En cours uniquement), à l'arrivée
-  // sur Projets actifs. L'utilisateur peut basculer en kanban/compact (mémorisé).
-  if (typeof window === 'undefined') return 'list'
+  // Vue par défaut = « Binôme » (projets d'Etienne / de Lyes) à l'arrivée sur
+  // Projets actifs. L'utilisateur peut basculer en kanban/compact/liste (mémorisé).
+  if (typeof window === 'undefined') return 'binome'
   const stored = window.localStorage.getItem(VIEW_MODE_STORAGE_KEY)
-  if (stored === 'compact' || stored === 'list' || stored === 'normal') return stored
-  return 'list'
+  if (stored === 'binome' || stored === 'compact' || stored === 'list' || stored === 'normal') return stored
+  return 'binome'
 }
 
 function useDebounced<T>(value: T, delay: number): T {
@@ -53,7 +55,17 @@ function useDebounced<T>(value: T, delay: number): T {
 
 export function ProjectsV3Page() {
   const navigate = useNavigate()
-  const { projects, loading, updateProjectStatus, addProject } = useProjectsV3()
+  const { projects, loading, updateProjectStatus, updateProject, addProject } = useProjectsV3()
+
+  const handleMoveProject = useCallback(async (id: string, updates: Partial<ProjectV2>): Promise<boolean> => {
+    try {
+      await updateProject(id, updates)
+      return true
+    } catch {
+      toast.error('Déplacement du projet échoué')
+      return false
+    }
+  }, [updateProject])
   const { byProjectId: portalHealthByProjectId } = usePortalHealth()
   const [newOpen, setNewOpen] = useState(false)
 
@@ -175,7 +187,17 @@ export function ProjectsV3Page() {
         onViewModeChange={handleViewModeChange}
       />
 
-      {viewMode === 'list' ? (
+      {viewMode === 'binome' ? (
+        <ProjectsV3BinomeView
+          projects={filteredProjects}
+          assignees={projectAssignees}
+          portalHealthByProjectId={portalHealthByProjectId}
+          allowedAssigneeIds={allowedAssigneeIds}
+          assigneeLabelsById={assigneeLabelsById}
+          onProjectClick={(id) => navigate(`/projets-v3-preview/${id}`)}
+          onMoveProject={handleMoveProject}
+        />
+      ) : viewMode === 'list' ? (
         <ProjectsV3DetailList
           projects={filteredProjects}
           portalHealthByProjectId={portalHealthByProjectId}
