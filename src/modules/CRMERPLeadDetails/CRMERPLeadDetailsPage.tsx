@@ -16,6 +16,7 @@ interface Props {
   onBack: () => void
   onEdit: () => void
   onAssign: (userId: string | null) => void
+  onDelete?: () => void
   onAddActivity: (type: ActivityType, content: string) => Promise<void>
   onUpdateActivity: (id: string, updates: { type?: ActivityType; content?: string }) => Promise<void>
   onDeleteActivity: (id: string) => Promise<void>
@@ -23,7 +24,7 @@ interface Props {
 
 export function CRMERPLeadDetailsPage({
   lead, activities, users,
-  onBack, onEdit, onAssign,
+  onBack, onEdit, onAssign, onDelete,
   onAddActivity, onUpdateActivity, onDeleteActivity,
 }: Props) {
   const [search, setSearch] = useState('')
@@ -55,7 +56,7 @@ export function CRMERPLeadDetailsPage({
       <div className="flex flex-1 overflow-hidden">
         {/* Colonne gauche */}
         <div className="w-[300px] shrink-0 border-r border-[rgba(139,92,246,0.18)] overflow-y-auto bg-[#070512]">
-          <LeadLeftSidebar lead={lead} users={users} onEdit={onEdit} onAssign={onAssign} />
+          <LeadLeftSidebar lead={lead} users={users} onEdit={onEdit} onAssign={onAssign} onDelete={onDelete} />
         </div>
 
         {/* Contenu principal */}

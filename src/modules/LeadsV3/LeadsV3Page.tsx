@@ -14,6 +14,9 @@ import { useLeadsV3Cards } from './hooks/useLeadsV3Cards'
 import type { LeadCardData } from './components/LeadCardV3'
 import { QualificationLeadDetailsSheet } from './components/QualificationLeadDetailsSheet'
 import { getProjectAssignees } from '@/modules/ProjectsV3/utils/projectAssignees'
+import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog'
+import { usePropulspaceDeletion } from '@/modules/EspaceClient/admin/hooks/usePropulspaceDeletion'
+import type { LeadSortMode } from './utils/leadAdapters'
 
 const TAB_KEY = 'propulseo:leads-v3:tab'
 
@@ -36,6 +39,7 @@ export function LeadsV3Page() {
   const navigate = useNavigate()
   const [tab, setTabRaw] = useState<LeadsV3Tab>(loadTab)
   const [filterUserId, setFilterUserId] = useState('')
+  const [sortMode, setSortMode] = useState<LeadSortMode>('relance_asc')
   const [searchQuery, setSearchQuery] = useState('')
   const debouncedSearch = useDebounced(searchQuery, 300)
   const [users, setUsers] = useState<{ id: string; name: string; email: string | null }[]>([])
@@ -46,8 +50,10 @@ export function LeadsV3Page() {
   const erp = useLeadsV3Erp()
   const qualif = useLeadsV3Qualification(tab === 'site_web' ? 'site' : 'erp')
   const { convert } = useConvertLeadToProject()
+  const { deleteQualifLead } = usePropulspaceDeletion()
   const [convertingId, setConvertingId] = useState<string | null>(null)
   const [selectedQualif, setSelectedQualif] = useState<QualificationLead | null>(null)
+  const [leadToDelete, setLeadToDelete] = useState<LeadCardData | null>(null)
 
   useEffect(() => {
     supabase.from('users').select('id, name, email').eq('is_active', true).order('name').then(({ data, error }) => {
@@ -64,7 +70,7 @@ export function LeadsV3Page() {
   const qualifIdSet = useMemo(() => new Set(qualif.leads.map(l => l.id)), [qualif.leads])
 
   const { cards, leadStatus, columns, onStatusChange } = useLeadsV3Cards({
-    tab, sw, erp, qualifLeads: qualif.leads, qualifIdSet, filterUserId, debouncedSearch,
+    tab, sw, erp, qualifLeads: qualif.leads, qualifIdSet, filterUserId, debouncedSearch, sortMode,
   })
 
   const handleLeadClick = (id: string) => {
@@ -110,6 +116,34 @@ export function LeadsV3Page() {
 
   const conversionHandler = (card: LeadCardData) => { void handleConvertLead(card) }
 
+  const leadToDeleteName = leadToDelete?.company || leadToDelete?.contact || 'Lead sans nom'
+
+  /**
+   * Suppression définitive du lead selon sa source : qualif (RPC admin),
+   * site web (`contacts`) ou ERP (`crmerp_leads`). Lève en cas d'échec pour
+   * que le dialog reste ouvert (le toast d'erreur informe l'utilisateur).
+   */
+  const confirmDeleteLead = async () => {
+    const card = leadToDelete
+    if (!card) return
+    try {
+      if (qualifIdSet.has(card.id)) {
+        const res = await deleteQualifLead(card.id)
+        if (!res.success) throw new Error(res.error ?? 'Échec de la suppression')
+        await qualif.refetch()
+      } else if (tab === 'site_web') {
+        await sw.deleteLead(card.id)
+      } else {
+        await erp.deleteLead(card.id)
+      }
+      toast.success('Lead supprimé')
+      setLeadToDelete(null)
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Échec de la suppression')
+      throw err
+    }
+  }
+
   return (
     <div className="min-h-full bg-[#0a0814] text-[#ede9fe] p-8 max-w-[1600px] mx-auto">
       <LeadsV3Header
@@ -122,6 +156,8 @@ export function LeadsV3Page() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onNewLead={() => toast.info('Création de lead : à venir en V3')}
+        sortMode={sortMode}
+        onSortModeChange={setSortMode}
       />
 
       {loading ? (
@@ -149,6 +185,7 @@ export function LeadsV3Page() {
           onConvert={conversionHandler}
           isLeadSigned={isLeadSigned}
           convertingId={convertingId}
+          onDelete={setLeadToDelete}
         />
       )}
 
@@ -157,6 +194,15 @@ export function LeadsV3Page() {
         open={selectedQualif !== null}
         onOpenChange={(open) => { if (!open) setSelectedQualif(null) }}
         onActionComplete={() => qualif.refetch()}
+      />
+
+      <ConfirmDeleteDialog
+        open={leadToDelete !== null}
+        onOpenChange={(open) => { if (!open) setLeadToDelete(null) }}
+        title="Supprimer ce lead ?"
+        description={`« ${leadToDeleteName} » sera supprimé définitivement. Cette action est irréversible.`}
+        confirmLabel="Supprimer"
+        onConfirm={confirmDeleteLead}
       />
     </div>
   )

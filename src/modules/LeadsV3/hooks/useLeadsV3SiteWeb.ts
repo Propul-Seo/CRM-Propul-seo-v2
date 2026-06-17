@@ -71,7 +71,17 @@ export function useLeadsV3SiteWeb() {
     await fetchLeads()
   }, [fetchLeads])
 
-  return { leads, loading, error, refetch: fetchLeads, updateStatus }
+  /** Suppression définitive d'un contact/lead Site web (RLS : admin ou propriétaire). */
+  const deleteLead = useCallback(async (id: string) => {
+    const { error: err } = await supabase
+      .from('contacts')
+      .delete()
+      .eq('id', id)
+    if (err) throw err
+    await fetchLeads()
+  }, [fetchLeads])
+
+  return { leads, loading, error, refetch: fetchLeads, updateStatus, deleteLead }
 }
 
 interface ProspectActivitySnapshot {

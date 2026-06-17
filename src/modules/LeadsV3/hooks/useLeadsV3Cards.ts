@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import type { LeadsV3Tab } from '../components/LeadsV3Header'
 import type { LeadCardData } from '../components/LeadCardV3'
-import { siteWebToCard, erpToCard, qualifToCard, matchesQuery, sortSiteWebLeads, sortErpLeads } from '../utils/leadAdapters'
+import { siteWebToCard, erpToCard, qualifToCard, matchesQuery, sortSiteWebLeads, sortErpLeads, type LeadSortMode } from '../utils/leadAdapters'
 import {
   SITE_WEB_STATUS_ORDER, SITE_WEB_STATUS_LABELS, SITE_WEB_STATUS_COLORS,
   ERP_STATUS_ORDER, ERP_STATUS_LABELS, ERP_STATUS_COLORS,
@@ -30,6 +30,7 @@ interface UseLeadsV3CardsArgs {
   qualifIdSet: Set<string>
   filterUserId: string
   debouncedSearch: string
+  sortMode: LeadSortMode
 }
 
 /**
@@ -40,7 +41,7 @@ interface UseLeadsV3CardsArgs {
  * pas être déplacés via drag-drop vers les colonnes contacts (no-op dans updater).
  */
 export function useLeadsV3Cards({
-  tab, sw, erp, qualifLeads, qualifIdSet, filterUserId, debouncedSearch,
+  tab, sw, erp, qualifLeads, qualifIdSet, filterUserId, debouncedSearch, sortMode,
 }: UseLeadsV3CardsArgs): CardsResult {
   return useMemo(() => {
     const qualifCards = qualifLeads.map(qualifToCard).filter(c => matchesQuery(c, debouncedSearch))
@@ -48,7 +49,7 @@ export function useLeadsV3Cards({
     for (const q of qualifLeads) qualifStatusMap[q.id] = 'questionnaire_complete'
 
     if (tab === 'site_web') {
-      const filtered = sortSiteWebLeads(sw.leads.filter(l => !filterUserId || l.assigned_to === filterUserId))
+      const filtered = sortSiteWebLeads(sw.leads.filter(l => !filterUserId || l.assigned_to === filterUserId), sortMode)
       const baseCards = filtered.map(siteWebToCard).filter(c => matchesQuery(c, debouncedSearch))
       const statusMap: Record<string, string> = { ...qualifStatusMap }
       for (const l of filtered) statusMap[l.id] = l.normalized_status
@@ -63,7 +64,7 @@ export function useLeadsV3Cards({
       return { cards: [...qualifCards, ...baseCards], leadStatus: statusMap, columns: cols, onStatusChange: updater }
     }
 
-    const filtered = sortErpLeads(erp.leads.filter(l => !filterUserId || l.assignee_id === filterUserId))
+    const filtered = sortErpLeads(erp.leads.filter(l => !filterUserId || l.assignee_id === filterUserId), sortMode)
     const baseCards = filtered.map(erpToCard).filter(c => matchesQuery(c, debouncedSearch))
     const statusMap: Record<string, string> = { ...qualifStatusMap }
     for (const l of filtered) statusMap[l.id] = normalizeErpStatus(l.status)
@@ -76,5 +77,5 @@ export function useLeadsV3Cards({
       await erp.updateStatus(id, newStatus as ErpStatus)
     }
     return { cards: [...qualifCards, ...baseCards], leadStatus: statusMap, columns: cols, onStatusChange: updater }
-  }, [tab, sw, erp, qualifLeads, qualifIdSet, filterUserId, debouncedSearch])
+  }, [tab, sw, erp, qualifLeads, qualifIdSet, filterUserId, debouncedSearch, sortMode])
 }

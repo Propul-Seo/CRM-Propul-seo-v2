@@ -42,5 +42,15 @@ export function useLeadsV3Erp() {
     await fetchLeads()
   }, [fetchLeads])
 
-  return { leads, loading, error, refetch: fetchLeads, updateStatus }
+  /** Suppression définitive d'un lead ERP (RLS : admin uniquement). */
+  const deleteLead = useCallback(async (id: string) => {
+    const { error: err } = await supabase
+      .from('crmerp_leads')
+      .delete()
+      .eq('id', id)
+    if (err) throw err
+    await fetchLeads()
+  }, [fetchLeads])
+
+  return { leads, loading, error, refetch: fetchLeads, updateStatus, deleteLead }
 }

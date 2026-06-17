@@ -1,4 +1,10 @@
-import { Building2, Mail, Phone, User, ArrowUpRight, Clock3 } from 'lucide-react'
+import { Building2, Mail, Phone, User, ArrowUpRight, Clock3, MoreVertical, Trash2 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu'
 
 export interface LeadCardData {
   id: string
@@ -35,13 +41,15 @@ interface Props {
   onConvert?: (data: LeadCardData) => void
   /** Indique qu'une conversion est déjà en cours pour ce lead (loader). */
   converting?: boolean
+  /** Callback de suppression (affiche le menu ⋮ seulement si fourni). */
+  onDelete?: (data: LeadCardData) => void
 }
 
 /**
  * Carte lead V3 — utilisée en variante A (kanban) et C (inbox).
  * Style : fond #070512, accents violets, hover bg #1a1430.
  */
-export function LeadCardV3({ data, onClick, showStatusBadge = false, onConvert, converting = false }: Props) {
+export function LeadCardV3({ data, onClick, showStatusBadge = false, onConvert, converting = false, onDelete }: Props) {
   const title = data.company || data.contact || 'Lead sans nom'
   const activityDate = data.lastActivityAt ?? data.createdAt
 
@@ -64,18 +72,44 @@ export function LeadCardV3({ data, onClick, showStatusBadge = false, onConvert, 
             {title}
           </div>
         </div>
-        {showStatusBadge && (
-          <span
-            className="shrink-0 text-[9px] font-semibold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded"
-            style={{
-              color: data.statusColor,
-              background: `${data.statusColor}1A`,
-              border: `1px solid ${data.statusColor}33`,
-            }}
-          >
-            {data.statusLabel}
-          </span>
-        )}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {showStatusBadge && (
+            <span
+              className="text-[9px] font-semibold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded"
+              style={{
+                color: data.statusColor,
+                background: `${data.statusColor}1A`,
+                border: `1px solid ${data.statusColor}33`,
+              }}
+            >
+              {data.statusLabel}
+            </span>
+          )}
+          {onDelete && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Actions du lead"
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  className="flex h-6 w-6 items-center justify-center rounded text-[#9ca3af] transition-colors hover:bg-[rgba(139,92,246,0.18)] hover:text-[#ede9fe] focus:outline-none"
+                >
+                  <MoreVertical className="h-3.5 w-3.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                <DropdownMenuItem
+                  className="text-red-500 focus:text-red-500"
+                  onSelect={() => onDelete(data)}
+                >
+                  <Trash2 className="mr-2 h-3.5 w-3.5" />
+                  Supprimer
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       </div>
 
       {/* Body */}

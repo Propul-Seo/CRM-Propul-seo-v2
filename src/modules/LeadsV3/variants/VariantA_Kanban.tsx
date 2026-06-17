@@ -39,6 +39,8 @@ interface Props {
   isLeadSigned?: (leadId: string) => boolean
   /** ID du lead en cours de conversion (loader sur le bouton concerné). */
   convertingId?: string | null
+  /** Suppression d'un lead (affiche le menu ⋮ sur la carte si fourni). */
+  onDelete?: (data: LeadCardData) => void
 }
 
 export function VariantA_Kanban({
@@ -50,6 +52,7 @@ export function VariantA_Kanban({
   onConvert,
   isLeadSigned,
   convertingId,
+  onDelete,
 }: Props) {
   const [activeId, setActiveId] = useState<string | null>(null)
   // Miroir local pour optimistic update : on déplace la carte immédiatement
@@ -133,6 +136,7 @@ export function VariantA_Kanban({
             onConvert={onConvert}
             isLeadSigned={isLeadSigned}
             convertingId={convertingId}
+            onDelete={onDelete}
           />
         ))}
       </div>
@@ -155,6 +159,7 @@ function KanbanColumnView({
   onConvert,
   isLeadSigned,
   convertingId,
+  onDelete,
 }: {
   column: KanbanColumn
   items: LeadCardData[]
@@ -162,6 +167,7 @@ function KanbanColumnView({
   onConvert?: (data: LeadCardData) => void
   isLeadSigned?: (leadId: string) => boolean
   convertingId?: string | null
+  onDelete?: (data: LeadCardData) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id })
   const itemIds = items.map(i => i.id)
@@ -208,6 +214,7 @@ function KanbanColumnView({
                   onClick={() => onLeadClick(lead.id)}
                   onConvert={eligible ? onConvert : undefined}
                   converting={convertingId === lead.id}
+                  onDelete={onDelete}
                 />
               )
             })}
@@ -223,11 +230,13 @@ function SortableLead({
   onClick,
   onConvert,
   converting,
+  onDelete,
 }: {
   lead: LeadCardData
   onClick: () => void
   onConvert?: (data: LeadCardData) => void
   converting?: boolean
+  onDelete?: (data: LeadCardData) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: lead.id })
   const style: React.CSSProperties = {
@@ -237,7 +246,7 @@ function SortableLead({
   }
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <LeadCardV3 data={lead} onClick={onClick} onConvert={onConvert} converting={converting} />
+      <LeadCardV3 data={lead} onClick={onClick} onConvert={onConvert} converting={converting} onDelete={onDelete} />
     </div>
   )
 }

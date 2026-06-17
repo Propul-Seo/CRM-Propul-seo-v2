@@ -1,4 +1,4 @@
-import { ArrowLeft, Edit, Plus } from 'lucide-react';
+import { ArrowLeft, Edit, Plus, Trash2 } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import type { Contact } from '../../../hooks/useContacts';
 
@@ -7,9 +7,10 @@ interface ContactDetailsHeaderProps {
   onBack: () => void;
   onEdit: () => void;
   onNewActivity: () => void;
+  onDelete?: () => void;
 }
 
-export function ContactDetailsHeader({ contact, onBack, onEdit, onNewActivity }: ContactDetailsHeaderProps) {
+export function ContactDetailsHeader({ contact, onBack, onEdit, onNewActivity, onDelete }: ContactDetailsHeaderProps) {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
@@ -39,6 +40,16 @@ export function ContactDetailsHeader({ contact, onBack, onEdit, onNewActivity }:
           <Plus className="w-4 h-4 mr-2" />
           Nouvelle activité
         </Button>
+        {onDelete && (
+          <Button
+            variant="outline"
+            onClick={onDelete}
+            className="border-border text-red-500 hover:bg-red-500/10 hover:text-red-500"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Supprimer
+          </Button>
+        )}
       </div>
     </div>
   );

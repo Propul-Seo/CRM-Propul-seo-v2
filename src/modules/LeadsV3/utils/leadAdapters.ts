@@ -80,19 +80,43 @@ export function erpToCard(lead: CRMERPLead): LeadCardData {
 }
 
 /**
- * Tri des leads Site Web par dernier signal d'activité descendante.
- * Ordre souhaité : du plus récent au plus ancien dans chaque colonne.
+ * Mode de tri des leads dans le board.
+ * - `relance_asc`  : par dernière relance, **les plus anciens / jamais relancés d'abord** (défaut).
+ * - `relance_desc` : par dernière relance, les plus récents d'abord.
+ * - `created_desc` : par date de création, les plus récents d'abord.
  */
-export function sortSiteWebLeads(leads: SiteWebLead[]): SiteWebLead[] {
-  return [...leads].sort((a, b) => getSiteWebActivityTimestamp(b) - getSiteWebActivityTimestamp(a))
+export type LeadSortMode = 'relance_asc' | 'relance_desc' | 'created_desc'
+
+export const LEAD_SORT_LABELS: Record<LeadSortMode, string> = {
+  relance_asc: 'Dernière relance (anciens d’abord)',
+  relance_desc: 'Dernière relance (récents d’abord)',
+  created_desc: 'Date de création (récents d’abord)',
 }
 
-/**
- * Tri des leads ERP par dernière activité descendante (la plus récente d'abord).
- * Les leads sans `last_activity_at` retombent sur `updated_at`, puis `created_at`.
- */
-export function sortErpLeads(leads: CRMERPLead[]): CRMERPLead[] {
-  return [...leads].sort((a, b) => getErpActivityTimestamp(b) - getErpActivityTimestamp(a))
+export const LEAD_SORT_ORDER: LeadSortMode[] = ['relance_asc', 'relance_desc', 'created_desc']
+
+/** Tri des leads Site Web selon le mode choisi. */
+export function sortSiteWebLeads(leads: SiteWebLead[], mode: LeadSortMode = 'relance_asc'): SiteWebLead[] {
+  return sortByMode(leads, mode, getSiteWebRelanceTimestamp, (l) => toTimestamp(l.created_at))
+}
+
+/** Tri des leads ERP selon le mode choisi. */
+export function sortErpLeads(leads: CRMERPLead[], mode: LeadSortMode = 'relance_asc'): CRMERPLead[] {
+  return sortByMode(leads, mode, getErpRelanceTimestamp, (l) => toTimestamp(l.created_at))
+}
+
+function sortByMode<T>(
+  leads: T[],
+  mode: LeadSortMode,
+  activityTs: (lead: T) => number,
+  createdTs: (lead: T) => number,
+): T[] {
+  const arr = [...leads]
+  if (mode === 'created_desc') return arr.sort((a, b) => createdTs(b) - createdTs(a))
+  if (mode === 'relance_desc') return arr.sort((a, b) => activityTs(b) - activityTs(a))
+  // relance_asc : les leads jamais relancés (timestamp 0) ou relancés il y a
+  // longtemps remontent en tête — ce sont les plus urgents à recontacter.
+  return arr.sort((a, b) => activityTs(a) - activityTs(b))
 }
 
 /** Recherche texte commune (case-insensitive). */
@@ -131,12 +155,18 @@ function getErpActivityInfo(lead: CRMERPLead): { date: string; label: string } {
   return { date: lead.created_at, label: 'Créé le' }
 }
 
-function getSiteWebActivityTimestamp(lead: SiteWebLead): number {
-  return toTimestamp(getSiteWebActivityInfo(lead).date)
+/**
+ * Timestamp de tri « dernière relance » : on ne regarde QUE `last_activity_at`
+ * (le vrai signal de relance), pas les fallbacks d'affichage (next_activity_date
+ * future, updated_at, created_at). Un lead jamais relancé → 0 → remonte en tête
+ * en mode `relance_asc` (« pas appelé depuis longtemps en premier »).
+ */
+function getSiteWebRelanceTimestamp(lead: SiteWebLead): number {
+  return toTimestamp(lead.last_activity_at)
 }
 
-function getErpActivityTimestamp(lead: CRMERPLead): number {
-  return toTimestamp(getErpActivityInfo(lead).date)
+function getErpRelanceTimestamp(lead: CRMERPLead): number {
+  return toTimestamp(lead.last_activity_at)
 }
 
 function toTimestamp(value: string | null | undefined): number {

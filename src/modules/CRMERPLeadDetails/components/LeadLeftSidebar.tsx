@@ -1,5 +1,5 @@
 // src/modules/CRMERPLeadDetails/components/LeadLeftSidebar.tsx
-import { Building2, Mail, Phone, Globe, Calendar, Tag, UserCheck } from 'lucide-react'
+import { Building2, Mail, Phone, Globe, Calendar, Tag, UserCheck, Trash2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
@@ -15,6 +15,7 @@ interface Props {
   users: User[]
   onEdit: () => void
   onAssign: (userId: string | null) => void
+  onDelete?: () => void
 }
 
 const STATUS_ORDER: CRMERPStatus[] = ['leads_contactes', 'rendez_vous_effectues', 'en_attente', 'signes']
@@ -42,7 +43,7 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label:
   )
 }
 
-export function LeadLeftSidebar({ lead, users, onEdit, onAssign }: Props) {
+export function LeadLeftSidebar({ lead, users, onEdit, onAssign, onDelete }: Props) {
   const statusConf = CRMERP_STATUS_COLORS[lead.status]
   const statusLabel = CRMERP_STATUS_LABELS[lead.status]
   const currentStep = STATUS_ORDER.indexOf(lead.status)
@@ -55,9 +56,22 @@ export function LeadLeftSidebar({ lead, users, onEdit, onAssign }: Props) {
           <div className="h-10 w-10 rounded-xl bg-[rgba(139,92,246,0.15)] border border-[rgba(139,92,246,0.2)] flex items-center justify-center shrink-0">
             <Building2 className="h-5 w-5 text-[#8B5CF6]" />
           </div>
-          <Button variant="ghost" size="sm" onClick={onEdit} className="text-xs h-7 text-[#9ca3af] hover:text-[#ede9fe]">
-            Modifier
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" onClick={onEdit} className="text-xs h-7 text-[#9ca3af] hover:text-[#ede9fe]">
+              Modifier
+            </Button>
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onDelete}
+                aria-label="Supprimer le lead"
+                className="h-7 w-7 p-0 text-[#9ca3af] hover:text-red-500"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
         </div>
         <h2 className="text-sm font-bold text-[#ede9fe] leading-tight">
           {lead.company_name || lead.contact_name || 'Lead sans nom'}

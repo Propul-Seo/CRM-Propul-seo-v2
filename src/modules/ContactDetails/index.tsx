@@ -1,5 +1,8 @@
+import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { useContactsCRUD } from '@/hooks/supabase/useContactsCRUD';
+import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog';
 import { useContactDetailsData } from './hooks/useContactDetailsData';
 import { ContactDetailsHeader } from './components/ContactDetailsHeader';
 import { ContactInfoSidebar } from './components/ContactInfoSidebar';
@@ -10,6 +13,16 @@ import type { ContactDetailsProps } from './types';
 
 export default function ContactDetails({ contactId, onBack }: ContactDetailsProps) {
   const data = useContactDetailsData(contactId);
+  const { deleteContact } = useContactsCRUD();
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const handleDelete = async () => {
+    const res = await deleteContact(contactId);
+    if (!res.success) throw new Error(res.error ?? 'Échec de la suppression');
+    // Fermer le dialog avant de naviguer pour laisser Radix nettoyer le scroll-lock.
+    setDeleteOpen(false);
+    onBack();
+  };
 
   if (data.loading) {
     return (
@@ -43,6 +56,16 @@ export default function ContactDetails({ contactId, onBack }: ContactDetailsProp
         onBack={onBack}
         onEdit={() => data.setEditingContact(true)}
         onNewActivity={() => data.setShowActivityForm(true)}
+        onDelete={() => setDeleteOpen(true)}
+      />
+
+      <ConfirmDeleteDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title="Supprimer ce lead ?"
+        description={`« ${data.contact.name || 'Lead sans nom'} » sera supprimé définitivement. Cette action est irréversible.`}
+        confirmLabel="Supprimer"
+        onConfirm={handleDelete}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
