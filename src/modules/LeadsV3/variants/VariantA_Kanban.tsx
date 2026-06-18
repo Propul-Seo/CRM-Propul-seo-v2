@@ -33,14 +33,14 @@ interface Props {
   leads: LeadCardData[]
   onLeadClick: (id: string) => void
   onStatusChange: (id: string, newStatus: string) => Promise<void>
-  /** Conversion lead → projet (bouton affiché uniquement si fourni + lead signé). */
+  /** Conversion lead → projet (bouton vert affiché uniquement si fourni + lead signé). Ouvre le modal. */
   onConvert?: (data: LeadCardData) => void
-  /** Prédicat pour savoir si un lead est éligible à la conversion (statut "signé"). */
+  /** Prédicat pour savoir si un lead est éligible au bouton vert de conversion (statut "signé"). */
   isLeadSigned?: (leadId: string) => boolean
-  /** ID du lead en cours de conversion (loader sur le bouton concerné). */
-  convertingId?: string | null
   /** Suppression d'un lead (affiche le menu ⋮ sur la carte si fourni). */
   onDelete?: (data: LeadCardData) => void
+  /** Conversion en projet via le menu ⋮ (toutes colonnes). */
+  onConvertMenu?: (data: LeadCardData) => void
 }
 
 export function VariantA_Kanban({
@@ -51,8 +51,8 @@ export function VariantA_Kanban({
   onStatusChange,
   onConvert,
   isLeadSigned,
-  convertingId,
   onDelete,
+  onConvertMenu,
 }: Props) {
   const [activeId, setActiveId] = useState<string | null>(null)
   // Miroir local pour optimistic update : on déplace la carte immédiatement
@@ -135,8 +135,8 @@ export function VariantA_Kanban({
             onLeadClick={onLeadClick}
             onConvert={onConvert}
             isLeadSigned={isLeadSigned}
-            convertingId={convertingId}
             onDelete={onDelete}
+            onConvertMenu={onConvertMenu}
           />
         ))}
       </div>
@@ -158,16 +158,16 @@ function KanbanColumnView({
   onLeadClick,
   onConvert,
   isLeadSigned,
-  convertingId,
   onDelete,
+  onConvertMenu,
 }: {
   column: KanbanColumn
   items: LeadCardData[]
   onLeadClick: (id: string) => void
   onConvert?: (data: LeadCardData) => void
   isLeadSigned?: (leadId: string) => boolean
-  convertingId?: string | null
   onDelete?: (data: LeadCardData) => void
+  onConvertMenu?: (data: LeadCardData) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id })
   const itemIds = items.map(i => i.id)
@@ -213,8 +213,8 @@ function KanbanColumnView({
                   lead={lead}
                   onClick={() => onLeadClick(lead.id)}
                   onConvert={eligible ? onConvert : undefined}
-                  converting={convertingId === lead.id}
                   onDelete={onDelete}
+                  onConvertMenu={onConvertMenu}
                 />
               )
             })}
@@ -229,14 +229,14 @@ function SortableLead({
   lead,
   onClick,
   onConvert,
-  converting,
   onDelete,
+  onConvertMenu,
 }: {
   lead: LeadCardData
   onClick: () => void
   onConvert?: (data: LeadCardData) => void
-  converting?: boolean
   onDelete?: (data: LeadCardData) => void
+  onConvertMenu?: (data: LeadCardData) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: lead.id })
   const style: React.CSSProperties = {
@@ -246,7 +246,8 @@ function SortableLead({
   }
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <LeadCardV3 data={lead} onClick={onClick} onConvert={onConvert} converting={converting} onDelete={onDelete} />
+      {/* Pas d'ouverture de la fiche si un drag est en cours (évite la nav involontaire au drop). */}
+      <LeadCardV3 data={lead} onClick={isDragging ? undefined : onClick} onConvert={onConvert} onDelete={onDelete} onConvertMenu={onConvertMenu} />
     </div>
   )
 }

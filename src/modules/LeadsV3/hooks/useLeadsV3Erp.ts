@@ -18,6 +18,8 @@ export function useLeadsV3Erp() {
       const { data, error: err } = await supabase
         .from('crmerp_leads')
         .select('*, assignee:users!assignee_id(id, name, email, is_active)')
+        // Un lead converti en projet quitte le board (cohérent avec le board qualif).
+        .is('converted_to_project_id', null)
         .order('created_at', { ascending: false })
       if (err) throw err
       setLeads((data ?? []) as CRMERPLead[])

@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { Mail, Phone, Calendar, ArrowRight, Archive, Loader2, Sparkles, Building2, X } from 'lucide-react'
+import { Mail, Phone, Calendar, ArrowRight, Archive, Sparkles, Building2, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { useNavigate } from 'react-router-dom'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -12,7 +11,6 @@ import {
 import { RecapAccordion } from '@/modules/EspaceClient/qualification/components/RecapAccordion'
 import type { QualificationDraft } from '@/modules/EspaceClient/qualification/schema'
 import type { QualificationLead } from '../hooks/useLeadsV3Qualification'
-import { useConvertQualifLead } from '../hooks/useConvertQualifLead'
 import { useArchiveQualifLead } from '../hooks/useArchiveQualifLead'
 import { PropulspaceDangerZone } from '@/modules/EspaceClient/admin/components/PropulspaceDangerZone'
 
@@ -21,6 +19,8 @@ interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   onActionComplete?: () => void
+  /** Ouvre le modal de conversion (CRM → projet actif) géré par la page. */
+  onRequestConvert?: (lead: QualificationLead) => void
 }
 
 function initialsOf(name: string | null, email: string): string {
@@ -38,28 +38,14 @@ function formatDate(iso: string | null): string {
 // Override styling RecapAccordion (consommateur côté admin dark) via descendants selectors.
 const RECAP_DARK = '[&_ul]:!border-[#1f1b3a] [&_ul]:!bg-transparent [&_li]:!border-[#1f1b3a] [&_button[aria-expanded]]:!bg-[#0f0a1f]/60 [&_button[aria-expanded]]:!text-[#ede9fe] [&_button[aria-expanded]:hover]:!bg-[#1a1233]/80 [&_dl]:!bg-[#0a0814]/60 [&_dt]:!text-[#a78bfa]/70 [&_dd]:!text-[#ede9fe] [&_span.text-\\[var\\(--ps-fg\\)\\]]:!text-[#ede9fe] [&_span.text-\\[var\\(--ps-fg-muted\\)\\]]:!text-[#9ca3af] [&_.bg-\\[var\\(--ps-primary-subtle\\)\\]]:!bg-violet-500/20 [&_.text-\\[var\\(--ps-primary-text\\)\\]]:!text-violet-300 [&_.divide-\\[var\\(--ps-border-soft\\)\\]>:not\\(\\[hidden\\]\\)~:not\\(\\[hidden\\]\\)]:!border-[#1f1b3a]'
 
-export function QualificationLeadDetailsSheet({ lead, open, onOpenChange, onActionComplete }: Props) {
-  const navigate = useNavigate()
-  const { convert, converting } = useConvertQualifLead()
+export function QualificationLeadDetailsSheet({ lead, open, onOpenChange, onActionComplete, onRequestConvert }: Props) {
   const { archive, archiving } = useArchiveQualifLead()
-  const [confirmConvert, setConfirmConvert] = useState(false)
   const [confirmArchive, setConfirmArchive] = useState(false)
   const [archiveReason, setArchiveReason] = useState('')
 
   if (!lead) return null
   const draft = lead.raw as QualificationDraft
-  const busy = converting || archiving
-
-  const handleConvert = async () => {
-    const res = await convert(lead)
-    setConfirmConvert(false)
-    if (res.success && res.projectId) {
-      toast.success('Projet créé ✓', {
-        action: { label: 'Ouvrir le projet', onClick: () => navigate(`/projets-v3-preview/${res.projectId}`) },
-      })
-      onOpenChange(false); onActionComplete?.()
-    } else toast.error(`Conversion échouée : ${res.error ?? 'erreur inconnue'}`)
-  }
+  const busy = archiving
 
   const handleArchive = async () => {
     const res = await archive(lead.id, archiveReason || null)
@@ -143,10 +129,9 @@ export function QualificationLeadDetailsSheet({ lead, open, onOpenChange, onActi
 
           <div className="relative border-t border-[#1f1b3a] bg-[#0a0814]/85 px-7 py-4 backdrop-blur-md">
             <div className="flex flex-col gap-2 sm:flex-row">
-              <Button onClick={() => setConfirmConvert(true)} disabled={busy}
+              <Button onClick={() => onRequestConvert?.(lead)} disabled={busy}
                 className="group h-11 flex-1 gap-1.5 rounded-xl bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 text-[13.5px] font-bold text-white shadow-[0_8px_24px_-8px_rgba(139,92,246,0.55)] transition-all hover:shadow-[0_12px_32px_-8px_rgba(139,92,246,0.75)] hover:brightness-110">
-                {converting ? <><Loader2 className="h-4 w-4 animate-spin" />Conversion…</>
-                  : <>Convertir en projet<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></>}
+                Convertir en projet<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Button>
               <Button onClick={() => setConfirmArchive(true)} disabled={busy} variant="outline"
                 className="h-11 gap-1.5 rounded-xl border-[#2a1f3d] bg-transparent text-[#a78bfa] hover:border-[#a78bfa]/50 hover:bg-[#1a1233] hover:text-[#ede9fe]">
@@ -164,25 +149,6 @@ export function QualificationLeadDetailsSheet({ lead, open, onOpenChange, onActi
           </div>
         </SheetContent>
       </Sheet>
-
-      <AlertDialog open={confirmConvert} onOpenChange={setConfirmConvert}>
-        <AlertDialogContent className="border-[#1f1b3a] bg-[#0a0814] text-[#ede9fe]">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#ede9fe]">Convertir ce lead en projet ?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#a78bfa]">
-              Un nouveau projet sera créé avec les infos du questionnaire. Le lead sera marqué comme converti.
-              L'activation du portail client se gère séparément depuis l'espace Propul'Space du projet.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={converting} className="border-[#1f1b3a] bg-transparent text-[#ede9fe] hover:bg-[#1a1233]">Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConvert} disabled={converting}
-              className="bg-gradient-to-r from-sky-500 via-violet-600 to-pink-500 text-white hover:brightness-110">
-              {converting ? 'Conversion…' : 'Convertir'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <AlertDialog open={confirmArchive} onOpenChange={setConfirmArchive}>
         <AlertDialogContent className="border-[#1f1b3a] bg-[#0a0814] text-[#ede9fe]">

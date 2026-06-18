@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
+import { supabase, v2 } from '@/lib/supabase'
 import { routes } from '@/lib/routes'
 import { LeadsV3Header, type LeadsV3Tab } from './components/LeadsV3Header'
 import { VariantA_Kanban } from './variants/VariantA_Kanban'
@@ -10,13 +10,17 @@ import { useLeadsV3SiteWeb } from './hooks/useLeadsV3SiteWeb'
 import { useLeadsV3Erp } from './hooks/useLeadsV3Erp'
 import { useLeadsV3Qualification, type QualificationLead } from './hooks/useLeadsV3Qualification'
 import { useConvertLeadToProject } from './hooks/useConvertLeadToProject'
+import { useConvertQualifLead } from './hooks/useConvertQualifLead'
 import { useLeadsV3Cards } from './hooks/useLeadsV3Cards'
 import type { LeadCardData } from './components/LeadCardV3'
 import { QualificationLeadDetailsSheet } from './components/QualificationLeadDetailsSheet'
+import { ConvertLeadModal } from './components/ConvertLeadModal'
 import { getProjectAssignees } from '@/modules/ProjectsV3/utils/projectAssignees'
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog'
 import { usePropulspaceDeletion } from '@/modules/EspaceClient/admin/hooks/usePropulspaceDeletion'
 import type { LeadSortMode } from './utils/leadAdapters'
+
+type ConvertTarget = { id: string; name: string; type: 'site_web' | 'erp' | 'qualification' }
 
 const TAB_KEY = 'propulseo:leads-v3:tab'
 
@@ -50,10 +54,12 @@ export function LeadsV3Page() {
   const erp = useLeadsV3Erp()
   const qualif = useLeadsV3Qualification(tab === 'site_web' ? 'site' : 'erp')
   const { convert } = useConvertLeadToProject()
+  const { convert: convertQualif } = useConvertQualifLead()
   const { deleteQualifLead } = usePropulspaceDeletion()
-  const [convertingId, setConvertingId] = useState<string | null>(null)
   const [selectedQualif, setSelectedQualif] = useState<QualificationLead | null>(null)
   const [leadToDelete, setLeadToDelete] = useState<LeadCardData | null>(null)
+  const [leadToConvert, setLeadToConvert] = useState<ConvertTarget | null>(null)
+  const [converting, setConverting] = useState(false)
 
   useEffect(() => {
     supabase.from('users').select('id, name, email').eq('is_active', true).order('name').then(({ data, error }) => {
@@ -80,32 +86,12 @@ export function LeadsV3Page() {
     else navigate(routes.crmErpLead(id))
   }
 
-  /**
-   * Convertit un lead signé en projet V3 via la RPC unifiée SP2.
-   * Le mapping des champs (nom, budget, responsable…) est fait côté serveur
-   * depuis la table source. Le lead n'est pas archivé — conversion non destructive.
-   */
-  const handleConvertLead = async (card: LeadCardData) => {
-    setConvertingId(card.id)
-    try {
-      // L'onglet courant détermine le pipeline source : site_web (contacts)
-      // ou erp (crmerp_leads). La RPC lit la bonne table selon ce type.
-      const leadType = tab === 'site_web' ? 'site_web' : 'erp'
-      const res = await convert({ leadId: card.id, leadType })
-
-      if (res.success && res.projectId) {
-        toast.success('Lead converti en projet ✓', {
-          action: {
-            label: 'Ouvrir le projet',
-            onClick: () => navigate(`/projets-v3-preview/${res.projectId}`),
-          },
-        })
-      } else {
-        toast.error(`Conversion échouée : ${res.error ?? 'erreur inconnue'}`)
-      }
-    } finally {
-      setConvertingId(null)
-    }
+  /** Détermine la source d'une carte (qualif / site web / erp) et ouvre le modal de conversion. */
+  const requestConvert = (card: LeadCardData) => {
+    const type: ConvertTarget['type'] = qualifIdSet.has(card.id)
+      ? 'qualification'
+      : tab === 'site_web' ? 'site_web' : 'erp'
+    setLeadToConvert({ id: card.id, name: card.company || card.contact || 'Lead sans nom', type })
   }
 
   const isLeadSigned = (leadId: string): boolean => {
@@ -114,7 +100,50 @@ export function LeadsV3Page() {
     return status === 'signe' || status === 'signes'
   }
 
-  const conversionHandler = (card: LeadCardData) => { void handleConvertLead(card) }
+  /**
+   * Convertit le lead ciblé en projet via la RPC unifiée SP2, puis le rend
+   * ACTIF (statut in_progress) et l'assigne au responsable choisi dans le modal.
+   * Conversion non destructive ; le lead quitte le board (filtre converted).
+   */
+  const confirmConvert = async (assignedToId: string | null) => {
+    const target = leadToConvert
+    if (!target) return
+    setConverting(true)
+    try {
+      let projectId: string | undefined
+      if (target.type === 'qualification') {
+        const qlead = qualif.leads.find(l => l.id === target.id)
+        if (!qlead) throw new Error('Lead introuvable')
+        const res = await convertQualif(qlead)
+        if (!res.success || !res.projectId) throw new Error(res.error ?? 'Conversion échouée')
+        projectId = res.projectId
+      } else {
+        const res = await convert({ leadId: target.id, leadType: target.type })
+        if (!res.success || !res.projectId) throw new Error(res.error ?? 'Conversion échouée')
+        projectId = res.projectId
+      }
+      // Rendre actif + assigner (best-effort : le projet est créé même si ceci échoue).
+      const { error: updErr } = await v2
+        .from('projects')
+        .update({ status: 'in_progress', assigned_to: assignedToId })
+        .eq('id', projectId)
+      if (updErr) console.warn('[convert] activation/assignation échouée:', updErr)
+
+      if (target.type === 'qualification') await qualif.refetch()
+      else if (target.type === 'site_web') await sw.refetch()
+      else await erp.refetch()
+
+      const pid = projectId
+      toast.success('Lead converti en projet actif ✓', {
+        action: { label: 'Ouvrir le projet', onClick: () => navigate(`/projets-v3-preview/${pid}`) },
+      })
+      setLeadToConvert(null)
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Conversion échouée')
+    } finally {
+      setConverting(false)
+    }
+  }
 
   const leadToDeleteName = leadToDelete?.company || leadToDelete?.contact || 'Lead sans nom'
 
@@ -182,10 +211,10 @@ export function LeadsV3Page() {
           leads={cards}
           onLeadClick={handleLeadClick}
           onStatusChange={onStatusChange}
-          onConvert={conversionHandler}
+          onConvert={requestConvert}
           isLeadSigned={isLeadSigned}
-          convertingId={convertingId}
           onDelete={setLeadToDelete}
+          onConvertMenu={requestConvert}
         />
       )}
 
@@ -194,6 +223,23 @@ export function LeadsV3Page() {
         open={selectedQualif !== null}
         onOpenChange={(open) => { if (!open) setSelectedQualif(null) }}
         onActionComplete={() => qualif.refetch()}
+        onRequestConvert={(lead) => {
+          setSelectedQualif(null)
+          setLeadToConvert({
+            id: lead.id,
+            name: lead.full_name || lead.company_name || lead.email,
+            type: 'qualification',
+          })
+        }}
+      />
+
+      <ConvertLeadModal
+        open={leadToConvert !== null}
+        onOpenChange={(open) => { if (!open) setLeadToConvert(null) }}
+        leadName={leadToConvert?.name ?? ''}
+        assignees={leadAssignees}
+        converting={converting}
+        onConfirm={confirmConvert}
       />
 
       <ConfirmDeleteDialog

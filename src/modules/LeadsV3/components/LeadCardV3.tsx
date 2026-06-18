@@ -4,6 +4,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 
 export interface LeadCardData {
@@ -37,26 +38,25 @@ interface Props {
   onClick?: () => void
   /** En variante C (inbox), on montre le badge statut sur la carte. */
   showStatusBadge?: boolean
-  /** Callback pour convertir le lead en projet (affiche le bouton seulement si fourni). */
+  /** Callback pour convertir le lead en projet (affiche le bouton seulement si fourni). Ouvre le modal de conversion. */
   onConvert?: (data: LeadCardData) => void
-  /** Indique qu'une conversion est déjà en cours pour ce lead (loader). */
-  converting?: boolean
   /** Callback de suppression (affiche le menu ⋮ seulement si fourni). */
   onDelete?: (data: LeadCardData) => void
+  /** Callback de conversion en projet via le menu ⋮ (disponible sur toutes les cartes). */
+  onConvertMenu?: (data: LeadCardData) => void
 }
 
 /**
  * Carte lead V3 — utilisée en variante A (kanban) et C (inbox).
  * Style : fond #070512, accents violets, hover bg #1a1430.
  */
-export function LeadCardV3({ data, onClick, showStatusBadge = false, onConvert, converting = false, onDelete }: Props) {
+export function LeadCardV3({ data, onClick, showStatusBadge = false, onConvert, onDelete, onConvertMenu }: Props) {
   const title = data.company || data.contact || 'Lead sans nom'
   const activityDate = data.lastActivityAt ?? data.createdAt
 
   const handleConvertClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (!onConvert || converting) return
-    onConvert(data)
+    onConvert?.(data)
   }
 
   return (
@@ -85,7 +85,7 @@ export function LeadCardV3({ data, onClick, showStatusBadge = false, onConvert, 
               {data.statusLabel}
             </span>
           )}
-          {onDelete && (
+          {(onDelete || onConvertMenu) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -99,13 +99,25 @@ export function LeadCardV3({ data, onClick, showStatusBadge = false, onConvert, 
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                <DropdownMenuItem
-                  className="text-red-500 focus:text-red-500"
-                  onSelect={() => onDelete(data)}
-                >
-                  <Trash2 className="mr-2 h-3.5 w-3.5" />
-                  Supprimer
-                </DropdownMenuItem>
+                {onConvertMenu && (
+                  <DropdownMenuItem
+                    className="text-[#10b981] focus:text-[#10b981]"
+                    onSelect={() => onConvertMenu(data)}
+                  >
+                    <ArrowUpRight className="mr-2 h-3.5 w-3.5" />
+                    Convertir en projet
+                  </DropdownMenuItem>
+                )}
+                {onConvertMenu && onDelete && <DropdownMenuSeparator />}
+                {onDelete && (
+                  <DropdownMenuItem
+                    className="text-red-500 focus:text-red-500"
+                    onSelect={() => onDelete(data)}
+                  >
+                    <Trash2 className="mr-2 h-3.5 w-3.5" />
+                    Supprimer
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -154,12 +166,11 @@ export function LeadCardV3({ data, onClick, showStatusBadge = false, onConvert, 
           <button
             type="button"
             onClick={handleConvertClick}
-            disabled={converting}
-            className="mt-2 w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-md bg-[rgba(16,185,129,0.15)] hover:bg-[rgba(16,185,129,0.25)] border border-[rgba(16,185,129,0.35)] text-[11px] font-semibold text-[#10b981] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="mt-2 w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-md bg-[rgba(16,185,129,0.15)] hover:bg-[rgba(16,185,129,0.25)] border border-[rgba(16,185,129,0.35)] text-[11px] font-semibold text-[#10b981] transition-colors"
             title="Convertir ce lead signé en projet"
           >
             <ArrowUpRight className="h-3 w-3" />
-            {converting ? 'Conversion…' : 'Convertir en projet'}
+            Convertir en projet
           </button>
         )}
       </div>
