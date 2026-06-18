@@ -30,6 +30,8 @@ export function useLeadsV3SiteWeb() {
           *,
           assigned_user:users!assigned_to (id, name, email, is_active)
         `)
+        // Un lead converti en projet quitte le board (cohérent avec le board qualif).
+        .is('converted_to_project_id', null)
         .order('created_at', { ascending: false })
 
       if (err) throw err
@@ -96,16 +98,39 @@ async function fetchLatestActivities(contactIds: string[]): Promise<Map<string, 
 
   const activities: ProspectActivitySnapshot[] = []
   for (const ids of chunk(contactIds, 100)) {
-    const { data, error } = await supabase
-      .from('prospect_activities')
-      .select('prospect_id, activity_date, activity_type, status')
-      .in('prospect_id', ids)
-      .neq('status', 'cancelled')
-      .order('activity_date', { ascending: false })
+    // Deux sources d'activités lues en parallèle :
+    //  - `prospect_activities` : ancien CRM (legacy).
+    //  - `contact_activities`  : V3, là où la fiche lead logge/valide les
+    //    activités. Sans ça, valider une activité ne bougeait pas le tri du board.
+    const [legacyRes, contactRes] = await Promise.all([
+      supabase
+        .from('prospect_activities')
+        .select('prospect_id, activity_date, activity_type, status')
+        .in('prospect_id', ids)
+        .neq('status', 'cancelled'),
+      supabase
+        .from('contact_activities')
+        .select('contact_id, activity_date, type, status')
+        .in('contact_id', ids)
+        .neq('status', 'cancelled'),
+    ])
 
-    if (error) throw error
-    activities.push(...((data ?? []) as ProspectActivitySnapshot[]))
+    if (legacyRes.error) throw legacyRes.error
+    activities.push(...((legacyRes.data ?? []) as ProspectActivitySnapshot[]))
+
+    if (contactRes.error) throw contactRes.error
+    for (const row of (contactRes.data ?? []) as { contact_id: string; activity_date: string; type: string | null; status: string | null }[]) {
+      activities.push({
+        prospect_id: row.contact_id,
+        activity_date: row.activity_date,
+        activity_type: row.type,
+        status: row.status,
+      })
+    }
   }
+
+  // Tri global le plus récent d'abord (on a fusionné deux sources non triées entre elles).
+  activities.sort((a, b) => safeTime(b.activity_date) - safeTime(a.activity_date))
 
   const now = Date.now()
   const completed = new Map<string, ProspectActivitySnapshot>()
@@ -141,6 +166,12 @@ function chunk<T>(items: T[], size: number): T[][] {
     chunks.push(items.slice(i, i + size))
   }
   return chunks
+}
+
+function safeTime(value: string | null | undefined): number {
+  if (!value) return 0
+  const t = new Date(value).getTime()
+  return Number.isNaN(t) ? 0 : t
 }
 
 const VALID = new Set<SiteWebStatus>([

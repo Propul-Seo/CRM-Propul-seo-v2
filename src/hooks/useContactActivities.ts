@@ -218,11 +218,15 @@ export function useContactActivities(contactId: string) {
     }
   };
 
-  // Marquer une activite comme terminee
+  // Marquer une activite comme terminee.
+  // On cale `activity_date` sur maintenant : valider une relance = elle vient
+  // d'avoir lieu → le lead remonte comme "récemment contacté" (descend dans le
+  // tri "anciens d'abord" du board CRM).
   const markActivityCompleted = async (activityId: string, outcome?: string) => {
     return await updateActivity(activityId, {
       status: 'completed',
-      outcome
+      outcome,
+      activity_date: new Date().toISOString()
     });
   };
 

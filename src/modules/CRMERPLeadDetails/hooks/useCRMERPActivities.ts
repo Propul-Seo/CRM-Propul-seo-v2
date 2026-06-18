@@ -39,6 +39,14 @@ export function useCRMERPActivities(leadId: string | null) {
       lead_id: leadId, type, content, created_by: userId,
     });
     if (error) throw error;
+    // Logguer une activité = un contact a eu lieu maintenant → on cale
+    // last_activity_at sur le lead pour que le tri du board CRM le fasse
+    // redescendre (best-effort, sans bloquer si l'update échoue).
+    const { error: bumpErr } = await supabase
+      .from('crmerp_leads')
+      .update({ last_activity_at: new Date().toISOString() })
+      .eq('id', leadId);
+    if (bumpErr) console.warn('[useCRMERPActivities] bump last_activity_at échoué:', bumpErr);
     await fetchActivities();
   }, [leadId, fetchActivities]);
 
