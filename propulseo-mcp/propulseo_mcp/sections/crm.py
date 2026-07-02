@@ -14,9 +14,8 @@ from ..context import get_context
 
 # Enums réels de la base (cf. schemas.ENUM_VALUES).
 ContactStatus = Literal[
-    "prospect", "proposition_envoyee", "meeting_booke", "offre_envoyee",
-    "en_attente", "signe", "presentation_envoyee", "prospects", "signes",
-    "en_negociation",
+    "prospect", "meeting_booke", "presentation_envoyee", "offre_envoyee",
+    "en_attente", "signe", "perdu",
 ]
 ActivityType = Literal["call", "email", "meeting", "note", "task"]
 ActivityStatus = Literal["scheduled", "completed", "cancelled"]

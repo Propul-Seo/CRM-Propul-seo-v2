@@ -202,7 +202,7 @@ Préfixe par section, chacun avec list / get / create / update / delete typés :
 ### Exemples de demandes en langage naturel
 - « Liste les 10 derniers contacts au statut *signe*. »
 - « Crée un contact : Jean Dupont, jean@exemple.fr, société Acme. »
-- « Passe le lead Acme au statut *en_negociation*. »
+- « Passe le contact Acme au statut *en_attente*. »
 - « Supprime le contact <id>. » → Claude montre d'abord la fiche, puis demande confirmation.
 
 ### Workflow recommandé

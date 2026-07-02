@@ -35,6 +35,7 @@ export const getStatusColor = (status: string) => {
     case 'offre_envoyee': return 'bg-yellow-500/20 text-yellow-400';
     case 'en_attente': return 'bg-surface-2/50 text-foreground';
     case 'signe': return 'bg-green-500/20 text-green-400';
+    case 'perdu': return 'bg-red-500/20 text-red-400';
     default: return 'bg-surface-2/50 text-foreground';
   }
 };

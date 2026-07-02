@@ -15,7 +15,7 @@ export interface Contact {
   company?: string;
   sector?: string;
   website?: string;
-  status: 'prospect' | 'presentation_envoyee' | 'meeting_booke' | 'offre_envoyee' | 'en_attente' | 'signe';
+  status: 'prospect' | 'meeting_booke' | 'presentation_envoyee' | 'offre_envoyee' | 'en_attente' | 'signe' | 'perdu';
   total_revenue?: number;
   project_price?: number;
   assigned_to?: string;
@@ -39,7 +39,8 @@ export interface CreateContactData {
   company?: string;
   sector?: string;
   website?: string;
-  status?: 'prospect' | 'proposition_envoyee' | 'meeting_booke' | 'offre_envoyee' | 'en_attente' | 'signe';
+  // Réutilise l'union de Contact.status (alignée sur l'enum DB client_status).
+  status?: Contact['status'];
   project_price?: number;
   source?: string;
   notes?: string;

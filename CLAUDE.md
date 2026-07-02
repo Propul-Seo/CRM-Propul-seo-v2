@@ -113,7 +113,7 @@ src/
 
 Key tables:
 - `users` - User data with roles and permissions (`can_view_communication`, etc.)
-- `contacts` - **Les leads du CRM** (pipeline LeadsV3 Site Web : prospect, presentation_envoyee, meeting_booke, offre_envoyee, en_attente, signe)
+- `contacts` - **Les leads du CRM** (pipeline LeadsV3 Site Web). Enum `client_status` nettoyé (migration 303) : prospect, meeting_booke, presentation_envoyee, offre_envoyee, en_attente, signe, perdu. ⚠️ La vue `client_unified_v2` lit `contacts.status` — la dropper/recréer autour de tout DDL sur cette colonne.
 - `contact_activities` - **Les activités des leads/contacts** (clé `contact_id`, colonne `type` : call/email/meeting/note/task)
 - `crmerp_leads` / `crmerp_activities` - Pipeline leads ERP (onglet ERP de LeadsV3) et ses activités
 - `projects` - Project tracking with status and budget
