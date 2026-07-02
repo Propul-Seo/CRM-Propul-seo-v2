@@ -96,8 +96,10 @@ export function useContactDetailsData(contactId: string) {
   const handleSaveContact = async () => {
     if (!contact) return;
 
-    type AllowedStatus = 'prospect' | 'presentation_envoyee' | 'meeting_booke' | 'offre_envoyee' | 'en_attente' | 'signe';
-    const allowedStatuses: AllowedStatus[] = ['prospect', 'presentation_envoyee', 'meeting_booke', 'offre_envoyee', 'en_attente', 'signe'];
+    // Aligné sur l'enum DB client_status (7 valeurs). Sans 'perdu' ici, un
+    // contact perdu édité serait silencieusement resauvé en 'prospect'.
+    type AllowedStatus = 'prospect' | 'presentation_envoyee' | 'meeting_booke' | 'offre_envoyee' | 'en_attente' | 'signe' | 'perdu';
+    const allowedStatuses: AllowedStatus[] = ['prospect', 'presentation_envoyee', 'meeting_booke', 'offre_envoyee', 'en_attente', 'signe', 'perdu'];
     const isValidStatus = (status: string): status is AllowedStatus => allowedStatuses.includes(status as AllowedStatus);
     const safeStatus = isValidStatus(editForm.status) ? editForm.status : 'prospect';
     const noShowValue = editForm.no_show === 'Oui' ? 'Oui' : 'Non';

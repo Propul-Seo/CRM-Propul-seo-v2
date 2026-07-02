@@ -5069,15 +5069,12 @@ export type Database = {
       campaign_type: "email" | "social" | "seo" | "ads" | "content" | "webinar"
       client_status:
         | "prospect"
-        | "proposition_envoyee"
         | "meeting_booke"
+        | "presentation_envoyee"
         | "offre_envoyee"
         | "en_attente"
         | "signe"
-        | "presentation_envoyee"
-        | "prospects"
-        | "signes"
-        | "en_negociation"
+        | "perdu"
       event_type:
         | "rdv_client"
         | "deadline"
@@ -5241,15 +5238,12 @@ export const Constants = {
       campaign_type: ["email", "social", "seo", "ads", "content", "webinar"],
       client_status: [
         "prospect",
-        "proposition_envoyee",
         "meeting_booke",
+        "presentation_envoyee",
         "offre_envoyee",
         "en_attente",
         "signe",
-        "presentation_envoyee",
-        "prospects",
-        "signes",
-        "en_negociation",
+        "perdu",
       ],
       event_type: [
         "rdv_client",

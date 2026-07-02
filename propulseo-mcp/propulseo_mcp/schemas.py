@@ -9,10 +9,11 @@ from __future__ import annotations
 ENUM_VALUES: dict[str, list[str]] = {
     "activity_status": ["scheduled", "completed", "cancelled"],
     "activity_type": ["call", "email", "meeting", "note", "task"],
+    # Nettoyé par la migration 303 (2026-07-02) : 4 valeurs mortes retirées,
+    # 'perdu' conservé. Ordre funnel.
     "client_status": [
-        "prospect", "proposition_envoyee", "meeting_booke", "offre_envoyee",
-        "en_attente", "signe", "presentation_envoyee", "prospects", "signes",
-        "en_negociation",
+        "prospect", "meeting_booke", "presentation_envoyee", "offre_envoyee",
+        "en_attente", "signe", "perdu",
     ],
     "event_type": ["rdv_client", "deadline", "livraison", "suivi", "marketing", "formation"],
     "invoice_status": ["draft", "sent", "paid", "overdue", "cancelled"],

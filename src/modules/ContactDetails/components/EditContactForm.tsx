@@ -90,6 +90,7 @@ export function EditContactForm({ editForm, setEditForm, crmUsers, onSave, onCan
                   <SelectItem value="offre_envoyee">Offre Envoyée</SelectItem>
                   <SelectItem value="en_attente">En Attente</SelectItem>
                   <SelectItem value="signe">Signés</SelectItem>
+                  <SelectItem value="perdu">Perdu</SelectItem>
                   <SelectItem value="__no_show__">No Show</SelectItem>
                 </SelectContent>
               </Select>

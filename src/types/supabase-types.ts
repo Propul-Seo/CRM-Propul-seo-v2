@@ -14,11 +14,7 @@ export type QuoteRow = Database['public']['Tables']['quotes']['Row'];
 export type QuoteItemRow = Database['public']['Tables']['quote_items']['Row'];
 export type CampaignRow = Database['public']['Tables']['campaigns']['Row'];
 export type CampaignMetricRow = Database['public']['Tables']['campaign_metrics']['Row'];
-export type LeadRow = Database['public']['Tables']['leads']['Row'];
-export type LeadNoteRow = Database['public']['Tables']['lead_notes']['Row'];
 export type AccountingEntryRow = Database['public']['Tables']['accounting_entries']['Row'];
-export type ActivityRow = Database['public']['Tables']['activities']['Row'];
-export type ProspectActivityRow = Database['public']['Tables']['prospect_activities']['Row'];
 
 // ===== TYPES INSERT (création dans la BDD) =====
 export type UserProfileInsert = Database['public']['Tables']['user_profiles']['Insert'];
@@ -30,11 +26,7 @@ export type QuoteInsert = Database['public']['Tables']['quotes']['Insert'];
 export type QuoteItemInsert = Database['public']['Tables']['quote_items']['Insert'];
 export type CampaignInsert = Database['public']['Tables']['campaigns']['Insert'];
 export type CampaignMetricInsert = Database['public']['Tables']['campaign_metrics']['Insert'];
-export type LeadInsert = Database['public']['Tables']['leads']['Insert'];
-export type LeadNoteInsert = Database['public']['Tables']['lead_notes']['Insert'];
 export type AccountingEntryInsert = Database['public']['Tables']['accounting_entries']['Insert'];
-export type ActivityInsert = Database['public']['Tables']['activities']['Insert'];
-export type ProspectActivityInsert = Database['public']['Tables']['prospect_activities']['Insert'];
 
 // ===== TYPES UPDATE (mise à jour dans la BDD) =====
 export type UserProfileUpdate = Database['public']['Tables']['user_profiles']['Update'];
@@ -46,11 +38,7 @@ export type QuoteUpdate = Database['public']['Tables']['quotes']['Update'];
 export type QuoteItemUpdate = Database['public']['Tables']['quote_items']['Update'];
 export type CampaignUpdate = Database['public']['Tables']['campaigns']['Update'];
 export type CampaignMetricUpdate = Database['public']['Tables']['campaign_metrics']['Update'];
-export type LeadUpdate = Database['public']['Tables']['leads']['Update'];
-export type LeadNoteUpdate = Database['public']['Tables']['lead_notes']['Update'];
 export type AccountingEntryUpdate = Database['public']['Tables']['accounting_entries']['Update'];
-export type ActivityUpdate = Database['public']['Tables']['activities']['Update'];
-export type ProspectActivityUpdate = Database['public']['Tables']['prospect_activities']['Update'];
 
 // ===== ENUMS =====
 export type UserRole = Database['public']['Enums']['user_role'];
