@@ -18,7 +18,6 @@ import { ConvertLeadModal } from './components/ConvertLeadModal'
 import { getProjectAssignees } from '@/modules/ProjectsV3/utils/projectAssignees'
 import { ConfirmDeleteDialog } from '@/components/ui/ConfirmDeleteDialog'
 import { usePropulspaceDeletion } from '@/modules/EspaceClient/admin/hooks/usePropulspaceDeletion'
-import type { LeadSortMode } from './utils/leadAdapters'
 
 type ConvertTarget = { id: string; name: string; type: 'site_web' | 'erp' | 'qualification' }
 
@@ -43,7 +42,6 @@ export function LeadsV3Page() {
   const navigate = useNavigate()
   const [tab, setTabRaw] = useState<LeadsV3Tab>(loadTab)
   const [filterUserId, setFilterUserId] = useState('')
-  const [sortMode, setSortMode] = useState<LeadSortMode>('relance_asc')
   const [searchQuery, setSearchQuery] = useState('')
   const debouncedSearch = useDebounced(searchQuery, 300)
   const [users, setUsers] = useState<{ id: string; name: string; email: string | null }[]>([])
@@ -76,7 +74,7 @@ export function LeadsV3Page() {
   const qualifIdSet = useMemo(() => new Set(qualif.leads.map(l => l.id)), [qualif.leads])
 
   const { cards, leadStatus, columns, onStatusChange } = useLeadsV3Cards({
-    tab, sw, erp, qualifLeads: qualif.leads, qualifIdSet, filterUserId, debouncedSearch, sortMode,
+    tab, sw, erp, qualifLeads: qualif.leads, qualifIdSet, filterUserId, debouncedSearch,
   })
 
   const handleLeadClick = (id: string) => {
@@ -185,8 +183,6 @@ export function LeadsV3Page() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onNewLead={() => toast.info('Création de lead : à venir en V3')}
-        sortMode={sortMode}
-        onSortModeChange={setSortMode}
       />
 
       {loading ? (

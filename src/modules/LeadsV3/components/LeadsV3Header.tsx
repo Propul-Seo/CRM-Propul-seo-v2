@@ -1,6 +1,5 @@
-import { Plus, Search, ArrowDownWideNarrow } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 import { ProjectAssigneeButtons } from '@/modules/ProjectsV3/components/ProjectAssigneeButtons'
-import { LEAD_SORT_LABELS, LEAD_SORT_ORDER, type LeadSortMode } from '../utils/leadAdapters'
 
 export type LeadsV3Tab = 'site_web' | 'erp'
 
@@ -19,8 +18,6 @@ interface Props {
   searchQuery: string
   onSearchChange: (q: string) => void
   onNewLead: () => void
-  sortMode: LeadSortMode
-  onSortModeChange: (mode: LeadSortMode) => void
 }
 
 export function LeadsV3Header({
@@ -33,8 +30,6 @@ export function LeadsV3Header({
   searchQuery,
   onSearchChange,
   onNewLead,
-  sortMode,
-  onSortModeChange,
 }: Props) {
   return (
     <>
@@ -87,23 +82,8 @@ export function LeadsV3Header({
             size="sm"
           />
 
-          {/* Tri */}
-          <div className="ml-auto flex items-center gap-2">
-            <ArrowDownWideNarrow className="h-3.5 w-3.5 text-[#6b7280] shrink-0" />
-            <select
-              value={sortMode}
-              onChange={e => onSortModeChange(e.target.value as LeadSortMode)}
-              aria-label="Trier les leads"
-              className="h-8 px-2 bg-[#070512] border border-[rgba(139,92,246,0.18)] rounded-md text-[#ede9fe] text-[12px] focus:outline-none focus:border-[#8B5CF6] transition-colors cursor-pointer"
-            >
-              {LEAD_SORT_ORDER.map(mode => (
-                <option key={mode} value={mode}>{LEAD_SORT_LABELS[mode]}</option>
-              ))}
-            </select>
-          </div>
-
           {/* Recherche */}
-          <div className="relative min-w-[240px]">
+          <div className="relative ml-auto min-w-[240px]">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#6b7280] pointer-events-none" />
             <input
               type="text"
