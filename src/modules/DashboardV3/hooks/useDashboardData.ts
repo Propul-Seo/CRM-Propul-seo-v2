@@ -6,7 +6,6 @@ import {
   useSupabaseContacts,
   useSupabaseTasks,
   useSupabaseAccountingEntries,
-  useSupabaseLeads,
 } from '@/hooks/useSupabaseData';
 import { useProjectsV3 } from '@/modules/ProjectsV3/hooks/useProjectsV3';
 import { useLeadsV3SiteWeb } from '@/modules/LeadsV3/hooks/useLeadsV3SiteWeb';
@@ -38,7 +37,10 @@ export function useDashboardData() {
   const siteWebCrm = useLeadsV3SiteWeb();
   const { data: tasks } = useSupabaseTasks();
   const { data: accountingEntries, loading: accountingLoading } = useSupabaseAccountingEntries();
-  const { data: leads, count: leadsCount } = useSupabaseLeads();
+  // Les leads vivent dans `contacts` (pipeline LeadsV3 Site Web), pas dans la
+  // table legacy `leads` (déplacée en corbeille par la migration 301) — on compte
+  // depuis la source déjà chargée.
+  const leadsCount = siteWebCrm.leads.length;
   const projectsCount = projects.length;
 
   const currentYear = new Date().getFullYear();
@@ -99,7 +101,6 @@ export function useDashboardData() {
   return {
     mounted,
     projects,
-    leads,
     crmOfferLeads,
     currentYear,
     currentYearRevenue,

@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Fin de sprint** : à la fin de chaque sprint, effectuer un code review (`/review`) puis sauvegarder la session avec `/token-saver fin`.
 - **Suivi du contexte** : surveiller en permanence l'utilisation du contexte. Dès que le contexte atteint **50%**, prévenir immédiatement l'utilisateur avec ce message : `⚠️ Contexte à 50% — je sauvegarde la session et on repart à neuf.`, puis exécuter automatiquement `/token-saver fin` sans attendre de confirmation.
-- **V2 uniquement** : toutes les modifications UI/fonctionnelles doivent être apportées aux modules **V2** (`CommunicationManager`, `ERPManager`, `SiteWebManager`, `ProjectsManagerV2`, `DashboardV2`, etc.). Ne jamais modifier les anciens modules (`Communication`, `CRM`, `ProjectsManager`, `Dashboard`, etc.) sauf demande explicite.
+- **Dernière génération uniquement** : toutes les modifications UI/fonctionnelles vont dans les modules de génération courante — **V3** (`DashboardV3`, `LeadsV3`, `ProjectsV3`, `ProjectsV3Completed`), `ProjectsManagerV2`, `EspaceClient` (portail Propul'Space) et les autres modules actifs listés dans Directory Structure. Les anciens modules (`CRM`, `Dashboard`, `ProjectsManager`, `TaskManager`, `Contacts`…) ont été **supprimés** au nettoyage du 13/06/2026 — ne pas les recréer ni les restaurer sauf demande explicite.
 
 ## Commands
 
@@ -50,89 +50,62 @@ The app will fail to start without valid Supabase credentials.
 
 ```
 src/
-├── App.tsx                 # Root component with auth flow
+├── App.tsx                 # Root: BrowserRouter + auth gate + top-level routes
 ├── components/
 │   ├── ui/                 # shadcn/ui components (Button, Card, Dialog, etc.)
-│   ├── layout/             # Layout.tsx, Header.tsx, Sidebar.tsx
-│   ├── auth/               # SupabaseAuth.tsx, AccessCodeDialog, UserSelector
-│   ├── realtime/           # RealtimeProvider.tsx
-│   ├── mobile/             # Mobile-specific components (BottomNav, FAB, etc.)
-│   ├── calendar/           # Calendar components (SimpleCalendar, EventModal)
-│   ├── crm/                # Shared CRM components (bot-one/)
-│   ├── notifications/      # Toast, Chat, Financial, Sync notifications
-│   └── [feature]/          # Feature-specific components
-├── modules/                # Main application modules (lazy-loaded)
-│   ├── Dashboard/          # KPIs and overview
-│   ├── CRM/                # Lead management (main CRM pipeline)
-│   ├── CRMBotOne/          # Secondary CRM pipeline
-│   ├── CRMERP/             # ERP-style CRM with kanban
-│   ├── CRMERPLeadDetails/  # Lead detail pages for CRMERP
-│   ├── Communication/      # Content production management (kanban/calendar/dashboard)
-│   ├── CommunicationKPI/   # Communication analytics & performance
-│   ├── Contacts/           # Contact list
-│   ├── ContactDetails/     # Contact detail view
-│   ├── ContactDetailsBotOne/ # Bot One contact details
-│   ├── ClientDetails/      # Client detail view
-│   ├── ProjectsManager/    # Active project management
-│   ├── ProjectDetails/     # Project detail view
-│   ├── CompletedProjectsManager/ # Completed projects archive
-│   ├── TaskManager/        # Task management with templates
-│   ├── Accounting/         # Financial tracking
-│   └── Settings/           # User/app settings, team management, archives
+│   ├── layout/             # Layout.tsx (déclare les routes des modules), Sidebar.tsx
+│   ├── auth/               # LoginPage.tsx
+│   ├── routing/            # Composants de routage partagés
+│   ├── mobile/             # Composants mobile
+│   ├── notifications/      # Toasts & notifications
+│   ├── activities-hub/     # Hub d'activités transverse
+│   ├── propulspace/        # Composants portail Propul'Space
+│   └── charts/ common/ v3/ # Graphiques, partagés, primitives V3
+├── modules/                # Modules applicatifs (lazy-loaded)
+│   ├── DashboardV3/        # KPIs et vue d'ensemble
+│   ├── LeadsV3/            # CRM leads : onglets Site Web (`contacts`) + ERP (`crmerp_leads`) + qualif
+│   ├── CRMERPLeadDetails/  # Fiches détaillées leads ERP
+│   ├── ContactDetails/     # Fiche contact
+│   ├── ProjectsV3/         # Gestion de projets
+│   ├── ProjectsV3Completed/# Projets terminés
+│   ├── ProjectsManagerV2/  # Gestion projets V2 (encore routée)
+│   ├── ProjectDetailsV3Preview/ # Aperçu fiche projet V3
+│   ├── EspaceClient/       # Portail client Propul'Space (admin/ + client/, routes imbriquées)
+│   ├── ClientPortal/ + ClientBrief/ # Portail & brief client
+│   ├── AgencyVault/        # Coffre-fort agence
+│   ├── Communication/      # Production de contenu (kanban/calendrier)
+│   ├── CommunicationKPI/   # Analytics communication
+│   ├── PersonalTasks/      # Tâches personnelles
+│   ├── ProceduresManager/  # Procédures internes (routes imbriquées)
+│   ├── Accounting/         # Comptabilité
+│   └── Settings/           # Réglages, équipe, archives
 ├── hooks/
-│   ├── supabase/           # Supabase query/CRUD hooks (refactored from useSupabaseData.ts)
+│   ├── supabase/           # Hooks query/CRUD Supabase + realtime.ts (subscriptions)
 │   │   ├── useSupabaseQuery.ts    # Base query hook
 │   │   ├── useQueryHooks.ts       # Entity-specific query hooks
 │   │   ├── use*CRUD.ts            # CRUD operations per entity
 │   │   └── index.ts               # Barrel export
-│   ├── useAuth.ts          # Supabase authentication
-│   ├── useContacts.ts      # Contact/lead management
-│   ├── useProjects.ts      # Project CRUD
-│   ├── useTasks.ts         # Task management
-│   └── use*.ts             # Domain-specific hooks
-├── services/               # Business logic services
-│   ├── archiveService.ts   # Archive/restore functionality
-│   ├── supabaseService.ts  # Core Supabase operations
-│   ├── ringoverService.ts  # Ringover phone integration
-│   └── *.ts                # Activity/prospect services
-├── store/
-│   ├── useStore.ts         # Main store (combines slices)
-│   ├── slices/             # Zustand store slices
-│   │   ├── authSlice.ts
-│   │   ├── navigationSlice.ts
-│   │   ├── crmSlice.ts
-│   │   ├── projectsSlice.ts
-│   │   ├── tasksSlice.ts
-│   │   ├── accountingSlice.ts
-│   │   ├── activitiesSlice.ts
-│   │   └── uiSlice.ts
-│   ├── selectors.ts        # Memoized selectors
-│   ├── helpers.ts
-│   └── types.ts
-├── lib/
-│   ├── supabase.ts         # Supabase client singleton
-│   └── utils.ts            # cn() and utility functions
-├── types/
-│   ├── database.ts         # Generated Supabase types
-│   └── *.ts                # Domain types (crmBotOne, financial, activity, etc.)
-├── utils/                  # Utility functions and constants
-└── pages/
-    └── ClientDetailsBotOne.tsx  # Page wrapper
+│   └── use*.ts             # Hooks domaine (useAuth, useContactActivities, …)
+├── services/               # archiveService.ts, automationService.ts
+├── store/                  # Zustand : useStore.ts + slices/ (auth, crm, projects, tasks, accounting, ui)
+├── lib/                    # supabase.ts (client singleton), routes.ts, utils.ts
+├── types/                  # database.ts (types Supabase générés) + types domaine
+└── utils/                  # Utilitaires et constantes
 ```
 
 ### Key Patterns
 
-**Module Navigation**: The app uses a single-page architecture with module switching via `useStore().activeModule`. Modules are lazy-loaded in `Layout.tsx`.
+**Routing**: react-router-dom — `BrowserRouter` dans `App.tsx`, routes des modules déclarées dans `components/layout/Layout.tsx` (`<Routes>`), routeurs imbriqués dans certains modules (`EspaceClient`, `ProceduresManager`). Helpers de routes dans `lib/routes.ts`. Modules lazy-loaded. (L'ancien `useStore().activeModule` n'existe plus.)
 
 **Data Flow**:
 - Supabase is the source of truth for all persistent data
-- `store/slices/` handle UI state (split into 8 slices: auth, navigation, crm, projects, tasks, accounting, activities, ui)
+- `store/slices/` handle UI state (6 slices: auth, crm, projects, tasks, accounting, ui)
 - `hooks/supabase/` encapsulate all Supabase queries and CRUD operations
 - Domain hooks in `hooks/` compose supabase hooks with business logic
 
-**Authentication**: Managed via `useAuth` hook and `SupabaseAuth` component. The `Layout` component checks user permissions before rendering modules. Admin check: `currentUser?.email === 'team@propulseo-site.com'` or `is_admin()` SQL function.
+**Authentication**: Managed via `useAuth` hook and `components/auth/LoginPage.tsx`. The `Layout` component checks user permissions before rendering modules. Admin check: `currentUser?.email === 'team@propulseo-site.com'` or `is_admin()` SQL function.
 
-**Realtime**: `RealtimeProvider` wraps the app for Supabase real-time subscriptions.
+**Realtime**: Supabase real-time subscriptions live in `hooks/supabase/realtime.ts`.
 
 **User table**: The main table is `users` (not `user_profiles`), with `auth_user_id` FK to Supabase auth. Roles: admin, sales, marketing, developer, manager, ops.
 
@@ -140,26 +113,30 @@ src/
 
 Key tables:
 - `users` - User data with roles and permissions (`can_view_communication`, etc.)
-- `clients` - CRM contacts with pipeline status (prospect, devis, signe, livre, perdu)
+- `contacts` - **Les leads du CRM** (pipeline LeadsV3 Site Web : prospect, presentation_envoyee, meeting_booke, offre_envoyee, en_attente, signe)
+- `contact_activities` - **Les activités des leads/contacts** (clé `contact_id`, colonne `type` : call/email/meeting/note/task)
+- `crmerp_leads` / `crmerp_activities` - Pipeline leads ERP (onglet ERP de LeadsV3) et ses activités
 - `projects` - Project tracking with status and budget
 - `tasks` - Task management linked to projects/clients
 - `calendar_events` - Calendar with event types
 - `accounting_entries` - Financial records
-- `activities` / `prospect_activities` - Activity tracking
 - `posts` / `post_assets` / `post_comments` - Communication module content
 - `post_metrics` - Communication KPI data per post
 - Materialized views: `kpi_monthly_overview`, `kpi_daily_metrics`, `kpi_top_posts`
+- Schéma `propulspace` (backend portail client) + vues `v2` (couche API du front portail)
+
+⚠️ Tables legacy VIDES déplacées en corbeille `trash_2026_07_02` (migration 301, 2026-07-02) : `leads`, `lead_notes`, `activities`, `activity_log`, `prospect_activities`, `user_activities` — ne pas les réutiliser ni requêter. `clients` existe mais est vide/inutilisée (un lead reste un `contact`). La corbeille `trash_2026_06_13` a été purgée définitivement (migration 302).
 
 Supabase migrations are in `supabase/migrations/`.
 
 ### Edge Functions
 
-Located in `supabase/functions/`:
-- `admin-create-user`, `admin-update-password`, `admin-toggle-user-status` - User management
-- `generate-quote-pdf` - PDF generation
-- `calculate-monthly-metrics` - Financial metrics
-- `ringover-call` - Phone integration
-- `sync-project-budget` - Budget sync
+Source in `supabase/functions/` (~22 actives en prod) :
+- Gestion utilisateurs : `admin-create-user`, `admin-update-password`, `admin-toggle-user-status`
+- Portail Propul'Space : `admin-portal-invite`/`-resend-invite`/`-deactivate`, `portal-sign-document`, `portal-contact-message`, `send-portal-email`, `portal-create-checkout-session`
+- Paiement/signature : `stripe-webhook`, `docuseal-webhook`, `admin-docuseal-create-submission`
+- Social/comm : `linkedin-oauth`, `instagram-oauth`, `sync-social-metrics`, `questionnaire-send-emails`
+- Divers : `generate-quote-pdf`, `generate-invoice-pdf`, `calculate-monthly-metrics`, `ringover-call`, `sync-project-budget`, `admin-cleanup-storage`, `gmail-sync`, `enrich-siret`
 
 ## Code Conventions
 

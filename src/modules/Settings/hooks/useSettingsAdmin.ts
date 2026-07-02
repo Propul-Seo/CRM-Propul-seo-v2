@@ -209,7 +209,6 @@ export function useSettingsAdmin({ users, fetchUsers, deleteUser, isAdmin }: Use
 
       await cleanColumn('contacts', 'assigned_to');
       await cleanColumn('clients', 'assigned_to');
-      await cleanColumn('leads', 'assigned_to');
       await cleanColumn('tasks', 'assigned_to');
 
       const result = await deleteUser(deleteModal.userId);

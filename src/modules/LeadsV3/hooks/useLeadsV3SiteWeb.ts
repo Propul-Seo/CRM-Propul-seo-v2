@@ -98,25 +98,17 @@ async function fetchLatestActivities(contactIds: string[]): Promise<Map<string, 
 
   const activities: ProspectActivitySnapshot[] = []
   for (const ids of chunk(contactIds, 100)) {
-    // Deux sources d'activités lues en parallèle :
-    //  - `prospect_activities` : ancien CRM (legacy).
-    //  - `contact_activities`  : V3, là où la fiche lead logge/valide les
-    //    activités. Sans ça, valider une activité ne bougeait pas le tri du board.
-    const [legacyRes, contactRes] = await Promise.all([
-      supabase
-        .from('prospect_activities')
-        .select('prospect_id, activity_date, activity_type, status')
-        .in('prospect_id', ids)
-        .neq('status', 'cancelled'),
-      supabase
-        .from('contact_activities')
-        .select('contact_id, activity_date, type, status')
-        .in('contact_id', ids)
-        .neq('status', 'cancelled'),
-    ])
-
-    if (legacyRes.error) throw legacyRes.error
-    activities.push(...((legacyRes.data ?? []) as ProspectActivitySnapshot[]))
+    // Les leads LeadsV3 sont des `contacts` ; leurs activités vivent dans
+    // `contact_activities` (clé `contact_id`, colonne `type`). C'est là que la
+    // fiche lead logge/valide les activités — valider une activité fait bouger
+    // le tri du board.
+    // NB : l'ancienne source `prospect_activities` a été retirée (table déplacée
+    // en corbeille par la migration 301, 2026-07-02) — ne plus la requêter.
+    const contactRes = await supabase
+      .from('contact_activities')
+      .select('contact_id, activity_date, type, status')
+      .in('contact_id', ids)
+      .neq('status', 'cancelled')
 
     if (contactRes.error) throw contactRes.error
     for (const row of (contactRes.data ?? []) as { contact_id: string; activity_date: string; type: string | null; status: string | null }[]) {

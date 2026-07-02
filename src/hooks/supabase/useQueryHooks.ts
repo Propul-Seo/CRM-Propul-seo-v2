@@ -5,7 +5,6 @@ import type {
   TaskRow,
   CalendarEventRow,
   AccountingEntryRow,
-  LeadRow,
   QuoteRow,
   ChannelRow,
   MessageRow,
@@ -66,13 +65,6 @@ export function useSupabaseAccountingEntries() {
     orderBy: { column: 'created_at', ascending: false }
   });
 }
-export function useSupabaseLeads() {
-  return useSupabaseData<LeadRow>({
-    table: 'leads',
-    select: '*',
-    orderBy: { column: 'created_at', ascending: false }
-  });
-}
 export function useSupabaseInvoices() {
   return useSupabaseData<{ id: string; [key: string]: unknown }>({
     table: 'invoices',
@@ -85,14 +77,6 @@ export function useSupabaseQuotes() {
     table: 'quotes',
     select: '*',
     orderBy: { column: 'created_at', ascending: false }
-  });
-}
-export function useSupabaseActivityLog() {
-  return useSupabaseData<{ id: string; created_at: string; [key: string]: unknown }>({
-    table: 'activity_log',
-    select: '*',
-    orderBy: { column: 'created_at', ascending: false },
-    limit: 50
   });
 }
 export function useSupabaseChannels() {

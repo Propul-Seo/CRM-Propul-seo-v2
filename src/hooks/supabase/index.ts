@@ -9,10 +9,8 @@ export {
   useSupabaseTasks,
   useSupabaseCalendarEvents,
   useSupabaseAccountingEntries,
-  useSupabaseLeads,
   useSupabaseInvoices,
   useSupabaseQuotes,
-  useSupabaseActivityLog,
   useSupabaseChannels,
   useSupabaseMessages,
 } from './useQueryHooks';
