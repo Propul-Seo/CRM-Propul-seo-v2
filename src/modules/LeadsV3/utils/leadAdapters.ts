@@ -80,19 +80,22 @@ export function erpToCard(lead: CRMERPLead): LeadCardData {
 }
 
 /**
- * Tri des leads Site Web par dernier signal d'activité descendante.
- * Ordre souhaité : du plus récent au plus ancien dans chaque colonne.
+ * Tri des leads Site Web par urgence de relance : le dernier signal d'activité
+ * le plus ANCIEN d'abord (en haut de colonne = pas touché depuis le plus longtemps).
+ * Sans activité, le signal retombe sur `next_activity_date`/`updated_at`/`created_at`
+ * (cf. getSiteWebActivityInfo) : un lead tout juste créé reste donc en bas, et une
+ * relance planifiée dans le futur descend aussi (lead déjà pris en charge).
  */
 export function sortSiteWebLeads(leads: SiteWebLead[]): SiteWebLead[] {
-  return [...leads].sort((a, b) => getSiteWebActivityTimestamp(b) - getSiteWebActivityTimestamp(a))
+  return [...leads].sort((a, b) => getSiteWebActivityTimestamp(a) - getSiteWebActivityTimestamp(b))
 }
 
 /**
- * Tri des leads ERP par dernière activité descendante (la plus récente d'abord).
+ * Tri des leads ERP par urgence de relance (activité la plus ancienne d'abord).
  * Les leads sans `last_activity_at` retombent sur `updated_at`, puis `created_at`.
  */
 export function sortErpLeads(leads: CRMERPLead[]): CRMERPLead[] {
-  return [...leads].sort((a, b) => getErpActivityTimestamp(b) - getErpActivityTimestamp(a))
+  return [...leads].sort((a, b) => getErpActivityTimestamp(a) - getErpActivityTimestamp(b))
 }
 
 /** Recherche texte commune (case-insensitive). */

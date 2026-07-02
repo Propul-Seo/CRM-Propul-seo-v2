@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { matchesQuery, siteWebToCard, erpToCard } from './leadAdapters'
+import { matchesQuery, siteWebToCard, erpToCard, sortSiteWebLeads, sortErpLeads } from './leadAdapters'
 import type { LeadCardData } from '../components/LeadCardV3'
 
 const baseCard: LeadCardData = {
@@ -130,5 +130,69 @@ describe('siteWebToCard', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const card = siteWebToCard(buildSwLead({ assigned_user: null, assigned_user_name: null }) as any)
     expect(card.assignee).toBeNull()
+  })
+})
+
+describe('sortSiteWebLeads (urgence : activité la plus ancienne en tête)', () => {
+  const swLead = (id: string, overrides: Record<string, unknown> = {}) => ({
+    id,
+    normalized_status: 'prospect',
+    created_at: '2026-06-01T10:00:00Z',
+    ...overrides,
+  })
+
+  it('place le lead à la dernière activité la plus ancienne en premier', () => {
+    const leads = [
+      swLead('recent', { last_activity_at: '2026-06-28T10:00:00Z' }),
+      swLead('ancien', { last_activity_at: '2026-03-01T10:00:00Z' }),
+      swLead('moyen', { last_activity_at: '2026-05-15T10:00:00Z' }),
+    ]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(sortSiteWebLeads(leads as any).map(l => l.id)).toEqual(['ancien', 'moyen', 'recent'])
+  })
+
+  it('sans activité, retombe sur updated_at/created_at : un vieux lead jamais touché remonte', () => {
+    const leads = [
+      swLead('touche-hier', { last_activity_at: '2026-07-01T10:00:00Z' }),
+      swLead('jamais-touche-vieux', { last_activity_at: null, updated_at: '2026-02-01T10:00:00Z' }),
+    ]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(sortSiteWebLeads(leads as any).map(l => l.id)).toEqual(['jamais-touche-vieux', 'touche-hier'])
+  })
+
+  it('une relance planifiée dans le futur descend en bas (lead pris en charge)', () => {
+    const leads = [
+      swLead('relance-future', { last_activity_at: null, next_activity_date: '2027-01-01T10:00:00Z' }),
+      swLead('a-relancer', { last_activity_at: '2026-04-01T10:00:00Z' }),
+    ]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(sortSiteWebLeads(leads as any).map(l => l.id)).toEqual(['a-relancer', 'relance-future'])
+  })
+
+  it('ne mute pas le tableau d\'entrée', () => {
+    const leads = [
+      swLead('b', { last_activity_at: '2026-06-01T10:00:00Z' }),
+      swLead('a', { last_activity_at: '2026-01-01T10:00:00Z' }),
+    ]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sortSiteWebLeads(leads as any)
+    expect(leads.map(l => l.id)).toEqual(['b', 'a'])
+  })
+})
+
+describe('sortErpLeads (urgence : activité la plus ancienne en tête)', () => {
+  it('trie du plus ancien signal au plus récent', () => {
+    const erpLead = (id: string, overrides: Record<string, unknown> = {}) => ({
+      id,
+      status: 'leads_contactes',
+      created_at: '2026-06-01T10:00:00Z',
+      ...overrides,
+    })
+    const leads = [
+      erpLead('recent', { last_activity_at: '2026-06-20T10:00:00Z' }),
+      erpLead('ancien', { last_activity_at: '2026-02-10T10:00:00Z' }),
+    ]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(sortErpLeads(leads as any).map(l => l.id)).toEqual(['ancien', 'recent'])
   })
 })

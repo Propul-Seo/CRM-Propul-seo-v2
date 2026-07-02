@@ -87,9 +87,12 @@ async function fetchLatestActivities(contactIds: string[]): Promise<Map<string, 
   const activities: ProspectActivitySnapshot[] = []
   for (const ids of chunk(contactIds, 100)) {
     const { data, error } = await supabase
-      .from('prospect_activities')
-      .select('prospect_id, activity_date, activity_type, status')
-      .in('prospect_id', ids)
+      .from('contact_activities')
+      // Les leads LeadsV3 sont des `contacts` ; leurs activités vivent dans
+      // `contact_activities` (clé `contact_id`, colonne `type`). On ré-alias vers
+      // `prospect_id`/`activity_type` pour conserver la logique de snapshot en aval.
+      .select('prospect_id:contact_id, activity_date, activity_type:type, status')
+      .in('contact_id', ids)
       .neq('status', 'cancelled')
       .order('activity_date', { ascending: false })
 

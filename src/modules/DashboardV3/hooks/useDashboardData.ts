@@ -5,7 +5,6 @@ import { routes } from '@/lib/routes';
 import {
   useSupabaseContacts,
   useSupabaseAccountingEntries,
-  useSupabaseLeads,
 } from '@/hooks/useSupabaseData';
 import { useProjectsV3 } from '@/modules/ProjectsV3/hooks/useProjectsV3';
 import { useLeadsV3SiteWeb } from '@/modules/LeadsV3/hooks/useLeadsV3SiteWeb';
@@ -31,7 +30,9 @@ export function useDashboardData() {
   const { projects } = useProjectsV3();
   const siteWebCrm = useLeadsV3SiteWeb();
   const { data: accountingEntries, loading: accountingLoading } = useSupabaseAccountingEntries();
-  const { count: leadsCount } = useSupabaseLeads();
+  // Les leads vivent dans `contacts` (pipeline LeadsV3 Site Web), pas dans la
+  // table legacy `leads` (vide) — on compte depuis la source déjà chargée.
+  const leadsCount = siteWebCrm.leads.length;
   const projectsCount = projects.length;
 
   const currentYear = new Date().getFullYear();
