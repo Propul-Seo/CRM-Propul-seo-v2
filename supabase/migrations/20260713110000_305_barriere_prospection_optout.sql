@@ -122,9 +122,16 @@ CREATE OR REPLACE VIEW public.crmerp_leads_prospectables
 GRANT SELECT ON public.contacts_prospectables     TO prospection;
 GRANT SELECT ON public.crmerp_leads_prospectables TO prospection;
 
--- --- 5. Verrou explicite : la clé PUBLIQUE `anon` ne voit toujours RIEN -------
--- (état actuel, on le rend explicite pour qu'aucune migration future ne l'ouvre
---  par inadvertance)
+-- --- 5. Fermeture de la clé PUBLIQUE `anon` sur CES objets --------------------
+-- ⚠️ PORTÉE LIMITÉE, vérifié le 2026-07-13 : ce REVOKE ne ferme QUE les 4 objets
+-- nommés ci-dessous. Il NE protège PAS les tables futures : `pg_default_acl`
+-- accorde à `anon` (et authenticated, service_role) un `arwdDxtm` par défaut sur
+-- toute table créée ensuite par postgres/supabase_admin dans `public`. Toute
+-- nouvelle table PII sans `ENABLE ROW LEVEL SECURITY` sera donc lisible par la clé
+-- publique. Le durcissement global (ALTER DEFAULT PRIVILEGES ... REVOKE FROM anon)
+-- est un chantier distinct — voir la migration de durcissement 306.
+-- Rappel : anon reste aussi lisible via la vue non-invoker `client_unified_v2`
+-- (fuite latente, hors périmètre de cette table) — également traité en 306.
 REVOKE ALL ON public.contacts     FROM anon;
 REVOKE ALL ON public.crmerp_leads FROM anon;
 REVOKE ALL ON public.contacts_prospectables     FROM anon;
