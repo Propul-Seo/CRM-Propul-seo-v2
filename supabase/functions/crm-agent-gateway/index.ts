@@ -45,6 +45,14 @@ const ACTIVITY_TYPE = ['call', 'email', 'meeting', 'note', 'task']
 const ACTIVITY_STATUS = ['scheduled', 'completed', 'cancelled']
 const MAX_LIMIT = 500
 
+// Plafond de l'action IRRÉVERSIBLE (set_opt_out) : borne un agent qui part en
+// boucle avant qu'il ne désinscrive tout le fichier (on ne revient pas en arrière
+// sans re-consentement). Par company, sur 24h glissantes. Valeurs à ajuster.
+// set_opt_out ne traite qu'UN id par appel (pas de batch) : le cap "par appel" est
+// structurellement 1 ; le vrai garde-fou est le cap journalier.
+const DAILY_OPTOUT_CAP = 25
+const OPTOUT_ALERT_THRESHOLD = 10
+
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), {
     status,
@@ -309,6 +317,16 @@ Deno.serve(async (req) => {
         if (!id) return reject(ctx, action, 400, 'id requis.')
         if (!source) return reject(ctx, action, 400, 'source requis (canal du retrait : lien, STOP, manuel...).', id)
 
+        // Plafond journalier de l'action irréversible (compté depuis le journal).
+        const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+        const { count: recent } = await service
+          .from('agent_call_log')
+          .select('id', { count: 'exact', head: true })
+          .eq('action', 'set_opt_out').eq('ok', true).eq('company_code', ctx.company)
+          .gte('created_at', since)
+        if ((recent ?? 0) >= DAILY_OPTOUT_CAP)
+          return reject(ctx, action, 429, `Plafond journalier d'opt-out atteint (${DAILY_OPTOUT_CAP}/24h pour ${ctx.company}). Action irréversible : au-delà, une intervention humaine est requise.`, id)
+
         const table = pipeline === 'site' ? 'contacts' : 'crmerp_leads'
         const { data, error } = await service
           .from(table)
@@ -317,6 +335,10 @@ Deno.serve(async (req) => {
           .select('id')
         if (error) throw error
         if (!data || data.length === 0) return reject(ctx, action, 404, 'Lead introuvable.', id)
+
+        if ((recent ?? 0) + 1 >= OPTOUT_ALERT_THRESHOLD)
+          console.error(`[crm-agent-gateway] ALERTE opt-out : company=${ctx.company} atteint ${(recent ?? 0) + 1} opt-out/24h (seuil ${OPTOUT_ALERT_THRESHOLD}, plafond ${DAILY_OPTOUT_CAP}).`)
+
         await logCall(ctx, action, true, data.length, id, null)
         return json(200, { id, opt_out: true })
       }
