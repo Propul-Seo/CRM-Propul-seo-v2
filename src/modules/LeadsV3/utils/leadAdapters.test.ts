@@ -151,13 +151,26 @@ describe('sortSiteWebLeads (urgence : activité la plus ancienne en tête)', () 
     expect(sortSiteWebLeads(leads as any).map(l => l.id)).toEqual(['ancien', 'moyen', 'recent'])
   })
 
-  it('sans activité, retombe sur updated_at/created_at : un vieux lead jamais touché remonte', () => {
+  it('un lead SANS activité tombe tout en bas, même avec un vieux updated_at/created_at', () => {
     const leads = [
       swLead('touche-hier', { last_activity_at: '2026-07-01T10:00:00Z' }),
-      swLead('jamais-touche-vieux', { last_activity_at: null, updated_at: '2026-02-01T10:00:00Z' }),
+      swLead('jamais-touche-vieux', { last_activity_at: null, next_activity_date: null, updated_at: '2026-02-01T10:00:00Z' }),
     ]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(sortSiteWebLeads(leads as any).map(l => l.id)).toEqual(['jamais-touche-vieux', 'touche-hier'])
+    expect(sortSiteWebLeads(leads as any).map(l => l.id)).toEqual(['touche-hier', 'jamais-touche-vieux'])
+  })
+
+  it('les leads avec activité restent au-dessus de TOUS les leads sans activité', () => {
+    const leads = [
+      swLead('sans-1', { last_activity_at: null, next_activity_date: null, updated_at: '2026-01-01T10:00:00Z' }),
+      swLead('avec-recent', { last_activity_at: '2026-06-28T10:00:00Z' }),
+      swLead('sans-2', { last_activity_at: null, next_activity_date: null, updated_at: '2026-06-30T10:00:00Z' }),
+      swLead('avec-ancien', { last_activity_at: '2026-03-01T10:00:00Z' }),
+    ]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ordered = sortSiteWebLeads(leads as any).map(l => l.id)
+    // Bloc "avec activité" (ancien avant récent) puis bloc "sans activité".
+    expect(ordered).toEqual(['avec-ancien', 'avec-recent', 'sans-1', 'sans-2'])
   })
 
   it('une relance planifiée dans le futur descend en bas (lead pris en charge)', () => {
@@ -180,19 +193,29 @@ describe('sortSiteWebLeads (urgence : activité la plus ancienne en tête)', () 
   })
 })
 
-describe('sortErpLeads (urgence : activité la plus ancienne en tête)', () => {
+describe('sortErpLeads (avec activité en tête, sans activité en bas)', () => {
+  const erpLead = (id: string, overrides: Record<string, unknown> = {}) => ({
+    id,
+    status: 'leads_contactes',
+    created_at: '2026-06-01T10:00:00Z',
+    ...overrides,
+  })
+
   it('trie du plus ancien signal au plus récent', () => {
-    const erpLead = (id: string, overrides: Record<string, unknown> = {}) => ({
-      id,
-      status: 'leads_contactes',
-      created_at: '2026-06-01T10:00:00Z',
-      ...overrides,
-    })
     const leads = [
       erpLead('recent', { last_activity_at: '2026-06-20T10:00:00Z' }),
       erpLead('ancien', { last_activity_at: '2026-02-10T10:00:00Z' }),
     ]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(sortErpLeads(leads as any).map(l => l.id)).toEqual(['ancien', 'recent'])
+  })
+
+  it('un lead sans last_activity_at tombe en bas, même avec un vieux created_at', () => {
+    const leads = [
+      erpLead('sans-activite-vieux', { last_activity_at: null, updated_at: null, created_at: '2026-01-01T10:00:00Z' }),
+      erpLead('avec-activite', { last_activity_at: '2026-05-01T10:00:00Z' }),
+    ]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(sortErpLeads(leads as any).map(l => l.id)).toEqual(['avec-activite', 'sans-activite-vieux'])
   })
 })

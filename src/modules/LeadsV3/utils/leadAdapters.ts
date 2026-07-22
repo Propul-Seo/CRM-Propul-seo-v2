@@ -80,22 +80,44 @@ export function erpToCard(lead: CRMERPLead): LeadCardData {
 }
 
 /**
- * Tri des leads Site Web par urgence de relance : le dernier signal d'activité
- * le plus ANCIEN d'abord (en haut de colonne = pas touché depuis le plus longtemps).
- * Sans activité, le signal retombe sur `next_activity_date`/`updated_at`/`created_at`
- * (cf. getSiteWebActivityInfo) : un lead tout juste créé reste donc en bas, et une
- * relance planifiée dans le futur descend aussi (lead déjà pris en charge).
+ * Tri des leads Site Web en DEUX étages :
+ *   1. Les leads AVEC activité (une activité passée `last_activity_at`, ou une
+ *      relance planifiée `next_activity_date` = lead pris en charge) passent en
+ *      HAUT, triés par urgence : le signal le plus ANCIEN d'abord.
+ *   2. Les leads SANS aucune activité tombent TOUT EN BAS (ils ne « polluent »
+ *      plus le haut de colonne en se faisant passer pour urgents via un vieux
+ *      `created_at`). Entre eux, ordre stable par date de fallback.
  */
 export function sortSiteWebLeads(leads: SiteWebLead[]): SiteWebLead[] {
-  return [...leads].sort((a, b) => getSiteWebActivityTimestamp(a) - getSiteWebActivityTimestamp(b))
+  return [...leads].sort((a, b) => {
+    const ha = hasSiteWebActivity(a)
+    const hb = hasSiteWebActivity(b)
+    if (ha !== hb) return ha ? -1 : 1 // sans activité => en bas
+    return getSiteWebActivityTimestamp(a) - getSiteWebActivityTimestamp(b)
+  })
 }
 
 /**
- * Tri des leads ERP par urgence de relance (activité la plus ancienne d'abord).
- * Les leads sans `last_activity_at` retombent sur `updated_at`, puis `created_at`.
+ * Tri des leads ERP en deux étages : les leads avec `last_activity_at` en haut
+ * (activité la plus ancienne d'abord), les leads sans activité tout en bas.
  */
 export function sortErpLeads(leads: CRMERPLead[]): CRMERPLead[] {
-  return [...leads].sort((a, b) => getErpActivityTimestamp(a) - getErpActivityTimestamp(b))
+  return [...leads].sort((a, b) => {
+    const ha = hasErpActivity(a)
+    const hb = hasErpActivity(b)
+    if (ha !== hb) return ha ? -1 : 1 // sans activité => en bas
+    return getErpActivityTimestamp(a) - getErpActivityTimestamp(b)
+  })
+}
+
+/** A une activité = une activité passée journalisée, ou une relance planifiée. */
+function hasSiteWebActivity(lead: SiteWebLead): boolean {
+  return Boolean(lead.last_activity_at || lead.next_activity_date)
+}
+
+/** A une activité = une activité passée journalisée (l'ERP n'a pas de relance planifiée). */
+function hasErpActivity(lead: CRMERPLead): boolean {
+  return Boolean(lead.last_activity_at)
 }
 
 /** Recherche texte commune (case-insensitive). */
