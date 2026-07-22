@@ -1,10 +1,11 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import ContactDetails from '@/modules/ContactDetails'
-import { routes } from '@/lib/routes'
 
 /**
  * Route wrapper pour `/clients/:id` — détail d'un lead/contact CRM.
- * Lit l'id depuis l'URL, retour vers la liste Leads V3.
+ * Lit l'id depuis l'URL. Retour = navigate(-1) (POP) : ramène à la vue
+ * précédente en restaurant sa position de scroll (cf. Layout), au lieu de
+ * repartir en haut de la liste.
  */
 export function ClientDetailsRoute() {
   const { id = '' } = useParams<{ id: string }>()
@@ -15,7 +16,7 @@ export function ClientDetailsRoute() {
   return (
     <ContactDetails
       contactId={id}
-      onBack={() => navigate(routes.leadsV3)}
+      onBack={() => navigate(-1)}
     />
   )
 }

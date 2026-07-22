@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useState, lazy, Suspense } from 'react';
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import React, { useRef, useEffect, useLayoutEffect, useState, lazy, Suspense } from 'react';
+import { Routes, Route, Navigate, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useUsers } from '../../hooks/useUsers';
 import { useIsMobile } from '../../hooks/useMediaQuery';
@@ -68,18 +68,56 @@ export function Layout() {
   const isMobile = useIsMobile();
   const location = useLocation();
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const [currentUserData, setCurrentUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const mainRef = useRef<HTMLDivElement>(null);
+  // Position de scroll mémorisée par entrée d'historique (location.key).
+  const scrollPositions = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
   }, []);
 
+  // Sauvegarde continue de la position de scroll de la vue courante.
   useEffect(() => {
-    if (mainRef.current) mainRef.current.scrollTo(0, 0);
-    else window.scrollTo(0, 0);
-  }, [location.pathname]);
+    const el = mainRef.current;
+    if (!el) return;
+    const key = location.key;
+    const save = () => { scrollPositions.current.set(key, el.scrollTop); };
+    el.addEventListener('scroll', save, { passive: true });
+    return () => el.removeEventListener('scroll', save);
+  }, [location.key]);
+
+  // Restauration du scroll : navigation AVANT (PUSH/REPLACE) -> haut de page ;
+  // RETOUR (POP : bouton retour, navigate(-1), back navigateur) -> position mémorisée.
+  // Le contenu se chargeant parfois de façon asynchrone (liste refetchée au remount),
+  // on réessaie sur quelques frames jusqu'à ce que la page soit assez haute.
+  useLayoutEffect(() => {
+    const el = mainRef.current;
+    if (!el) { window.scrollTo(0, 0); return; }
+
+    if (navigationType === 'POP') {
+      const saved = scrollPositions.current.get(location.key);
+      if (saved && saved > 0) {
+        el.scrollTop = saved; // tentative immédiate (pas de flash si le contenu est déjà là)
+        if (Math.abs(el.scrollTop - saved) <= 1) return;
+        let raf = 0;
+        let tries = 0;
+        const restore = () => {
+          const node = mainRef.current;
+          if (!node) return;
+          node.scrollTop = saved;
+          if (Math.abs(node.scrollTop - saved) > 1 && ++tries < 40) {
+            raf = requestAnimationFrame(restore);
+          }
+        };
+        raf = requestAnimationFrame(restore);
+        return () => cancelAnimationFrame(raf);
+      }
+    }
+    el.scrollTo(0, 0);
+  }, [location.key, navigationType]);
 
   useEffect(() => {
     const loadUserData = async () => {
