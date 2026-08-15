@@ -133,7 +133,7 @@ describe('siteWebToCard', () => {
   })
 })
 
-describe('sortSiteWebLeads (urgence : activité la plus ancienne en tête)', () => {
+describe('sortSiteWebLeads (relance programmée en tête, backlog en bas)', () => {
   const swLead = (id: string, overrides: Record<string, unknown> = {}) => ({
     id,
     normalized_status: 'prospect',
@@ -141,51 +141,47 @@ describe('sortSiteWebLeads (urgence : activité la plus ancienne en tête)', () 
     ...overrides,
   })
 
-  it('place le lead à la dernière activité la plus ancienne en premier', () => {
+  it('les leads avec une relance programmée passent au-dessus de ceux sans', () => {
     const leads = [
-      swLead('recent', { last_activity_at: '2026-06-28T10:00:00Z' }),
-      swLead('ancien', { last_activity_at: '2026-03-01T10:00:00Z' }),
-      swLead('moyen', { last_activity_at: '2026-05-15T10:00:00Z' }),
+      swLead('sans-relance', { last_activity_at: '2026-07-01T10:00:00Z', next_activity_date: null }),
+      swLead('avec-relance', { last_activity_at: null, next_activity_date: '2026-08-01T10:00:00Z' }),
     ]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(sortSiteWebLeads(leads as any).map(l => l.id)).toEqual(['ancien', 'moyen', 'recent'])
+    expect(sortSiteWebLeads(leads as any).map(l => l.id)).toEqual(['avec-relance', 'sans-relance'])
   })
 
-  it('un lead SANS activité tombe tout en bas, même avec un vieux updated_at/created_at', () => {
+  it('un lead avec un appel passé MAIS sans relance programmée tombe en bas', () => {
     const leads = [
-      swLead('touche-hier', { last_activity_at: '2026-07-01T10:00:00Z' }),
-      swLead('jamais-touche-vieux', { last_activity_at: null, next_activity_date: null, updated_at: '2026-02-01T10:00:00Z' }),
+      swLead('appele-sans-suite', { last_activity_at: '2026-07-01T10:00:00Z', next_activity_date: null }),
+      swLead('relance-prevue', { last_activity_at: '2026-02-01T10:00:00Z', next_activity_date: '2026-07-20T10:00:00Z' }),
     ]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(sortSiteWebLeads(leads as any).map(l => l.id)).toEqual(['touche-hier', 'jamais-touche-vieux'])
+    expect(sortSiteWebLeads(leads as any).map(l => l.id)).toEqual(['relance-prevue', 'appele-sans-suite'])
   })
 
-  it('les leads avec activité restent au-dessus de TOUS les leads sans activité', () => {
+  it('parmi les leads programmés : la relance la plus proche / en retard d\'abord', () => {
     const leads = [
-      swLead('sans-1', { last_activity_at: null, next_activity_date: null, updated_at: '2026-01-01T10:00:00Z' }),
-      swLead('avec-recent', { last_activity_at: '2026-06-28T10:00:00Z' }),
-      swLead('sans-2', { last_activity_at: null, next_activity_date: null, updated_at: '2026-06-30T10:00:00Z' }),
-      swLead('avec-ancien', { last_activity_at: '2026-03-01T10:00:00Z' }),
+      swLead('futur', { next_activity_date: '2026-12-01T10:00:00Z' }),
+      swLead('en-retard', { next_activity_date: '2026-01-01T10:00:00Z' }),
+      swLead('bientot', { next_activity_date: '2026-07-15T10:00:00Z' }),
     ]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const ordered = sortSiteWebLeads(leads as any).map(l => l.id)
-    // Bloc "avec activité" (ancien avant récent) puis bloc "sans activité".
-    expect(ordered).toEqual(['avec-ancien', 'avec-recent', 'sans-1', 'sans-2'])
+    expect(sortSiteWebLeads(leads as any).map(l => l.id)).toEqual(['en-retard', 'bientot', 'futur'])
   })
 
-  it('une relance planifiée dans le futur descend en bas (lead pris en charge)', () => {
+  it('dans le backlog (sans relance) : activité la plus récente d\'abord', () => {
     const leads = [
-      swLead('relance-future', { last_activity_at: null, next_activity_date: '2027-01-01T10:00:00Z' }),
-      swLead('a-relancer', { last_activity_at: '2026-04-01T10:00:00Z' }),
+      swLead('vieux', { last_activity_at: null, next_activity_date: null, updated_at: '2026-01-01T10:00:00Z' }),
+      swLead('recent', { last_activity_at: '2026-07-01T10:00:00Z', next_activity_date: null }),
     ]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(sortSiteWebLeads(leads as any).map(l => l.id)).toEqual(['a-relancer', 'relance-future'])
+    expect(sortSiteWebLeads(leads as any).map(l => l.id)).toEqual(['recent', 'vieux'])
   })
 
   it('ne mute pas le tableau d\'entrée', () => {
     const leads = [
-      swLead('b', { last_activity_at: '2026-06-01T10:00:00Z' }),
-      swLead('a', { last_activity_at: '2026-01-01T10:00:00Z' }),
+      swLead('b', { next_activity_date: '2026-06-01T10:00:00Z' }),
+      swLead('a', { next_activity_date: '2026-01-01T10:00:00Z' }),
     ]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sortSiteWebLeads(leads as any)

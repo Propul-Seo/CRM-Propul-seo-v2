@@ -80,20 +80,25 @@ export function erpToCard(lead: CRMERPLead): LeadCardData {
 }
 
 /**
- * Tri des leads Site Web en DEUX étages :
- *   1. Les leads AVEC activité (une activité passée `last_activity_at`, ou une
- *      relance planifiée `next_activity_date` = lead pris en charge) passent en
- *      HAUT, triés par urgence : le signal le plus ANCIEN d'abord.
- *   2. Les leads SANS aucune activité tombent TOUT EN BAS (ils ne « polluent »
- *      plus le haut de colonne en se faisant passer pour urgents via un vieux
- *      `created_at`). Entre eux, ordre stable par date de fallback.
+ * Tri des leads Site Web autour de la RELANCE PROGRAMMÉE (`next_activity_date`) :
+ *   1. En HAUT, les leads qui ont une prochaine relance planifiée — la plus proche
+ *      / la plus en retard d'abord (file de travail : ce qui est dû en premier).
+ *   2. En BAS, les leads SANS relance programmée, même s'ils ont une activité
+ *      passée (`last_activity_at`) : un lead appelé mais sans prochaine action
+ *      planifiée ne monopolise plus le haut de colonne. Entre eux, activité la
+ *      plus récente d'abord.
  */
 export function sortSiteWebLeads(leads: SiteWebLead[]): SiteWebLead[] {
   return [...leads].sort((a, b) => {
-    const ha = hasSiteWebActivity(a)
-    const hb = hasSiteWebActivity(b)
-    if (ha !== hb) return ha ? -1 : 1 // sans activité => en bas
-    return getSiteWebActivityTimestamp(a) - getSiteWebActivityTimestamp(b)
+    const sa = hasScheduledRelance(a)
+    const sb = hasScheduledRelance(b)
+    if (sa !== sb) return sa ? -1 : 1 // sans relance programmée => en bas
+    if (sa) {
+      // Haut : la relance la plus proche / la plus en retard d'abord.
+      return toTimestamp(a.next_activity_date) - toTimestamp(b.next_activity_date)
+    }
+    // Bas : backlog non programmé, activité la plus récente d'abord.
+    return getSiteWebActivityTimestamp(b) - getSiteWebActivityTimestamp(a)
   })
 }
 
@@ -110,12 +115,15 @@ export function sortErpLeads(leads: CRMERPLead[]): CRMERPLead[] {
   })
 }
 
-/** A une activité = une activité passée journalisée, ou une relance planifiée. */
-function hasSiteWebActivity(lead: SiteWebLead): boolean {
-  return Boolean(lead.last_activity_at || lead.next_activity_date)
+/** A une relance PROGRAMMÉE = une prochaine activité planifiée (`next_activity_date`). */
+function hasScheduledRelance(lead: SiteWebLead): boolean {
+  return Boolean(lead.next_activity_date)
 }
 
-/** A une activité = une activité passée journalisée (l'ERP n'a pas de relance planifiée). */
+/**
+ * Côté ERP il n'existe pas de champ « prochaine relance » (`crmerp_leads` n'a pas
+ * de `next_activity_date`) : on retombe sur « a une activité passée » comme signal.
+ */
 function hasErpActivity(lead: CRMERPLead): boolean {
   return Boolean(lead.last_activity_at)
 }
